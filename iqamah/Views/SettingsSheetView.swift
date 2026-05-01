@@ -24,7 +24,9 @@ struct SettingsSheetView: View {
     @State private var selectedMethod: CalculationMethod
     @State private var selectedAsrMethod: AsrJuristicMethod
     @State private var use24Hour: Bool
-    @State private var uiScale: Double
+    // Scale is applied live; originalUiScale lets Cancel restore it
+    private let originalUiScale = SettingsManager.shared.uiScale
+    @ObservedObject private var settings = SettingsManager.shared
     @State private var launchAtLogin = false
 
     // US-0031: track whether the user has manually changed the method
@@ -57,7 +59,6 @@ struct SettingsSheetView: View {
         _selectedMethod = State(initialValue: currentMethod)
         _selectedAsrMethod = State(initialValue: currentAsrMethod)
         _use24Hour = State(initialValue: SettingsManager.shared.use24HourTime)
-        _uiScale = State(initialValue: SettingsManager.shared.uiScale)
     }
 
     // MARK: - Body
@@ -214,43 +215,41 @@ struct SettingsSheetView: View {
                                 .foregroundColor(.secondary)
                             HStack(spacing: 12) {
                                 Button(action: {
-                                    if uiScale > SettingsManager.uiScaleMin {
-                                        uiScale = (uiScale - SettingsManager.uiScaleStep)
-                                            .rounded(toPlaces: 1)
+                                    if SettingsManager.shared.uiScale > SettingsManager.uiScaleMin {
+                                        SettingsManager.shared.uiScale = (SettingsManager.shared.uiScale - SettingsManager.uiScaleStep).rounded(toPlaces: 1)
                                     }
                                 }) {
                                     Image(systemName: "minus.circle.fill")
                                         .font(.title3)
                                         .foregroundColor(
-                                            uiScale > SettingsManager.uiScaleMin ? .accentColor : .secondary
+                                            SettingsManager.shared.uiScale > SettingsManager.uiScaleMin ? .accentColor : .secondary
                                         )
                                         .symbolRenderingMode(.hierarchical)
                                 }
                                 .buttonStyle(.plain)
-                                .disabled(uiScale <= SettingsManager.uiScaleMin)
+                                .disabled(SettingsManager.shared.uiScale <= SettingsManager.uiScaleMin)
 
-                                Text("\(Int(uiScale * 100))%")
+                                Text("\(Int(SettingsManager.shared.uiScale * 100))%")
                                     .font(.body.monospacedDigit())
                                     .frame(minWidth: 42, alignment: .center)
 
                                 Button(action: {
-                                    if uiScale < SettingsManager.uiScaleMax {
-                                        uiScale = (uiScale + SettingsManager.uiScaleStep)
-                                            .rounded(toPlaces: 1)
+                                    if SettingsManager.shared.uiScale < SettingsManager.uiScaleMax {
+                                        SettingsManager.shared.uiScale = (SettingsManager.shared.uiScale + SettingsManager.uiScaleStep).rounded(toPlaces: 1)
                                     }
                                 }) {
                                     Image(systemName: "plus.circle.fill")
                                         .font(.title3)
                                         .foregroundColor(
-                                            uiScale < SettingsManager.uiScaleMax ? .accentColor : .secondary
+                                            SettingsManager.shared.uiScale < SettingsManager.uiScaleMax ? .accentColor : .secondary
                                         )
                                         .symbolRenderingMode(.hierarchical)
                                 }
                                 .buttonStyle(.plain)
-                                .disabled(uiScale >= SettingsManager.uiScaleMax)
+                                .disabled(SettingsManager.shared.uiScale >= SettingsManager.uiScaleMax)
 
-                                if uiScale != 1.0 {
-                                    Button("Reset") { uiScale = 1.0 }
+                                if SettingsManager.shared.uiScale != 1.0 {
+                                    Button("Reset") { SettingsManager.shared.uiScale = 1.0 }
                                         .font(.caption)
                                         .buttonStyle(.plain)
                                         .foregroundColor(.secondary)
@@ -268,7 +267,10 @@ struct SettingsSheetView: View {
 
             // ── Action buttons ───────────────────────────────────────
             HStack(spacing: 12) {
-                Button("Cancel", action: onCancel)
+                Button("Cancel") {
+                    SettingsManager.shared.uiScale = originalUiScale
+                    onCancel()
+                }
                     .buttonStyle(.bordered)
                     .controlSize(.large)
                     .keyboardShortcut(.escape, modifiers: [])
@@ -324,7 +326,6 @@ struct SettingsSheetView: View {
     private func save() {
         guard let city = selectedCity else { return }
         SettingsManager.shared.use24HourTime = use24Hour
-        SettingsManager.shared.uiScale = uiScale
         onSave(city, selectedMethod, selectedAsrMethod)
     }
 }

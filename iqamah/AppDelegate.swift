@@ -41,19 +41,29 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
 
     private func resizeWindowForScale() {
-        guard let window = mainWindow else { return }
-        let scale = SettingsManager.shared.uiScale
-        let newSize = NSSize(width: 620 * scale, height: 680 * scale)
-        let currentFrame = window.frame
-        let newOriginX = currentFrame.midX - newSize.width / 2
-        let newOriginY = currentFrame.midY - newSize.height / 2
-        NSAnimationContext.runAnimationGroup { ctx in
-            ctx.duration = 0.2
-            ctx.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-            window.animator().setFrame(
-                NSRect(origin: NSPoint(x: newOriginX, y: newOriginY), size: newSize),
-                display: true
-            )
+        // Dispatch after the current run-loop turn so SwiftUI's scaleEffect
+        // re-render has updated the view hierarchy before we resize the window.
+        DispatchQueue.main.async { [weak self] in
+            guard let self, let window = self.mainWindow else { return }
+            let scale = SettingsManager.shared.uiScale
+            let newSize = NSSize(width: 620 * scale, height: 680 * scale)
+            // Don't animate during the live-preview rapid taps — just snap.
+            // Only animate for larger jumps (e.g. restoring on cancel).
+            let currentSize = window.frame.size
+            let shouldAnimate = abs(currentSize.width - newSize.width) > 30
+            let currentFrame = window.frame
+            let newOriginX = currentFrame.midX - newSize.width / 2
+            let newOriginY = currentFrame.midY - newSize.height / 2
+            let newFrame = NSRect(origin: NSPoint(x: newOriginX, y: newOriginY), size: newSize)
+            if shouldAnimate {
+                NSAnimationContext.runAnimationGroup { ctx in
+                    ctx.duration = 0.2
+                    ctx.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                    window.animator().setFrame(newFrame, display: true)
+                }
+            } else {
+                window.setFrame(newFrame, display: true, animate: false)
+            }
         }
     }
 

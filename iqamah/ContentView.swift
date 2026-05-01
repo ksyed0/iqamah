@@ -89,13 +89,10 @@ struct ContentView: View {
         // UI scale: double-frame technique — inner frame gives content a fixed
         // logical canvas; scaleEffect scales the pixels; outer frame tells the
         // layout system the true visual footprint so the window resizes to match.
+        // Fixed frame: scaleEffect scales pixels; fixed width/height tells the
+        // layout system the exact visual footprint so nothing clips.
         .scaleEffect(settings.uiScale, anchor: .topLeading)
-        .frame(
-            minWidth:   580 * settings.uiScale,
-            idealWidth: 620 * settings.uiScale,
-            minHeight:  620 * settings.uiScale,
-            idealHeight: 680 * settings.uiScale
-        )
+        .frame(width: 620 * settings.uiScale, height: 680 * settings.uiScale)
     }
 
     private func loadSavedSettingsAndProceed() {
