@@ -28,7 +28,8 @@ struct ContentView: View {
                         }
                     }
                     .onAppear {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+                        let delay: Double = settings.hasCompletedSetup ? 1.0 : 5.0
+                        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
                             withAnimation(.easeInOut(duration: 0.3)) {
                                 loadSavedSettingsAndProceed()
                             }

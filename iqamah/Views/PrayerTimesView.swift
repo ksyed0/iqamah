@@ -242,8 +242,22 @@ struct PrayerTimesTable: View {
         .background(Color(nsColor: .controlBackgroundColor))
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
-        .onAppear {
-            loadAdjustments()
+        .onAppear { loadAdjustments() }
+
+        // Reset button — only shown when at least one adjustment is non-zero
+        if adjustments.values.contains(where: { $0 != 0 }) {
+            HStack {
+                Spacer()
+                Button(action: resetAllAdjustments) {
+                    Label("Reset adjustments", systemImage: "arrow.counterclockwise")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .buttonStyle(.plain)
+                .help("Clear all ± minute adjustments and return to calculated times")
+            }
+            .padding(.horizontal, 4)
+            .padding(.top, 6)
         }
     }
 
@@ -258,6 +272,13 @@ struct PrayerTimesTable: View {
     private func adjustedTime(for prayer: (name: String, time: Date)) -> Date {
         let adjustmentMinutes = adjustments[prayer.name] ?? 0
         return Calendar.current.date(byAdding: .minute, value: adjustmentMinutes, to: prayer.time) ?? prayer.time
+    }
+
+    private func resetAllAdjustments() {
+        settingsManager.resetAdjustments()
+        for prayer in prayerTimes.prayers {
+            adjustments[prayer.name] = 0
+        }
     }
 
     private func adjustPrayerTime(for prayerName: String, delta: Int) {

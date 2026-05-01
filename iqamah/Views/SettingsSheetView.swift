@@ -1,4 +1,5 @@
 import SwiftUI
+import ServiceManagement
 
 /// Non-destructive settings sheet (US-0020).
 /// All changes are held in local draft state until the user taps Save.
@@ -23,6 +24,7 @@ struct SettingsSheetView: View {
     @State private var selectedMethod: CalculationMethod
     @State private var selectedAsrMethod: AsrJuristicMethod
     @State private var use24Hour: Bool
+    @State private var launchAtLogin = false
 
     // US-0031: track whether the user has manually changed the method
     @State private var userOverrodeMethod = false
@@ -161,7 +163,7 @@ struct SettingsSheetView: View {
 
                     // BUG-0030: fixedSize prevents subtitle clipping; padding ensures
                     // the Display section is always reachable within the sheet's scroll area
-                    VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .leading, spacing: 14) {
                         Toggle(isOn: $use24Hour) {
                             VStack(alignment: .leading, spacing: 3) {
                                 Text("24-Hour Time")
@@ -173,6 +175,33 @@ struct SettingsSheetView: View {
                             }
                         }
                         .toggleStyle(.switch)
+
+                        Divider()
+
+                        Toggle(isOn: $launchAtLogin) {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Launch at Login")
+                                    .font(.headline)
+                                Text("Start Iqamah automatically when you log in")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                        .toggleStyle(.switch)
+                        .onChange(of: launchAtLogin) { _, enabled in
+                            do {
+                                if enabled {
+                                    try SMAppService.mainApp.register()
+                                } else {
+                                    try SMAppService.mainApp.unregister()
+                                }
+                            } catch {
+                                // Registration can fail if the user has restricted login items in
+                                // System Settings → General → Login Items. Revert the toggle.
+                                launchAtLogin = !enabled
+                            }
+                        }
                     }
                     .padding(.horizontal, 28)
                     .padding(.bottom, 8)
@@ -219,6 +248,8 @@ struct SettingsSheetView: View {
     // MARK: - Helpers
 
     private func loadInitialState() {
+        launchAtLogin = SMAppService.mainApp.status == .enabled
+
         // Load cities database
         if case let .success(db) = CitiesLoader.shared.load() {
             database = db

@@ -164,8 +164,16 @@ class SettingsManager: ObservableObject {
         var adjustments = defaults.dictionary(forKey: Keys.prayerAdjustments) as? [String: Int] ?? [:]
         adjustments[prayerName] = minutes
         defaults.set(adjustments, forKey: Keys.prayerAdjustments)
+        NotificationCenter.default.post(name: .settingsDidChange, object: nil)
+    }
 
-        // Notify that settings changed
+    func hasAnyAdjustments() -> Bool {
+        let adjustments = defaults.dictionary(forKey: Keys.prayerAdjustments) as? [String: Int] ?? [:]
+        return adjustments.values.contains { $0 != 0 }
+    }
+
+    func resetAdjustments() {
+        defaults.removeObject(forKey: Keys.prayerAdjustments)
         NotificationCenter.default.post(name: .settingsDidChange, object: nil)
     }
 }

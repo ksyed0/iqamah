@@ -47,6 +47,12 @@ permissions:
   contents: write
   pull-requests: write
 
+# Only one bump runs at a time per branch; never cancel mid-bump (that leaves
+# the version in a half-committed state). A second push queues behind the first.
+concurrency:
+  group: version-bump-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   bump:
     name: Version bump
