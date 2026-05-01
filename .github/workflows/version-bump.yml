@@ -1,60 +1,119 @@
 name: Version Bump
 
-# Trigger manually from the GitHub Actions UI with a bump-type dropdown.
-# The workflow commits the version change back to the source branch,
-# creates an annotated git tag, and optionally opens a PR to develop.
+# Automatic triggers:
+#   push to main     → detect bump type from Conventional Commits, bump marketing version + build
+#   push to develop  → build number only (dev/TestFlight builds stay uniquely identified)
+#
+# Manual override (workflow_dispatch):
+#   Choose bump type explicitly from the GitHub Actions UI dropdown.
+#   Use this to force a major bump or set an arbitrary version.
+#
+# Infinite-loop guard:
+#   The bot's own "chore(release):" commits are skipped via two guards:
+#     1. if: github.actor != 'github-actions[bot]'
+#     2. [skip ci] suffix in the commit message
+
 on:
+  push:
+    branches: [main, develop]
+    paths:
+      # Only run when actual source code changes — not when docs or CI config alone change
+      - 'iqamah/**/*.swift'
+      - 'iqamah/**/*.xcassets/**'
+      - 'iqamah/Resources/**'
+      - 'iqamah.xcodeproj/project.pbxproj'
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/**'
+      - 'scripts/**'
+
   workflow_dispatch:
     inputs:
       bump_type:
-        description: "Version bump type"
+        description: "Bump type (leave 'auto' to detect from commit history)"
         required: true
-        default: patch
+        default: auto
         type: choice
         options:
-          - patch   # 1.0.0 → 1.0.1  (bug fixes)
-          - minor   # 1.0.0 → 1.1.0  (new features, backwards-compatible)
-          - major   # 1.0.0 → 2.0.0  (breaking changes)
-          - build   # build number only — keeps marketing version unchanged
+          - auto    # detect from Conventional Commits since last tag
+          - patch   # 1.0.0 → 1.0.1
+          - minor   # 1.0.0 → 1.1.0
+          - major   # 1.0.0 → 2.0.0
+          - build   # build number only, no marketing version change
       custom_version:
-        description: "Override with explicit version (e.g. 2.0.0). Leave blank to use bump_type."
+        description: "Set an explicit version (e.g. 2.0.0). Overrides bump_type."
         required: false
         default: ""
 
 permissions:
-  contents: write   # push commits + tags
+  contents: write
   pull-requests: write
 
 jobs:
   bump:
-    name: Bump version (${{ inputs.bump_type }})
+    name: Version bump
     runs-on: macos-15
 
+    # Skip the bot's own version-bump commits to prevent infinite loops
+    if: |
+      github.actor != 'github-actions[bot]' &&
+      !contains(github.event.head_commit.message, '[skip ci]') &&
+      !startsWith(github.event.head_commit.message, 'chore(release):')
+
     steps:
-      - name: Checkout source branch
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          # Use the branch the workflow was triggered on
           ref: ${{ github.ref }}
-          # Full history so we can push back
-          fetch-depth: 0
+          fetch-depth: 0   # full history needed for tag detection
 
       - name: Select Xcode 16.2
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: "16.2"
 
+      - name: Determine bump type
+        id: detect
+        run: |
+          chmod +x scripts/detect_bump_type.sh
+
+          if [[ -n "${{ inputs.custom_version }}" ]]; then
+            # Explicit version override — bump type is irrelevant
+            echo "bump_type=set" >> $GITHUB_OUTPUT
+            echo "resolved=set ${{ inputs.custom_version }}" >> $GITHUB_OUTPUT
+
+          elif [[ "${{ github.event_name }}" == "push" && "${{ github.ref_name }}" == "develop" ]]; then
+            # develop pushes always only bump the build number
+            echo "bump_type=build" >> $GITHUB_OUTPUT
+            echo "resolved=build (develop push)" >> $GITHUB_OUTPUT
+
+          elif [[ "${{ inputs.bump_type }}" == "auto" || "${{ github.event_name }}" == "push" ]]; then
+            # Auto-detect from Conventional Commits
+            DETECTED=$(./scripts/detect_bump_type.sh)
+            echo "bump_type=$DETECTED" >> $GITHUB_OUTPUT
+            echo "resolved=$DETECTED (auto-detected from commits)" >> $GITHUB_OUTPUT
+
+          else:
+            # Manual workflow_dispatch with explicit choice
+            echo "bump_type=${{ inputs.bump_type }}" >> $GITHUB_OUTPUT
+            echo "resolved=${{ inputs.bump_type }} (manual)" >> $GITHUB_OUTPUT
+          fi
+
+          echo "Resolved bump type: $(cat $GITHUB_OUTPUT | grep '^resolved=' | cut -d= -f2-)"
+
       - name: Run bump script
         id: bump
         run: |
           chmod +x scripts/bump_version.sh
+
           if [[ -n "${{ inputs.custom_version }}" ]]; then
             ./scripts/bump_version.sh set "${{ inputs.custom_version }}"
           else
-            ./scripts/bump_version.sh "${{ inputs.bump_type }}"
+            ./scripts/bump_version.sh "${{ steps.detect.outputs.bump_type }}"
           fi
 
-      - name: Verify build still succeeds
+      - name: Verify Release build still succeeds
         run: |
           xcodebuild \
             -project iqamah.xcodeproj \
@@ -65,32 +124,42 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             | xcpretty --color && exit ${PIPESTATUS[0]}
 
-      - name: Commit and tag
+      - name: Commit, tag, and push
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add iqamah.xcodeproj/project.pbxproj
 
-          git commit -m "chore(release): bump to v${{ steps.bump.outputs.new_version }} (build ${{ steps.bump.outputs.new_build }})
+          git commit -m "chore(release): bump to v${{ steps.bump.outputs.new_version }} (build ${{ steps.bump.outputs.new_build }}) [skip ci]
 
           - Marketing version: ${{ steps.bump.outputs.prev_version }} → ${{ steps.bump.outputs.new_version }}
           - Build number:      ${{ steps.bump.outputs.prev_build }} → ${{ steps.bump.outputs.new_build }}
-          - Triggered by: @${{ github.actor }} (${{ inputs.bump_type }} bump)"
+          - Bump type: ${{ steps.detect.outputs.resolved }}
+          - Triggered by: @${{ github.actor }} on ${{ github.ref_name }}"
 
-          git tag -a "v${{ steps.bump.outputs.new_version }}" \
-            -m "Release v${{ steps.bump.outputs.new_version }} (build ${{ steps.bump.outputs.new_build }})"
+          # Only create a marketing version tag for non-build-only bumps
+          if [[ "${{ steps.detect.outputs.bump_type }}" != "build" ]]; then
+            git tag -a "v${{ steps.bump.outputs.new_version }}" \
+              -m "Release v${{ steps.bump.outputs.new_version }} (build ${{ steps.bump.outputs.new_build }})"
+            git push origin "v${{ steps.bump.outputs.new_version }}"
+          fi
 
           git push origin HEAD
-          git push origin "v${{ steps.bump.outputs.new_version }}"
 
-      - name: Summary
+      - name: Job summary
         run: |
-          echo "## ✅ Version bumped" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| | Before | After |" >> $GITHUB_STEP_SUMMARY
-          echo "|---|---|---|" >> $GITHUB_STEP_SUMMARY
-          echo "| Marketing version | \`${{ steps.bump.outputs.prev_version }}\` | \`${{ steps.bump.outputs.new_version }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Build number | \`${{ steps.bump.outputs.prev_build }}\` | \`${{ steps.bump.outputs.new_build }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Tag \`v${{ steps.bump.outputs.new_version }}\` pushed." >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## ✅ Version bumped"
+            echo ""
+            echo "| | Before | After |"
+            echo "|---|---|---|"
+            echo "| Marketing version | \`${{ steps.bump.outputs.prev_version }}\` | \`${{ steps.bump.outputs.new_version }}\` |"
+            echo "| Build number | \`${{ steps.bump.outputs.prev_build }}\` | \`${{ steps.bump.outputs.new_build }}\` |"
+            echo ""
+            echo "**Bump type:** ${{ steps.detect.outputs.resolved }}"
+            echo ""
+            if [[ "${{ steps.detect.outputs.bump_type }}" != "build" ]]; then
+              echo "**Tag** \`v${{ steps.bump.outputs.new_version }}\` created and pushed."
+            fi
+          } >> $GITHUB_STEP_SUMMARY
