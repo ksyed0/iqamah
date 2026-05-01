@@ -284,7 +284,7 @@ struct SettingsSheetView: View {
             .padding(.horizontal, 28)
             .padding(.vertical, 20)
         }
-        .frame(width: 480, height: 560)
+        .frame(width: 480, height: 660)
         .onAppear { loadInitialState() }
         .onChange(of: selectedCountry) { _, newCountry in
             guard let country = newCountry else { return }
