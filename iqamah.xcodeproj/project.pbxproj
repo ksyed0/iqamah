@@ -63,6 +63,8 @@
 		EE0000000000000000003001 /* cities.json in Resources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001B /* cities.json */; };
 		FF000000000000000000BB01 /* Adhaan.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000000000000000000AA01 /* Adhaan.swift */; };
 		FF000000000000000000BB02 /* AdhaaanPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000000000000000000AA02 /* AdhaaanPlayer.swift */; };
+		BN000000000000000000BB01 /* AdhaanBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BN000000000000000000AA01 /* AdhaanBannerView.swift */; };
+		BN000000000000000000BB02 /* AdhaanBannerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BN000000000000000000AA02 /* AdhaanBannerController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -124,6 +126,8 @@
 		EE000000000000000000100F /* IntegrationAndEdgeCaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationAndEdgeCaseTests.swift; sourceTree = "<group>"; };
 		FF000000000000000000AA01 /* Adhaan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Adhaan.swift; sourceTree = "<group>"; };
 		FF000000000000000000AA02 /* AdhaaanPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdhaaanPlayer.swift; sourceTree = "<group>"; };
+		BN000000000000000000AA01 /* AdhaanBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdhaanBannerView.swift; sourceTree = "<group>"; };
+		BN000000000000000000AA02 /* AdhaanBannerController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdhaanBannerController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -213,6 +217,7 @@
 			children = (
 				94CAD5662F23CBD100E1689F /* SettingsManager.swift */,
 				FF000000000000000000AA02 /* AdhaaanPlayer.swift */,
+				BN000000000000000000AA02 /* AdhaanBannerController.swift */,
 				AA0000000000000000000016 /* LocationService.swift */,
 				AA0000000000000000000017 /* PrayerCalculator.swift */,
 				944B0D962F63596200EC6A01 /* ModelsIqamahError.swift */,
@@ -228,6 +233,7 @@
 				AA000000000000000000001A /* PrayerTimesView.swift */,
 				94CAD56A2F23D3C800E1689F /* SplashScreenView.swift */,
 				AA000000000000000000001E /* QiblahView.swift */,
+				BN000000000000000000AA01 /* AdhaanBannerView.swift */,
 				CC000000000000000000001B /* StepIndicatorView.swift */,
 				BB000000000000000000001A /* SettingsSheetView.swift */,
 				944B0D982F635A0500EC6A01 /* TestsAdditionalTests.swift */,
@@ -395,6 +401,8 @@
 				94CAD5672F23CBD100E1689F /* SettingsManager.swift in Sources */,
 				FF000000000000000000BB01 /* Adhaan.swift in Sources */,
 				FF000000000000000000BB02 /* AdhaaanPlayer.swift in Sources */,
+				BN000000000000000000BB01 /* AdhaanBannerView.swift in Sources */,
+				BN000000000000000000BB02 /* AdhaanBannerController.swift in Sources */,
 				AA0000000000000000000008 /* LocationSetupView.swift in Sources */,
 				AA0000000000000000000009 /* CalculationMethodView.swift in Sources */,
 				AA000000000000000000000A /* PrayerTimesView.swift in Sources */,
