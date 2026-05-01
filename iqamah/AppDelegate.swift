@@ -168,10 +168,20 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             let adhaan = settings.getAdhaan(for: prayer.name)
             guard adhaan.id != "silent" else { continue }
 
-            // AdhaaanPlayer is @MainActor; the timer fires on the main thread
-            // but we dispatch explicitly to be safe across future refactors
             DispatchQueue.main.async {
                 AdhaaanPlayer.shared.play(adhaan)
+
+                // Banner only for full adhaan recordings (adhaan_*).
+                // Alert tones (tone_*) are short — no banner.
+                if adhaan.id.hasPrefix("adhaan_") {
+                    AdhaanBannerController.shared.show(
+                        prayerName: prayer.name,
+                        prayerTime: prayer.time,
+                        adhaan: adhaan,
+                        allPrayers: adjustedPrayers,
+                        timezone: TimeZone.current
+                    )
+                }
             }
         }
     }
