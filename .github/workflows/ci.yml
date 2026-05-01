@@ -1,0 +1,238 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  SCHEME: iqamah
+  PROJECT: iqamah.xcodeproj
+  XCODE_VERSION: "16.2"
+
+jobs:
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 1. LINT — SwiftLint style + rule enforcement
+  # ──────────────────────────────────────────────────────────────────────────
+  lint:
+    name: SwiftLint
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install SwiftLint
+        run: brew install swiftlint
+
+      - name: Run SwiftLint
+        run: swiftlint lint --strict --reporter github-actions-logging
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 2. FORMAT — SwiftFormat (replaces Prettier, which is JS-only)
+  #    Note: Prettier does not support Swift. SwiftFormat is the equivalent.
+  # ──────────────────────────────────────────────────────────────────────────
+  format:
+    name: SwiftFormat
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install SwiftFormat
+        run: brew install swiftformat
+
+      - name: Check formatting
+        run: |
+          swiftformat --lint iqamah/
+          if [ $? -ne 0 ]; then
+            echo "::error::SwiftFormat found formatting issues. Run 'swiftformat iqamah/' locally to fix."
+            exit 1
+          fi
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 3. BUILD — Debug + Release configurations
+  # ──────────────────────────────────────────────────────────────────────────
+  build:
+    name: Build (${{ matrix.configuration }})
+    runs-on: macos-15
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode ${{ env.XCODE_VERSION }}
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+
+      - name: Build
+        run: |
+          xcodebuild \
+            -project ${{ env.PROJECT }} \
+            -scheme ${{ env.SCHEME }} \
+            -configuration ${{ matrix.configuration }} \
+            -destination 'platform=macOS' \
+            build \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcpretty --color && exit ${PIPESTATUS[0]}
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 4. TEST + COVERAGE — run tests, enforce ≥80% code coverage
+  # ──────────────────────────────────────────────────────────────────────────
+  test:
+    name: Test & Coverage
+    runs-on: macos-15
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode ${{ env.XCODE_VERSION }}
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+
+      - name: Run tests with coverage
+        run: |
+          xcodebuild \
+            -project ${{ env.PROJECT }} \
+            -scheme ${{ env.SCHEME }} \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            -enableCodeCoverage YES \
+            -resultBundlePath TestResults.xcresult \
+            test \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcpretty --color && exit ${PIPESTATUS[0]}
+
+      - name: Install xcov / slather for coverage reporting
+        run: gem install slather
+
+      - name: Generate coverage report
+        run: |
+          slather coverage \
+            --xcodeproj ${{ env.PROJECT }} \
+            --scheme ${{ env.SCHEME }} \
+            --output-directory coverage-report \
+            --html \
+            --build-directory TestResults.xcresult
+
+      - name: Enforce ≥80% coverage
+        run: |
+          # Extract total line coverage percentage from slather output
+          COVERAGE=$(slather coverage \
+            --xcodeproj ${{ env.PROJECT }} \
+            --scheme ${{ env.SCHEME }} \
+            --build-directory TestResults.xcresult \
+            2>&1 | grep -oE '[0-9]+\.[0-9]+%' | tail -1 | tr -d '%')
+
+          echo "Code coverage: ${COVERAGE}%"
+
+          if (( $(echo "$COVERAGE < 80.0" | bc -l) )); then
+            echo "::error::Coverage ${COVERAGE}% is below the required 80% threshold."
+            exit 1
+          fi
+          echo "::notice::Coverage ${COVERAGE}% meets the ≥80% requirement."
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage-report/
+          retention-days: 14
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: TestResults.xcresult
+          retention-days: 7
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 5. SECURITY — CodeQL static analysis for Swift
+  # ──────────────────────────────────────────────────────────────────────────
+  security:
+    name: CodeQL Security Scan
+    runs-on: macos-15
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode ${{ env.XCODE_VERSION }}
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: swift
+          queries: security-extended,security-and-quality
+
+      - name: Build for CodeQL
+        run: |
+          xcodebuild \
+            -project ${{ env.PROJECT }} \
+            -scheme ${{ env.SCHEME }} \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            build \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:swift"
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 6. FILE SIZE GUARD — prevent accidentally committing large binaries
+  # ──────────────────────────────────────────────────────────────────────────
+  file-size:
+    name: File Size Guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for files > 10 MB
+        run: |
+          LARGE=$(find . -not -path './.git/*' -size +10M)
+          if [ -n "$LARGE" ]; then
+            echo "::error::Files exceeding 10 MB found:"
+            echo "$LARGE"
+            exit 1
+          fi
+          echo "All files within size limit."
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 7. PR TITLE — enforce Conventional Commits format
+  # ──────────────────────────────────────────────────────────────────────────
+  pr-title:
+    name: PR Title Convention
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Check PR title format
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            test
+            chore
+            perf
+            ci
+          requireScope: false
