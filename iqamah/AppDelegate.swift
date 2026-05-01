@@ -95,7 +95,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
 
         // Trigger adhaan for any prayer whose time just arrived
-        triggerAdhaanIfNeeded(adjustedPrayers: adjustedPrayers, now: now, settings: settings)
+        triggerAdhaanIfNeeded(adjustedPrayers: adjustedPrayers, now: now, settings: settings, timezone: timezone)
 
         // Find next upcoming prayer for status bar display
         var nextPrayer = adjustedPrayers.first { $0.time > now }
@@ -135,7 +135,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private func triggerAdhaanIfNeeded(
         adjustedPrayers: [(name: String, time: Date)],
         now: Date,
-        settings: SettingsManager
+        settings: SettingsManager,
+        timezone: TimeZone
     ) {
         // Reset the daily tracking set at midnight
         if !Calendar.current.isDate(now, inSameDayAs: announcedDate) {
@@ -179,7 +180,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                         prayerTime: prayer.time,
                         adhaan: adhaan,
                         allPrayers: adjustedPrayers,
-                        timezone: TimeZone.current
+                        timezone: timezone  // city's timezone, not device timezone
                     )
                 }
             }
