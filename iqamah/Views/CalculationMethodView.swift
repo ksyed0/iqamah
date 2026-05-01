@@ -5,11 +5,10 @@ struct CalculationMethodView: View {
     @Binding var selectedAsrMethod: AsrJuristicMethod
 
     let onConfirm: () -> Void
-    let onBack: () -> Void             // US-0027
+    let onBack: () -> Void // US-0027
 
     var body: some View {
         VStack(spacing: 0) {
-
             // ── Step indicator (US-0027) ────────────────────────────
             StepIndicator(current: 2, total: 2)
                 .padding(.top, 28)

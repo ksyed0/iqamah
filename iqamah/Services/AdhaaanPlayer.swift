@@ -14,7 +14,7 @@ class AdhaaanPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
 
     private var player: AVAudioPlayer?
 
-    private override init() {
+    override private init() {
         isMuted = UserDefaults.standard.bool(forKey: "adhaanMuted")
     }
 
@@ -43,7 +43,7 @@ class AdhaaanPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
 
     // MARK: - AVAudioPlayerDelegate
 
-    nonisolated func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+    nonisolated func audioPlayerDidFinishPlaying(_: AVAudioPlayer, successfully _: Bool) {
         Task { @MainActor in
             self.isPlaying = false
             self.player = nil
@@ -54,7 +54,7 @@ class AdhaaanPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
 
     private func startPlayback(_ adhaan: Adhaan) {
         let name = (adhaan.filename as NSString).deletingPathExtension
-        let ext  = (adhaan.filename as NSString).pathExtension
+        let ext = (adhaan.filename as NSString).pathExtension
 
         guard let url = Bundle.main.url(forResource: name, withExtension: ext) else {
             print("AdhaaanPlayer: file not found — \(adhaan.filename)")

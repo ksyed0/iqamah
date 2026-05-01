@@ -20,29 +20,29 @@ struct City: Codable, Identifiable, Hashable {
     var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }
-    
+
     // Custom initializer with validation
     init(name: String, countryCode: String, latitude: Double, longitude: Double, timezone: String) throws {
         // Validate coordinates
-        guard latitude >= -90 && latitude <= 90 else {
+        guard latitude >= -90, latitude <= 90 else {
             throw IqamahError.invalidCoordinates(latitude: latitude, longitude: longitude)
         }
-        guard longitude >= -180 && longitude <= 180 else {
+        guard longitude >= -180, longitude <= 180 else {
             throw IqamahError.invalidCoordinates(latitude: latitude, longitude: longitude)
         }
-        
+
         // Validate timezone
         guard TimeZone(identifier: timezone) != nil else {
             throw IqamahError.invalidTimezone(timezone)
         }
-        
+
         self.name = name
         self.countryCode = countryCode
         self.latitude = latitude
         self.longitude = longitude
         self.timezone = timezone
     }
-    
+
     // Codable conformance (for JSON decoding)
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -51,7 +51,7 @@ struct City: Codable, Identifiable, Hashable {
         let latitude = try container.decode(Double.self, forKey: .latitude)
         let longitude = try container.decode(Double.self, forKey: .longitude)
         let timezone = try container.decode(String.self, forKey: .timezone)
-        
+
         // Use the throwing initializer for validation
         try self.init(name: name, countryCode: countryCode, latitude: latitude, longitude: longitude, timezone: timezone)
     }
@@ -91,7 +91,7 @@ class CitiesLoader {
 
     func load() -> Result<CitiesDatabase, IqamahError> {
         // Return cached database if already loaded successfully
-        if let database = database {
+        if let database {
             return .success(database)
         }
 
@@ -113,7 +113,7 @@ class CitiesLoader {
             let data = try Data(contentsOf: url)
             let decoder = JSONDecoder()
             let loadedDatabase = try decoder.decode(CitiesDatabase.self, from: data)
-            
+
             // Validate database has content
             guard !loadedDatabase.cities.isEmpty else {
                 let error = IqamahError.citiesDatabaseLoadFailed(reason: "Database contains no cities")
@@ -121,7 +121,7 @@ class CitiesLoader {
                 logError(error, context: "CitiesLoader.load()")
                 return .failure(error)
             }
-            
+
             database = loadedDatabase
             return .success(loadedDatabase)
         } catch let decodingError as DecodingError {

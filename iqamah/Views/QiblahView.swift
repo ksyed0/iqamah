@@ -3,7 +3,7 @@ import SwiftUI
 struct QiblahView: View {
     let latitude: Double
     let longitude: Double
-    let cityName: String          // AC-0134
+    let cityName: String // AC-0134
 
     private let kaabahLat = 21.4225
     private let kaabahLon = 39.8262
@@ -67,16 +67,16 @@ struct QiblahView: View {
                     .frame(width: 294, height: 294)
 
                 // ── Tick marks: 24 total (every 15°), cardinals prominent ─
-                ForEach(0..<24, id: \.self) { i in
+                ForEach(0 ..< 24, id: \.self) { i in
                     let angle = Double(i) * 15
-                    let isCardinal = i % 6 == 0      // N/E/S/W
-                    let isMinorCard = i % 3 == 0     // NE/SE/SW/NW
+                    let isCardinal = i % 6 == 0 // N/E/S/W
+                    let isMinorCard = i % 3 == 0 // NE/SE/SW/NW
                     Rectangle()
                         .fill(isCardinal
-                              ? Color.primary.opacity(0.85)
-                              : isMinorCard
-                                ? Color.primary.opacity(0.50)
-                                : Color.secondary.opacity(0.30))
+                            ? Color.primary.opacity(0.85)
+                            : isMinorCard
+                            ? Color.primary.opacity(0.50)
+                            : Color.secondary.opacity(0.30))
                         .frame(width: isCardinal ? 2.5 : isMinorCard ? 1.5 : 1,
                                height: isCardinal ? 18 : isMinorCard ? 12 : 6)
                         .offset(y: -148)

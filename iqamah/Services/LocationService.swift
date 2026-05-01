@@ -53,9 +53,13 @@ class LocationService: NSObject, ObservableObject {
     }
 
     func requestLocationAsync() async throws -> CLLocationCoordinate2D {
-        return try await withCheckedThrowingContinuation { [weak self] continuation in
-            guard let self = self else {
-                continuation.resume(throwing: NSError(domain: "LocationService", code: 2, userInfo: [NSLocalizedDescriptionKey: "Service deallocated"]))
+        try await withCheckedThrowingContinuation { [weak self] continuation in
+            guard let self else {
+                continuation.resume(throwing: NSError(
+                    domain: "LocationService",
+                    code: 2,
+                    userInfo: [NSLocalizedDescriptionKey: "Service deallocated"]
+                ))
                 return
             }
             Task { @MainActor in
@@ -67,7 +71,7 @@ class LocationService: NSObject, ObservableObject {
 }
 
 extension LocationService: CLLocationManagerDelegate {
-    nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    nonisolated func locationManager(_: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         Task { @MainActor in
             isLoading = false
             pendingLocationRequest = false
@@ -79,7 +83,7 @@ extension LocationService: CLLocationManagerDelegate {
         }
     }
 
-    nonisolated func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+    nonisolated func locationManager(_: CLLocationManager, didFailWithError error: Error) {
         Task { @MainActor in
             isLoading = false
             pendingLocationRequest = false
@@ -104,7 +108,11 @@ extension LocationService: CLLocationManagerDelegate {
                 isLoading = false
                 pendingLocationRequest = false
                 locationError = "Location access denied. Please enable in System Settings."
-                locationContinuation?.resume(throwing: NSError(domain: "LocationService", code: 1, userInfo: [NSLocalizedDescriptionKey: "Location access denied"]))
+                locationContinuation?.resume(throwing: NSError(
+                    domain: "LocationService",
+                    code: 1,
+                    userInfo: [NSLocalizedDescriptionKey: "Location access denied"]
+                ))
                 locationContinuation = nil
             case .notDetermined:
                 break

@@ -7,10 +7,10 @@ struct LocationSetupView: View {
     @State private var selectedCountry: Country?
     @State private var selectedCity: City?
     @State private var hasDetectedLocation = false
-    @State private var showDetectedBadge = false   // US-0026
+    @State private var showDetectedBadge = false // US-0026
 
     let onLocationConfirmed: (City) -> Void
-    let onBack: (() -> Void)?                       // US-0027 — nil when used in first-run flow
+    let onBack: (() -> Void)? // US-0027 — nil when used in first-run flow
 
     init(onLocationConfirmed: @escaping (City) -> Void, onBack: (() -> Void)? = nil) {
         self.onLocationConfirmed = onLocationConfirmed
@@ -19,7 +19,6 @@ struct LocationSetupView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-
             // ── Step indicator (US-0027) ────────────────────────────
             StepIndicator(current: 1, total: 2)
                 .padding(.top, 28)
@@ -78,7 +77,7 @@ struct LocationSetupView: View {
                 }
 
                 // ── Country / City pickers ──────────────────────────
-                if let database = database {
+                if let database {
                     VStack(alignment: .leading, spacing: 14) {
                         VStack(alignment: .leading, spacing: 6) {
                             Text("Country").font(.headline)
@@ -97,7 +96,7 @@ struct LocationSetupView: View {
                                 Text("City").font(.headline)
                                 Picker("City", selection: $selectedCity) {
                                     Text("Select a city").tag(nil as City?)
-                                    ForEach(database.cities(forCountryCode: selectedCountry!.code)) { city in
+                                    ForEach(database.cities(forCountryCode: selectedCountry?.code ?? "")) { city in
                                         Text(city.name).tag(city as City?)
                                     }
                                 }
@@ -116,7 +115,7 @@ struct LocationSetupView: View {
 
             // ── Navigation buttons ──────────────────────────────────
             HStack {
-                if let onBack = onBack {
+                if let onBack {
                     Button(action: onBack) {
                         Label("Back", systemImage: "chevron.left")
                     }
@@ -159,20 +158,20 @@ struct LocationSetupView: View {
     }
 
     private func loadDatabase() {
-        if case .success(let db) = CitiesLoader.shared.load() {
+        if case let .success(db) = CitiesLoader.shared.load() {
             database = db
         }
     }
 
     private func detectClosestCity(to coordinate: CLLocationCoordinate2D) {
-        guard let database = database else { return }
+        guard let database else { return }
         if let closestCity = database.closestCity(to: coordinate) {
             selectedCountry = database.country(forCode: closestCity.countryCode)
             hasDetectedLocation = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                self.selectedCity = closestCity
+                selectedCity = closestCity
                 withAnimation(.spring(response: 0.4)) {
-                    self.showDetectedBadge = true
+                    showDetectedBadge = true
                 }
             }
         }

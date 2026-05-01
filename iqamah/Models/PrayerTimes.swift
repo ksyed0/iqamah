@@ -16,7 +16,7 @@ struct PrayerTimes {
             ("Dhuhr", dhuhr),
             ("Asr", asr),
             ("Maghrib", maghrib),
-            ("Isha", isha)
+            ("Isha", isha),
         ]
     }
 

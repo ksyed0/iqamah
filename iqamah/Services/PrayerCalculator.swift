@@ -20,7 +20,8 @@ class PrayerCalculator {
 
         guard let year = components.year,
               let month = components.month,
-              let day = components.day else {
+              let day = components.day
+        else {
             throw IqamahError.invalidDate("Could not extract date components from \(date)")
         }
 
@@ -69,7 +70,7 @@ class PrayerCalculator {
     // MARK: - Sun Position Calculations
 
     private func calculateSunDeclination(julianDay: Double) -> Double {
-        let t = (julianDay - 2451545.0) / 36525.0
+        let t = (julianDay - 2_451_545.0) / 36525.0
         let l0 = 280.46646 + 36000.76983 * t + 0.0003032 * t * t
         let m = 357.52911 + 35999.05029 * t - 0.0001537 * t * t
 
@@ -82,7 +83,7 @@ class PrayerCalculator {
         let omega = 125.04 - 1934.136 * t
         let lambda = sunLong - 0.00569 - 0.00478 * sin(omega * .pi / 180.0)
 
-        let obliquity = 23.439 - 0.00000036 * (julianDay - 2451545.0)
+        let obliquity = 23.439 - 0.00000036 * (julianDay - 2_451_545.0)
         let obliquityRad = obliquity * .pi / 180.0
         let lambdaRad = lambda * .pi / 180.0
 
@@ -90,14 +91,14 @@ class PrayerCalculator {
     }
 
     private func calculateEquationOfTime(julianDay: Double) -> Double {
-        let t = (julianDay - 2451545.0) / 36525.0
+        let t = (julianDay - 2_451_545.0) / 36525.0
         let l0 = 280.46646 + 36000.76983 * t + 0.0003032 * t * t
         let m = 357.52911 + 35999.05029 * t - 0.0001537 * t * t
         let e = 0.016708634 - 0.000042037 * t - 0.0000001267 * t * t
 
         let l0Rad = l0 * .pi / 180.0
         let mRad = m * .pi / 180.0
-        let obliquity = 23.439 - 0.00000036 * (julianDay - 2451545.0)
+        let obliquity = 23.439 - 0.00000036 * (julianDay - 2_451_545.0)
         let y = tan(obliquity * .pi / 360.0)
         let ySquared = y * y
 
@@ -141,7 +142,7 @@ class PrayerCalculator {
         let angle = atan(1.0 / (factor + tan(abs(latitudeRad - declinationRad))))
         let asrAngle = acos(
             (sin(angle) - sin(latitudeRad) * sin(declinationRad)) /
-            (cos(latitudeRad) * cos(declinationRad))
+                (cos(latitudeRad) * cos(declinationRad))
         ) * 180.0 / .pi
 
         return transitTime + asrAngle / 15.0
@@ -170,7 +171,7 @@ class PrayerCalculator {
         let angleRad = angle * .pi / 180.0
 
         let cosHourAngle = (-sin(angleRad) - sin(latitudeRad) * sin(declinationRad)) /
-                           (cos(latitudeRad) * cos(declinationRad))
+            (cos(latitudeRad) * cos(declinationRad))
 
         // Clamp value to valid range for acos
         let clampedCos = max(-1, min(1, cosHourAngle))
@@ -202,7 +203,7 @@ extension Date {
         let monthNames = [
             "Muharram", "Safar", "Rabi' al-Awwal", "Rabi' al-Thani",
             "Jumada al-Awwal", "Jumada al-Thani", "Rajab", "Sha'ban",
-            "Ramadan", "Shawwal", "Dhu al-Qi'dah", "Dhu al-Hijjah"
+            "Ramadan", "Shawwal", "Dhu al-Qi'dah", "Dhu al-Hijjah",
         ]
 
         let monthName = components.month.map { monthNames[$0 - 1] } ?? ""

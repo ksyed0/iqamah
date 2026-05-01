@@ -7,7 +7,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var mainWindow: NSWindow?
     var updateTimer: Timer?
 
-    func applicationDidFinishLaunching(_ notification: Notification) {
+    func applicationDidFinishLaunching(_: Notification) {
         setupStatusBarItem()
         startUpdateTimer()
 
@@ -90,7 +90,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             // Apply adjustment to prayer time
             let adjustmentMinutes = settings.getAdjustment(for: prayer.name)
             let adjustedTime = Calendar.current.date(byAdding: .minute, value: adjustmentMinutes, to: prayer.time) ?? prayer.time
-            
+
             if adjustedTime > now {
                 nextPrayer = (prayer.name, adjustedTime)
                 break
@@ -99,13 +99,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         // If no prayer found today, show Fajr (next day's first prayer)
         if nextPrayer == nil {
-            let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: now)!
+            guard let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: now) else { return }
             guard let tomorrowPrayers = try? calculator.calculate(for: tomorrow) else {
                 button.image = NSImage(systemSymbolName: "moon.stars", accessibilityDescription: "Iqamah")
                 return
             }
             let adjustmentMinutes = settings.getAdjustment(for: "Fajr")
-            let adjustedFajr = Calendar.current.date(byAdding: .minute, value: adjustmentMinutes, to: tomorrowPrayers.fajr) ?? tomorrowPrayers.fajr
+            let adjustedFajr = Calendar.current
+                .date(byAdding: .minute, value: adjustmentMinutes, to: tomorrowPrayers.fajr) ?? tomorrowPrayers.fajr
             nextPrayer = ("Fajr", adjustedFajr)
         }
 
@@ -126,24 +127,23 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let minutesUntil = Int(next.time.timeIntervalSince(now) / 60)
 
         // Set color based on time remaining
-        let textColor: NSColor
-        if minutesUntil < 10 {
-            textColor = .systemRed
+        let textColor: NSColor = if minutesUntil < 10 {
+            .systemRed
         } else {
-            textColor = .labelColor
+            .labelColor
         }
 
         // Create attributed string with color
         let attributes: [NSAttributedString.Key: Any] = [
             .foregroundColor: textColor,
-            .font: NSFont.monospacedDigitSystemFont(ofSize: NSFont.systemFontSize, weight: .medium)
+            .font: NSFont.monospacedDigitSystemFont(ofSize: NSFont.systemFontSize, weight: .medium),
         ]
 
         button.image = nil
         button.attributedTitle = NSAttributedString(string: displayText, attributes: attributes)
     }
 
-    @objc func statusBarButtonClicked(_ sender: NSStatusBarButton) {
+    @objc func statusBarButtonClicked(_: NSStatusBarButton) {
         guard let event = NSApp.currentEvent else { return }
 
         if event.type == .rightMouseUp {
@@ -199,29 +199,29 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         return false
     }
 
-    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+    func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         if !flag {
             showWindow()
         }
         return true
     }
 
-    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-        return false
+    func applicationShouldTerminateAfterLastWindowClosed(_: NSApplication) -> Bool {
+        false
     }
 
-    func applicationWillTerminate(_ notification: Notification) {
+    func applicationWillTerminate(_: Notification) {
         updateTimer?.invalidate()
         updateTimer = nil
     }
-    
-    func applicationDidResignActive(_ notification: Notification) {
+
+    func applicationDidResignActive(_: Notification) {
         // Optionally pause timer when app goes to background
         // Uncomment to save resources when app is not active
         // updateTimer?.invalidate()
     }
-    
-    func applicationDidBecomeActive(_ notification: Notification) {
+
+    func applicationDidBecomeActive(_: Notification) {
         // Restart timer if it was paused
         if updateTimer == nil {
             startUpdateTimer()

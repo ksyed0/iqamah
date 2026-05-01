@@ -32,21 +32,21 @@ struct PrayerTimesView: View {
                         .frame(width: 36, height: 36)
                         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                         .shadow(color: Color.black.opacity(0.12), radius: 3, x: 0, y: 1)
-                    
+
                     Text("Iqamah")
                         .font(.system(size: titleFontSize, weight: .bold, design: .serif))
                         .foregroundStyle(
                             LinearGradient(
                                 colors: [
                                     Color(red: 0.95, green: 0.76, blue: 0.06),
-                                    Color(red: 0.85, green: 0.65, blue: 0.13)
+                                    Color(red: 0.85, green: 0.65, blue: 0.13),
                                 ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
                         )
                 }
-                
+
                 // City and method — BUG-0029: lineLimit + scale prevents overflow at large text sizes
                 VStack(alignment: .leading, spacing: 3) {
                     Text(city.name)
@@ -59,13 +59,13 @@ struct PrayerTimesView: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.75)
                 }
-                
+
                 Spacer()
 
                 // Global Adhaan mute toggle
                 Button(action: { AdhaaanPlayer.shared.toggleMute() }) {
                     Image(systemName: AdhaaanPlayer.shared.isMuted
-                          ? "speaker.slash.fill" : "speaker.wave.2.fill")
+                        ? "speaker.slash.fill" : "speaker.wave.2.fill")
                         .font(.title3)
                         .foregroundColor(AdhaaanPlayer.shared.isMuted ? .secondary : .accentColor)
                         .symbolRenderingMode(.hierarchical)
@@ -118,7 +118,7 @@ struct PrayerTimesView: View {
             .padding(.vertical, 18)
 
             // Prayer times table
-            if let prayerTimes = prayerTimes {
+            if let prayerTimes {
                 PrayerTimesTable(prayerTimes: prayerTimes, timezone: TimeZone(identifier: city.timezone) ?? .current)
                     .padding(.horizontal, 24)
                     .padding(.bottom, 24)
@@ -168,7 +168,7 @@ struct PrayerTimesView: View {
             method: calculationMethod,
             asrMethod: asrMethod
         )
-        
+
         do {
             prayerTimes = try calculator.calculate(for: currentDate)
         } catch {
@@ -208,7 +208,7 @@ struct PrayerTimesTable: View {
 
     var body: some View {
         VStack(spacing: 1) {
-            ForEach(Array(prayerTimes.prayers.enumerated()), id: \.offset) { index, prayer in
+            ForEach(Array(prayerTimes.prayers.enumerated()), id: \.offset) { _, prayer in
                 let isSunrise = prayer.name == "Sunrise"
                 let adjusted = adjustedTime(for: prayer)
                 if isSunrise {
@@ -246,7 +246,7 @@ struct PrayerTimesTable: View {
             loadAdjustments()
         }
     }
-    
+
     private func loadAdjustments() {
         for prayer in prayerTimes.prayers {
             adjustments[prayer.name] = settingsManager.getAdjustment(for: prayer.name)
@@ -254,12 +254,12 @@ struct PrayerTimesTable: View {
             prayerMuted[prayer.name] = settingsManager.isPrayerMuted(prayer.name)
         }
     }
-    
+
     private func adjustedTime(for prayer: (name: String, time: Date)) -> Date {
         let adjustmentMinutes = adjustments[prayer.name] ?? 0
         return Calendar.current.date(byAdding: .minute, value: adjustmentMinutes, to: prayer.time) ?? prayer.time
     }
-    
+
     private func adjustPrayerTime(for prayerName: String, delta: Int) {
         let currentAdjustment = adjustments[prayerName] ?? 0
         let newAdjustment = currentAdjustment + delta
@@ -292,7 +292,7 @@ struct SunriseRow: View {
             HStack(spacing: 14) {
                 Image(systemName: "sunrise.fill")
                     .font(.callout)
-                    .foregroundColor(.secondary)       // AC-0063: no opacity reduction on semantic colour
+                    .foregroundColor(.secondary) // AC-0063: no opacity reduction on semantic colour
                     .frame(width: 44, height: 36)
                 Text("Sunrise")
                     .font(.callout)
@@ -336,170 +336,172 @@ struct PrayerTimeRow: View {
     private let gold = Color(red: 0.88, green: 0.69, blue: 0.06)
 
     var body: some View {
-        VStack(spacing: 0) {  // outer VStack — holds row + adhaan picker
-        HStack(spacing: 0) {
-            // ── Left accent stripe (highlighted only) ───────────────────
-            Rectangle()
-                .fill(isHighlighted ? gold : Color.clear)
-                .frame(width: 4)
-                .clipShape(RoundedRectangle(cornerRadius: 2, style: .continuous))
-                .padding(.vertical, 8)
+        VStack(spacing: 0) { // outer VStack — holds row + adhaan picker
+            HStack(spacing: 0) {
+                // ── Left accent stripe (highlighted only) ───────────────────
+                Rectangle()
+                    .fill(isHighlighted ? gold : Color.clear)
+                    .frame(width: 4)
+                    .clipShape(RoundedRectangle(cornerRadius: 2, style: .continuous))
+                    .padding(.vertical, 8)
 
-            HStack(spacing: 16) {
-                // Prayer icon and name
-                HStack(spacing: 14) {
-                    ZStack {
-                        // Highlighted: filled gold circle; normal: subtle grey
-                        Circle()
-                            .fill(isHighlighted
-                                  ? gold.opacity(0.20)
-                                  : Color.secondary.opacity(0.08))
-                            .frame(width: 44, height: 44)
+                HStack(spacing: 16) {
+                    // Prayer icon and name
+                    HStack(spacing: 14) {
+                        ZStack {
+                            // Highlighted: filled gold circle; normal: subtle grey
+                            Circle()
+                                .fill(isHighlighted
+                                    ? gold.opacity(0.20)
+                                    : Color.secondary.opacity(0.08))
+                                .frame(width: 44, height: 44)
 
-                        Image(systemName: iconName)
-                            .font(.title3.weight(.medium))
-                            .foregroundColor(isHighlighted ? gold : .secondary)
-                    }
+                            Image(systemName: iconName)
+                                .font(.title3.weight(.medium))
+                                .foregroundColor(isHighlighted ? gold : .secondary)
+                        }
 
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(name)
-                            .font(.body.bold())
-                            .foregroundColor(isHighlighted ? gold : .primary)
-                        // "NEXT" micro-label — unambiguous for first-time users
-                        if isHighlighted {
-                            Text("NEXT")
-                                .font(.system(size: 9, weight: .heavy))
-                                .foregroundColor(gold.opacity(0.85))
-                                .tracking(1.2)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(name)
+                                .font(.body.bold())
+                                .foregroundColor(isHighlighted ? gold : .primary)
+                            // "NEXT" micro-label — unambiguous for first-time users
+                            if isHighlighted {
+                                Text("NEXT")
+                                    .font(.system(size: 9, weight: .heavy))
+                                    .foregroundColor(gold.opacity(0.85))
+                                    .tracking(1.2)
+                            }
                         }
                     }
-                }
 
-                Spacer()
+                    Spacer()
 
-                // Time display — larger when highlighted
-                Text(formatter.string(from: time))
-                    .font(isHighlighted ? .title2.weight(.semibold) : .title3.weight(.medium))
-                    .foregroundColor(isHighlighted ? gold : .primary)
-                    .monospacedDigit()
-                    .frame(minWidth: 100, alignment: .trailing)
+                    // Time display — larger when highlighted
+                    Text(formatter.string(from: time))
+                        .font(isHighlighted ? .title2.weight(.semibold) : .title3.weight(.medium))
+                        .foregroundColor(isHighlighted ? gold : .primary)
+                        .monospacedDigit()
+                        .frame(minWidth: 100, alignment: .trailing)
 
-            // Adjustment badge — AC-0063: white-on-coloured-capsule ensures 4.5:1+ contrast
-            // AC-0065: pill shape + number together convey adjustment, not colour alone
-            if adjustment != 0 {
-                Text(adjustment > 0 ? "+\(adjustment)" : "\(adjustment)")
-                    .font(.caption.bold())
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(
-                        Capsule().fill(Color(nsColor: NSColor(name: nil) { ap in
-                            // Dark red on light bg: #B01A10 ≈ 7:1 vs white
-                            // System red on dark bg: good contrast vs dark surface
-                            ap.bestMatch(from: [.darkAqua]) == .darkAqua
-                                ? .systemRed
-                                : NSColor(red: 0.69, green: 0.10, blue: 0.06, alpha: 1)
-                        }))
-                    )
-                    .frame(minWidth: 35, alignment: .center)
-                    .accessibilityLabel("\(abs(adjustment)) minute adjustment")
-            } else {
-                Color.clear.frame(width: 35)
-            }
-
-            // Adjustment controls
-            HStack(spacing: 6) {
-                Button(action: { onAdjust(-1) }) {
-                    Image(systemName: "minus.circle.fill")
-                        .font(.title3)
-                        .foregroundColor(.secondary)
-                        .symbolRenderingMode(.hierarchical)
-                }
-                .buttonStyle(.plain)
-                .help("Decrease time by 1 minute")
-                .accessibilityLabel("Decrease \(name) time by 1 minute")
-                .accessibilityHint("Current adjustment: \(adjustment) minutes")
-
-                Button(action: { onAdjust(1) }) {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.title3)
-                        .foregroundColor(.secondary)
-                        .symbolRenderingMode(.hierarchical)
-                }
-                .buttonStyle(.plain)
-                .help("Increase time by 1 minute")
-                .accessibilityLabel("Increase \(name) time by 1 minute")
-                .accessibilityHint("Current adjustment: \(adjustment) minutes")
-            }
-            .opacity(isHovering ? 1.0 : 0.7)
-            .accessibilityElement(children: .contain)
-            .accessibilityLabel("Time adjustment controls for \(name)")
-
-            // Per-prayer mute toggle
-            Button(action: { isPrayerMuted = !isPrayerMuted }) {
-                Image(systemName: isPrayerMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
-                    .font(.callout)
-                    .foregroundColor(isPrayerMuted ? .orange : .secondary)
-                    .symbolRenderingMode(.hierarchical)
-                    .padding(8)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .help(isPrayerMuted ? "Unmute \(name) adhaan" : "Mute \(name) adhaan")
-            .accessibilityLabel(isPrayerMuted ? "Unmute \(name) adhaan" : "Mute \(name) adhaan")
-            .opacity(player.isMuted ? 0.4 : 1.0)
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, isHighlighted ? 18 : 14)
-        }  // end inner HStack
-
-        // ── Adhaan picker — visible on hover or when a non-silent adhaan is set ──
-        if isHovering || selectedAdhaan.id != "silent" {
-            HStack(spacing: 10) {
-                // Context icon: muted if global OR per-prayer mute is active
-                Image(systemName: (player.isMuted || isPrayerMuted) ? "speaker.slash" : "music.note")
-                    .font(.caption)
-                    .foregroundColor((player.isMuted || isPrayerMuted) ? .orange.opacity(0.7) : .secondary)
-
-                Picker("Adhaan", selection: $selectedAdhaan) {
-                    ForEach(adhaanOptions) { option in
-                        Text(option.displayName).tag(option)
+                    // Adjustment badge — AC-0063: white-on-coloured-capsule ensures 4.5:1+ contrast
+                    // AC-0065: pill shape + number together convey adjustment, not colour alone
+                    if adjustment != 0 {
+                        Text(adjustment > 0 ? "+\(adjustment)" : "\(adjustment)")
+                            .font(.caption.bold())
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(
+                                Capsule().fill(Color(nsColor: NSColor(name: nil) { ap in
+                                    // Dark red on light bg: #B01A10 ≈ 7:1 vs white
+                                    // System red on dark bg: good contrast vs dark surface
+                                    ap.bestMatch(from: [.darkAqua]) == .darkAqua
+                                        ? .systemRed
+                                        : NSColor(red: 0.69, green: 0.10, blue: 0.06, alpha: 1)
+                                }))
+                            )
+                            .frame(minWidth: 35, alignment: .center)
+                            .accessibilityLabel("\(abs(adjustment)) minute adjustment")
+                    } else {
+                        Color.clear.frame(width: 35)
                     }
-                }
-                .labelsHidden()
-                .pickerStyle(.menu)
-                .controlSize(.mini)
-                .frame(maxWidth: 140)
 
-                // Preview play/stop toggle — works even when globally muted
-                if selectedAdhaan.id != "silent" {
-                    Button(action: {
-                        if player.isPlaying {
-                            AdhaaanPlayer.shared.stop()
-                        } else {
-                            AdhaaanPlayer.shared.preview(selectedAdhaan)
+                    // Adjustment controls
+                    HStack(spacing: 6) {
+                        Button(action: { onAdjust(-1) }) {
+                            Image(systemName: "minus.circle.fill")
+                                .font(.title3)
+                                .foregroundColor(.secondary)
+                                .symbolRenderingMode(.hierarchical)
                         }
-                    }) {
-                        Image(systemName: player.isPlaying ? "stop.circle.fill" : "play.circle")
-                            .font(.caption)
-                            .foregroundColor(player.isPlaying ? .accentColor : .secondary)
+                        .buttonStyle(.plain)
+                        .help("Decrease time by 1 minute")
+                        .accessibilityLabel("Decrease \(name) time by 1 minute")
+                        .accessibilityHint("Current adjustment: \(adjustment) minutes")
+
+                        Button(action: { onAdjust(1) }) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.title3)
+                                .foregroundColor(.secondary)
+                                .symbolRenderingMode(.hierarchical)
+                        }
+                        .buttonStyle(.plain)
+                        .help("Increase time by 1 minute")
+                        .accessibilityLabel("Increase \(name) time by 1 minute")
+                        .accessibilityHint("Current adjustment: \(adjustment) minutes")
+                    }
+                    .opacity(isHovering ? 1.0 : 0.7)
+                    .accessibilityElement(children: .contain)
+                    .accessibilityLabel("Time adjustment controls for \(name)")
+
+                    // Per-prayer mute toggle
+                    // Direct assignment required: @Binding<Bool>.toggle() does not reliably fire the setter in Button action closures
+                    // swiftlint:disable:next toggle_bool
+                    Button(action: { isPrayerMuted = !isPrayerMuted }) {
+                        Image(systemName: isPrayerMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
+                            .font(.callout)
+                            .foregroundColor(isPrayerMuted ? .orange : .secondary)
+                            .symbolRenderingMode(.hierarchical)
+                            .padding(8)
+                            .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
-                    .help(player.isPlaying ? "Stop preview" : "Preview \(selectedAdhaan.displayName)")
+                    .help(isPrayerMuted ? "Unmute \(name) adhaan" : "Mute \(name) adhaan")
+                    .accessibilityLabel(isPrayerMuted ? "Unmute \(name) adhaan" : "Mute \(name) adhaan")
+                    .opacity(player.isMuted ? 0.4 : 1.0)
                 }
+                .padding(.horizontal, 16)
+                .padding(.vertical, isHighlighted ? 18 : 14)
+            } // end inner HStack
 
-                Spacer()
+            // ── Adhaan picker — visible on hover or when a non-silent adhaan is set ──
+            if isHovering || selectedAdhaan.id != "silent" {
+                HStack(spacing: 10) {
+                    // Context icon: muted if global OR per-prayer mute is active
+                    Image(systemName: (player.isMuted || isPrayerMuted) ? "speaker.slash" : "music.note")
+                        .font(.caption)
+                        .foregroundColor((player.isMuted || isPrayerMuted) ? .orange.opacity(0.7) : .secondary)
+
+                    Picker("Adhaan", selection: $selectedAdhaan) {
+                        ForEach(adhaanOptions) { option in
+                            Text(option.displayName).tag(option)
+                        }
+                    }
+                    .labelsHidden()
+                    .pickerStyle(.menu)
+                    .controlSize(.mini)
+                    .frame(maxWidth: 140)
+
+                    // Preview play/stop toggle — works even when globally muted
+                    if selectedAdhaan.id != "silent" {
+                        Button(action: {
+                            if player.isPlaying {
+                                AdhaaanPlayer.shared.stop()
+                            } else {
+                                AdhaaanPlayer.shared.preview(selectedAdhaan)
+                            }
+                        }) {
+                            Image(systemName: player.isPlaying ? "stop.circle.fill" : "play.circle")
+                                .font(.caption)
+                                .foregroundColor(player.isPlaying ? .accentColor : .secondary)
+                        }
+                        .buttonStyle(.plain)
+                        .help(player.isPlaying ? "Stop preview" : "Preview \(selectedAdhaan.displayName)")
+                    }
+
+                    Spacer()
+                }
+                .padding(.leading, 20)
+                .padding(.bottom, 10)
+                .transition(.opacity.combined(with: .move(edge: .top)))
             }
-            .padding(.leading, 20)
-            .padding(.bottom, 10)
-            .transition(.opacity.combined(with: .move(edge: .top)))
-        }
-        }  // end outer VStack — wrap body in VStack for picker row
+        } // end outer VStack — wrap body in VStack for picker row
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(isHighlighted
-                      ? gold.opacity(0.10)
-                      : Color.clear)
+                    ? gold.opacity(0.10)
+                    : Color.clear)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
@@ -516,25 +518,27 @@ struct PrayerTimeRow: View {
             }
         }
         .accessibilityElement(children: .contain)
-        .accessibilityLabel("\(name) prayer at \(formatter.string(from: time))\(adjustment != 0 ? ", adjusted by \(adjustment) minutes" : "")\(isPrayerMuted ? ", adhaan muted" : "")\(isHighlighted ? ", next prayer" : "")")
+        .accessibilityLabel(
+            "\(name) prayer at \(formatter.string(from: time))\(adjustment != 0 ? ", adjusted by \(adjustment) minutes" : "")\(isPrayerMuted ? ", adhaan muted" : "")\(isHighlighted ? ", next prayer" : "")"
+        )
     }
 
     private var iconName: String {
         switch name {
         case "Fajr":
-            return "sun.horizon.fill"
+            "sun.horizon.fill"
         case "Sunrise":
-            return "sunrise.fill"
+            "sunrise.fill"
         case "Dhuhr":
-            return "sun.max.fill"
+            "sun.max.fill"
         case "Asr":
-            return "sun.min.fill"
+            "sun.min.fill"
         case "Maghrib":
-            return "sunset.fill"
+            "sunset.fill"
         case "Isha":
-            return "moon.stars.fill"
+            "moon.stars.fill"
         default:
-            return "clock.fill"
+            "clock.fill"
         }
     }
 }

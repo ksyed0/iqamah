@@ -4,17 +4,19 @@ import SwiftUI
 /// All changes are held in local draft state until the user taps Save.
 /// Cancel discards without touching UserDefaults or prayer adjustments.
 struct SettingsSheetView: View {
-
     // MARK: - Inputs
+
     let currentCity: City
     let currentMethod: CalculationMethod
     let currentAsrMethod: AsrJuristicMethod
 
     // MARK: - Callbacks
+
     let onSave: (City, CalculationMethod, AsrJuristicMethod) -> Void
     let onCancel: () -> Void
 
     // MARK: - Draft state
+
     @State private var database: CitiesDatabase?
     @State private var selectedCountry: Country?
     @State private var selectedCity: City?
@@ -27,6 +29,7 @@ struct SettingsSheetView: View {
     @State private var recommendationLabel: String? = nil
 
     // MARK: - Derived
+
     private var cities: [City] {
         guard let db = database, let country = selectedCountry else { return [] }
         return db.cities(forCountryCode: country.code)
@@ -35,6 +38,7 @@ struct SettingsSheetView: View {
     private var canSave: Bool { selectedCity != nil }
 
     // MARK: - Init
+
     init(
         currentCity: City,
         currentMethod: CalculationMethod,
@@ -53,9 +57,9 @@ struct SettingsSheetView: View {
     }
 
     // MARK: - Body
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-
             // ── Header ──────────────────────────────────────────────
             HStack {
                 Text("Settings")
@@ -70,7 +74,6 @@ struct SettingsSheetView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-
                     // ── Location section ─────────────────────────────
                     SectionHeader("Location")
 
@@ -217,7 +220,7 @@ struct SettingsSheetView: View {
 
     private func loadInitialState() {
         // Load cities database
-        if case .success(let db) = CitiesLoader.shared.load() {
+        if case let .success(db) = CitiesLoader.shared.load() {
             database = db
             // Pre-select the current city's country and city
             selectedCountry = db.country(forCode: currentCity.countryCode)
@@ -243,7 +246,10 @@ struct SettingsSheetView: View {
 
 private struct SectionHeader: View {
     let title: String
-    init(_ title: String) { self.title = title }
+    init(_ title: String) {
+        self.title = title
+    }
+
     var body: some View {
         Text(title)
             .font(.caption.bold())

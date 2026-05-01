@@ -50,24 +50,24 @@ class SettingsManager: ObservableObject {
     }
 
     init(userDefaults: UserDefaults = .standard) {
-        self.defaults = userDefaults
-        self.hasCompletedSetup = userDefaults.bool(forKey: Keys.hasCompletedSetup)
+        defaults = userDefaults
+        hasCompletedSetup = userDefaults.bool(forKey: Keys.hasCompletedSetup)
 
         if let methodRaw = defaults.string(forKey: Keys.calculationMethod),
            let method = CalculationMethod(rawValue: methodRaw) {
-            self.calculationMethod = method
+            calculationMethod = method
         } else {
-            self.calculationMethod = .muslimWorldLeague
+            calculationMethod = .muslimWorldLeague
         }
 
         if let asrRaw = defaults.string(forKey: Keys.asrMethod),
            let asr = AsrJuristicMethod(rawValue: asrRaw) {
-            self.asrMethod = asr
+            asrMethod = asr
         } else {
-            self.asrMethod = .standard
+            asrMethod = .standard
         }
 
-        self.use24HourTime = defaults.bool(forKey: Keys.use24HourTime)
+        use24HourTime = defaults.bool(forKey: Keys.use24HourTime)
     }
 
     func saveCity(_ city: City) {
@@ -81,7 +81,8 @@ class SettingsManager: ObservableObject {
     func loadCity() -> City? {
         guard let name = defaults.string(forKey: Keys.selectedCityName),
               let countryCode = defaults.string(forKey: Keys.selectedCityCountryCode),
-              let timezone = defaults.string(forKey: Keys.selectedCityTimezone) else {
+              let timezone = defaults.string(forKey: Keys.selectedCityTimezone)
+        else {
             return nil
         }
 
@@ -89,7 +90,7 @@ class SettingsManager: ObservableObject {
         let longitude = defaults.double(forKey: Keys.selectedCityLongitude)
 
         // Validate that we have actual coordinates
-        if latitude == 0 && longitude == 0 {
+        if latitude == 0, longitude == 0 {
             return nil
         }
 
@@ -106,7 +107,7 @@ class SettingsManager: ObservableObject {
         saveCity(city)
         self.calculationMethod = calculationMethod
         self.asrMethod = asrMethod
-        self.hasCompletedSetup = true
+        hasCompletedSetup = true
 
         // Notify that settings changed so menu bar can update
         NotificationCenter.default.post(name: .settingsDidChange, object: nil)
@@ -124,14 +125,14 @@ class SettingsManager: ObservableObject {
             defaults.removeObject(forKey: key)
         }
     }
-    
+
     // MARK: - Prayer Time Adjustments
-    
+
     func getAdjustment(for prayerName: String) -> Int {
         let adjustments = defaults.dictionary(forKey: Keys.prayerAdjustments) as? [String: Int] ?? [:]
         return adjustments[prayerName] ?? 0
     }
-    
+
     // MARK: - Adhaan Selection
 
     func getAdhaan(for prayerName: String) -> Adhaan {
@@ -163,7 +164,7 @@ class SettingsManager: ObservableObject {
         var adjustments = defaults.dictionary(forKey: Keys.prayerAdjustments) as? [String: Int] ?? [:]
         adjustments[prayerName] = minutes
         defaults.set(adjustments, forKey: Keys.prayerAdjustments)
-        
+
         // Notify that settings changed
         NotificationCenter.default.post(name: .settingsDidChange, object: nil)
     }

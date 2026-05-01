@@ -2,80 +2,80 @@ import Foundation
 
 enum CalculationMethod: String, CaseIterable, Identifiable {
     case muslimWorldLeague = "mwl"
-    case isna = "isna"
-    case egypt = "egypt"
+    case isna
+    case egypt
     case ummAlQura = "umm_al_qura"
-    case karachi = "karachi"
-    case tehran = "tehran"
+    case karachi
+    case tehran
 
     var id: String { rawValue }
 
     var displayName: String {
         switch self {
         case .muslimWorldLeague:
-            return "Muslim World League"
+            "Muslim World League"
         case .isna:
-            return "Islamic Society of North America (ISNA)"
+            "Islamic Society of North America (ISNA)"
         case .egypt:
-            return "Egyptian General Authority of Survey"
+            "Egyptian General Authority of Survey"
         case .ummAlQura:
-            return "Umm Al-Qura University, Makkah"
+            "Umm Al-Qura University, Makkah"
         case .karachi:
-            return "University of Islamic Sciences, Karachi"
+            "University of Islamic Sciences, Karachi"
         case .tehran:
-            return "Institute of Geophysics, University of Tehran"
+            "Institute of Geophysics, University of Tehran"
         }
     }
 
     var fajrAngle: Double {
         switch self {
         case .muslimWorldLeague:
-            return 18.0
+            18.0
         case .isna:
-            return 15.0
+            15.0
         case .egypt:
-            return 19.5
+            19.5
         case .ummAlQura:
-            return 18.5
+            18.5
         case .karachi:
-            return 18.0
+            18.0
         case .tehran:
-            return 17.7
+            17.7
         }
     }
 
     var ishaAngle: Double {
         switch self {
         case .muslimWorldLeague:
-            return 17.0
+            17.0
         case .isna:
-            return 15.0
+            15.0
         case .egypt:
-            return 17.5
+            17.5
         case .ummAlQura:
-            return 0.0 // Umm Al-Qura uses fixed interval
+            0.0 // Umm Al-Qura uses fixed interval
         case .karachi:
-            return 18.0
+            18.0
         case .tehran:
-            return 14.0
+            14.0
         }
     }
 
     var ishaInterval: Int? {
         switch self {
         case .ummAlQura:
-            return 90 // 90 minutes after Maghrib
+            90 // 90 minutes after Maghrib
         default:
-            return nil
+            nil
         }
     }
 
     var maghribAngle: Double? {
         switch self {
         case .tehran:
-            return 4.5
+            4.5
         default:
-            return nil
+            nil
         }
     }
 }
@@ -87,17 +87,17 @@ extension CalculationMethod {
     static func suggested(forCountryCode code: String) -> CalculationMethod {
         switch code.uppercased() {
         case "US", "CA":
-            return .isna
+            .isna
         case "EG", "LY", "SD", "MA", "DZ", "TN", "JO", "PS", "LB", "SY", "IQ", "KM":
-            return .egypt
+            .egypt
         case "SA", "AE", "QA", "BH", "KW", "YE", "OM":
-            return .ummAlQura
+            .ummAlQura
         case "PK", "AF", "BD", "IN", "LK", "NP", "MV":
-            return .karachi
+            .karachi
         case "IR":
-            return .tehran
+            .tehran
         default:
-            return .muslimWorldLeague
+            .muslimWorldLeague
         }
     }
 
@@ -109,26 +109,26 @@ extension CalculationMethod {
 }
 
 enum AsrJuristicMethod: String, CaseIterable, Identifiable {
-    case standard = "standard"
-    case hanafi = "hanafi"
+    case standard
+    case hanafi
 
     var id: String { rawValue }
 
     var displayName: String {
         switch self {
         case .standard:
-            return "Standard (Shafi'i/Maliki/Hanbali)"
+            "Standard (Shafi'i/Maliki/Hanbali)"
         case .hanafi:
-            return "Hanafi"
+            "Hanafi"
         }
     }
 
     var shadowFactor: Double {
         switch self {
         case .standard:
-            return 1.0
+            1.0
         case .hanafi:
-            return 2.0
+            2.0
         }
     }
 }
