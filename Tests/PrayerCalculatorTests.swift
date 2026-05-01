@@ -180,23 +180,26 @@ struct PrayerCalculatorTests {
             method: .muslimWorldLeague
         )
         
-        // Test midnight transition
+        // Test midnight transition — timezone must be explicit so the date is created
+        // in NYC local time, not the CI runner's system timezone (UTC).
         var components = DateComponents()
+        components.timeZone = KnownPrayerTimes.newYorkTimezone
         components.year = 2024
         components.month = 1
         components.day = 1
         components.hour = 23
         components.minute = 59
-        
+
         let midnightDate = Calendar(identifier: .gregorian).date(from: components)!
         let times = try calculator.calculate(for: midnightDate)
-        
-        // All prayer times should be on the same day
-        let calendar = Calendar(identifier: .gregorian)
-        let testDay = calendar.component(.day, from: midnightDate)
-        
+
+        // Compare days in the prayer's own timezone so the check is timezone-independent
+        var nycCalendar = Calendar(identifier: .gregorian)
+        nycCalendar.timeZone = KnownPrayerTimes.newYorkTimezone
+        let testDay = nycCalendar.component(.day, from: midnightDate)
+
         for prayer in times.prayers {
-            let prayerDay = calendar.component(.day, from: prayer.time)
+            let prayerDay = nycCalendar.component(.day, from: prayer.time)
             #expect(prayerDay == testDay, "\(prayer.name) should be on day \(testDay), got \(prayerDay)")
         }
     }

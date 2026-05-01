@@ -200,16 +200,18 @@ struct UIStateTests {
             method: .isna
         )
         
+        let nyTimezone = TimeZone(identifier: "America/New_York")!
         var components = DateComponents()
+        components.timeZone = nyTimezone   // explicit: 10 AM NYC, not 10 AM UTC
         components.year = 2024
         components.month = 1
         components.day = 1
         components.hour = 10
         components.minute = 0
-        
+
         let currentTime = Calendar(identifier: .gregorian).date(from: components)!
         let times = try calculator.calculate(for: currentTime)
-        
+
         // Find next prayer
         var nextPrayer: (name: String, time: Date)?
         for prayer in times.prayers {
@@ -218,9 +220,9 @@ struct UIStateTests {
                 break
             }
         }
-        
+
         #expect(nextPrayer != nil, "Should find next prayer")
-        #expect(nextPrayer?.name == "Dhuhr", "At 10 AM, next prayer should be Dhuhr")
+        #expect(nextPrayer?.name == "Dhuhr", "At 10 AM NYC, next prayer should be Dhuhr")
     }
     
     @Test("All prayers passed defaults to Fajr")
@@ -239,16 +241,18 @@ struct UIStateTests {
             method: .isna
         )
         
+        let nyTimezone = TimeZone(identifier: "America/New_York")!
         var components = DateComponents()
+        components.timeZone = nyTimezone   // explicit: 23:59 NYC, not 23:59 UTC
         components.year = 2024
         components.month = 1
         components.day = 1
         components.hour = 23
         components.minute = 59
-        
+
         let currentTime = Calendar(identifier: .gregorian).date(from: components)!
         let times = try calculator.calculate(for: currentTime)
-        
+
         // Find next prayer
         var nextPrayer: (name: String, time: Date)?
         for prayer in times.prayers {
@@ -257,15 +261,18 @@ struct UIStateTests {
                 break
             }
         }
-        
+
         // If no prayer found, default is Fajr of next day
         if nextPrayer == nil {
-            let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: currentTime)!
+            // Use a timezone-aware calendar to avoid UTC/local drift on CI runners
+            var nycCalendar = Calendar(identifier: .gregorian)
+            nycCalendar.timeZone = nyTimezone
+            let tomorrow = nycCalendar.date(byAdding: .day, value: 1, to: currentTime)!
             let tomorrowTimes = try calculator.calculate(for: tomorrow)
             nextPrayer = ("Fajr", tomorrowTimes.fajr)
         }
-        
-        #expect(nextPrayer?.name == "Fajr", "After all prayers, next should be tomorrow's Fajr")
+
+        #expect(nextPrayer?.name == "Fajr", "After all NYC prayers pass, next should be tomorrow's Fajr")
     }
 }
 
@@ -280,29 +287,32 @@ struct EdgeCaseTests {
 
     @Test("Prayer calculation at date boundaries")
     func dateBoundaries() async throws {
-        let coordinate = CLLocationCoordinate2D(latitude: 40.7128, longitude: -74.0060)
         let timezone = TimeZone(identifier: "America/New_York")!
+        let coordinate = CLLocationCoordinate2D(latitude: 40.7128, longitude: -74.0060)
         let calculator = PrayerCalculator(coordinate: coordinate, timezone: timezone, method: .isna)
-        
-        // Test at midnight
+
+        // Timezone must be explicit — without it, Calendar uses the system timezone
+        // (UTC on CI runners), which shifts midnight UTC to Dec 31 in New York.
         var components = DateComponents()
+        components.timeZone = timezone
         components.year = 2024
         components.month = 1
         components.day = 1
         components.hour = 0
         components.minute = 0
-        
+
         let midnight = Calendar(identifier: .gregorian).date(from: components)!
         let times = try calculator.calculate(for: midnight)
-        
+
         #expect(times.prayers.count == 6)
-        
-        // All prayers should be on the same day
-        let calendar = Calendar(identifier: .gregorian)
-        let testDay = calendar.component(.day, from: midnight)
-        
+
+        // Compare days in the prayer's own timezone so the assertion is timezone-independent
+        var nycCalendar = Calendar(identifier: .gregorian)
+        nycCalendar.timeZone = timezone
+        let testDay = nycCalendar.component(.day, from: midnight)
+
         for prayer in times.prayers {
-            let prayerDay = calendar.component(.day, from: prayer.time)
+            let prayerDay = nycCalendar.component(.day, from: prayer.time)
             #expect(prayerDay == testDay, "\(prayer.name) should be on day \(testDay)")
         }
     }
