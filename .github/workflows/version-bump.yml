@@ -15,7 +15,8 @@ name: Version Bump
 
 on:
   push:
-    branches: [main, develop]
+    # Auto-bump on develop only — main is protected, bot cannot push directly
+    branches: [develop]
     # Trigger only on actual source changes — docs, CI config, and scripts
     # don't need a version bump. paths and paths-ignore cannot be combined;
     # use paths alone and list what we care about.
