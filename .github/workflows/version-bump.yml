@@ -16,17 +16,14 @@ name: Version Bump
 on:
   push:
     branches: [main, develop]
+    # Trigger only on actual source changes — docs, CI config, and scripts
+    # don't need a version bump. paths and paths-ignore cannot be combined;
+    # use paths alone and list what we care about.
     paths:
-      # Only run when actual source code changes — not when docs or CI config alone change
       - 'iqamah/**/*.swift'
       - 'iqamah/**/*.xcassets/**'
       - 'iqamah/Resources/**'
       - 'iqamah.xcodeproj/project.pbxproj'
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.github/**'
-      - 'scripts/**'
 
   workflow_dispatch:
     inputs:
@@ -94,7 +91,7 @@ jobs:
             echo "bump_type=$DETECTED" >> $GITHUB_OUTPUT
             echo "resolved=$DETECTED (auto-detected from commits)" >> $GITHUB_OUTPUT
 
-          else:
+          else
             # Manual workflow_dispatch with explicit choice
             echo "bump_type=${{ inputs.bump_type }}" >> $GITHUB_OUTPUT
             echo "resolved=${{ inputs.bump_type }} (manual)" >> $GITHUB_OUTPUT
