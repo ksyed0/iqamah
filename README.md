@@ -14,10 +14,14 @@ A free, open-source macOS menu bar app that calculates accurate Islamic prayer t
 - **Menu bar agent** — lives in the menu bar only; no dock icon, no Cmd+Tab entry
 - **Menu bar countdown** — next prayer name and time, turns red when under 10 minutes away
 - **Adhaan auto-play** — plays your chosen recording or alert tone automatically when each prayer time arrives
+- **Notification banner** — slides down from the menu bar when the Adhaan plays; shows the prayer name, time, and a sun arc position indicator. STOP button stops playback; becomes a CLOSE button when the recording finishes naturally
+- **Sun arc** — stylised day arc inside the banner shows where in the day the current prayer falls, coloured dawn → golden midday → sunset → night, with the sun glowing at the active prayer position
 - **Per-prayer sound selection** — assign a different Adhaan to each prayer; Fajr gets its own dedicated recordings (which include *"As-salatu khayrun minan nawm"*)
 - **Per-prayer mute** — silence individual prayers without affecting others, plus a master mute toggle
 - **Live preview** — play/stop any Adhaan from the sound picker (works even when globally muted)
 - **Iqamah adjustments** — ± minute offsets per prayer to match your local mosque's iqamah time
+- **Reset adjustments** — one-tap reset appears below the prayer table when any offset is non-zero
+- **Launch at Login** — optional toggle in Settings to start Iqamah automatically at login
 - **Accurate prayer times** via 6 established calculation methods (MWL, ISNA, Egyptian, Umm Al-Qura, Karachi, Tehran)
 - **Qiblah compass** with real prayer-mat and Ka'bah imagery
 - **Hijri date** alongside the Gregorian date
