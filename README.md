@@ -11,17 +11,20 @@ A free, open-source macOS menu bar app that calculates accurate Islamic prayer t
 
 ## Features
 
-- **Accurate prayer times** via 6 established calculation methods (MWL, ISNA, Egyptian, Umm Al-Qura, Karachi, Tehran)
-- **Menu bar countdown** showing the next prayer name and time, turning red when under 10 minutes away
-- **Per-prayer Adhaan** — assign a different sound to each prayer; Fajr has its own dedicated recordings (which include *"As-salatu khayrun minan nawm"*)
-- **Individual mute** per prayer, plus a master mute toggle
+- **Menu bar agent** — lives in the menu bar only; no dock icon, no Cmd+Tab entry
+- **Menu bar countdown** — next prayer name and time, turns red when under 10 minutes away
+- **Adhaan auto-play** — plays your chosen recording or alert tone automatically when each prayer time arrives
+- **Per-prayer sound selection** — assign a different Adhaan to each prayer; Fajr gets its own dedicated recordings (which include *"As-salatu khayrun minan nawm"*)
+- **Per-prayer mute** — silence individual prayers without affecting others, plus a master mute toggle
+- **Live preview** — play/stop any Adhaan from the sound picker (works even when globally muted)
 - **Iqamah adjustments** — ± minute offsets per prayer to match your local mosque's iqamah time
-- **Qiblah compass** with prayer-mat and Ka'bah imagery
-- **Hijri date** displayed alongside the Gregorian date
+- **Accurate prayer times** via 6 established calculation methods (MWL, ISNA, Egyptian, Umm Al-Qura, Karachi, Tehran)
+- **Qiblah compass** with real prayer-mat and Ka'bah imagery
+- **Hijri date** alongside the Gregorian date
 - **24-hour time** toggle
-- **Auto city detection** via CoreLocation, or manual country/city selection from a bundled database of thousands of cities
+- **Auto city detection** via CoreLocation, or manual country/city selection from a bundled database
 - **Calculation method auto-suggestion** based on your selected country
-- Fully offline — zero external dependencies, no analytics, no tracking
+- Fully offline — zero network calls, no analytics, no tracking
 
 ---
 

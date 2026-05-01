@@ -7,11 +7,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var mainWindow: NSWindow?
     var updateTimer: Timer?
 
+    // MARK: - Adhaan auto-play tracking
+
+    // Keyed by "PrayerName-yyyy-MM-dd" (e.g. "Fajr-2026-05-01").
+    // Prevents the same prayer from being announced more than once per day
+    // even if the 60-second timer fires multiple times within the trigger window.
+    private var announcedPrayers: Set<String> = []
+    private var announcedDate = Date()
+
     func applicationDidFinishLaunching(_: Notification) {
         setupStatusBarItem()
         startUpdateTimer()
 
-        // Listen for settings changes
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(settingsDidChange),
@@ -19,7 +26,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             object: nil
         )
 
-        // Find and configure the main window
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             if let window = NSApplication.shared.windows.first {
                 self.mainWindow = window
@@ -46,29 +52,26 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
 
     private func startUpdateTimer() {
-        // Update immediately
         updateStatusBarDisplay()
 
-        // Then update every minute
         updateTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
             self?.updateStatusBarDisplay()
         }
     }
+
+    // MARK: - Status bar display + adhaan trigger
 
     private func updateStatusBarDisplay() {
         guard let button = statusItem?.button else { return }
 
         let settings = SettingsManager.shared
 
-        // Check if setup is complete and we have a saved city
         guard settings.hasCompletedSetup, let city = settings.loadCity() else {
-            // Show default icon if not configured
             button.attributedTitle = NSAttributedString(string: "")
             button.image = NSImage(systemSymbolName: "moon.stars", accessibilityDescription: "Iqamah")
             return
         }
 
-        // Calculate prayer times
         let timezone = TimeZone(identifier: city.timezone) ?? .current
         let calculator = PrayerCalculator(
             coordinate: city.coordinate,
@@ -78,35 +81,33 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         )
 
         guard let prayerTimes = try? calculator.calculate(for: Date()) else {
-            // If calculation fails, show default icon
             button.image = NSImage(systemSymbolName: "moon.stars", accessibilityDescription: "Iqamah")
             return
         }
+
         let now = Date()
 
-        // Find next prayer (with adjustments)
-        var nextPrayer: (name: String, time: Date)?
-        for prayer in prayerTimes.prayers {
-            // Apply adjustment to prayer time
-            let adjustmentMinutes = settings.getAdjustment(for: prayer.name)
-            let adjustedTime = Calendar.current.date(byAdding: .minute, value: adjustmentMinutes, to: prayer.time) ?? prayer.time
-
-            if adjustedTime > now {
-                nextPrayer = (prayer.name, adjustedTime)
-                break
-            }
+        // Build adjusted prayer times once — used for both display and adhaan trigger
+        let adjustedPrayers: [(name: String, time: Date)] = prayerTimes.prayers.map { prayer in
+            let adj = settings.getAdjustment(for: prayer.name)
+            let t = Calendar.current.date(byAdding: .minute, value: adj, to: prayer.time) ?? prayer.time
+            return (prayer.name, t)
         }
 
-        // If no prayer found today, show Fajr (next day's first prayer)
+        // Trigger adhaan for any prayer whose time just arrived
+        triggerAdhaanIfNeeded(adjustedPrayers: adjustedPrayers, now: now, settings: settings)
+
+        // Find next upcoming prayer for status bar display
+        var nextPrayer = adjustedPrayers.first { $0.time > now }
+
         if nextPrayer == nil {
-            guard let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: now) else { return }
-            guard let tomorrowPrayers = try? calculator.calculate(for: tomorrow) else {
+            guard let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: now),
+                  let tomorrowTimes = try? calculator.calculate(for: tomorrow) else {
                 button.image = NSImage(systemSymbolName: "moon.stars", accessibilityDescription: "Iqamah")
                 return
             }
-            let adjustmentMinutes = settings.getAdjustment(for: "Fajr")
-            let adjustedFajr = Calendar.current
-                .date(byAdding: .minute, value: adjustmentMinutes, to: tomorrowPrayers.fajr) ?? tomorrowPrayers.fajr
+            let adj = settings.getAdjustment(for: "Fajr")
+            let adjustedFajr = Calendar.current.date(byAdding: .minute, value: adj, to: tomorrowTimes.fajr) ?? tomorrowTimes.fajr
             nextPrayer = ("Fajr", adjustedFajr)
         }
 
@@ -115,25 +116,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             return
         }
 
-        let formatter = PrayerTimes.timeFormatter(
-            for: timezone,
-            use24Hour: settings.use24HourTime
-        )
-
-        let timeString = formatter.string(from: next.time)
-        let displayText = "\(next.name) \(timeString)"
-
-        // Calculate minutes until next prayer
+        let formatter = PrayerTimes.timeFormatter(for: timezone, use24Hour: settings.use24HourTime)
+        let displayText = "\(next.name) \(formatter.string(from: next.time))"
         let minutesUntil = Int(next.time.timeIntervalSince(now) / 60)
 
-        // Set color based on time remaining
-        let textColor: NSColor = if minutesUntil < 10 {
-            .systemRed
-        } else {
-            .labelColor
-        }
-
-        // Create attributed string with color
+        let textColor: NSColor = minutesUntil < 10 ? .systemRed : .labelColor
         let attributes: [NSAttributedString.Key: Any] = [
             .foregroundColor: textColor,
             .font: NSFont.monospacedDigitSystemFont(ofSize: NSFont.systemFontSize, weight: .medium),
@@ -142,6 +129,54 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         button.image = nil
         button.attributedTitle = NSAttributedString(string: displayText, attributes: attributes)
     }
+
+    // MARK: - Adhaan auto-play
+
+    private func triggerAdhaanIfNeeded(
+        adjustedPrayers: [(name: String, time: Date)],
+        now: Date,
+        settings: SettingsManager
+    ) {
+        // Reset the daily tracking set at midnight
+        if !Calendar.current.isDate(now, inSameDayAs: announcedDate) {
+            announcedPrayers.removeAll()
+            announcedDate = now
+        }
+
+        let dateKey: (String) -> String = { name in
+            let fmt = DateFormatter()
+            fmt.dateFormat = "yyyy-MM-dd"
+            return "\(name)-\(fmt.string(from: now))"
+        }
+
+        for prayer in adjustedPrayers where prayer.name != "Sunrise" {
+            let elapsed = now.timeIntervalSince(prayer.time)
+
+            // Trigger window: [0s, 90s) after prayer time.
+            // 90s safely covers one full 60s polling cycle with a 30s buffer.
+            guard elapsed >= 0 && elapsed < 90 else { continue }
+
+            let key = dateKey(prayer.name)
+            guard !announcedPrayers.contains(key) else { continue }
+
+            // Mark as handled regardless of mute state — avoids re-announcing
+            // once the window is cleared after a mute toggle
+            announcedPrayers.insert(key)
+
+            guard !settings.isPrayerMuted(prayer.name) else { continue }
+
+            let adhaan = settings.getAdhaan(for: prayer.name)
+            guard adhaan.id != "silent" else { continue }
+
+            // AdhaaanPlayer is @MainActor; the timer fires on the main thread
+            // but we dispatch explicitly to be safe across future refactors
+            DispatchQueue.main.async {
+                AdhaaanPlayer.shared.play(adhaan)
+            }
+        }
+    }
+
+    // MARK: - Window management
 
     @objc func statusBarButtonClicked(_: NSStatusBarButton) {
         guard let event = NSApp.currentEvent else { return }
@@ -155,7 +190,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     private func showMenu() {
         let menu = NSMenu()
-
         menu.addItem(NSMenuItem(title: "Show Prayer Times", action: #selector(showWindow), keyEquivalent: ""))
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Quit Iqamah", action: #selector(quitApp), keyEquivalent: "q"))
@@ -200,33 +234,23 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
 
     func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        if !flag {
-            showWindow()
-        }
+        if !flag { showWindow() }
         return true
     }
 
-    func applicationShouldTerminateAfterLastWindowClosed(_: NSApplication) -> Bool {
-        false
-    }
+    func applicationShouldTerminateAfterLastWindowClosed(_: NSApplication) -> Bool { false }
 
     func applicationWillTerminate(_: Notification) {
         updateTimer?.invalidate()
         updateTimer = nil
     }
 
-    func applicationDidResignActive(_: Notification) {
-        // Optionally pause timer when app goes to background
-        // Uncomment to save resources when app is not active
-        // updateTimer?.invalidate()
-    }
+    func applicationDidResignActive(_: Notification) {}
 
     func applicationDidBecomeActive(_: Notification) {
-        // Restart timer if it was paused
         if updateTimer == nil {
             startUpdateTimer()
         } else {
-            // Force update display immediately
             updateStatusBarDisplay()
         }
     }
