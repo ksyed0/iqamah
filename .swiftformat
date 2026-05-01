@@ -13,10 +13,12 @@
 --maxwidth 140
 
 # Rules to disable — either project-inappropriate or too disruptive to apply wholesale
---disable wrapPropertyBodies      # wraps { return x } onto new lines — too noisy for simple computed props
---disable docComments             # enforces /// over // on all declarations — large blast radius, tracked separately
---disable sortImports             # import order is intentional in places (AppKit before SwiftUI etc.)
---disable redundantType           # explicit types aid readability for complex SwiftUI expressions
---disable enumNamespaces          # project uses plain enums, not caseless namespace enums
---disable acronyms                # "URL", "ID" casing is already correct throughout
---disable organizeDeclarations    # auto-reordering declarations is too disruptive mid-project
+--disable wrapPropertyBodies           # wraps { return x } onto new lines — too noisy for simple computed props
+--disable docComments                  # enforces /// over // on all declarations — large blast radius, tracked separately
+--disable sortImports                  # import order is intentional in places (AppKit before SwiftUI etc.)
+--disable redundantType                # explicit types aid readability for complex SwiftUI expressions
+--disable enumNamespaces               # project uses plain enums, not caseless namespace enums
+--disable acronyms                     # "URL", "ID" casing is already correct throughout
+--disable organizeDeclarations         # auto-reordering declarations is too disruptive mid-project
+--disable wrapMultilineStatementBraces # conflicts with SwiftLint opening_brace rule (same-line brace required)
+--disable blankLinesBetweenScopes      # enforced selectively; blanket insertion is too noisy here
