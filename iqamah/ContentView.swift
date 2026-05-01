@@ -89,9 +89,14 @@ struct ContentView: View {
         // UI scale: double-frame technique — inner frame gives content a fixed
         // logical canvas; scaleEffect scales the pixels; outer frame tells the
         // layout system the true visual footprint so the window resizes to match.
-        // Fixed frame: scaleEffect scales pixels; fixed width/height tells the
-        // layout system the exact visual footprint so nothing clips.
+        // Step 1: fix content at base size so it cannot expand to fill the window.
+        //         Without this, the window resize causes the view to lay out at the
+        //         NEW window width, then scaleEffect makes it even wider — clipping.
+        .frame(width: 620, height: 680)
+        // Step 2: scale the fixed 620×680 canvas visually.
         .scaleEffect(settings.uiScale, anchor: .topLeading)
+        // Step 3: tell the layout system the true visual footprint so the window
+        //         adopts the scaled size (620*scale × 680*scale).
         .frame(width: 620 * settings.uiScale, height: 680 * settings.uiScale)
     }
 
