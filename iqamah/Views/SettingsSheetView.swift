@@ -24,6 +24,7 @@ struct SettingsSheetView: View {
     @State private var selectedMethod: CalculationMethod
     @State private var selectedAsrMethod: AsrJuristicMethod
     @State private var use24Hour: Bool
+    @State private var uiScale: Double
     @State private var launchAtLogin = false
 
     // US-0031: track whether the user has manually changed the method
@@ -56,6 +57,7 @@ struct SettingsSheetView: View {
         _selectedMethod = State(initialValue: currentMethod)
         _selectedAsrMethod = State(initialValue: currentAsrMethod)
         _use24Hour = State(initialValue: SettingsManager.shared.use24HourTime)
+        _uiScale = State(initialValue: SettingsManager.shared.uiScale)
     }
 
     // MARK: - Body
@@ -197,9 +199,62 @@ struct SettingsSheetView: View {
                                     try SMAppService.mainApp.unregister()
                                 }
                             } catch {
-                                // Registration can fail if the user has restricted login items in
-                                // System Settings → General → Login Items. Revert the toggle.
                                 launchAtLogin = !enabled
+                            }
+                        }
+
+                        Divider()
+
+                        // UI Scale
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Display Size")
+                                .font(.headline)
+                            Text("Scale the window and all UI elements")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            HStack(spacing: 12) {
+                                Button(action: {
+                                    if uiScale > SettingsManager.uiScaleMin {
+                                        uiScale = (uiScale - SettingsManager.uiScaleStep)
+                                            .rounded(toPlaces: 1)
+                                    }
+                                }) {
+                                    Image(systemName: "minus.circle.fill")
+                                        .font(.title3)
+                                        .foregroundColor(
+                                            uiScale > SettingsManager.uiScaleMin ? .accentColor : .secondary
+                                        )
+                                        .symbolRenderingMode(.hierarchical)
+                                }
+                                .buttonStyle(.plain)
+                                .disabled(uiScale <= SettingsManager.uiScaleMin)
+
+                                Text("\(Int(uiScale * 100))%")
+                                    .font(.body.monospacedDigit())
+                                    .frame(minWidth: 42, alignment: .center)
+
+                                Button(action: {
+                                    if uiScale < SettingsManager.uiScaleMax {
+                                        uiScale = (uiScale + SettingsManager.uiScaleStep)
+                                            .rounded(toPlaces: 1)
+                                    }
+                                }) {
+                                    Image(systemName: "plus.circle.fill")
+                                        .font(.title3)
+                                        .foregroundColor(
+                                            uiScale < SettingsManager.uiScaleMax ? .accentColor : .secondary
+                                        )
+                                        .symbolRenderingMode(.hierarchical)
+                                }
+                                .buttonStyle(.plain)
+                                .disabled(uiScale >= SettingsManager.uiScaleMax)
+
+                                if uiScale != 1.0 {
+                                    Button("Reset") { uiScale = 1.0 }
+                                        .font(.caption)
+                                        .buttonStyle(.plain)
+                                        .foregroundColor(.secondary)
+                                }
                             }
                         }
                     }
@@ -269,6 +324,7 @@ struct SettingsSheetView: View {
     private func save() {
         guard let city = selectedCity else { return }
         SettingsManager.shared.use24HourTime = use24Hour
+        SettingsManager.shared.uiScale = uiScale
         onSave(city, selectedMethod, selectedAsrMethod)
     }
 }

@@ -37,6 +37,24 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     @objc private func settingsDidChange() {
         updateStatusBarDisplay()
+        resizeWindowForScale()
+    }
+
+    private func resizeWindowForScale() {
+        guard let window = mainWindow else { return }
+        let scale = SettingsManager.shared.uiScale
+        let newSize = NSSize(width: 620 * scale, height: 680 * scale)
+        let currentFrame = window.frame
+        let newOriginX = currentFrame.midX - newSize.width / 2
+        let newOriginY = currentFrame.midY - newSize.height / 2
+        NSAnimationContext.runAnimationGroup { ctx in
+            ctx.duration = 0.2
+            ctx.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            window.animator().setFrame(
+                NSRect(origin: NSPoint(x: newOriginX, y: newOriginY), size: newSize),
+                display: true
+            )
+        }
     }
 
     private func setupStatusBarItem() {

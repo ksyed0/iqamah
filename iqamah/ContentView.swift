@@ -86,6 +86,16 @@ struct ContentView: View {
             }
         }
         .animation(.easeInOut, value: currentScreen)
+        // UI scale: double-frame technique — inner frame gives content a fixed
+        // logical canvas; scaleEffect scales the pixels; outer frame tells the
+        // layout system the true visual footprint so the window resizes to match.
+        .scaleEffect(settings.uiScale, anchor: .topLeading)
+        .frame(
+            minWidth:   580 * settings.uiScale,
+            idealWidth: 620 * settings.uiScale,
+            minHeight:  620 * settings.uiScale,
+            idealHeight: 680 * settings.uiScale
+        )
     }
 
     private func loadSavedSettingsAndProceed() {

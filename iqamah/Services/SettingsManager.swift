@@ -22,6 +22,7 @@ class SettingsManager: ObservableObject {
         static let use24HourTime = "use24HourTime"
         static let prayerAdhaanIds = "prayerAdhaanIds"
         static let mutedPrayers = "mutedPrayers"
+        static let uiScale = "uiScale"
     }
 
     @Published var hasCompletedSetup: Bool {
@@ -49,6 +50,18 @@ class SettingsManager: ObservableObject {
         }
     }
 
+    /// UI display scale — 0.7 (70%) to 1.5 (150%) in 0.1 increments. Default 1.0.
+    @Published var uiScale: Double {
+        didSet {
+            defaults.set(uiScale, forKey: Keys.uiScale)
+            NotificationCenter.default.post(name: .settingsDidChange, object: nil)
+        }
+    }
+
+    static let uiScaleMin: Double = 0.7
+    static let uiScaleMax: Double = 1.5
+    static let uiScaleStep: Double = 0.1
+
     init(userDefaults: UserDefaults = .standard) {
         defaults = userDefaults
         hasCompletedSetup = userDefaults.bool(forKey: Keys.hasCompletedSetup)
@@ -68,6 +81,9 @@ class SettingsManager: ObservableObject {
         }
 
         use24HourTime = defaults.bool(forKey: Keys.use24HourTime)
+
+        let savedScale = defaults.double(forKey: Keys.uiScale)
+        uiScale = savedScale == 0 ? 1.0 : savedScale  // 0 means key not found
     }
 
     func saveCity(_ city: City) {
@@ -175,5 +191,12 @@ class SettingsManager: ObservableObject {
     func resetAdjustments() {
         defaults.removeObject(forKey: Keys.prayerAdjustments)
         NotificationCenter.default.post(name: .settingsDidChange, object: nil)
+    }
+}
+
+extension Double {
+    func rounded(toPlaces places: Int) -> Double {
+        let factor = pow(10.0, Double(places))
+        return (self * factor).rounded() / factor
     }
 }
