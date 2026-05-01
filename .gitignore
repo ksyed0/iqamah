@@ -1,0 +1,201 @@
+# .gitignore — Version Control Exclusions
+
+# ========================================
+# Iqamah macOS App — Git Ignore Rules
+# ========================================
+
+# ========================================
+# Environment & Secrets
+# ========================================
+.env
+.env.local
+.env.*.local
+
+# ========================================
+# Temporary Files & Logs
+# ========================================
+.tmp/
+*.tmp
+*.log
+*.swp
+*.swo
+*~
+
+# ========================================
+# macOS System Files
+# ========================================
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# ========================================
+# Xcode
+# ========================================
+## User settings
+xcuserdata/
+
+## Compatibility with Xcode 8 and earlier (ignoring not required starting Xcode 9)
+*.xcscmblueprint
+*.xccheckout
+
+## Compatibility with Xcode 3 and earlier (ignoring not required starting Xcode 4)
+build/
+DerivedData/
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+
+## Xcode Patch
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/project.xcworkspace/
+!*.xcworkspace/contents.xcworkspacedata
+/*.gcno
+**/xcshareddata/WorkspaceSettings.xcsettings
+
+## Xcode workspace
+*.xcworkspace
+!default.xcworkspace
+
+## Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Packages/
+Package.pins
+Package.resolved
+# *.xcodeproj intentionally NOT ignored — this is an Xcode project, not SPM
+
+# CocoaPods (if used)
+Pods/
+*.podspec
+
+# Carthage (if used)
+Carthage/Build/
+
+# fastlane (if used)
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# ========================================
+# IDE & Editor Files
+# ========================================
+
+# Visual Studio Code
+.vscode/
+
+# JetBrains IDEs (AppCode, CLion)
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# ========================================
+# Build Artifacts
+# ========================================
+*.app
+*.dSYM
+*.ipa
+*.xcarchive
+
+# ========================================
+# Testing & Coverage
+# ========================================
+*.gcda
+*.gcno
+coverage/
+*.coverage
+*.lcov
+
+# ========================================
+# Documentation Build
+# ========================================
+docs/_build/
+.jazzy/
+
+# ========================================
+# Node.js (if documentation tools are used)
+# ========================================
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# ========================================
+# Python (if any scripts are used)
+# ========================================
+__pycache__/
+*.py[cod]
+*.egg
+*.egg-info/
+dist/
+.venv/
+venv/
+
+# ========================================
+# Adhaan Audio (copyright — supply your own; see README)
+# ========================================
+iqamah/Resources/adhaan_*.mp3
+iqamah/Resources/adhaan_*.m4a
+Resources/Media/
+
+# ========================================
+# CI artefacts
+# ========================================
+coverage-report/
+*.xcresult
