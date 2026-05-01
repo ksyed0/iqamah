@@ -46,7 +46,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         DispatchQueue.main.async { [weak self] in
             guard let self, let window = self.mainWindow else { return }
             let scale = SettingsManager.shared.uiScale
-            let newSize = NSSize(width: 620 * scale, height: 680 * scale)
+            let border: CGFloat = 20   // 10pt fixed padding on each side
+            let newSize = NSSize(width: 620 * scale + border, height: 680 * scale + border)
             // Don't animate during the live-preview rapid taps — just snap.
             // Only animate for larger jumps (e.g. restoring on cancel).
             let currentSize = window.frame.size
