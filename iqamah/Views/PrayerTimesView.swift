@@ -12,6 +12,7 @@ struct PrayerTimesView: View {
     @State private var prayerTimes: PrayerTimes?
     @State private var showQiblah = false
     @State private var showSettings = false
+    @State private var showAbout = false
     @State private var timerSubscription: Cancellable?
     @ObservedObject private var settingsStore = SettingsManager.shared
 
@@ -98,6 +99,16 @@ struct PrayerTimesView: View {
                 .help("Settings")
                 .accessibilityLabel("Open settings")
                 .accessibilityHint("Change city, calculation method, or display options without losing your adjustments")
+
+                // About button
+                Button(action: { showAbout = true }) {
+                    Image(systemName: "info.circle")
+                        .font(.title3)
+                        .foregroundColor(.secondary)
+                }
+                .buttonStyle(.plain)
+                .help("About Iqamah")
+                .accessibilityLabel("About Iqamah")
             }
             .padding(.horizontal, 24)
             .padding(.top, 50)
@@ -145,6 +156,9 @@ struct PrayerTimesView: View {
                 },
                 onCancel: { showSettings = false }
             )
+        }
+        .sheet(isPresented: $showAbout) {
+            AboutView()
         }
         .onAppear {
             calculatePrayerTimes()
