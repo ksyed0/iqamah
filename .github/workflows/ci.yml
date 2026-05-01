@@ -125,26 +125,21 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             | xcpretty --color && exit ${PIPESTATUS[0]}
 
-      - name: Install xcov / slather for coverage reporting
-        run: gem install slather
-
-      - name: Generate coverage report
-        run: |
-          slather coverage \
-            --xcodeproj ${{ env.PROJECT }} \
-            --scheme ${{ env.SCHEME }} \
-            --output-directory coverage-report \
-            --html \
-            --build-directory TestResults.xcresult
-
       - name: Enforce ≥80% coverage
         run: |
-          # Extract total line coverage percentage from slather output
-          COVERAGE=$(slather coverage \
-            --xcodeproj ${{ env.PROJECT }} \
-            --scheme ${{ env.SCHEME }} \
-            --build-directory TestResults.xcresult \
-            2>&1 | grep -oE '[0-9]+\.[0-9]+%' | tail -1 | tr -d '%')
+          # xcrun xccov ships with Xcode — no gem or pip install needed.
+          # It reads directly from the .xcresult bundle and outputs JSON
+          # with lineCoverage as a float in [0, 1].
+          COVERAGE=$(xcrun xccov view --report --json TestResults.xcresult 2>/dev/null \
+            | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+# Sum executable lines and covered lines across all targets
+total_exec = sum(t.get('executableLines', 0) for t in data.get('targets', []))
+total_cov  = sum(t.get('coveredLines',    0) for t in data.get('targets', []))
+pct = (total_cov / total_exec * 100) if total_exec > 0 else 0
+print(f'{pct:.1f}')
+" 2>/dev/null || echo "0")
 
           echo "Code coverage: ${COVERAGE}%"
 
@@ -154,13 +149,6 @@ jobs:
           fi
           echo "::notice::Coverage ${COVERAGE}% meets the ≥80% requirement."
 
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: coverage-report
-          path: coverage-report/
-          retention-days: 14
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
