@@ -29,7 +29,7 @@ class PrayerCalculator {
         let sunDeclination = calculateSunDeclination(julianDay: julianDay)
         let equationOfTime = calculateEquationOfTime(julianDay: julianDay)
 
-        let transitTime = calculateTransitTime(equationOfTime: equationOfTime)
+        let transitTime = calculateTransitTime(equationOfTime: equationOfTime, for: date)
         let sunriseTime = calculateSunriseTime(transitTime: transitTime, sunDeclination: sunDeclination)
         let sunsetTime = calculateSunsetTime(transitTime: transitTime, sunDeclination: sunDeclination)
 
@@ -113,9 +113,12 @@ class PrayerCalculator {
 
     // MARK: - Prayer Time Calculations
 
-    private func calculateTransitTime(equationOfTime: Double) -> Double {
+    private func calculateTransitTime(equationOfTime: Double, for date: Date) -> Double {
         let longitudeOffset = coordinate.longitude / 15.0
-        let timezoneOffset = Double(timezone.secondsFromGMT()) / 3600.0
+        // secondsFromGMT(for:) returns the correct DST-aware offset for the TARGET
+        // calculation date, not the current system time. Without this, winter prayer
+        // times calculated in summer (or vice versa) are off by 1 hour.
+        let timezoneOffset = Double(timezone.secondsFromGMT(for: date)) / 3600.0
         return 12.0 + timezoneOffset - longitudeOffset - equationOfTime / 60.0
     }
 

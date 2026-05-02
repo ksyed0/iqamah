@@ -69,9 +69,11 @@ final class AdhaanBannerController {
         newPanel.collectionBehavior = [.canJoinAllSpaces, .stationary]
 
         positionPanel(newPanel, size: bannerSize, animated: true)
-        self.panel = newPanel
+        panel = newPanel
 
         // Auto-transition to CLOSE when playback ends naturally
+        // Combine publisher operators: .filter + .first() are Publisher methods, not Collection
+        // swiftlint:disable:next first_where
         playerCancellable = AdhaaanPlayer.shared.$isPlaying
             .dropFirst()
             .filter { !$0 }
@@ -124,8 +126,8 @@ final class AdhaanBannerController {
             - screen.visibleFrame.origin.y
 
         let centreX = screenFrame.midX - size.width / 2
-        let finalY   = screenFrame.maxY - menuBarHeight - size.height - 12
-        let startY   = screenFrame.maxY + 10  // above screen, hidden
+        let finalY = screenFrame.maxY - menuBarHeight - size.height - 12
+        let startY = screenFrame.maxY + 10 // above screen, hidden
 
         panel.setFrame(
             NSRect(x: centreX, y: startY, width: size.width, height: size.height),
