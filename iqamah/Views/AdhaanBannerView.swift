@@ -6,7 +6,7 @@ struct AdhaanBannerView: View {
     let prayerName: String
     let prayerTime: Date
     let adhaanDisplayName: String
-    let allPrayers: [(name: String, time: Date)]  // adjusted times, no Sunrise
+    let allPrayers: [(name: String, time: Date)] // adjusted times, no Sunrise
     let timezone: TimeZone
     let onStop: () -> Void
     let onClose: () -> Void
@@ -137,7 +137,7 @@ private struct WaveformView: View {
 
     var body: some View {
         HStack(spacing: 3) {
-            ForEach(0..<5, id: \.self) { i in
+            ForEach(0 ..< 5, id: \.self) { i in
                 WaveBar(delay: delays[i], isAnimating: isAnimating)
             }
         }
@@ -278,7 +278,7 @@ private struct SunArcView: View {
     /// Maps a time to parameter t ∈ [0,1] across the Fajr→Isha span.
     private func tValue(for time: Date) -> Double {
         guard let fajr = allPrayers.first(where: { $0.name == "Fajr" })?.time,
-              let isha  = allPrayers.first(where: { $0.name == "Isha"  })?.time else { return 0.5 }
+              let isha = allPrayers.first(where: { $0.name == "Isha" })?.time else { return 0.5 }
         let span = isha.timeIntervalSince(fajr)
         guard span > 0 else { return 0.5 }
         return max(0.02, min(0.98, time.timeIntervalSince(fajr) / span))

@@ -44,9 +44,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         // Dispatch after the current run-loop turn so SwiftUI's scaleEffect
         // re-render has updated the view hierarchy before we resize the window.
         DispatchQueue.main.async { [weak self] in
-            guard let self, let window = self.mainWindow else { return }
+            guard let self, let window = mainWindow else { return }
             let scale = SettingsManager.shared.uiScale
-            let border: CGFloat = 20   // 10pt fixed padding on each side
+            let border: CGFloat = 20 // 10pt fixed padding on each side
             let newSize = NSSize(width: 620 * scale + border, height: 680 * scale + border)
             // Don't animate during the live-preview rapid taps — just snap.
             // Only animate for larger jumps (e.g. restoring on cancel).
@@ -184,7 +184,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
             // Trigger window: [0s, 90s) after prayer time.
             // 90s safely covers one full 60s polling cycle with a 30s buffer.
-            guard elapsed >= 0 && elapsed < 90 else { continue }
+            guard elapsed >= 0, elapsed < 90 else { continue }
 
             let key = dateKey(prayer.name)
             guard !announcedPrayers.contains(key) else { continue }
@@ -209,7 +209,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                         prayerTime: prayer.time,
                         adhaan: adhaan,
                         allPrayers: adjustedPrayers,
-                        timezone: timezone  // city's timezone, not device timezone
+                        timezone: timezone // city's timezone, not device timezone
                     )
                 }
             }
@@ -278,7 +278,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         return true
     }
 
-    func applicationShouldTerminateAfterLastWindowClosed(_: NSApplication) -> Bool { false }
+    func applicationShouldTerminateAfterLastWindowClosed(_: NSApplication) -> Bool {
+        false
+    }
 
     func applicationWillTerminate(_: Notification) {
         updateTimer?.invalidate()

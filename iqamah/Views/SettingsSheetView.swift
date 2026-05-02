@@ -216,7 +216,8 @@ struct SettingsSheetView: View {
                             HStack(spacing: 12) {
                                 Button(action: {
                                     if SettingsManager.shared.uiScale > SettingsManager.uiScaleMin {
-                                        SettingsManager.shared.uiScale = (SettingsManager.shared.uiScale - SettingsManager.uiScaleStep).rounded(toPlaces: 1)
+                                        SettingsManager.shared.uiScale = (SettingsManager.shared.uiScale - SettingsManager.uiScaleStep)
+                                            .rounded(toPlaces: 1)
                                     }
                                 }) {
                                     Image(systemName: "minus.circle.fill")
@@ -235,7 +236,8 @@ struct SettingsSheetView: View {
 
                                 Button(action: {
                                     if SettingsManager.shared.uiScale < SettingsManager.uiScaleMax {
-                                        SettingsManager.shared.uiScale = (SettingsManager.shared.uiScale + SettingsManager.uiScaleStep).rounded(toPlaces: 1)
+                                        SettingsManager.shared.uiScale = (SettingsManager.shared.uiScale + SettingsManager.uiScaleStep)
+                                            .rounded(toPlaces: 1)
                                     }
                                 }) {
                                     Image(systemName: "plus.circle.fill")
@@ -271,9 +273,9 @@ struct SettingsSheetView: View {
                     SettingsManager.shared.uiScale = originalUiScale
                     onCancel()
                 }
-                    .buttonStyle(.bordered)
-                    .controlSize(.large)
-                    .keyboardShortcut(.escape, modifiers: [])
+                .buttonStyle(.bordered)
+                .controlSize(.large)
+                .keyboardShortcut(.escape, modifiers: [])
 
                 Spacer()
 

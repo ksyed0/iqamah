@@ -83,7 +83,7 @@ class SettingsManager: ObservableObject {
         use24HourTime = defaults.bool(forKey: Keys.use24HourTime)
 
         let savedScale = defaults.double(forKey: Keys.uiScale)
-        uiScale = savedScale == 0 ? 1.0 : savedScale  // 0 means key not found
+        uiScale = savedScale == 0 ? 1.0 : savedScale // 0 means key not found
     }
 
     func saveCity(_ city: City) {

@@ -9,6 +9,6 @@ struct iqamahApp: App {
             ContentView()
         }
         .windowStyle(.hiddenTitleBar)
-        .defaultSize(width: 640, height: 700)  // 620×680 content + 10pt border each side
+        .defaultSize(width: 640, height: 700) // 620×680 content + 10pt border each side
     }
 }
