@@ -100,8 +100,8 @@ struct AboutView: View {
 
                     Text(
                         "Iqamah is free and open source. If it brings you benefit, please consider " +
-                        "donating to a worthy cause in your community — your local mosque, " +
-                        "a food bank, or any charity you trust."
+                            "donating to a worthy cause in your community — your local mosque, " +
+                            "a food bank, or any charity you trust."
                     )
                     .font(.callout)
                     .foregroundColor(.secondary)
