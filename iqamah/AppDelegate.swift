@@ -230,9 +230,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     private func showMenu() {
         let menu = NSMenu()
-        menu.addItem(NSMenuItem(title: "Show Prayer Times", action: #selector(showWindow), keyEquivalent: ""))
+
+        // target must be set explicitly — NSStatusItem menus do not walk the
+        // normal responder chain, so without a target the action fires into void.
+        let showItem = NSMenuItem(title: "Show Prayer Times", action: #selector(showWindow), keyEquivalent: "")
+        showItem.target = self
+        menu.addItem(showItem)
+
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Quit Iqamah", action: #selector(quitApp), keyEquivalent: "q"))
+
+        let quitItem = NSMenuItem(title: "Quit Iqamah", action: #selector(quitApp), keyEquivalent: "q")
+        quitItem.target = self
+        menu.addItem(quitItem)
 
         statusItem?.menu = menu
         statusItem?.button?.performClick(nil)
