@@ -310,8 +310,13 @@ Detailed release plan defining MVP and subsequent milestones. Contains Epics, Us
 **Description:** Ensure all features meet quality standards with comprehensive testing, accessibility compliance, and performance validation.
 
 **Release Target:** MVP v1.0.0  
-**Status:** 🔴 Not Started  
+**Status:** 🟡 In Progress  
 **Dependencies:** EPIC-0001, EPIC-0002, EPIC-0003
+
+**CI/QA completed 2026-05-03:**
+- Issue #5 — cities.json schema validation CI job with `paths:` filter (PR #37)
+- Issue #6 — Release .app bundle size budget check (50 MB limit) in CI (PR #38)
+- Issue #4 — Prayer time accuracy regression test suite: 5 cities × 5 prayers, ±3 min tolerance (PR #39)
 
 ### User Stories in EPIC-0004
 
