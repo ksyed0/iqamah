@@ -1,0 +1,22 @@
+name: Validate cities.json
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'iqamah/Resources/cities.json'
+      - 'scripts/validate_cities.py'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'iqamah/Resources/cities.json'
+      - 'scripts/validate_cities.py'
+
+jobs:
+  validate_cities:
+    name: Validate cities.json
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run schema validation
+        run: python3 scripts/validate_cities.py
