@@ -16,6 +16,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var announcedDate = Date()
 
     func applicationDidFinishLaunching(_: Notification) {
+        // Start as a menu-bar-only agent (no dock icon, no Cmd+Tab).
+        // We do this in code rather than via LSUIElement in the plist so that
+        // setActivationPolicy(.regular) works fully when the window is shown.
+        NSApplication.shared.setActivationPolicy(.accessory)
+
         setupStatusBarItem()
         startUpdateTimer()
 
