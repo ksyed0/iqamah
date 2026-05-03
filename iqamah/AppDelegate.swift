@@ -16,6 +16,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var announcedDate = Date()
 
     func applicationDidFinishLaunching(_: Notification) {
+        // Start as a menu-bar-only agent (no dock icon, no Cmd+Tab).
+        // We do this in code rather than via LSUIElement in the plist so that
+        // setActivationPolicy(.regular) works fully when the window is shown.
+        NSApplication.shared.setActivationPolicy(.accessory)
+
         setupStatusBarItem()
         startUpdateTimer()
 
@@ -44,9 +49,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         // Dispatch after the current run-loop turn so SwiftUI's scaleEffect
         // re-render has updated the view hierarchy before we resize the window.
         DispatchQueue.main.async { [weak self] in
-            guard let self, let window = self.mainWindow else { return }
+            guard let self, let window = mainWindow else { return }
             let scale = SettingsManager.shared.uiScale
-            let newSize = NSSize(width: 620 * scale, height: 680 * scale)
+            let border: CGFloat = 20 // 10pt fixed padding on each side
+            let newSize = NSSize(width: 620 * scale + border, height: 680 * scale + border)
             // Don't animate during the live-preview rapid taps — just snap.
             // Only animate for larger jumps (e.g. restoring on cancel).
             let currentSize = window.frame.size
@@ -183,7 +189,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
             // Trigger window: [0s, 90s) after prayer time.
             // 90s safely covers one full 60s polling cycle with a 30s buffer.
-            guard elapsed >= 0 && elapsed < 90 else { continue }
+            guard elapsed >= 0, elapsed < 90 else { continue }
 
             let key = dateKey(prayer.name)
             guard !announcedPrayers.contains(key) else { continue }
@@ -208,7 +214,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                         prayerTime: prayer.time,
                         adhaan: adhaan,
                         allPrayers: adjustedPrayers,
-                        timezone: timezone  // city's timezone, not device timezone
+                        timezone: timezone // city's timezone, not device timezone
                     )
                 }
             }
@@ -229,9 +235,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     private func showMenu() {
         let menu = NSMenu()
-        menu.addItem(NSMenuItem(title: "Show Prayer Times", action: #selector(showWindow), keyEquivalent: ""))
+
+        // target must be set explicitly — NSStatusItem menus do not walk the
+        // normal responder chain, so without a target the action fires into void.
+        let showItem = NSMenuItem(title: "Show Prayer Times", action: #selector(showWindow), keyEquivalent: "")
+        showItem.target = self
+        menu.addItem(showItem)
+
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Quit Iqamah", action: #selector(quitApp), keyEquivalent: "q"))
+
+        let quitItem = NSMenuItem(title: "Quit Iqamah", action: #selector(quitApp), keyEquivalent: "q")
+        quitItem.target = self
+        menu.addItem(quitItem)
 
         statusItem?.menu = menu
         statusItem?.button?.performClick(nil)
@@ -239,28 +254,37 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
 
     @objc func showWindow() {
+        // Switch to .regular so the app appears in Cmd+Tab while the window is open.
+        // The Dock icon temporarily appears — this is expected macOS behaviour for
+        // hybrid menu-bar/window apps (same pattern used by Bartender, Fantastical, etc.).
+        NSApplication.shared.setActivationPolicy(.regular)
+
         if let window = mainWindow {
             window.makeKeyAndOrderFront(nil)
-            NSApplication.shared.activate(ignoringOtherApps: true)
         } else if let window = NSApplication.shared.windows.first {
             mainWindow = window
             window.delegate = self
             window.makeKeyAndOrderFront(nil)
-            NSApplication.shared.activate(ignoringOtherApps: true)
         }
+        NSApplication.shared.activate(ignoringOtherApps: true)
     }
 
     @objc func toggleWindow() {
         if let window = mainWindow {
             if window.isVisible {
-                window.orderOut(nil)
+                hideWindow(window)
             } else {
-                window.makeKeyAndOrderFront(nil)
-                NSApplication.shared.activate(ignoringOtherApps: true)
+                showWindow()
             }
         } else {
             showWindow()
         }
+    }
+
+    private func hideWindow(_ window: NSWindow) {
+        window.orderOut(nil)
+        // Return to accessory policy: remove from Cmd+Tab and Dock
+        NSApplication.shared.setActivationPolicy(.accessory)
     }
 
     @objc func quitApp() {
@@ -268,7 +292,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
 
     func windowShouldClose(_ sender: NSWindow) -> Bool {
-        sender.orderOut(nil)
+        hideWindow(sender)
         return false
     }
 
@@ -277,7 +301,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         return true
     }
 
-    func applicationShouldTerminateAfterLastWindowClosed(_: NSApplication) -> Bool { false }
+    func applicationShouldTerminateAfterLastWindowClosed(_: NSApplication) -> Bool {
+        false
+    }
 
     func applicationWillTerminate(_: Notification) {
         updateTimer?.invalidate()

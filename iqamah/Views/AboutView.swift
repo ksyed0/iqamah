@@ -11,7 +11,6 @@ struct AboutView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-
             // ── Hero image ───────────────────────────────────────────
             GeometryReader { geo in
                 ZStack(alignment: .bottom) {
@@ -61,7 +60,6 @@ struct AboutView: View {
 
             // ── Content ──────────────────────────────────────────────
             VStack(spacing: 20) {
-
                 // Version
                 Text("Version \(appVersion)")
                     .font(.subheadline)
@@ -79,6 +77,8 @@ struct AboutView: View {
                 }
 
                 // GitHub link
+                // Literal URL string — cannot fail to parse
+                // swiftlint:disable:next force_unwrapping
                 Link(destination: URL(string: "https://github.com/ksyed0/iqamah")!) {
                     HStack(spacing: 6) {
                         Image(systemName: "globe")
@@ -98,11 +98,15 @@ struct AboutView: View {
                         .font(.headline)
                         .multilineTextAlignment(.center)
 
-                    Text("Iqamah is free and open source. If it brings you benefit, please consider donating to a worthy cause in your community — your local mosque, a food bank, or any charity you trust.")
-                        .font(.callout)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                        .fixedSize(horizontal: false, vertical: true)
+                    Text(
+                        "Iqamah is free and open source. If it brings you benefit, please consider " +
+                            "donating to a worthy cause in your community — your local mosque, " +
+                            "a food bank, or any charity you trust."
+                    )
+                    .font(.callout)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
                 }
                 .padding(.horizontal, 8)
 

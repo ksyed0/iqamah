@@ -310,8 +310,13 @@ Detailed release plan defining MVP and subsequent milestones. Contains Epics, Us
 **Description:** Ensure all features meet quality standards with comprehensive testing, accessibility compliance, and performance validation.
 
 **Release Target:** MVP v1.0.0  
-**Status:** 🔴 Not Started  
+**Status:** 🟡 In Progress  
 **Dependencies:** EPIC-0001, EPIC-0002, EPIC-0003
+
+**CI/QA completed 2026-05-03:**
+- Issue #5 — cities.json schema validation CI job with `paths:` filter (PR #37)
+- Issue #6 — Release .app bundle size budget check (50 MB limit) in CI (PR #38)
+- Issue #4 — Prayer time accuracy regression test suite: 5 cities × 5 prayers, ±3 min tolerance (PR #39)
 
 ### User Stories in EPIC-0004
 
@@ -789,3 +794,41 @@ All features implemented and Release build succeeds with zero errors.
 
 **Last Updated:** 2026-04-30 (EPIC-0007 Adhaan sounds added; App Store submission checklist added)
 
+
+---
+
+## EPIC-0008: Post-MVP Bug Fixes & UX Improvements (2026-05-01 – 2026-05-03)
+
+**Status:** 🟡 In Progress
+
+---
+
+### US-0033 — Menu bar agent stability
+
+**Status:** ✅ Implemented (merged PR #35)
+
+- **BUG:** Right-click → "Show Prayer Times" and "Quit Iqamah" had no effect — `NSMenuItem` without `.target` in a status bar menu silently discards its action selector (no responder chain in status bar context).  
+- **FIX:** Set `showItem.target = self` and `quitItem.target = self` explicitly.
+
+- **BUG:** App did not appear in Cmd+Tab switcher when main window was open — `LSUIElement = YES` in Info.plist is a process-level OS flag that prevents `setActivationPolicy(.regular)` from fully registering the app in the Cmd+Tab switcher at runtime.  
+- **FIX:** Removed `INFOPLIST_KEY_LSUIElement` from both build configs; call `setActivationPolicy(.accessory)` in `applicationDidFinishLaunching` instead. App now toggles `.regular` (window open) / `.accessory` (window closed) seamlessly.
+
+---
+
+### US-0034 — UI Design Refresh: Option B secondary toolbar + light mode
+
+**Status:** 🟡 In Progress (PR open, CI running)
+
+**Acceptance Criteria:**
+- [x] Primary header trimmed to: app icon + "Iqamah" wordmark + city name + abbreviated method + mute button (4 elements vs. 7)
+- [x] Secondary toolbar below header contains: Qiblah / Settings / About as flat hover-highlight buttons (macOS toolbar convention)
+- [x] Hijri date moved into secondary toolbar right-aligned
+- [x] Gregorian date stands alone as single-line `subheadline.bold()`
+- [x] `CalculationMethod.shortName` computed property for abbreviated display (ISNA, MWL, Egyptian, etc.)
+- [x] `SecondaryToolbarButton` component: SF symbol + label, no border, hover background via semantic `quaternaryLabelColor`
+- [x] Shadow uses `Color.primary.opacity()` — adapts light/dark automatically
+- [ ] Full light mode pass on remaining hardcoded dark values (future follow-up)
+
+---
+
+**Last Updated:** 2026-05-03

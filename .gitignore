@@ -188,13 +188,6 @@ dist/
 venv/
 
 # ========================================
-# Adhaan Audio (copyright — supply your own; see README)
-# ========================================
-iqamah/Resources/adhaan_*.mp3
-iqamah/Resources/adhaan_*.m4a
-Resources/Media/
-
-# ========================================
 # CI artefacts
 # ========================================
 coverage-report/

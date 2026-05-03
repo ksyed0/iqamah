@@ -70,15 +70,6 @@ jobs:
         with:
           xcode-version: ${{ env.XCODE_VERSION }}
 
-      - name: Create adhaan stub files for CI build
-        # Adhaan MP3s are gitignored (copyrighted recordings not committed).
-        # The build only copies these files — empty stubs satisfy the linker/copy phase.
-        run: |
-          for name in adhaan_1 adhaan_2 adhaan_3 adhaan_4 adhaan_5 \
-                      adhaan_fajr_1 adhaan_fajr_2 adhaan_fajr_3; do
-            touch "iqamah/Resources/${name}.mp3"
-          done
-
       - name: Build
         run: |
           xcodebuild \
@@ -104,13 +95,6 @@ jobs:
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: ${{ env.XCODE_VERSION }}
-
-      - name: Create adhaan stub files for CI build
-        run: |
-          for name in adhaan_1 adhaan_2 adhaan_3 adhaan_4 adhaan_5 \
-                      adhaan_fajr_1 adhaan_fajr_2 adhaan_fajr_3; do
-            touch "iqamah/Resources/${name}.mp3"
-          done
 
       - name: Run tests with coverage
         run: |
@@ -177,13 +161,6 @@ jobs:
           languages: swift
           queries: security-extended,security-and-quality
 
-      - name: Create adhaan stub files for CI build
-        run: |
-          for name in adhaan_1 adhaan_2 adhaan_3 adhaan_4 adhaan_5 \
-                      adhaan_fajr_1 adhaan_fajr_2 adhaan_fajr_3; do
-            touch "iqamah/Resources/${name}.mp3"
-          done
-
       - name: Build for CodeQL
         run: |
           xcodebuild \
@@ -200,23 +177,46 @@ jobs:
           category: "/language:swift"
 
   # ──────────────────────────────────────────────────────────────────────────
-  # 6. FILE SIZE GUARD — prevent accidentally committing large binaries
+  # 6. FILE SIZE GUARD — .app bundle must not exceed 50 MB (Release build)
   # ──────────────────────────────────────────────────────────────────────────
   file-size:
     name: File Size Guard
-    runs-on: ubuntu-latest
+    runs-on: macos-15
+    needs: build
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check for files > 10 MB
+      - name: Select Xcode ${{ env.XCODE_VERSION }}
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+
+      - name: Build Release
         run: |
-          LARGE=$(find . -not -path './.git/*' -size +10M)
-          if [ -n "$LARGE" ]; then
-            echo "::error::Files exceeding 10 MB found:"
-            echo "$LARGE"
+          xcodebuild \
+            -project ${{ env.PROJECT }} \
+            -scheme ${{ env.SCHEME }} \
+            -configuration Release \
+            -destination 'platform=macOS' \
+            -derivedDataPath DerivedData \
+            build \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcpretty --color && exit ${PIPESTATUS[0]}
+
+      - name: Check .app bundle size (≤ 50 MB)
+        run: |
+          APP=$(find DerivedData -name "*.app" -maxdepth 6 | head -1)
+          if [ -z "$APP" ]; then
+            echo "::error::Could not find .app bundle in DerivedData"
             exit 1
           fi
-          echo "All files within size limit."
+          SIZE_MB=$(du -sm "$APP" | cut -f1)
+          echo "Bundle size: ${SIZE_MB} MB  (path: $APP)"
+          if [ "$SIZE_MB" -gt 50 ]; then
+            echo "::error::Bundle size ${SIZE_MB} MB exceeds the 50 MB budget."
+            exit 1
+          fi
+          echo "::notice::Bundle size ${SIZE_MB} MB is within the 50 MB budget."
 
   # ──────────────────────────────────────────────────────────────────────────
   # 7. PR TITLE — enforce Conventional Commits format

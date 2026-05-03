@@ -77,7 +77,7 @@ struct CalculationMethodView: View {
                     if settings.uiScale > SettingsManager.uiScaleMin {
                         settings.uiScale =
                             (settings.uiScale - SettingsManager.uiScaleStep)
-                            .rounded(toPlaces: 1)
+                                .rounded(toPlaces: 1)
                     }
                 }) {
                     Image(systemName: "minus.circle")
@@ -97,7 +97,7 @@ struct CalculationMethodView: View {
                     if settings.uiScale < SettingsManager.uiScaleMax {
                         settings.uiScale =
                             (settings.uiScale + SettingsManager.uiScaleStep)
-                            .rounded(toPlaces: 1)
+                                .rounded(toPlaces: 1)
                     }
                 }) {
                     Image(systemName: "plus.circle")

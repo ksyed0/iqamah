@@ -14,6 +14,25 @@ All bugs and defects tracked here with BUG-XXXX identifiers and status.
 
 ---
 
+## Resolved (sprint 2026-05-03)
+
+**BUG-CI-005: cities.json validation not path-filtered in CI**
+- **Severity:** Low / maintenance
+- **Resolution:** Added `validate-cities.yml` workflow with `paths:` filter on `iqamah/Resources/cities.json` (PR #37)
+- **Resolved:** 2026-05-03
+
+**BUG-CI-006: File size guard checked repo files, not .app bundle**
+- **Severity:** Medium
+- **Resolution:** Replaced `file-size` CI job with Release build + `du -sm` bundle check (50 MB limit) (PR #38)
+- **Resolved:** 2026-05-03
+
+**BUG-TEST-004: No prayer time accuracy regression tests**
+- **Severity:** High
+- **Resolution:** Added `PrayerAccuracyRegressionTests.swift` — 5 cities × 5 prayers on 2024-01-15, ±3 min tolerance (PR #39)
+- **Resolved:** 2026-05-03
+
+---
+
 ## Bugs by Status
 
 ### Open
@@ -1435,3 +1454,38 @@ Without this file, App Store Connect will reject the binary at upload with: *"IT
 ---
 
 **Last Updated:** 2026-04-30 (Previous UI review session + Adhaan sound feature session)
+
+---
+
+## Bug Fixes — 2026-05-01 to 2026-05-03 (Post-MVP Session)
+
+### Fixed
+
+**BUG-0035: Right-click status bar menu items had no effect**
+
+**Severity:** High  
+**Status:** ✅ Fixed — PR #35 merged  
+**Root cause:** `NSMenuItem` without an explicit `.target` in a status bar menu silently discards its action. The `NSStatusItem` menu has no responder chain context, unlike normal app menus which walk from the key window up to `NSApp` and `AppDelegate`. Both "Show Prayer Times" and "Quit Iqamah" were firing into void.  
+**Fix:** `showItem.target = self` and `quitItem.target = self` in `AppDelegate.showMenu()`.
+
+---
+
+**BUG-0036: App did not appear in Cmd+Tab switcher when main window was open**
+
+**Severity:** High  
+**Status:** ✅ Fixed — PR #35 merged  
+**Root cause:** `INFOPLIST_KEY_LSUIElement = YES` in the Xcode build settings is a process-level OS flag set before the app launches. It permanently marks the process as an agent, meaning `NSApp.setActivationPolicy(.regular)` calls at runtime are silently ignored for Cmd+Tab registration.  
+**Fix:** Removed `INFOPLIST_KEY_LSUIElement` from both Debug and Release build configs. Added `NSApplication.shared.setActivationPolicy(.accessory)` in `applicationDidFinishLaunching` for identical startup behaviour. The OS now fully honours `.regular` / `.accessory` transitions: window opens → `.regular` (Cmd+Tab visible, dock icon); window closes → `.accessory` (hidden).
+
+---
+
+**BUG-0037: UI design — header too dense, 7 competing elements**
+
+**Severity:** Low (UX)  
+**Status:** ✅ Fixed — PR open (`feat/option-b-secondary-toolbar-light-mode`)  
+**Root cause:** Primary header contained icon + wordmark + city + full method name + mute + Qiblah + settings + about — 7 interactive/informational elements with no visual hierarchy.  
+**Fix:** Option B design — header reduced to icon + wordmark + city + abbreviated method + mute. Secondary toolbar (Qiblah / Settings / About) below, Hijri date right-aligned in toolbar, Gregorian date standalone.
+
+---
+
+**Last Updated:** 2026-05-03
