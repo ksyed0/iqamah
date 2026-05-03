@@ -16,6 +16,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var announcedDate = Date()
 
     func applicationDidFinishLaunching(_: Notification) {
+        // Start as a menu-bar-only agent (no dock icon, no Cmd+Tab).
+        // We do this in code rather than via LSUIElement in the plist so that
+        // setActivationPolicy(.regular) works fully when the window is shown.
+        NSApplication.shared.setActivationPolicy(.accessory)
+
         setupStatusBarItem()
         startUpdateTimer()
 
@@ -230,9 +235,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     private func showMenu() {
         let menu = NSMenu()
-        menu.addItem(NSMenuItem(title: "Show Prayer Times", action: #selector(showWindow), keyEquivalent: ""))
+
+        // target must be set explicitly — NSStatusItem menus do not walk the
+        // normal responder chain, so without a target the action fires into void.
+        let showItem = NSMenuItem(title: "Show Prayer Times", action: #selector(showWindow), keyEquivalent: "")
+        showItem.target = self
+        menu.addItem(showItem)
+
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Quit Iqamah", action: #selector(quitApp), keyEquivalent: "q"))
+
+        let quitItem = NSMenuItem(title: "Quit Iqamah", action: #selector(quitApp), keyEquivalent: "q")
+        quitItem.target = self
+        menu.addItem(quitItem)
 
         statusItem?.menu = menu
         statusItem?.button?.performClick(nil)
@@ -240,28 +254,37 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
 
     @objc func showWindow() {
+        // Switch to .regular so the app appears in Cmd+Tab while the window is open.
+        // The Dock icon temporarily appears — this is expected macOS behaviour for
+        // hybrid menu-bar/window apps (same pattern used by Bartender, Fantastical, etc.).
+        NSApplication.shared.setActivationPolicy(.regular)
+
         if let window = mainWindow {
             window.makeKeyAndOrderFront(nil)
-            NSApplication.shared.activate(ignoringOtherApps: true)
         } else if let window = NSApplication.shared.windows.first {
             mainWindow = window
             window.delegate = self
             window.makeKeyAndOrderFront(nil)
-            NSApplication.shared.activate(ignoringOtherApps: true)
         }
+        NSApplication.shared.activate(ignoringOtherApps: true)
     }
 
     @objc func toggleWindow() {
         if let window = mainWindow {
             if window.isVisible {
-                window.orderOut(nil)
+                hideWindow(window)
             } else {
-                window.makeKeyAndOrderFront(nil)
-                NSApplication.shared.activate(ignoringOtherApps: true)
+                showWindow()
             }
         } else {
             showWindow()
         }
+    }
+
+    private func hideWindow(_ window: NSWindow) {
+        window.orderOut(nil)
+        // Return to accessory policy: remove from Cmd+Tab and Dock
+        NSApplication.shared.setActivationPolicy(.accessory)
     }
 
     @objc func quitApp() {
@@ -269,7 +292,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
 
     func windowShouldClose(_ sender: NSWindow) -> Bool {
-        sender.orderOut(nil)
+        hideWindow(sender)
         return false
     }
 
