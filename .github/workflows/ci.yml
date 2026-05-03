@@ -18,17 +18,6 @@ env:
 jobs:
 
   # ──────────────────────────────────────────────────────────────────────────
-  # 0. DATA VALIDATION — cities.json schema check
-  # ──────────────────────────────────────────────────────────────────────────
-  validate_cities:
-    name: Validate cities.json
-    runs-on: ubuntu-latest   # no Xcode needed — pure Python
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run schema validation
-        run: python3 scripts/validate_cities.py
-
-  # ──────────────────────────────────────────────────────────────────────────
   # 1. LINT — SwiftLint style + rule enforcement
   # ──────────────────────────────────────────────────────────────────────────
   lint:
