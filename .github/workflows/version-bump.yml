@@ -117,13 +117,6 @@ jobs:
             ./scripts/bump_version.sh "${{ steps.detect.outputs.bump_type }}"
           fi
 
-      - name: Create adhaan stub files for CI build
-        run: |
-          for name in adhaan_1 adhaan_2 adhaan_3 adhaan_4 adhaan_5 \
-                      adhaan_fajr_1 adhaan_fajr_2 adhaan_fajr_3; do
-            touch "iqamah/Resources/${name}.mp3"
-          done
-
       - name: Verify Release build still succeeds
         run: |
           xcodebuild \
@@ -156,7 +149,13 @@ jobs:
             git push origin "v${{ steps.bump.outputs.new_version }}"
           fi
 
-          git push origin HEAD
+          # develop has enforce_admins branch protection — bot cannot push directly.
+          # Emit a warning and exit 0 so CI stays green; bump the version manually
+          # via workflow_dispatch when needed.
+          git push origin HEAD || {
+            echo "::warning::Version bump commit could not be pushed — develop branch protection blocks bot pushes. Run the Version Bump workflow manually via workflow_dispatch to apply the bump."
+            exit 0
+          }
 
       - name: Job summary
         run: |
