@@ -244,6 +244,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         menu.addItem(NSMenuItem.separator())
 
+        let supportItem = NSMenuItem(title: "Help & Support", action: #selector(openSupport), keyEquivalent: "")
+        supportItem.target = self
+        menu.addItem(supportItem)
+
+        let privacyItem = NSMenuItem(title: "Privacy Policy", action: #selector(openPrivacy), keyEquivalent: "")
+        privacyItem.target = self
+        menu.addItem(privacyItem)
+
+        menu.addItem(NSMenuItem.separator())
+
         let quitItem = NSMenuItem(title: "Quit Iqamah", action: #selector(quitApp), keyEquivalent: "q")
         quitItem.target = self
         menu.addItem(quitItem)
@@ -285,6 +295,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         window.orderOut(nil)
         // Return to accessory policy: remove from Cmd+Tab and Dock
         NSApplication.shared.setActivationPolicy(.accessory)
+    }
+
+    @objc func openSupport() {
+        // swiftlint:disable:next force_unwrapping
+        NSWorkspace.shared.open(URL(string: "https://ksyed0.github.io/iqamah/support.html")!)
+    }
+
+    @objc func openPrivacy() {
+        // swiftlint:disable:next force_unwrapping
+        NSWorkspace.shared.open(URL(string: "https://ksyed0.github.io/iqamah/privacy-policy.html")!)
     }
 
     @objc func quitApp() {

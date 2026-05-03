@@ -76,18 +76,47 @@ struct AboutView: View {
                         .font(.title3.weight(.semibold))
                 }
 
-                // GitHub link
-                // Literal URL string — cannot fail to parse
-                // swiftlint:disable:next force_unwrapping
-                Link(destination: URL(string: "https://github.com/ksyed0/iqamah")!) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "globe")
-                            .font(.callout)
-                        Text("github.com/ksyed0/iqamah")
-                            .font(.callout)
-                            .underline()
+                // Links — literal URL strings cannot fail to parse
+                HStack(spacing: 20) {
+                    // swiftlint:disable:next force_unwrapping
+                    Link(destination: URL(string: "https://github.com/ksyed0/iqamah")!) {
+                        HStack(spacing: 5) {
+                            Image(systemName: "chevron.left.forwardslash.chevron.right")
+                                .font(.caption)
+                            Text("GitHub")
+                                .font(.callout)
+                                .underline()
+                        }
+                        .foregroundColor(gold)
                     }
-                    .foregroundColor(gold)
+
+                    Text("·").foregroundColor(.secondary)
+
+                    // swiftlint:disable:next force_unwrapping
+                    Link(destination: URL(string: "https://ksyed0.github.io/iqamah/support.html")!) {
+                        HStack(spacing: 5) {
+                            Image(systemName: "questionmark.circle")
+                                .font(.caption)
+                            Text("Support")
+                                .font(.callout)
+                                .underline()
+                        }
+                        .foregroundColor(gold)
+                    }
+
+                    Text("·").foregroundColor(.secondary)
+
+                    // swiftlint:disable:next force_unwrapping
+                    Link(destination: URL(string: "https://ksyed0.github.io/iqamah/privacy-policy.html")!) {
+                        HStack(spacing: 5) {
+                            Image(systemName: "lock.shield")
+                                .font(.caption)
+                            Text("Privacy")
+                                .font(.callout)
+                                .underline()
+                        }
+                        .foregroundColor(gold)
+                    }
                 }
 
                 Divider()
