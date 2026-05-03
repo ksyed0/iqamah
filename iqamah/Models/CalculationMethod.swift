@@ -27,6 +27,18 @@ enum CalculationMethod: String, CaseIterable, Identifiable {
         }
     }
 
+    /// Abbreviated name suitable for constrained UI (header toolbar).
+    var shortName: String {
+        switch self {
+        case .muslimWorldLeague: "MWL"
+        case .isna: "ISNA"
+        case .egypt: "Egyptian"
+        case .ummAlQura: "Umm Al-Qura"
+        case .karachi: "Karachi"
+        case .tehran: "Tehran"
+        }
+    }
+
     var fajrAngle: Double {
         switch self {
         case .muslimWorldLeague:
