@@ -14,6 +14,25 @@ All bugs and defects tracked here with BUG-XXXX identifiers and status.
 
 ---
 
+## Resolved (sprint 2026-05-03)
+
+**BUG-CI-005: cities.json validation not path-filtered in CI**
+- **Severity:** Low / maintenance
+- **Resolution:** Added `validate-cities.yml` workflow with `paths:` filter on `iqamah/Resources/cities.json` (PR #37)
+- **Resolved:** 2026-05-03
+
+**BUG-CI-006: File size guard checked repo files, not .app bundle**
+- **Severity:** Medium
+- **Resolution:** Replaced `file-size` CI job with Release build + `du -sm` bundle check (50 MB limit) (PR #38)
+- **Resolved:** 2026-05-03
+
+**BUG-TEST-004: No prayer time accuracy regression tests**
+- **Severity:** High
+- **Resolution:** Added `PrayerAccuracyRegressionTests.swift` — 5 cities × 5 prayers on 2024-01-15, ±3 min tolerance (PR #39)
+- **Resolved:** 2026-05-03
+
+---
+
 ## Bugs by Status
 
 ### Open
