@@ -249,28 +249,37 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
 
     @objc func showWindow() {
+        // Switch to .regular so the app appears in Cmd+Tab while the window is open.
+        // The Dock icon temporarily appears — this is expected macOS behaviour for
+        // hybrid menu-bar/window apps (same pattern used by Bartender, Fantastical, etc.).
+        NSApplication.shared.setActivationPolicy(.regular)
+
         if let window = mainWindow {
             window.makeKeyAndOrderFront(nil)
-            NSApplication.shared.activate(ignoringOtherApps: true)
         } else if let window = NSApplication.shared.windows.first {
             mainWindow = window
             window.delegate = self
             window.makeKeyAndOrderFront(nil)
-            NSApplication.shared.activate(ignoringOtherApps: true)
         }
+        NSApplication.shared.activate(ignoringOtherApps: true)
     }
 
     @objc func toggleWindow() {
         if let window = mainWindow {
             if window.isVisible {
-                window.orderOut(nil)
+                hideWindow(window)
             } else {
-                window.makeKeyAndOrderFront(nil)
-                NSApplication.shared.activate(ignoringOtherApps: true)
+                showWindow()
             }
         } else {
             showWindow()
         }
+    }
+
+    private func hideWindow(_ window: NSWindow) {
+        window.orderOut(nil)
+        // Return to accessory policy: remove from Cmd+Tab and Dock
+        NSApplication.shared.setActivationPolicy(.accessory)
     }
 
     @objc func quitApp() {
@@ -278,7 +287,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
 
     func windowShouldClose(_ sender: NSWindow) -> Bool {
-        sender.orderOut(nil)
+        hideWindow(sender)
         return false
     }
 
