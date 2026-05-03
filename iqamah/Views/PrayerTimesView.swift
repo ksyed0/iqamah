@@ -23,47 +23,41 @@ struct PrayerTimesView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header with app branding, location and settings
-            HStack(spacing: 14) {
-                // App icon and title
-                HStack(spacing: 12) {
-                    // Use the compiled app icon asset — crisp at any size
-                    Image(nsImage: NSImage(named: NSImage.applicationIconName) ?? NSImage())
-                        .resizable()
-                        .frame(width: 36, height: 36)
-                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                        .shadow(color: Color.black.opacity(0.12), radius: 3, x: 0, y: 1)
+            // ── Primary header: brand + location + mute only ─────────
+            HStack(spacing: 12) {
+                Image(nsImage: NSImage(named: NSImage.applicationIconName) ?? NSImage())
+                    .resizable()
+                    .frame(width: 32, height: 32)
+                    .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+                    .shadow(color: Color.primary.opacity(0.10), radius: 3, x: 0, y: 1)
 
-                    Text("Iqamah")
-                        .font(.system(size: titleFontSize, weight: .bold, design: .serif))
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [
-                                    Color(red: 0.95, green: 0.76, blue: 0.06),
-                                    Color(red: 0.85, green: 0.65, blue: 0.13),
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
+                Text("Iqamah")
+                    .font(.system(size: titleFontSize, weight: .bold, design: .serif))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [
+                                Color(red: 0.95, green: 0.76, blue: 0.06),
+                                Color(red: 0.85, green: 0.65, blue: 0.13),
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
                         )
-                }
+                    )
 
-                // City and method — BUG-0029: lineLimit + scale prevents overflow at large text sizes
-                VStack(alignment: .leading, spacing: 3) {
+                VStack(alignment: .leading, spacing: 2) {
                     Text(city.name)
-                        .font(.body.weight(.semibold))
+                        .font(.subheadline.weight(.semibold))
                         .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-                    Text(calculationMethod.displayName)
-                        .font(.caption.weight(.medium))
+                        .minimumScaleFactor(0.85)
+                    Text(calculationMethod.shortName)
+                        .font(.caption2.weight(.medium))
                         .foregroundColor(.secondary)
                         .lineLimit(1)
-                        .minimumScaleFactor(0.75)
                 }
 
                 Spacer()
 
-                // Global Adhaan mute toggle
+                // Mute — the one action important enough for the primary header
                 Button(action: { AdhaaanPlayer.shared.toggleMute() }) {
                     Image(systemName: AdhaaanPlayer.shared.isMuted
                         ? "speaker.slash.fill" : "speaker.wave.2.fill")
@@ -74,59 +68,50 @@ struct PrayerTimesView: View {
                 .buttonStyle(.plain)
                 .help(AdhaaanPlayer.shared.isMuted ? "Unmute Adhaan" : "Mute Adhaan")
                 .accessibilityLabel(AdhaaanPlayer.shared.isMuted ? "Adhaan muted — tap to unmute" : "Adhaan on — tap to mute")
-
-                // Qiblah button (AC-0135: labelled so purpose is clear)
-                Button(action: { showQiblah = true }) {
-                    VStack(spacing: 2) {
-                        PrayerMatIcon(size: 20)
-                        Text("Qiblah")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                    }
-                }
-                .buttonStyle(.plain)
-                .help("Qiblah Direction")
-                .accessibilityLabel("Show Qiblah direction")
-                .accessibilityHint("Opens compass showing direction to Ka'bah in Makkah")
-
-                // Settings button — opens sheet, does not reset data
-                Button(action: { showSettings = true }) {
-                    Image(systemName: "gearshape.fill")
-                        .font(.title3)
-                        .foregroundColor(.secondary)
-                }
-                .buttonStyle(.plain)
-                .help("Settings")
-                .accessibilityLabel("Open settings")
-                .accessibilityHint("Change city, calculation method, or display options without losing your adjustments")
-
-                // About button
-                Button(action: { showAbout = true }) {
-                    Image(systemName: "info.circle")
-                        .font(.title3)
-                        .foregroundColor(.secondary)
-                }
-                .buttonStyle(.plain)
-                .help("About Iqamah")
-                .accessibilityLabel("About Iqamah")
             }
-            .padding(.horizontal, 24)
-            .padding(.top, 50)
-            .padding(.bottom, 18)
+            .padding(.horizontal, 22)
+            .padding(.top, 46)
+            .padding(.bottom, 10)
+
+            // ── Secondary toolbar: navigation actions + Hijri date ───
+            HStack(spacing: 0) {
+                SecondaryToolbarButton(
+                    label: "Qiblah",
+                    systemImage: "location.north.line.fill",
+                    action: { showQiblah = true }
+                )
+                .accessibilityLabel("Show Qiblah direction")
+
+                SecondaryToolbarButton(
+                    label: "Settings",
+                    systemImage: "gearshape",
+                    action: { showSettings = true }
+                )
+                .accessibilityLabel("Open settings")
+
+                SecondaryToolbarButton(
+                    label: "About",
+                    systemImage: "info.circle",
+                    action: { showAbout = true }
+                )
+                .accessibilityLabel("About Iqamah")
+
+                Spacer()
+
+                // Hijri date lives here — frees the date block below for Gregorian only
+                Text(currentDate.formattedHijriDate())
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .padding(.trailing, 16)
+            }
+            .background(Color(nsColor: .windowBackgroundColor))
 
             Divider()
-                .padding(.horizontal, 24)
 
-            // Date display
-            VStack(spacing: 5) {
-                Text(currentDate.formattedGregorianDate())
-                    .font(.body.bold())
-
-                Text(currentDate.formattedHijriDate())
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
-            .padding(.vertical, 18)
+            // Date display — Gregorian only, now cleaner
+            Text(currentDate.formattedGregorianDate())
+                .font(.subheadline.bold())
+                .padding(.vertical, 12)
 
             // Prayer times table
             if let prayerTimes {
@@ -575,5 +560,39 @@ struct PrayerTimeRow: View {
         default:
             "clock.fill"
         }
+    }
+}
+
+// MARK: - Secondary toolbar button
+
+/// Flat toolbar-style button used in the secondary bar below the primary header.
+/// Matches macOS convention: no border, subtle background on hover only.
+private struct SecondaryToolbarButton: View {
+    let label: String
+    let systemImage: String
+    let action: () -> Void
+
+    @State private var isHovering = false
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 5) {
+                Image(systemName: systemImage)
+                    .font(.system(size: 12, weight: .medium))
+                Text(label)
+                    .font(.system(size: 12, weight: .medium))
+            }
+            .foregroundColor(isHovering ? .primary : .secondary)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .fill(isHovering
+                        ? Color(nsColor: .quaternaryLabelColor).opacity(0.5)
+                        : Color.clear)
+            )
+        }
+        .buttonStyle(.plain)
+        .onHover { isHovering = $0 }
     }
 }
