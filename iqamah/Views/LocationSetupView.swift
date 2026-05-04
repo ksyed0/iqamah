@@ -130,6 +130,7 @@ struct LocationSetupView: View {
                         .frame(minWidth: 100)
                 }
                 .buttonStyle(.borderedProminent)
+                .tint(.appGold)
                 .controlSize(.large)
                 .disabled(selectedCity == nil)
             }
