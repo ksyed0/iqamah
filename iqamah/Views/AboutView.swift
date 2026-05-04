@@ -152,7 +152,13 @@ struct AboutView: View {
                 .padding(.bottom, 24)
         }
         .frame(width: 380)
-        .background(Color(nsColor: .windowBackgroundColor))
+        .background {
+            if #available(macOS 26, *) {
+                Rectangle().glassEffect()
+            } else {
+                Rectangle().fill(.regularMaterial)
+            }
+        }
     }
 
     private func loadSplashImage() -> NSImage? {

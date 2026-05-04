@@ -152,6 +152,13 @@ struct QiblahView: View {
                 .padding(.bottom, 24)
         }
         .frame(width: 440, height: 560)
+        .background {
+            if #available(macOS 26, *) {
+                Rectangle().glassEffect()
+            } else {
+                Rectangle().fill(.regularMaterial)
+            }
+        }
     }
 }
 
