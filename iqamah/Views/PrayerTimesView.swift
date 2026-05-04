@@ -336,6 +336,115 @@ struct PrayerTimeRow: View {
         colorScheme == .dark ? .appGold : .appGoldDark
     }
 
+    // Extracted to keep body under the Swift type-checker expression limit
+    private var adhaanColumnButton: some View {
+        Button(action: onTogglePicker) {
+            HStack(spacing: 4) {
+                Image(systemName: "music.note")
+                    .font(.caption2)
+                    .foregroundStyle(selectedAdhaan.id == "silent"
+                        ? Color.secondary.opacity(0.4)
+                        : effectiveGold.opacity(0.75))
+                if selectedAdhaan.id == "silent" {
+                    Text("—")
+                        .font(.caption.italic())
+                        .foregroundStyle(.secondary.opacity(0.5))
+                } else {
+                    Text(selectedAdhaan.shortName)
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(effectiveGold.opacity(0.85))
+                        .lineLimit(1)
+                }
+            }
+            .padding(.horizontal, 6)
+            .padding(.vertical, 3)
+            .background(
+                RoundedRectangle(cornerRadius: 4, style: .continuous)
+                    .fill(selectedAdhaan.id == "silent"
+                        ? Color.clear
+                        : effectiveGold.opacity(colorScheme == .dark ? 0.10 : 0.12))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 4, style: .continuous)
+                    .strokeBorder(selectedAdhaan.id == "silent"
+                        ? Color.clear
+                        : effectiveGold.opacity(0.22), lineWidth: 0.5)
+            )
+            .frame(minWidth: 72, alignment: .center)
+        }
+        .buttonStyle(.plain)
+        .help(selectedAdhaan.id == "silent"
+            ? "Tap to set adhaan for \(name)"
+            : "Adhaan: \(selectedAdhaan.displayName) — tap to change")
+        .accessibilityLabel(selectedAdhaan.id == "silent"
+            ? "No adhaan set for \(name). Tap to set."
+            : "Adhaan for \(name): \(selectedAdhaan.displayName). Tap to change.")
+    }
+
+    @ViewBuilder private var chipPickerSection: some View {
+        if isPickerExpanded {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 8) {
+                    Image(systemName: (player.isMuted || isPrayerMuted) ? "speaker.slash" : "music.note")
+                        .font(.caption)
+                        .foregroundStyle((player.isMuted || isPrayerMuted)
+                            ? Color.orange.opacity(0.7) : .secondary)
+                    Text("Select adhaan for \(name)")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    if selectedAdhaan.id != "silent", player.isPlaying {
+                        Button(action: { AdhaaanPlayer.shared.stop() }) {
+                            Label("Stop", systemImage: "stop.circle.fill")
+                                .font(.caption)
+                                .foregroundStyle(Color.accentColor)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 6) {
+                        ForEach(adhaanOptions) { option in
+                            Button(action: {
+                                selectedAdhaan = option
+                                if option.id != "silent" {
+                                    AdhaaanPlayer.shared.preview(option)
+                                } else {
+                                    onTogglePicker()
+                                }
+                            }) {
+                                Text(option.displayName)
+                                    .font(.caption.weight(.medium))
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 5)
+                                    .background(
+                                        Capsule()
+                                            .fill(selectedAdhaan.id == option.id
+                                                ? effectiveGold.opacity(colorScheme == .dark ? 0.18 : 0.15)
+                                                : Color.secondary.opacity(0.08))
+                                    )
+                                    .overlay(
+                                        Capsule()
+                                            .strokeBorder(selectedAdhaan.id == option.id
+                                                ? effectiveGold.opacity(0.35)
+                                                : Color.clear, lineWidth: 1)
+                                    )
+                                    .foregroundStyle(selectedAdhaan.id == option.id
+                                        ? effectiveGold : .secondary)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.horizontal, 2)
+                }
+            }
+            .padding(.leading, 20)
+            .padding(.trailing, 16)
+            .padding(.bottom, 12)
+            .transition(.opacity.combined(with: .move(edge: .top)))
+        }
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             // ── Main row ──────────────────────────────────────────
@@ -376,47 +485,7 @@ struct PrayerTimeRow: View {
                     Spacer()
 
                     // ── Adhaan column (always visible) ──────────────
-                    Button(action: onTogglePicker) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "music.note")
-                                .font(.caption2)
-                                .foregroundStyle(selectedAdhaan.id == "silent"
-                                    ? Color.secondary.opacity(0.4)
-                                    : effectiveGold.opacity(0.75))
-                            if selectedAdhaan.id == "silent" {
-                                Text("—")
-                                    .font(.caption.italic())
-                                    .foregroundStyle(.secondary.opacity(0.5))
-                            } else {
-                                Text(selectedAdhaan.shortName)
-                                    .font(.caption.weight(.medium))
-                                    .foregroundStyle(effectiveGold.opacity(0.85))
-                                    .lineLimit(1)
-                            }
-                        }
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 3)
-                        .background(
-                            RoundedRectangle(cornerRadius: 4, style: .continuous)
-                                .fill(selectedAdhaan.id == "silent"
-                                    ? Color.clear
-                                    : effectiveGold.opacity(colorScheme == .dark ? 0.10 : 0.12))
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 4, style: .continuous)
-                                .strokeBorder(selectedAdhaan.id == "silent"
-                                    ? Color.clear
-                                    : effectiveGold.opacity(0.22), lineWidth: 0.5)
-                        )
-                        .frame(minWidth: 72, alignment: .center)
-                    }
-                    .buttonStyle(.plain)
-                    .help(selectedAdhaan.id == "silent"
-                        ? "Tap to set adhaan for \(name)"
-                        : "Adhaan: \(selectedAdhaan.displayName) — tap to change")
-                    .accessibilityLabel(selectedAdhaan.id == "silent"
-                        ? "No adhaan set for \(name). Tap to set."
-                        : "Adhaan for \(name): \(selectedAdhaan.displayName). Tap to change.")
+                    adhaanColumnButton
 
                     // Time + optional adjustment badge (out-of-flow overlay avoids row height jitter)
                     Text(formatter.string(from: time))
@@ -481,71 +550,7 @@ struct PrayerTimeRow: View {
             }
 
             // ── Inline chip picker — expands when this row's picker is open ──
-            if isPickerExpanded {
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack(spacing: 8) {
-                        Image(systemName: (player.isMuted || isPrayerMuted) ? "speaker.slash" : "music.note")
-                            .font(.caption)
-                            .foregroundStyle((player.isMuted || isPrayerMuted)
-                                ? Color.orange.opacity(0.7) : .secondary)
-
-                        Text("Select adhaan for \(name)")
-                            .font(.caption.weight(.medium))
-                            .foregroundStyle(.secondary)
-
-                        Spacer()
-
-                        if selectedAdhaan.id != "silent", player.isPlaying {
-                            Button(action: { AdhaaanPlayer.shared.stop() }) {
-                                Label("Stop", systemImage: "stop.circle.fill")
-                                    .font(.caption)
-                                    .foregroundStyle(Color.accentColor)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 6) {
-                            ForEach(adhaanOptions) { option in
-                                Button(action: {
-                                    selectedAdhaan = option
-                                    if option.id != "silent" {
-                                        AdhaaanPlayer.shared.preview(option)
-                                    } else {
-                                        onTogglePicker()
-                                    }
-                                }) {
-                                    Text(option.displayName)
-                                        .font(.caption.weight(.medium))
-                                        .padding(.horizontal, 10)
-                                        .padding(.vertical, 5)
-                                        .background(
-                                            Capsule()
-                                                .fill(selectedAdhaan.id == option.id
-                                                    ? effectiveGold.opacity(colorScheme == .dark ? 0.18 : 0.15)
-                                                    : Color.secondary.opacity(0.08))
-                                        )
-                                        .overlay(
-                                            Capsule()
-                                                .strokeBorder(selectedAdhaan.id == option.id
-                                                    ? effectiveGold.opacity(0.35)
-                                                    : Color.clear, lineWidth: 1)
-                                        )
-                                        .foregroundStyle(selectedAdhaan.id == option.id
-                                            ? effectiveGold : .secondary)
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-                        .padding(.horizontal, 2)
-                    }
-                }
-                .padding(.leading, 20)
-                .padding(.trailing, 16)
-                .padding(.bottom, 12)
-                .transition(.opacity.combined(with: .move(edge: .top)))
-            }
+            chipPickerSection
         }
         .background {
             RoundedRectangle(cornerRadius: 10, style: .continuous)
