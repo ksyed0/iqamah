@@ -13,7 +13,6 @@ struct AdhaanBannerView: View {
 
     @ObservedObject private var player = AdhaaanPlayer.shared
 
-
     var body: some View {
         VStack(spacing: 0) {
             // ── Top row ──────────────────────────────────────
@@ -179,7 +178,6 @@ private struct WaveBar: View {
 private struct SunArcView: View {
     let allPrayers: [(name: String, time: Date)]
     let currentPrayerName: String
-
 
     // Time-of-day gradient matching mockup: dawn → golden midday → sunset → night
     private let arcGradient = LinearGradient(

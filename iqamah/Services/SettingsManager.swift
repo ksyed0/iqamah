@@ -10,17 +10,17 @@ enum AppAppearance: String, CaseIterable {
 
     var colorScheme: ColorScheme? {
         switch self {
-        case .system: return nil
-        case .light:  return .light
-        case .dark:   return .dark
+        case .system: nil
+        case .light: .light
+        case .dark: .dark
         }
     }
 
     var displayName: String {
         switch self {
-        case .system: return "System"
-        case .light:  return "Light"
-        case .dark:   return "Dark"
+        case .system: "System"
+        case .light: "Light"
+        case .dark: "Dark"
         }
     }
 }

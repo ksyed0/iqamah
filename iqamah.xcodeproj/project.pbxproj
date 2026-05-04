@@ -68,7 +68,8 @@
 		AB000000000000000000BB01 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000000000000000000AA01 /* AboutView.swift */; };
 		BN000000000000000000BB02 /* AdhaanBannerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BN000000000000000000AA02 /* AdhaanBannerController.swift */; };
 		EE0000000000000000003002 /* Color+App.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000000000000000003003 /* Color+App.swift */; };
-		EE0000000000000000004002 /* IqamahBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000000000000000004003 /* IqamahBackground.swift */; };
+		EE0000000000000000004002 /* IqamahBackground.swift in Sources */,
+			EE0000000000000000006001 /* PrayerTimesComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000000000000000004003 /* IqamahBackground.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -135,6 +136,7 @@
 		AB000000000000000000AA01 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		BN000000000000000000AA02 /* AdhaanBannerController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdhaanBannerController.swift; sourceTree = "<group>"; };
 		EE0000000000000000003003 /* Color+App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+App.swift"; sourceTree = "<group>"; };
+		EE0000000000000000006002 /* PrayerTimesComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerTimesComponents.swift; sourceTree = "<group>"; };
 		EE0000000000000000004003 /* IqamahBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IqamahBackground.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -185,7 +187,7 @@
 				AA0000000000000000000012 /* ContentView.swift */,
 				AA0000000000000000000033 /* Models */,
 				AA0000000000000000000034 /* Services */,
-				EE0000000000000000003001 /* Extensions */,
+				EE0000000000000000005001 /* Extensions */,
 				AA0000000000000000000035 /* Views */,
 				AA0000000000000000000036 /* Resources */,
 				AA000000000000000000001C /* Assets.xcassets */,
@@ -234,7 +236,7 @@
 			path = Services;
 			sourceTree = "<group>";
 		};
-		EE0000000000000000003001 /* Extensions */ = {
+		EE0000000000000000005001 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
 				EE0000000000000000003003 /* Color+App.swift */,
@@ -255,6 +257,7 @@
 				CC000000000000000000001B /* StepIndicatorView.swift */,
 				BB000000000000000000001A /* SettingsSheetView.swift */,
 				EE0000000000000000004003 /* IqamahBackground.swift */,
+				EE0000000000000000006002 /* PrayerTimesComponents.swift */,
 				944B0D982F635A0500EC6A01 /* TestsAdditionalTests.swift */,
 				944B0D9A2F635AC100EC6A01 /* DocsFINAL_SESSION_SUMMARY.md */,
 			);
@@ -432,6 +435,7 @@
 				CC000000000000000000000B /* StepIndicatorView.swift in Sources */,
 				BB000000000000000000000A /* SettingsSheetView.swift in Sources */,
 				EE0000000000000000004002 /* IqamahBackground.swift in Sources */,
+			EE0000000000000000006001 /* PrayerTimesComponents.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
