@@ -103,7 +103,6 @@ struct PrayerTimesView: View {
                     .foregroundColor(.secondary)
                     .padding(.trailing, 16)
             }
-            .background(Color(nsColor: .windowBackgroundColor))
 
             Divider()
 
@@ -125,7 +124,6 @@ struct PrayerTimesView: View {
             Spacer(minLength: 0)
         }
         .frame(minWidth: 580, idealWidth: 620, minHeight: 640, idealHeight: 680)
-        .background(Color(nsColor: .windowBackgroundColor))
         .sheet(isPresented: $showQiblah) {
             QiblahView(latitude: city.latitude, longitude: city.longitude, cityName: city.name)
         }

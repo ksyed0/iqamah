@@ -68,6 +68,7 @@
 		AB000000000000000000BB01 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000000000000000000AA01 /* AboutView.swift */; };
 		BN000000000000000000BB02 /* AdhaanBannerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BN000000000000000000AA02 /* AdhaanBannerController.swift */; };
 		EE0000000000000000003002 /* Color+App.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000000000000000003003 /* Color+App.swift */; };
+		EE0000000000000000004002 /* IqamahBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000000000000000004003 /* IqamahBackground.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -134,6 +135,7 @@
 		AB000000000000000000AA01 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		BN000000000000000000AA02 /* AdhaanBannerController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdhaanBannerController.swift; sourceTree = "<group>"; };
 		EE0000000000000000003003 /* Color+App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+App.swift"; sourceTree = "<group>"; };
+		EE0000000000000000004003 /* IqamahBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IqamahBackground.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -252,6 +254,7 @@
 				AB000000000000000000AA01 /* AboutView.swift */,
 				CC000000000000000000001B /* StepIndicatorView.swift */,
 				BB000000000000000000001A /* SettingsSheetView.swift */,
+				EE0000000000000000004003 /* IqamahBackground.swift */,
 				944B0D982F635A0500EC6A01 /* TestsAdditionalTests.swift */,
 				944B0D9A2F635AC100EC6A01 /* DocsFINAL_SESSION_SUMMARY.md */,
 			);
@@ -428,6 +431,7 @@
 				AA000000000000000000000D /* QiblahView.swift in Sources */,
 				CC000000000000000000000B /* StepIndicatorView.swift in Sources */,
 				BB000000000000000000000A /* SettingsSheetView.swift in Sources */,
+				EE0000000000000000004002 /* IqamahBackground.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

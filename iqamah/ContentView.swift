@@ -100,6 +100,8 @@ struct ContentView: View {
         // Step 4: fixed 10 pt border on every side — this sits OUTSIDE the scale
         //         transform so it never grows or shrinks with the UI.
         .padding(10)
+        .background(IqamahBackground())
+        .preferredColorScheme(settings.appearance.colorScheme)
     }
 
     private func loadSavedSettingsAndProceed() {
