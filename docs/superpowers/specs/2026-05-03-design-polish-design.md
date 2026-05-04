@@ -258,8 +258,25 @@ On macOS 26+, wrap the entire prayer table in a `GlassEffectContainer` so adjace
 ### Toolbar buttons (macOS 26+ only)
 The secondary toolbar buttons (Qiblah / Settings / About) get `.buttonStyle(.glass)` on macOS 26+, remaining as plain text buttons on macOS 14–25.
 
+### Light mode Liquid Glass specifics
+In light mode, `.glassEffect()` produces frosted white glass automatically — no extra branching. The rows pick up the warm cream/gold of the dawn gradient and render as honey-tinted frosted panels. One exception: the gold accent color (`Color.appGold` = `#e0b00f`) has insufficient contrast on a light glass surface. Add a second token:
+
+```swift
+extension Color {
+    static let appGold = Color(red: 0.88, green: 0.69, blue: 0.06)       // dark surfaces
+    static let appGoldDark = Color(red: 0.54, green: 0.37, blue: 0.0)    // #8a5e00, light surfaces
+}
+```
+
+Use `Color.appGold` in dark mode and `Color.appGoldDark` in light mode for prayer name, time, and adhaan chip text. All other colors (`Color.primary`, `Color.secondary`) adapt automatically via vibrancy — no overrides needed.
+
+The adhaan chip in light mode uses `rgba(255,220,100,0.35)` fill with `inset 0 1px 0 rgba(255,255,255,0.9)` specular — approximated in SwiftUI as:
+```swift
+Color(red: 1.0, green: 0.86, blue: 0.39).opacity(0.35)
+```
+
 ### Text contrast
-On glass surfaces, `Color.primary` and `Color.secondary` remain unchanged — they adapt to dark/light mode automatically. The gold accent (`Color.appGold`) is unchanged. No manual contrast overrides are needed because SwiftUI materials handle vibrancy.
+On dark glass surfaces, `Color.primary` and `Color.secondary` adapt automatically. On light glass, vibrancy handles most text — only the gold accent requires the `appGoldDark` override above. No other manual contrast overrides are needed.
 
 ### `windowBackground` removal
 Remove `.background(Color(nsColor: .windowBackgroundColor))` from `PrayerTimesView` and any other views that set it. The `IqamahBackground` gradient replaces it. `SettingsSheetView`, `QiblahView`, and `AboutView` (presented as sheets) inherit the window material automatically on macOS 26+; on 14–25 they get `.background(.regularMaterial)`.
