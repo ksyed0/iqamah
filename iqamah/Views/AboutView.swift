@@ -146,8 +146,7 @@ struct AboutView: View {
 
             // ── Close button ─────────────────────────────────────────
             Button("Close") { dismiss() }
-                .buttonStyle(.borderedProminent)
-                .tint(Color.appGold)
+                .buttonStyle(.bordered)
                 .controlSize(.regular)
                 .keyboardShortcut(.escape, modifiers: [])
                 .padding(.bottom, 24)

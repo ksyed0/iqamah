@@ -28,7 +28,6 @@ struct PrayerTimesView: View {
                 Image(nsImage: NSImage(named: NSImage.applicationIconName) ?? NSImage())
                     .resizable()
                     .frame(width: 32, height: 32)
-                    .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
                     .shadow(color: Color.primary.opacity(0.10), radius: 3, x: 0, y: 1)
 
                 Text("Iqamah")
