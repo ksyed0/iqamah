@@ -1488,4 +1488,201 @@ Without this file, App Store Connect will reject the binary at upload with: *"IT
 
 ---
 
-**Last Updated:** 2026-05-03
+## New Bugs — 2026-05-03 Design Review (All Views)
+
+**Total Active Bugs (updated):** 19  
+**Critical:** 0  
+**High:** 2 (+2)  
+**Medium:** 4 (+4)  
+**Low:** 4 (+4)
+
+---
+
+**BUG-0038: Gold brand color hardcoded as local `let gold` in 6+ files**
+
+**Severity:** Medium  
+**Related Story:** US-0004 (Prayer Times Display), brand consistency  
+**Discovered:** 2026-05-03 design review  
+**Status:** Open
+
+**Description:**  
+`Color(red: 0.88, green: 0.69, blue: 0.06)` (and a slight variant `0.95, 0.76, 0.06`) is defined as `private let gold` in `PrayerTimeRow`, `AdhaanBannerView`, `AboutView`, `SunArcView`, `WaveBar`, and `QiblahView`, plus inline literals in `PrayerTimesView`. Any brand color tweak requires editing 6+ files.
+
+**Code Locations:**  
+- `iqamah/Views/PrayerTimesView.swift:39` — inline literal  
+- `iqamah/Views/PrayerTimesView.swift:356` — `private let gold`  
+- `iqamah/Views/AdhaanBannerView.swift:16` — `private let gold`  
+- `iqamah/Views/AboutView.swift:6` — `private let gold`  
+- `iqamah/Views/QiblahView.swift:64` — inline literal  
+
+**Fix:** Add `Color+App.swift` extension with `static let appGold = Color(red: 0.88, green: 0.69, blue: 0.06)` and replace all local definitions.
+
+**Priority:** Medium — maintainability / brand consistency risk
+
+---
+
+**BUG-0039: Adhaan picker hidden until hover — key feature invisible on first use**
+
+**Severity:** High  
+**Related Story:** US-0032 (Per-prayer adhaan selection)  
+**Discovered:** 2026-05-03 design review  
+**Status:** Open
+
+**Description:**  
+`PrayerTimeRow` shows the adhaan picker only when `isHovering || selectedAdhaan.id != "silent"`. A user who has never hovered over a prayer row will never discover they can assign an adhaan sound. The feature is completely invisible in its default state.
+
+**Code Location:** `iqamah/Views/PrayerTimesView.swift:479`
+
+**Fix:** Show a persistent but minimal hint ("No adhaan" / music note) below each row by default, or keep the picker always visible at minimum size and expand on hover.
+
+**Priority:** High — core feature (US-0032) is undiscoverable
+
+---
+
+**BUG-0040: Settings sheet fixed height (660pt) exceeds main window minHeight (640pt)**
+
+**Severity:** Medium  
+**Related Story:** US-0022 (Settings UX)  
+**Discovered:** 2026-05-03 design review  
+**Status:** Open
+
+**Description:**  
+`SettingsSheetView` declares `.frame(width: 480, height: 660)`. The main `PrayerTimesView` has `minHeight: 640`. On a display where the window opened at or near its minimum height, the sheet can be taller than the window presenting it, causing layout overflow.
+
+**Code Location:** `iqamah/Views/SettingsSheetView.swift:291`
+
+**Fix:** Change to `.frame(width: 480, minHeight: 540, maxHeight: 660)` and let the existing `ScrollView` accommodate variable content height.
+
+**Priority:** Medium — layout overflow on constrained displays
+
+---
+
+**BUG-0041: Stale PIL comment in SplashScreenView references a Python library**
+
+**Severity:** Low  
+**Related Story:** None  
+**Discovered:** 2026-05-03 design review  
+**Status:** Open
+
+**Description:**  
+`SplashScreenView.swift:23` contains `// (CoreText handles Arabic shaping correctly; PIL cannot)`. PIL (Python Imaging Library) has no relevance to a Swift codebase. This is a leftover comment from an image-generation script used during asset creation.
+
+**Code Location:** `iqamah/Views/SplashScreenView.swift:23`
+
+**Fix:** Remove the comment entirely.
+
+**Priority:** Low — cosmetic / misleading comment
+
+---
+
+**BUG-0042: ForEach in PrayerTimesTable uses array offset as identity — breaks animations**
+
+**Severity:** Medium  
+**Related Story:** US-0004 (Prayer Times Display)  
+**Discovered:** 2026-05-03 design review  
+**Status:** Open
+
+**Description:**  
+`ForEach(Array(prayerTimes.prayers.enumerated()), id: \.offset)` uses the integer index as the item identity. SwiftUI cannot track which row corresponds to which prayer across updates, so any state change that reorders or replaces the list will produce incorrect animations and potential state bleed between rows.
+
+**Code Location:** `iqamah/Views/PrayerTimesView.swift:210`
+
+**Fix:** `ForEach(prayerTimes.prayers, id: \.name)` — prayer names are stable and unique.
+
+**Priority:** Medium — incorrect SwiftUI diffing can cause visual glitches
+
+---
+
+**BUG-0043: App icon in PrayerTimesView header is double-rounded**
+
+**Severity:** Low  
+**Related Story:** US-0004 (Prayer Times Display)  
+**Discovered:** 2026-05-03 design review  
+**Status:** Open
+
+**Description:**  
+`NSImage(named: NSImage.applicationIconName)` already returns a pre-rounded square icon (Apple renders all macOS app icons with a rounded rect mask). Applying an additional `.clipShape(RoundedRectangle(cornerRadius: 7))` creates a tighter inner clip that produces a slightly misshapen corner on the displayed icon.
+
+**Code Location:** `iqamah/Views/PrayerTimesView.swift:31`
+
+**Fix:** Remove the `.clipShape(RoundedRectangle(...))` modifier. The icon renders correctly without it.
+
+**Priority:** Low — subtle visual artifact
+
+---
+
+**BUG-0044: Onboarding "Continue" button uses default blue accent — inconsistent with gold brand**
+
+**Severity:** Low  
+**Related Story:** US-0018 (Onboarding & First Launch)  
+**Discovered:** 2026-05-03 design review  
+**Status:** Open
+
+**Description:**  
+`LocationSetupView` and `CalculationMethodView` both use `.buttonStyle(.borderedProminent)` without a `.tint()`, defaulting to the system accent color (blue/teal). The `AboutView` and `QiblahView` done/close buttons use `.tint(gold)`. This creates an inconsistency: the first-run funnel uses blue, the rest of the app uses gold.
+
+**Code Locations:**  
+- `iqamah/Views/LocationSetupView.swift:132`  
+- `iqamah/Views/CalculationMethodView.swift:131`
+
+**Fix:** Add `.tint(.appGold)` (or equivalent) to the `.borderedProminent` buttons in both onboarding views.
+
+**Priority:** Low — brand inconsistency in first-run funnel
+
+---
+
+**BUG-0045: Display Size stepper embedded in step 2 of onboarding breaks focus**
+
+**Severity:** Medium  
+**Related Story:** US-0018 (Onboarding & First Launch)  
+**Discovered:** 2026-05-03 design review  
+**Status:** Open
+
+**Description:**  
+`CalculationMethodView` contains a "Display Size" stepper (±10% scale) after the calculation method section, with the label `"(you can change this later in Settings)"`. Embedding an unrelated display preference inside a focused onboarding step dilutes the task and the apologetic label acknowledges it doesn't belong there. New users should complete onboarding before tuning display preferences.
+
+**Code Location:** `iqamah/Views/CalculationMethodView.swift:68-115`
+
+**Fix:** Remove the Display Size block from `CalculationMethodView`. It remains accessible via Settings → Display Size.
+
+**Priority:** Medium — breaks onboarding focus; setting is duplicated in Settings
+
+---
+
+**BUG-0046: Settings sheet uses custom section/divider pattern instead of native `Form`**
+
+**Severity:** High  
+**Related Story:** US-0022 (Settings UX)  
+**Discovered:** 2026-05-03 design review  
+**Status:** Open
+
+**Description:**  
+`SettingsSheetView` reimplements macOS settings layout manually: custom `SectionHeader` view, manual `Divider()` placement, hand-rolled `SettingsRow`, explicit `padding(.horizontal, 28)` on every section, and a hardcoded `height: 660`. This diverges from `Form { Section { ... } }.formStyle(.grouped)`, which provides the correct macOS-native grouped appearance, automatic insets, focus ring behavior, and content-size adaptation for free.
+
+**Code Location:** `iqamah/Views/SettingsSheetView.swift:66-305`
+
+**Fix:** Wrap the settings content in `Form { }.formStyle(.grouped)`. Replace `SectionHeader` with `Section("Location") { }` headers. Remove manual `Divider()` calls and padding. Remove the fixed `height: 660` frame.
+
+**Priority:** High — deviates from macOS platform conventions; hardcoded height causes layout issues
+
+---
+
+**BUG-0047: AboutView "Close" button uses `.borderedProminent` — wrong prominence for dismiss**
+
+**Severity:** Low  
+**Related Story:** US-0021 (About screen)  
+**Discovered:** 2026-05-03 design review  
+**Status:** Open
+
+**Description:**  
+`AboutView` uses `.buttonStyle(.borderedProminent).tint(gold)` for the "Close" button. Per Apple HIG, `.borderedProminent` is reserved for the primary forward action in a flow (e.g., Save, Continue, Submit). A dismiss button should use `.bordered` or `.plain`. Using `.borderedProminent` for "Close" inverts the visual hierarchy and suggests the action is more significant than it is.
+
+**Code Location:** `iqamah/Views/AboutView.swift:149`
+
+**Fix:** Change to `.buttonStyle(.bordered)` and remove `.tint(gold)`.
+
+**Priority:** Low — HIG violation, subtle but incorrect
+
+---
+
+**Last Updated:** 2026-05-03 (Design review — BUG-0038 through BUG-0047 added)
