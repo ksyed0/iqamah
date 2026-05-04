@@ -336,6 +336,26 @@ struct PrayerTimeRow: View {
         colorScheme == .dark ? .appGold : .appGoldDark
     }
 
+    private var accessibilityDescription: String {
+        var parts = ["\(name) at \(formatter.string(from: time))"]
+        if adjustment != 0 { parts.append("adjusted \(adjustment) min") }
+        if isPrayerMuted { parts.append("muted") }
+        if isHighlighted { parts.append("next prayer") }
+        return parts.joined(separator: ", ")
+    }
+
+    private var rowBackground: some View {
+        RoundedRectangle(cornerRadius: 10, style: .continuous)
+            .fill(isHighlighted ? effectiveGold.opacity(0.10) : .ultraThinMaterial)
+            .overlay(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .strokeBorder(
+                        isHighlighted ? effectiveGold.opacity(0.25) : Color.white.opacity(0.10),
+                        lineWidth: 1
+                    )
+            )
+    }
+
     // Extracted to keep body under the Swift type-checker expression limit
     private var adhaanColumnButton: some View {
         Button(action: onTogglePicker) {
@@ -552,28 +572,14 @@ struct PrayerTimeRow: View {
             mainRowContent
             chipPickerSection
         }
-        .background {
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(isHighlighted ? effectiveGold.opacity(0.10) : .ultraThinMaterial)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .strokeBorder(isHighlighted
-                            ? effectiveGold.opacity(0.25)
-                            : Color.white.opacity(0.10), lineWidth: 1)
-                )
-        }
+        .background { rowBackground }
         .contentShape(Rectangle())
         .onKeyPress(.escape) {
             if isPickerExpanded { onTogglePicker() }
             return isPickerExpanded ? .handled : .ignored
         }
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(
-            "\(name) at \(formatter.string(from: time))"
-                + (adjustment != 0 ? ", adjusted \(adjustment) min" : "")
-                + (isPrayerMuted ? ", muted" : "")
-                + (isHighlighted ? ", next prayer" : "")
-        )
+        .accessibilityLabel(accessibilityDescription)
     }
 
     private var iconName: String {

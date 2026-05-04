@@ -65,9 +65,10 @@ struct SettingsSheetView: View {
 
     // MARK: - Body
 
-    // Extracted to isolate type inference — fixes cascade error on .frame(width:) in Release builds
-    private var settingsForm: some View {
-        Form {
+    // AnyView erasure forces a concrete return type, preventing cascade type errors on
+    // .frame(width:) in Xcode 26.3.0 which has stricter whole-module type inference.
+    private var settingsForm: AnyView {
+        AnyView(Form {
             Section("Location") {
                 if let db = database {
                     Picker("Country", selection: $selectedCountry) {
@@ -192,7 +193,7 @@ struct SettingsSheetView: View {
                 }
             }
         }
-        .formStyle(.grouped)
+        .formStyle(.grouped))
     }
 
     var body: some View {
