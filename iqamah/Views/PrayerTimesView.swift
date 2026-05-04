@@ -71,6 +71,13 @@ struct PrayerTimesView: View {
             .padding(.horizontal, 22)
             .padding(.top, 46)
             .padding(.bottom, 10)
+            .background {
+                if #available(macOS 26, *) {
+                    Rectangle().glassEffect()
+                } else {
+                    Rectangle().fill(.ultraThinMaterial)
+                }
+            }
 
             // ── Secondary toolbar: navigation actions + Hijri date ───
             HStack(spacing: 0) {
@@ -103,6 +110,13 @@ struct PrayerTimesView: View {
                     .foregroundColor(.secondary)
                     .padding(.trailing, 16)
             }
+            .background {
+                if #available(macOS 26, *) {
+                    Rectangle().glassEffect()
+                } else {
+                    Rectangle().fill(.ultraThinMaterial)
+                }
+            }
 
             Divider()
 
@@ -110,6 +124,14 @@ struct PrayerTimesView: View {
             Text(currentDate.formattedGregorianDate())
                 .font(.subheadline.bold())
                 .padding(.vertical, 12)
+                .frame(maxWidth: .infinity)
+                .background {
+                    if #available(macOS 26, *) {
+                        Rectangle().glassEffect()
+                    } else {
+                        Rectangle().fill(.ultraThinMaterial.opacity(0.6))
+                    }
+                }
 
             // Prayer times table
             if let prayerTimes {
@@ -238,9 +260,6 @@ struct PrayerTimesTable: View {
                 }
             }
         }
-        .background(Color(nsColor: .controlBackgroundColor))
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
         .onAppear { loadAdjustments() }
 
         // Reset button — only shown when at least one adjustment is non-zero
@@ -569,15 +588,23 @@ struct PrayerTimeRow: View {
                 .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
-        .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(isHighlighted ? effectiveGold.opacity(0.10) : Color.clear)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .stroke(isHighlighted ? effectiveGold.opacity(0.25) : Color.clear, lineWidth: 1)
-        )
-        .shadow(color: isHighlighted ? effectiveGold.opacity(0.12) : .clear, radius: 6, x: 0, y: 2)
+        .background {
+            if #available(macOS 26, *) {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .glassEffect(isHighlighted
+                        ? .regular.tint(effectiveGold.opacity(0.15))
+                        : .regular)
+            } else {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(isHighlighted ? effectiveGold.opacity(0.10) : .ultraThinMaterial)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .strokeBorder(isHighlighted
+                                ? effectiveGold.opacity(0.25)
+                                : Color.white.opacity(0.10), lineWidth: 1)
+                    )
+            }
+        }
         .contentShape(Rectangle())
         .onKeyPress(.escape) {
             if isPickerExpanded { onTogglePicker() }
