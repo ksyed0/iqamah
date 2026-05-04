@@ -381,6 +381,108 @@ struct PrayerTimeRow: View {
             : "Adhaan for \(name): \(selectedAdhaan.displayName). Tap to change.")
     }
 
+    private var mainRowContent: some View {
+        HStack(spacing: 0) {
+            // Left accent stripe (highlighted only)
+            Rectangle()
+                .fill(isHighlighted ? effectiveGold : Color.clear)
+                .frame(width: 4)
+                .clipShape(RoundedRectangle(cornerRadius: 2, style: .continuous))
+                .padding(.vertical, 8)
+
+            HStack(spacing: 16) {
+                // Prayer icon + name
+                HStack(spacing: 14) {
+                    ZStack {
+                        Circle()
+                            .fill(isHighlighted
+                                ? effectiveGold.opacity(0.20)
+                                : Color.secondary.opacity(0.08))
+                            .frame(width: 44, height: 44)
+                        Image(systemName: iconName)
+                            .font(.title3.weight(.medium))
+                            .foregroundStyle(isHighlighted ? effectiveGold : .secondary)
+                    }
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(name)
+                            .font(.body.bold())
+                            .foregroundStyle(isHighlighted ? effectiveGold : .primary)
+                        if isHighlighted {
+                            Text("NEXT")
+                                .font(.system(size: 9, weight: .heavy))
+                                .foregroundStyle(effectiveGold.opacity(0.85))
+                                .tracking(1.2)
+                        }
+                    }
+                }
+
+                Spacer()
+
+                adhaanColumnButton
+
+                // Time + optional adjustment badge
+                Text(formatter.string(from: time))
+                    .font(isHighlighted ? .title2.weight(.semibold) : .title3.weight(.medium))
+                    .foregroundStyle(isHighlighted ? effectiveGold : .primary)
+                    .monospacedDigit()
+                    .frame(minWidth: 72, alignment: .trailing)
+                    .overlay(alignment: .topTrailing) {
+                        if adjustment != 0 {
+                            Text(adjustment > 0 ? "+\(adjustment)" : "\(adjustment)")
+                                .font(.system(size: 8, weight: .bold))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 4)
+                                .padding(.vertical, 1)
+                                .background(Capsule().fill(Color.red.opacity(0.8)))
+                                .offset(x: 4, y: -4)
+                                .accessibilityLabel("\(abs(adjustment)) minute adjustment")
+                        }
+                    }
+
+                // Adjustment controls
+                HStack(spacing: 6) {
+                    Button(action: { onAdjust(-1) }) {
+                        Image(systemName: "minus.circle.fill")
+                            .font(.title3)
+                            .foregroundStyle(.secondary)
+                            .symbolRenderingMode(.hierarchical)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Decrease \(name) by 1 minute")
+                    .accessibilityLabel("Decrease \(name) time by 1 minute")
+                    .accessibilityHint("Current adjustment: \(adjustment) minutes")
+
+                    Button(action: { onAdjust(1) }) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title3)
+                            .foregroundStyle(.secondary)
+                            .symbolRenderingMode(.hierarchical)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Increase \(name) by 1 minute")
+                    .accessibilityLabel("Increase \(name) time by 1 minute")
+                    .accessibilityHint("Current adjustment: \(adjustment) minutes")
+                }
+
+                // Per-prayer mute
+                Button(action: { isPrayerMuted.toggle() }) {
+                    Image(systemName: isPrayerMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
+                        .font(.callout)
+                        .foregroundStyle(isPrayerMuted ? .orange : .secondary)
+                        .symbolRenderingMode(.hierarchical)
+                        .padding(8)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .help(isPrayerMuted ? "Unmute \(name) adhaan" : "Mute \(name) adhaan")
+                .accessibilityLabel(isPrayerMuted ? "Unmute \(name) adhaan" : "Mute \(name) adhaan")
+                .opacity(player.isMuted ? 0.4 : 1.0)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, isHighlighted ? 18 : 14)
+        }
+    }
+
     @ViewBuilder private var chipPickerSection: some View {
         if isPickerExpanded {
             VStack(alignment: .leading, spacing: 8) {
@@ -447,109 +549,7 @@ struct PrayerTimeRow: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // ── Main row ──────────────────────────────────────────
-            HStack(spacing: 0) {
-                // Left accent stripe (highlighted only)
-                Rectangle()
-                    .fill(isHighlighted ? effectiveGold : Color.clear)
-                    .frame(width: 4)
-                    .clipShape(RoundedRectangle(cornerRadius: 2, style: .continuous))
-                    .padding(.vertical, 8)
-
-                HStack(spacing: 16) {
-                    // Prayer icon + name
-                    HStack(spacing: 14) {
-                        ZStack {
-                            Circle()
-                                .fill(isHighlighted
-                                    ? effectiveGold.opacity(0.20)
-                                    : Color.secondary.opacity(0.08))
-                                .frame(width: 44, height: 44)
-                            Image(systemName: iconName)
-                                .font(.title3.weight(.medium))
-                                .foregroundStyle(isHighlighted ? effectiveGold : .secondary)
-                        }
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(name)
-                                .font(.body.bold())
-                                .foregroundStyle(isHighlighted ? effectiveGold : .primary)
-                            if isHighlighted {
-                                Text("NEXT")
-                                    .font(.system(size: 9, weight: .heavy))
-                                    .foregroundStyle(effectiveGold.opacity(0.85))
-                                    .tracking(1.2)
-                            }
-                        }
-                    }
-
-                    Spacer()
-
-                    // ── Adhaan column (always visible) ──────────────
-                    adhaanColumnButton
-
-                    // Time + optional adjustment badge (out-of-flow overlay avoids row height jitter)
-                    Text(formatter.string(from: time))
-                        .font(isHighlighted ? .title2.weight(.semibold) : .title3.weight(.medium))
-                        .foregroundStyle(isHighlighted ? effectiveGold : .primary)
-                        .monospacedDigit()
-                        .frame(minWidth: 72, alignment: .trailing)
-                        .overlay(alignment: .topTrailing) {
-                            if adjustment != 0 {
-                                Text(adjustment > 0 ? "+\(adjustment)" : "\(adjustment)")
-                                    .font(.system(size: 8, weight: .bold))
-                                    .foregroundStyle(.white)
-                                    .padding(.horizontal, 4)
-                                    .padding(.vertical, 1)
-                                    .background(Capsule().fill(Color.red.opacity(0.8)))
-                                    .offset(x: 4, y: -4)
-                                    .accessibilityLabel("\(abs(adjustment)) minute adjustment")
-                            }
-                        }
-
-                    // Adjustment controls
-                    HStack(spacing: 6) {
-                        Button(action: { onAdjust(-1) }) {
-                            Image(systemName: "minus.circle.fill")
-                                .font(.title3)
-                                .foregroundStyle(.secondary)
-                                .symbolRenderingMode(.hierarchical)
-                        }
-                        .buttonStyle(.plain)
-                        .help("Decrease \(name) by 1 minute")
-                        .accessibilityLabel("Decrease \(name) time by 1 minute")
-                        .accessibilityHint("Current adjustment: \(adjustment) minutes")
-
-                        Button(action: { onAdjust(1) }) {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.title3)
-                                .foregroundStyle(.secondary)
-                                .symbolRenderingMode(.hierarchical)
-                        }
-                        .buttonStyle(.plain)
-                        .help("Increase \(name) by 1 minute")
-                        .accessibilityLabel("Increase \(name) time by 1 minute")
-                        .accessibilityHint("Current adjustment: \(adjustment) minutes")
-                    }
-
-                    // Per-prayer mute
-                    Button(action: { isPrayerMuted.toggle() }) {
-                        Image(systemName: isPrayerMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
-                            .font(.callout)
-                            .foregroundStyle(isPrayerMuted ? .orange : .secondary)
-                            .symbolRenderingMode(.hierarchical)
-                            .padding(8)
-                            .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .help(isPrayerMuted ? "Unmute \(name) adhaan" : "Mute \(name) adhaan")
-                    .accessibilityLabel(isPrayerMuted ? "Unmute \(name) adhaan" : "Mute \(name) adhaan")
-                    .opacity(player.isMuted ? 0.4 : 1.0)
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, isHighlighted ? 18 : 14)
-            }
-
-            // ── Inline chip picker — expands when this row's picker is open ──
+            mainRowContent
             chipPickerSection
         }
         .background {

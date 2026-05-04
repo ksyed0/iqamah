@@ -65,6 +65,136 @@ struct SettingsSheetView: View {
 
     // MARK: - Body
 
+    // Extracted to isolate type inference — fixes cascade error on .frame(width:) in Release builds
+    private var settingsForm: some View {
+        Form {
+            Section("Location") {
+                if let db = database {
+                    Picker("Country", selection: $selectedCountry) {
+                        Text("Select a country").tag(nil as Country?)
+                        ForEach(db.countries.sorted { $0.name < $1.name }) { c in
+                            Text(c.name).tag(c as Country?)
+                        }
+                    }
+
+                    if selectedCountry != nil {
+                        Picker("City", selection: $selectedCity) {
+                            Text("Select a city").tag(nil as City?)
+                            ForEach(cities) { city in
+                                Text(city.name).tag(city as City?)
+                            }
+                        }
+                    }
+                } else {
+                    ProgressView("Loading cities…")
+                }
+            }
+
+            Section("Calculation") {
+                VStack(alignment: .leading, spacing: 4) {
+                    Picker("Method", selection: $selectedMethod) {
+                        ForEach(CalculationMethod.allCases) { method in
+                            Text(method.displayName).tag(method)
+                        }
+                    }
+                    .onChange(of: selectedMethod) { _, _ in userOverrodeMethod = true }
+                    if let label = recommendationLabel, !userOverrodeMethod {
+                        Text(label)
+                            .font(.caption)
+                            .foregroundStyle(Color.accentColor)
+                    }
+                }
+
+                Picker("Asr Calculation", selection: $selectedAsrMethod) {
+                    ForEach(AsrJuristicMethod.allCases) { method in
+                        Text(method.displayName).tag(method)
+                    }
+                }
+                .pickerStyle(.radioGroup)
+            }
+
+            Section("Display") {
+                Toggle(isOn: $use24Hour) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("24-Hour Time")
+                        Text(use24Hour ? "e.g. 13:30" : "e.g. 1:30 PM")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .toggleStyle(.switch)
+
+                Toggle(isOn: $launchAtLogin) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Launch at Login")
+                        Text("Start Iqamah automatically when you log in")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .toggleStyle(.switch)
+                .onChange(of: launchAtLogin) { _, enabled in
+                    do {
+                        if enabled {
+                            try SMAppService.mainApp.register()
+                        } else {
+                            try SMAppService.mainApp.unregister()
+                        }
+                    } catch {
+                        launchAtLogin = !enabled
+                    }
+                }
+
+                Picker("Appearance", selection: $selectedAppearance) {
+                    ForEach(AppAppearance.allCases, id: \.self) { mode in
+                        Text(mode.displayName).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+
+                HStack {
+                    Text("Display Size")
+                    Spacer()
+                    Button {
+                        if settings.uiScale > SettingsManager.uiScaleMin {
+                            settings.uiScale = (settings.uiScale - SettingsManager.uiScaleStep).rounded(toPlaces: 1)
+                        }
+                    } label: {
+                        Image(systemName: "minus.circle.fill")
+                            .foregroundStyle(settings.uiScale > SettingsManager.uiScaleMin ? Color.accentColor : .secondary)
+                            .symbolRenderingMode(.hierarchical)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(settings.uiScale <= SettingsManager.uiScaleMin)
+
+                    Text("\(Int(settings.uiScale * 100))%")
+                        .font(.body.monospacedDigit())
+                        .frame(minWidth: 42, alignment: .center)
+
+                    Button {
+                        if settings.uiScale < SettingsManager.uiScaleMax {
+                            settings.uiScale = (settings.uiScale + SettingsManager.uiScaleStep).rounded(toPlaces: 1)
+                        }
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundStyle(settings.uiScale < SettingsManager.uiScaleMax ? Color.accentColor : .secondary)
+                            .symbolRenderingMode(.hierarchical)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(settings.uiScale >= SettingsManager.uiScaleMax)
+
+                    if settings.uiScale != 1.0 {
+                        Button("Reset") { settings.uiScale = 1.0 }
+                            .font(.caption)
+                            .buttonStyle(.plain)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+        }
+        .formStyle(.grouped)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // ── Header ──────────────────────────────────────────────
@@ -77,132 +207,7 @@ struct SettingsSheetView: View {
             .padding(.top, 28)
             .padding(.bottom, 20)
 
-            Form {
-                Section("Location") {
-                    if let db = database {
-                        Picker("Country", selection: $selectedCountry) {
-                            Text("Select a country").tag(nil as Country?)
-                            ForEach(db.countries.sorted { $0.name < $1.name }) { c in
-                                Text(c.name).tag(c as Country?)
-                            }
-                        }
-
-                        if selectedCountry != nil {
-                            Picker("City", selection: $selectedCity) {
-                                Text("Select a city").tag(nil as City?)
-                                ForEach(cities) { city in
-                                    Text(city.name).tag(city as City?)
-                                }
-                            }
-                        }
-                    } else {
-                        ProgressView("Loading cities…")
-                    }
-                }
-
-                Section("Calculation") {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Picker("Method", selection: $selectedMethod) {
-                            ForEach(CalculationMethod.allCases) { method in
-                                Text(method.displayName).tag(method)
-                            }
-                        }
-                        .onChange(of: selectedMethod) { _, _ in userOverrodeMethod = true }
-                        if let label = recommendationLabel, !userOverrodeMethod {
-                            Text(label)
-                                .font(.caption)
-                                .foregroundStyle(Color.accentColor)
-                        }
-                    }
-
-                    Picker("Asr Calculation", selection: $selectedAsrMethod) {
-                        ForEach(AsrJuristicMethod.allCases) { method in
-                            Text(method.displayName).tag(method)
-                        }
-                    }
-                    .pickerStyle(.radioGroup)
-                }
-
-                Section("Display") {
-                    Toggle(isOn: $use24Hour) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("24-Hour Time")
-                            Text(use24Hour ? "e.g. 13:30" : "e.g. 1:30 PM")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .toggleStyle(.switch)
-
-                    Toggle(isOn: $launchAtLogin) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Launch at Login")
-                            Text("Start Iqamah automatically when you log in")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .toggleStyle(.switch)
-                    .onChange(of: launchAtLogin) { _, enabled in
-                        do {
-                            if enabled {
-                                try SMAppService.mainApp.register()
-                            } else {
-                                try SMAppService.mainApp.unregister()
-                            }
-                        } catch {
-                            launchAtLogin = !enabled
-                        }
-                    }
-
-                    Picker("Appearance", selection: $selectedAppearance) {
-                        ForEach(AppAppearance.allCases, id: \.self) { mode in
-                            Text(mode.displayName).tag(mode)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-
-                    HStack {
-                        Text("Display Size")
-                        Spacer()
-                        Button {
-                            if settings.uiScale > SettingsManager.uiScaleMin {
-                                settings.uiScale = (settings.uiScale - SettingsManager.uiScaleStep).rounded(toPlaces: 1)
-                            }
-                        } label: {
-                            Image(systemName: "minus.circle.fill")
-                                .foregroundStyle(settings.uiScale > SettingsManager.uiScaleMin ? Color.accentColor : .secondary)
-                                .symbolRenderingMode(.hierarchical)
-                        }
-                        .buttonStyle(.plain)
-                        .disabled(settings.uiScale <= SettingsManager.uiScaleMin)
-
-                        Text("\(Int(settings.uiScale * 100))%")
-                            .font(.body.monospacedDigit())
-                            .frame(minWidth: 42, alignment: .center)
-
-                        Button {
-                            if settings.uiScale < SettingsManager.uiScaleMax {
-                                settings.uiScale = (settings.uiScale + SettingsManager.uiScaleStep).rounded(toPlaces: 1)
-                            }
-                        } label: {
-                            Image(systemName: "plus.circle.fill")
-                                .foregroundStyle(settings.uiScale < SettingsManager.uiScaleMax ? Color.accentColor : .secondary)
-                                .symbolRenderingMode(.hierarchical)
-                        }
-                        .buttonStyle(.plain)
-                        .disabled(settings.uiScale >= SettingsManager.uiScaleMax)
-
-                        if settings.uiScale != 1.0 {
-                            Button("Reset") { settings.uiScale = 1.0 }
-                                .font(.caption)
-                                .buttonStyle(.plain)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                }
-            }
-            .formStyle(.grouped)
+            settingsForm
 
             // ── Action buttons ───────────────────────────────────────
             HStack(spacing: 12) {
