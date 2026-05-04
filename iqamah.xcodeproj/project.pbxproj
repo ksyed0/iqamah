@@ -67,6 +67,7 @@
 		BN000000000000000000BB01 /* AdhaanBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BN000000000000000000AA01 /* AdhaanBannerView.swift */; };
 		AB000000000000000000BB01 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000000000000000000AA01 /* AboutView.swift */; };
 		BN000000000000000000BB02 /* AdhaanBannerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BN000000000000000000AA02 /* AdhaanBannerController.swift */; };
+		EE0000000000000000003002 /* Color+App.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000000000000000003003 /* Color+App.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -132,6 +133,7 @@
 		BN000000000000000000AA01 /* AdhaanBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdhaanBannerView.swift; sourceTree = "<group>"; };
 		AB000000000000000000AA01 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		BN000000000000000000AA02 /* AdhaanBannerController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdhaanBannerController.swift; sourceTree = "<group>"; };
+		EE0000000000000000003003 /* Color+App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+App.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -181,6 +183,7 @@
 				AA0000000000000000000012 /* ContentView.swift */,
 				AA0000000000000000000033 /* Models */,
 				AA0000000000000000000034 /* Services */,
+				EE0000000000000000003001 /* Extensions */,
 				AA0000000000000000000035 /* Views */,
 				AA0000000000000000000036 /* Resources */,
 				AA000000000000000000001C /* Assets.xcassets */,
@@ -227,6 +230,14 @@
 				944B0D962F63596200EC6A01 /* ModelsIqamahError.swift */,
 			);
 			path = Services;
+			sourceTree = "<group>";
+		};
+		EE0000000000000000003001 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				EE0000000000000000003003 /* Color+App.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 		AA0000000000000000000035 /* Views */ = {
@@ -405,6 +416,7 @@
 				AA0000000000000000000006 /* LocationService.swift in Sources */,
 				AA0000000000000000000007 /* PrayerCalculator.swift in Sources */,
 				94CAD5672F23CBD100E1689F /* SettingsManager.swift in Sources */,
+				EE0000000000000000003002 /* Color+App.swift in Sources */,
 				FF000000000000000000BB01 /* Adhaan.swift in Sources */,
 				FF000000000000000000BB02 /* AdhaaanPlayer.swift in Sources */,
 				BN000000000000000000BB01 /* AdhaanBannerView.swift in Sources */,

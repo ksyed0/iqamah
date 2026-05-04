@@ -36,7 +36,7 @@ struct PrayerTimesView: View {
                     .foregroundStyle(
                         LinearGradient(
                             colors: [
-                                Color(red: 0.95, green: 0.76, blue: 0.06),
+                                Color.appGoldDim,
                                 Color(red: 0.85, green: 0.65, blue: 0.13),
                             ],
                             startPoint: .topLeading,
@@ -353,14 +353,13 @@ struct PrayerTimeRow: View {
     }
 
     // Gold accent colour matching app brand
-    private let gold = Color(red: 0.88, green: 0.69, blue: 0.06)
 
     var body: some View {
         VStack(spacing: 0) { // outer VStack — holds row + adhaan picker
             HStack(spacing: 0) {
                 // ── Left accent stripe (highlighted only) ───────────────────
                 Rectangle()
-                    .fill(isHighlighted ? gold : Color.clear)
+                    .fill(isHighlighted ? Color.appGold : Color.clear)
                     .frame(width: 4)
                     .clipShape(RoundedRectangle(cornerRadius: 2, style: .continuous))
                     .padding(.vertical, 8)
@@ -369,27 +368,27 @@ struct PrayerTimeRow: View {
                     // Prayer icon and name
                     HStack(spacing: 14) {
                         ZStack {
-                            // Highlighted: filled gold circle; normal: subtle grey
+                            // Highlighted: filled Color.appGold circle; normal: subtle grey
                             Circle()
                                 .fill(isHighlighted
-                                    ? gold.opacity(0.20)
+                                    ? Color.appGold.opacity(0.20)
                                     : Color.secondary.opacity(0.08))
                                 .frame(width: 44, height: 44)
 
                             Image(systemName: iconName)
                                 .font(.title3.weight(.medium))
-                                .foregroundColor(isHighlighted ? gold : .secondary)
+                                .foregroundColor(isHighlighted ? Color.appGold : .secondary)
                         }
 
                         VStack(alignment: .leading, spacing: 2) {
                             Text(name)
                                 .font(.body.bold())
-                                .foregroundColor(isHighlighted ? gold : .primary)
+                                .foregroundColor(isHighlighted ? Color.appGold : .primary)
                             // "NEXT" micro-label — unambiguous for first-time users
                             if isHighlighted {
                                 Text("NEXT")
                                     .font(.system(size: 9, weight: .heavy))
-                                    .foregroundColor(gold.opacity(0.85))
+                                    .foregroundColor(Color.appGold.opacity(0.85))
                                     .tracking(1.2)
                             }
                         }
@@ -400,7 +399,7 @@ struct PrayerTimeRow: View {
                     // Time display — larger when highlighted
                     Text(formatter.string(from: time))
                         .font(isHighlighted ? .title2.weight(.semibold) : .title3.weight(.medium))
-                        .foregroundColor(isHighlighted ? gold : .primary)
+                        .foregroundColor(isHighlighted ? Color.appGold : .primary)
                         .monospacedDigit()
                         .frame(minWidth: 100, alignment: .trailing)
 
@@ -520,15 +519,15 @@ struct PrayerTimeRow: View {
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(isHighlighted
-                    ? gold.opacity(0.10)
+                    ? Color.appGold.opacity(0.10)
                     : Color.clear)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .stroke(isHighlighted ? gold.opacity(0.25) : Color.clear, lineWidth: 1)
+                .stroke(isHighlighted ? Color.appGold.opacity(0.25) : Color.clear, lineWidth: 1)
         )
         .shadow(
-            color: isHighlighted ? gold.opacity(0.12) : .clear,
+            color: isHighlighted ? Color.appGold.opacity(0.12) : .clear,
             radius: 6, x: 0, y: 2
         )
         .contentShape(Rectangle())

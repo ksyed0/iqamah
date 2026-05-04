@@ -3,7 +3,6 @@ import SwiftUI
 struct AboutView: View {
     @Environment(\.dismiss) private var dismiss
 
-    private let gold = Color(red: 0.88, green: 0.69, blue: 0.06)
 
     private var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
@@ -41,7 +40,7 @@ struct AboutView: View {
                             .font(.system(size: 36, weight: .bold, design: .serif))
                             .foregroundStyle(
                                 LinearGradient(
-                                    colors: [Color(red: 0.95, green: 0.76, blue: 0.06),
+                                    colors: [Color.appGoldDim,
                                              Color(red: 0.80, green: 0.60, blue: 0.10)],
                                     startPoint: .top, endPoint: .bottom
                                 )
@@ -50,7 +49,7 @@ struct AboutView: View {
 
                         Text("إقامة")
                             .font(.system(size: 18, weight: .medium, design: .serif))
-                            .foregroundColor(gold.opacity(0.85))
+                            .foregroundColor(Color.appGold.opacity(0.85))
                             .shadow(color: .black.opacity(0.5), radius: 3)
                     }
                     .padding(.bottom, 20)
@@ -87,7 +86,7 @@ struct AboutView: View {
                                 .font(.callout)
                                 .underline()
                         }
-                        .foregroundColor(gold)
+                        .foregroundColor(Color.appGold)
                     }
 
                     Text("·").foregroundColor(.secondary)
@@ -101,7 +100,7 @@ struct AboutView: View {
                                 .font(.callout)
                                 .underline()
                         }
-                        .foregroundColor(gold)
+                        .foregroundColor(Color.appGold)
                     }
 
                     Text("·").foregroundColor(.secondary)
@@ -115,7 +114,7 @@ struct AboutView: View {
                                 .font(.callout)
                                 .underline()
                         }
-                        .foregroundColor(gold)
+                        .foregroundColor(Color.appGold)
                     }
                 }
 
@@ -148,7 +147,7 @@ struct AboutView: View {
             // ── Close button ─────────────────────────────────────────
             Button("Close") { dismiss() }
                 .buttonStyle(.borderedProminent)
-                .tint(gold)
+                .tint(Color.appGold)
                 .controlSize(.regular)
                 .keyboardShortcut(.escape, modifiers: [])
                 .padding(.bottom, 24)

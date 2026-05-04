@@ -143,7 +143,7 @@ struct AppIconView: View {
                         LinearGradient(
                             colors: [
                                 Color(red: 0.85, green: 0.65, blue: 0.13),
-                                Color(red: 0.95, green: 0.76, blue: 0.06),
+                                Color.appGoldDim,
                             ],
                             startPoint: .top,
                             endPoint: .bottom
@@ -158,7 +158,7 @@ struct AppIconView: View {
                     .foregroundStyle(
                         LinearGradient(
                             colors: [
-                                Color(red: 0.95, green: 0.76, blue: 0.06),
+                                Color.appGoldDim,
                                 Color(red: 0.85, green: 0.65, blue: 0.13),
                             ],
                             startPoint: .top,
