@@ -227,11 +227,7 @@ struct SettingsSheetView: View {
         }
         .frame(width: 480, minHeight: 540, maxHeight: 700)
         .background {
-            if #available(macOS 26, *) {
-                Rectangle().glassEffect()
-            } else {
-                Rectangle().fill(.regularMaterial)
-            }
+            Rectangle().fill(.regularMaterial)
         }
         .onAppear { loadInitialState() }
         .onChange(of: selectedCountry) { _, newCountry in

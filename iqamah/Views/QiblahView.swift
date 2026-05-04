@@ -153,11 +153,7 @@ struct QiblahView: View {
         }
         .frame(width: 440, height: 560)
         .background {
-            if #available(macOS 26, *) {
-                Rectangle().glassEffect()
-            } else {
-                Rectangle().fill(.regularMaterial)
-            }
+            Rectangle().fill(.regularMaterial)
         }
     }
 }

@@ -108,13 +108,8 @@ struct AdhaanBannerView: View {
             .padding(.bottom, 14)
         }
         .background {
-            if #available(macOS 26, *) {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .glassEffect(.regular.tint(Color.appGold.opacity(0.08)))
-            } else {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(.ultraThinMaterial)
-            }
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(.ultraThinMaterial)
         }
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)

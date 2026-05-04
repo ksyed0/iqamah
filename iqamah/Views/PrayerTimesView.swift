@@ -72,11 +72,7 @@ struct PrayerTimesView: View {
             .padding(.top, 46)
             .padding(.bottom, 10)
             .background {
-                if #available(macOS 26, *) {
-                    Rectangle().glassEffect()
-                } else {
-                    Rectangle().fill(.ultraThinMaterial)
-                }
+                Rectangle().fill(.ultraThinMaterial)
             }
 
             // ── Secondary toolbar: navigation actions + Hijri date ───
@@ -111,11 +107,7 @@ struct PrayerTimesView: View {
                     .padding(.trailing, 16)
             }
             .background {
-                if #available(macOS 26, *) {
-                    Rectangle().glassEffect()
-                } else {
-                    Rectangle().fill(.ultraThinMaterial)
-                }
+                Rectangle().fill(.ultraThinMaterial)
             }
 
             Divider()
@@ -126,11 +118,7 @@ struct PrayerTimesView: View {
                 .padding(.vertical, 12)
                 .frame(maxWidth: .infinity)
                 .background {
-                    if #available(macOS 26, *) {
-                        Rectangle().glassEffect()
-                    } else {
-                        Rectangle().fill(.ultraThinMaterial.opacity(0.6))
-                    }
+                    Rectangle().fill(.ultraThinMaterial.opacity(0.6))
                 }
 
             // Prayer times table
@@ -560,21 +548,14 @@ struct PrayerTimeRow: View {
             }
         }
         .background {
-            if #available(macOS 26, *) {
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .glassEffect(isHighlighted
-                        ? .regular.tint(effectiveGold.opacity(0.15))
-                        : .regular)
-            } else {
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(isHighlighted ? effectiveGold.opacity(0.10) : .ultraThinMaterial)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .strokeBorder(isHighlighted
-                                ? effectiveGold.opacity(0.25)
-                                : Color.white.opacity(0.10), lineWidth: 1)
-                    )
-            }
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(isHighlighted ? effectiveGold.opacity(0.10) : .ultraThinMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .strokeBorder(isHighlighted
+                            ? effectiveGold.opacity(0.25)
+                            : Color.white.opacity(0.10), lineWidth: 1)
+                )
         }
         .contentShape(Rectangle())
         .onKeyPress(.escape) {

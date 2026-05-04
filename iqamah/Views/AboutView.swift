@@ -152,11 +152,7 @@ struct AboutView: View {
         }
         .frame(width: 380)
         .background {
-            if #available(macOS 26, *) {
-                Rectangle().glassEffect()
-            } else {
-                Rectangle().fill(.regularMaterial)
-            }
+            Rectangle().fill(.regularMaterial)
         }
     }
 
