@@ -65,7 +65,6 @@ struct SettingsSheetView: View {
 
     // MARK: - Body
 
-    // AnyView erasure forces a concrete return type, preventing cascade type errors on
     // Each section extracted so the type-checker handles them independently
     @ViewBuilder private var locationSection: some View {
         if let db = database {
@@ -127,8 +126,11 @@ struct SettingsSheetView: View {
         .toggleStyle(.switch)
         .onChange(of: launchAtLogin) { _, enabled in
             do {
-                if enabled { try SMAppService.mainApp.register() }
-                else { try SMAppService.mainApp.unregister() }
+                if enabled {
+                    try SMAppService.mainApp.register()
+                } else {
+                    try SMAppService.mainApp.unregister()
+                }
             } catch { launchAtLogin = !enabled }
         }
         Picker("Appearance", selection: $selectedAppearance) {
