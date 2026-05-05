@@ -52,5 +52,5 @@ Singletons (`SettingsManager.shared`, `CitiesLoader.shared`) → SwiftUI @StateO
 - Window size: 450x500 default, max 620x680, hidden title bar
 - Prayer times recalculate on day change and every 60 seconds
 - UserDefaults keys: `hasCompletedSetup`, `selectedCity*`, `calculationMethod`, `asrMethod`, `prayerAdjustments`
-- Bundle ID: `com.iqamah.app`, Team: `96Y29SP9JR`
+- Bundle ID: `com.fablesoft.iqamah`, Team: `96Y29SP9JR`
 - Entitlements: App Sandbox enabled, location access via Info.plist keys
