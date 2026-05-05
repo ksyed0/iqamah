@@ -170,7 +170,7 @@ struct IntegrationTests {
         
         // Verify error messages are user-friendly
         do {
-            try City(name: "Test", countryCode: "XX", latitude: 91, longitude: 0, timezone: "UTC")
+            _ = try City(name: "Test", countryCode: "XX", latitude: 91, longitude: 0, timezone: "UTC")
             Issue.record("Should have thrown error")
         } catch let error as IqamahError {
             let message = error.localizedDescription
