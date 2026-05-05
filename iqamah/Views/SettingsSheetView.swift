@@ -177,13 +177,15 @@ struct SettingsSheetView: View {
         }
     }
 
-    private var settingsForm: some View {
-        Form {
-            Section("Location") { locationSection }
-            Section("Calculation") { calculationSection }
-            Section("Display") { displaySection }
-        }
-        .formStyle(.grouped)
+    private var settingsForm: AnyView {
+        AnyView(
+            Form {
+                Section("Location") { locationSection }
+                Section("Calculation") { calculationSection }
+                Section("Display") { displaySection }
+            }
+            .formStyle(.grouped)
+        )
     }
 
     var body: some View {
