@@ -36,7 +36,7 @@ final class AdhaanBannerController {
             adhaanDisplayName: adhaan.displayName,
             allPrayers: allPrayers.filter { $0.name != "Sunrise" },
             timezone: timezone,
-            onStop: { [weak self] in
+            onStop: {
                 AdhaaanPlayer.shared.stop()
                 // Button transitions to CLOSE automatically via isPlaying → false
             },
