@@ -344,16 +344,23 @@ struct PrayerTimeRow: View {
         return parts.joined(separator: ", ")
     }
 
-    private var rowBackground: some View {
-        RoundedRectangle(cornerRadius: 10, style: .continuous)
-            .fill(isHighlighted ? effectiveGold.opacity(0.10) : .ultraThinMaterial)
-            .overlay(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .strokeBorder(
-                        isHighlighted ? effectiveGold.opacity(0.25) : Color.white.opacity(0.10),
-                        lineWidth: 1
-                    )
-            )
+    // @ViewBuilder if/else avoids ternary type ambiguity between Color and Material
+    @ViewBuilder private var rowBackground: some View {
+        if isHighlighted {
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(effectiveGold.opacity(0.10))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .strokeBorder(effectiveGold.opacity(0.25), lineWidth: 1)
+                )
+        } else {
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .strokeBorder(Color.white.opacity(0.10), lineWidth: 1)
+                )
+        }
     }
 
     // Extracted to keep body under the Swift type-checker expression limit
