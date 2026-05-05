@@ -61,7 +61,7 @@ struct QiblahView: View {
                 // ── Inner gold decorative ring ───────────────────────────
                 Circle()
                     .stroke(
-                        Color(red: 0.88, green: 0.69, blue: 0.06).opacity(0.40),
+                        Color.appGold.opacity(0.40),
                         lineWidth: 1
                     )
                     .frame(width: 294, height: 294)
@@ -96,7 +96,7 @@ struct QiblahView: View {
 
                 // ── Centre dot ──────────────────────────────────────────
                 Circle()
-                    .fill(Color(red: 0.88, green: 0.69, blue: 0.06))
+                    .fill(Color.appGold)
                     .frame(width: 8, height: 8)
                     .accessibilityHidden(true)
 
@@ -127,9 +127,9 @@ struct QiblahView: View {
                     .drawingGroup()
                     .clipShape(Circle())
                     .overlay(Circle().stroke(
-                        Color(red: 0.88, green: 0.69, blue: 0.06), lineWidth: 2
+                        Color.appGold, lineWidth: 2
                     ))
-                    .shadow(color: Color(red: 0.88, green: 0.69, blue: 0.06).opacity(0.5),
+                    .shadow(color: Color.appGold.opacity(0.5),
                             radius: 4, x: 0, y: 0)
                     .offset(
                         x: 155 * CGFloat(sin(qiblahBearing * .pi / 180)),
@@ -147,11 +147,14 @@ struct QiblahView: View {
             // BUG-0027: gold tint matches app brand instead of default system accent
             Button("Done") { dismiss() }
                 .buttonStyle(.borderedProminent)
-                .tint(Color(red: 0.88, green: 0.69, blue: 0.06))
+                .tint(Color.appGold)
                 .controlSize(.regular)
                 .padding(.bottom, 24)
         }
         .frame(width: 440, height: 560)
+        .background {
+            Rectangle().fill(.regularMaterial)
+        }
     }
 }
 

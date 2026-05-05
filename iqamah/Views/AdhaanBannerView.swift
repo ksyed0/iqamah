@@ -13,8 +13,6 @@ struct AdhaanBannerView: View {
 
     @ObservedObject private var player = AdhaaanPlayer.shared
 
-    private let gold = Color(red: 0.88, green: 0.69, blue: 0.06)
-
     var body: some View {
         VStack(spacing: 0) {
             // ── Top row ──────────────────────────────────────
@@ -26,7 +24,7 @@ struct AdhaanBannerView: View {
                     Text("TIME FOR PRAYER")
                         .font(.system(size: 10, weight: .semibold))
                         .tracking(0.8)
-                        .foregroundColor(gold.opacity(0.75))
+                        .foregroundColor(Color.appGold.opacity(0.75))
 
                     HStack(alignment: .firstTextBaseline, spacing: 10) {
                         Text(prayerName)
@@ -35,12 +33,12 @@ struct AdhaanBannerView: View {
                         Text(formattedTime)
                             .font(.system(size: 22, weight: .light))
                             .monospacedDigit()
-                            .foregroundColor(gold.opacity(0.85))
+                            .foregroundColor(Color.appGold.opacity(0.85))
                     }
 
                     HStack(spacing: 5) {
                         Circle()
-                            .fill(gold.opacity(player.isPlaying ? 0.8 : 0.3))
+                            .fill(Color.appGold.opacity(player.isPlaying ? 0.8 : 0.3))
                             .frame(width: 4, height: 4)
                             .animation(player.isPlaying
                                 ? .easeInOut(duration: 0.9).repeatForever(autoreverses: true)
@@ -50,7 +48,7 @@ struct AdhaanBannerView: View {
                             ? "\(adhaanDisplayName) · playing"
                             : "\(adhaanDisplayName) · finished")
                             .font(.system(size: 11))
-                            .foregroundColor(gold.opacity(0.6))
+                            .foregroundColor(Color.appGold.opacity(0.6))
                     }
                 }
 
@@ -109,13 +107,13 @@ struct AdhaanBannerView: View {
             .padding(.top, 14)
             .padding(.bottom, 14)
         }
-        .background(
+        .background {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(.ultraThinMaterial)
-        )
+        }
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .strokeBorder(gold.opacity(0.28), lineWidth: 1)
+                .strokeBorder(Color.appGold.opacity(0.28), lineWidth: 1)
         )
         .shadow(color: .black.opacity(0.55), radius: 32, x: 0, y: 8)
     }
@@ -132,7 +130,6 @@ struct AdhaanBannerView: View {
 
 private struct WaveformView: View {
     let isAnimating: Bool
-    private let gold = Color(red: 0.88, green: 0.69, blue: 0.06)
     private let delays: [Double] = [0, 0.15, 0.3, 0.15, 0]
 
     var body: some View {
@@ -148,11 +145,10 @@ private struct WaveBar: View {
     let delay: Double
     let isAnimating: Bool
     @State private var scaleY: CGFloat = 0.35
-    private let gold = Color(red: 0.88, green: 0.69, blue: 0.06)
 
     var body: some View {
         Capsule()
-            .fill(gold)
+            .fill(Color.appGold)
             .frame(width: 3.5, height: 26)
             .scaleEffect(y: scaleY, anchor: .center)
             .onAppear { updateAnimation() }
@@ -177,8 +173,6 @@ private struct WaveBar: View {
 private struct SunArcView: View {
     let allPrayers: [(name: String, time: Date)]
     let currentPrayerName: String
-
-    private let gold = Color(red: 0.88, green: 0.69, blue: 0.06)
 
     // Time-of-day gradient matching mockup: dawn → golden midday → sunset → night
     private let arcGradient = LinearGradient(
@@ -219,7 +213,7 @@ private struct SunArcView: View {
 
                     // Dot
                     Circle()
-                        .fill(isActive ? gold.opacity(0.9) : gold.opacity(0.32))
+                        .fill(isActive ? Color.appGold.opacity(0.9) : Color.appGold.opacity(0.32))
                         .frame(width: isActive ? 9 : 6, height: isActive ? 9 : 6)
                         .animation(.easeInOut(duration: 0.4), value: isActive)
                         .position(x: pt.x, y: pt.y)
@@ -227,7 +221,7 @@ private struct SunArcView: View {
                     // Label
                     Text(shortName(prayer.name))
                         .font(.system(size: 9, weight: isActive ? .semibold : .regular))
-                        .foregroundColor(isActive ? gold.opacity(0.9) : Color.white.opacity(0.32))
+                        .foregroundColor(isActive ? Color.appGold.opacity(0.9) : Color.white.opacity(0.32))
                         .animation(.easeInOut(duration: 0.3), value: isActive)
                         .position(x: clamp(pt.x, lo: 16, hi: w - 16), y: h)
                 }
@@ -237,16 +231,16 @@ private struct SunArcView: View {
                     let pt = pointOnArc(for: current.time, w: w, h: h)
 
                     Circle()
-                        .fill(gold.opacity(0.22))
+                        .fill(Color.appGold.opacity(0.22))
                         .frame(width: 22, height: 22)
                         .blur(radius: 5)
                         .position(x: pt.x, y: pt.y)
                         .animation(.easeInOut(duration: 0.6), value: pt.x)
 
                     Circle()
-                        .fill(gold)
+                        .fill(Color.appGold)
                         .frame(width: 10, height: 10)
-                        .shadow(color: gold.opacity(0.6), radius: 4)
+                        .shadow(color: Color.appGold.opacity(0.6), radius: 4)
                         .position(x: pt.x, y: pt.y)
                         .animation(.spring(response: 0.5, dampingFraction: 0.7), value: pt.x)
                 }

@@ -100,6 +100,8 @@ struct ContentView: View {
         // Step 4: fixed 10 pt border on every side — this sits OUTSIDE the scale
         //         transform so it never grows or shrinks with the UI.
         .padding(10)
+        .background(IqamahBackground())
+        .preferredColorScheme(settings.appearance.colorScheme)
     }
 
     private func loadSavedSettingsAndProceed() {
@@ -143,7 +145,7 @@ struct AppIconView: View {
                         LinearGradient(
                             colors: [
                                 Color(red: 0.85, green: 0.65, blue: 0.13),
-                                Color(red: 0.95, green: 0.76, blue: 0.06),
+                                Color.appGoldDim,
                             ],
                             startPoint: .top,
                             endPoint: .bottom
@@ -158,7 +160,7 @@ struct AppIconView: View {
                     .foregroundStyle(
                         LinearGradient(
                             colors: [
-                                Color(red: 0.95, green: 0.76, blue: 0.06),
+                                Color.appGoldDim,
                                 Color(red: 0.85, green: 0.65, blue: 0.13),
                             ],
                             startPoint: .top,

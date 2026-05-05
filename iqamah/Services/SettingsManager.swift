@@ -1,7 +1,28 @@
 import Foundation
+import SwiftUI
 
 extension Notification.Name {
     static let settingsDidChange = Notification.Name("settingsDidChange")
+}
+
+enum AppAppearance: String, CaseIterable {
+    case system, light, dark
+
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system: nil
+        case .light: .light
+        case .dark: .dark
+        }
+    }
+
+    var displayName: String {
+        switch self {
+        case .system: "System"
+        case .light: "Light"
+        case .dark: "Dark"
+        }
+    }
 }
 
 class SettingsManager: ObservableObject {
@@ -23,6 +44,7 @@ class SettingsManager: ObservableObject {
         static let prayerAdhaanIds = "prayerAdhaanIds"
         static let mutedPrayers = "mutedPrayers"
         static let uiScale = "uiScale"
+        static let appearance = "appAppearance"
     }
 
     @Published var hasCompletedSetup: Bool {
@@ -58,6 +80,13 @@ class SettingsManager: ObservableObject {
         }
     }
 
+    @Published var appearance: AppAppearance {
+        didSet {
+            defaults.set(appearance.rawValue, forKey: Keys.appearance)
+            NotificationCenter.default.post(name: .settingsDidChange, object: nil)
+        }
+    }
+
     static let uiScaleMin: Double = 0.7
     static let uiScaleMax: Double = 1.5
     static let uiScaleStep: Double = 0.1
@@ -84,6 +113,13 @@ class SettingsManager: ObservableObject {
 
         let savedScale = defaults.double(forKey: Keys.uiScale)
         uiScale = savedScale == 0 ? 1.0 : savedScale // 0 means key not found
+
+        if let raw = userDefaults.string(forKey: Keys.appearance),
+           let saved = AppAppearance(rawValue: raw) {
+            appearance = saved
+        } else {
+            appearance = .system
+        }
     }
 
     func saveCity(_ city: City) {

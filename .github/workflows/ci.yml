@@ -13,7 +13,7 @@ concurrency:
 env:
   SCHEME: iqamah
   PROJECT: iqamah.xcodeproj
-  XCODE_VERSION: "16.2"
+  XCODE_VERSION: "26"
 
 jobs:
 
@@ -22,7 +22,7 @@ jobs:
   # ──────────────────────────────────────────────────────────────────────────
   lint:
     name: SwiftLint
-    runs-on: macos-15
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -38,7 +38,7 @@ jobs:
   # ──────────────────────────────────────────────────────────────────────────
   format:
     name: SwiftFormat
-    runs-on: macos-15
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -58,7 +58,7 @@ jobs:
   # ──────────────────────────────────────────────────────────────────────────
   build:
     name: Build (${{ matrix.configuration }})
-    runs-on: macos-15
+    runs-on: macos-latest
     strategy:
       matrix:
         configuration: [Debug, Release]
@@ -86,7 +86,7 @@ jobs:
   # ──────────────────────────────────────────────────────────────────────────
   test:
     name: Test & Coverage
-    runs-on: macos-15
+    runs-on: macos-latest
     needs: build
     steps:
       - uses: actions/checkout@v4
@@ -142,7 +142,7 @@ jobs:
   # ──────────────────────────────────────────────────────────────────────────
   security:
     name: CodeQL Security Scan
-    runs-on: macos-15
+    runs-on: macos-latest
     permissions:
       actions: read
       contents: read
@@ -181,7 +181,7 @@ jobs:
   # ──────────────────────────────────────────────────────────────────────────
   file-size:
     name: File Size Guard
-    runs-on: macos-15
+    runs-on: macos-latest
     needs: build
     steps:
       - uses: actions/checkout@v4

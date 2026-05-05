@@ -24,6 +24,7 @@ struct SettingsSheetView: View {
     @State private var selectedMethod: CalculationMethod
     @State private var selectedAsrMethod: AsrJuristicMethod
     @State private var use24Hour: Bool
+    @State private var selectedAppearance: AppAppearance
     // Scale is applied live; originalUiScale lets Cancel restore it
     private let originalUiScale = SettingsManager.shared.uiScale
     @ObservedObject private var settings = SettingsManager.shared
@@ -59,9 +60,133 @@ struct SettingsSheetView: View {
         _selectedMethod = State(initialValue: currentMethod)
         _selectedAsrMethod = State(initialValue: currentAsrMethod)
         _use24Hour = State(initialValue: SettingsManager.shared.use24HourTime)
+        _selectedAppearance = State(initialValue: SettingsManager.shared.appearance)
     }
 
     // MARK: - Body
+
+    // Each section extracted so the type-checker handles them independently
+    @ViewBuilder private var locationSection: some View {
+        if let db = database {
+            Picker("Country", selection: $selectedCountry) {
+                Text("Select a country").tag(nil as Country?)
+                ForEach(db.countries.sorted { $0.name < $1.name }) { c in
+                    Text(c.name).tag(c as Country?)
+                }
+            }
+            if selectedCountry != nil {
+                Picker("City", selection: $selectedCity) {
+                    Text("Select a city").tag(nil as City?)
+                    ForEach(cities) { city in
+                        Text(city.name).tag(city as City?)
+                    }
+                }
+            }
+        } else {
+            ProgressView("Loading cities…")
+        }
+    }
+
+    @ViewBuilder private var calculationSection: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Picker("Method", selection: $selectedMethod) {
+                ForEach(CalculationMethod.allCases) { method in
+                    Text(method.displayName).tag(method)
+                }
+            }
+            .onChange(of: selectedMethod) { _, _ in userOverrodeMethod = true }
+            if let label = recommendationLabel, !userOverrodeMethod {
+                Text(label).font(.caption).foregroundStyle(Color.accentColor)
+            }
+        }
+        Picker("Asr Calculation", selection: $selectedAsrMethod) {
+            ForEach(AsrJuristicMethod.allCases) { method in
+                Text(method.displayName).tag(method)
+            }
+        }
+        .pickerStyle(.radioGroup)
+    }
+
+    @ViewBuilder private var displaySection: some View {
+        Toggle(isOn: $use24Hour) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("24-Hour Time")
+                Text(use24Hour ? "e.g. 13:30" : "e.g. 1:30 PM")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+        }
+        .toggleStyle(.switch)
+        Toggle(isOn: $launchAtLogin) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Launch at Login")
+                Text("Start Iqamah automatically when you log in")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+        }
+        .toggleStyle(.switch)
+        .onChange(of: launchAtLogin) { _, enabled in
+            do {
+                if enabled {
+                    try SMAppService.mainApp.register()
+                } else {
+                    try SMAppService.mainApp.unregister()
+                }
+            } catch { launchAtLogin = !enabled }
+        }
+        Picker("Appearance", selection: $selectedAppearance) {
+            ForEach(AppAppearance.allCases, id: \.self) { mode in
+                Text(mode.displayName).tag(mode)
+            }
+        }
+        .pickerStyle(.segmented)
+        displaySizeRow
+    }
+
+    private var displaySizeRow: some View {
+        HStack {
+            Text("Display Size")
+            Spacer()
+            Button {
+                if settings.uiScale > SettingsManager.uiScaleMin {
+                    settings.uiScale = (settings.uiScale - SettingsManager.uiScaleStep).rounded(toPlaces: 1)
+                }
+            } label: {
+                Image(systemName: "minus.circle.fill")
+                    .foregroundStyle(settings.uiScale > SettingsManager.uiScaleMin ? Color.accentColor : .secondary)
+                    .symbolRenderingMode(.hierarchical)
+            }
+            .buttonStyle(.plain)
+            .disabled(settings.uiScale <= SettingsManager.uiScaleMin)
+            Text("\(Int(settings.uiScale * 100))%")
+                .font(.body.monospacedDigit()).frame(minWidth: 42, alignment: .center)
+            Button {
+                if settings.uiScale < SettingsManager.uiScaleMax {
+                    settings.uiScale = (settings.uiScale + SettingsManager.uiScaleStep).rounded(toPlaces: 1)
+                }
+            } label: {
+                Image(systemName: "plus.circle.fill")
+                    .foregroundStyle(settings.uiScale < SettingsManager.uiScaleMax ? Color.accentColor : .secondary)
+                    .symbolRenderingMode(.hierarchical)
+            }
+            .buttonStyle(.plain)
+            .disabled(settings.uiScale >= SettingsManager.uiScaleMax)
+            if settings.uiScale != 1.0 {
+                Button("Reset") { settings.uiScale = 1.0 }
+                    .font(.caption).buttonStyle(.plain).foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private var settingsForm: AnyView {
+        AnyView(
+            Form {
+                Section("Location") { locationSection }
+                Section("Calculation") { calculationSection }
+                Section("Display") { displaySection }
+            }
+            .formStyle(.grouped)
+        )
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -75,197 +200,7 @@ struct SettingsSheetView: View {
             .padding(.top, 28)
             .padding(.bottom, 20)
 
-            Divider().padding(.horizontal, 28)
-
-            ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    // ── Location section ─────────────────────────────
-                    SectionHeader("Location")
-
-                    VStack(alignment: .leading, spacing: 14) {
-                        SettingsRow(label: "Country") {
-                            if let db = database {
-                                Picker("", selection: $selectedCountry) {
-                                    Text("Select a country").tag(nil as Country?)
-                                    ForEach(db.countries.sorted { $0.name < $1.name }) { c in
-                                        Text(c.name).tag(c as Country?)
-                                    }
-                                }
-                                .labelsHidden()
-                                .frame(maxWidth: .infinity)
-                            } else {
-                                ProgressView()
-                            }
-                        }
-
-                        if selectedCountry != nil {
-                            SettingsRow(label: "City") {
-                                Picker("", selection: $selectedCity) {
-                                    Text("Select a city").tag(nil as City?)
-                                    ForEach(cities) { city in
-                                        Text(city.name).tag(city as City?)
-                                    }
-                                }
-                                .labelsHidden()
-                                .frame(maxWidth: .infinity)
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 28)
-
-                    Divider().padding(.horizontal, 28)
-
-                    // ── Calculation section ──────────────────────────
-                    SectionHeader("Calculation")
-
-                    VStack(alignment: .leading, spacing: 14) {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("Calculation Method")
-                                .font(.headline)
-                            // US-0031: recommendation badge
-                            if let label = recommendationLabel, !userOverrodeMethod {
-                                Text(label)
-                                    .font(.caption)
-                                    .foregroundColor(.accentColor)
-                            }
-                            Picker("", selection: $selectedMethod) {
-                                ForEach(CalculationMethod.allCases) { method in
-                                    Text(method.displayName).tag(method)
-                                }
-                            }
-                            .labelsHidden()
-                            .frame(maxWidth: .infinity)
-                            .onChange(of: selectedMethod) { _, _ in
-                                userOverrodeMethod = true
-                            }
-                        }
-
-                        Divider()
-
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("Asr Calculation")
-                                .font(.headline)
-                            Text("The Hanafi school uses a different shadow length calculation.")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Picker("", selection: $selectedAsrMethod) {
-                                ForEach(AsrJuristicMethod.allCases) { method in
-                                    Text(method.displayName).tag(method)
-                                }
-                            }
-                            .labelsHidden()
-                            .pickerStyle(.radioGroup)
-                        }
-                    }
-                    .padding(.horizontal, 28)
-
-                    Divider().padding(.horizontal, 28)
-
-                    // ── Display section ──────────────────────────────
-                    SectionHeader("Display")
-
-                    // BUG-0030: fixedSize prevents subtitle clipping; padding ensures
-                    // the Display section is always reachable within the sheet's scroll area
-                    VStack(alignment: .leading, spacing: 14) {
-                        Toggle(isOn: $use24Hour) {
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text("24-Hour Time")
-                                    .font(.headline)
-                                Text(use24Hour ? "e.g. 13:30" : "e.g. 1:30 PM")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                        }
-                        .toggleStyle(.switch)
-
-                        Divider()
-
-                        Toggle(isOn: $launchAtLogin) {
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text("Launch at Login")
-                                    .font(.headline)
-                                Text("Start Iqamah automatically when you log in")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                        }
-                        .toggleStyle(.switch)
-                        .onChange(of: launchAtLogin) { _, enabled in
-                            do {
-                                if enabled {
-                                    try SMAppService.mainApp.register()
-                                } else {
-                                    try SMAppService.mainApp.unregister()
-                                }
-                            } catch {
-                                launchAtLogin = !enabled
-                            }
-                        }
-
-                        Divider()
-
-                        // UI Scale
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("Display Size")
-                                .font(.headline)
-                            Text("Scale the window and all UI elements")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            HStack(spacing: 12) {
-                                Button(action: {
-                                    if SettingsManager.shared.uiScale > SettingsManager.uiScaleMin {
-                                        SettingsManager.shared.uiScale = (SettingsManager.shared.uiScale - SettingsManager.uiScaleStep)
-                                            .rounded(toPlaces: 1)
-                                    }
-                                }) {
-                                    Image(systemName: "minus.circle.fill")
-                                        .font(.title3)
-                                        .foregroundColor(
-                                            SettingsManager.shared.uiScale > SettingsManager.uiScaleMin ? .accentColor : .secondary
-                                        )
-                                        .symbolRenderingMode(.hierarchical)
-                                }
-                                .buttonStyle(.plain)
-                                .disabled(SettingsManager.shared.uiScale <= SettingsManager.uiScaleMin)
-
-                                Text("\(Int(SettingsManager.shared.uiScale * 100))%")
-                                    .font(.body.monospacedDigit())
-                                    .frame(minWidth: 42, alignment: .center)
-
-                                Button(action: {
-                                    if SettingsManager.shared.uiScale < SettingsManager.uiScaleMax {
-                                        SettingsManager.shared.uiScale = (SettingsManager.shared.uiScale + SettingsManager.uiScaleStep)
-                                            .rounded(toPlaces: 1)
-                                    }
-                                }) {
-                                    Image(systemName: "plus.circle.fill")
-                                        .font(.title3)
-                                        .foregroundColor(
-                                            SettingsManager.shared.uiScale < SettingsManager.uiScaleMax ? .accentColor : .secondary
-                                        )
-                                        .symbolRenderingMode(.hierarchical)
-                                }
-                                .buttonStyle(.plain)
-                                .disabled(SettingsManager.shared.uiScale >= SettingsManager.uiScaleMax)
-
-                                if SettingsManager.shared.uiScale != 1.0 {
-                                    Button("Reset") { SettingsManager.shared.uiScale = 1.0 }
-                                        .font(.caption)
-                                        .buttonStyle(.plain)
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 28)
-                    .padding(.bottom, 8)
-                }
-                .padding(.vertical, 20)
-            }
-
-            Divider().padding(.horizontal, 28)
+            settingsForm
 
             // ── Action buttons ───────────────────────────────────────
             HStack(spacing: 12) {
@@ -288,7 +223,11 @@ struct SettingsSheetView: View {
             .padding(.horizontal, 28)
             .padding(.vertical, 20)
         }
-        .frame(width: 480, height: 660)
+        .frame(width: 480)
+        .frame(minHeight: 540, maxHeight: 700)
+        .background {
+            Rectangle().fill(.regularMaterial)
+        }
         .onAppear { loadInitialState() }
         .onChange(of: selectedCountry) { _, newCountry in
             guard let country = newCountry else { return }
@@ -328,35 +267,7 @@ struct SettingsSheetView: View {
     private func save() {
         guard let city = selectedCity else { return }
         SettingsManager.shared.use24HourTime = use24Hour
+        SettingsManager.shared.appearance = selectedAppearance
         onSave(city, selectedMethod, selectedAsrMethod)
-    }
-}
-
-// MARK: - Sub-views
-
-private struct SectionHeader: View {
-    let title: String
-    init(_ title: String) {
-        self.title = title
-    }
-
-    var body: some View {
-        Text(title)
-            .font(.caption.bold())
-            .foregroundColor(.secondary)
-            .textCase(.uppercase)
-            .tracking(0.8)
-            .padding(.horizontal, 28)
-    }
-}
-
-private struct SettingsRow<Content: View>: View {
-    let label: String
-    @ViewBuilder let content: () -> Content
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(label).font(.headline)
-            content()
-        }
     }
 }

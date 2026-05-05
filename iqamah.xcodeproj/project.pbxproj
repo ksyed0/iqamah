@@ -67,6 +67,9 @@
 		BN000000000000000000BB01 /* AdhaanBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BN000000000000000000AA01 /* AdhaanBannerView.swift */; };
 		AB000000000000000000BB01 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000000000000000000AA01 /* AboutView.swift */; };
 		BN000000000000000000BB02 /* AdhaanBannerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BN000000000000000000AA02 /* AdhaanBannerController.swift */; };
+		EE0000000000000000003002 /* Color+App.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000000000000000003003 /* Color+App.swift */; };
+		EE0000000000000000004002 /* IqamahBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000000000000000004003 /* IqamahBackground.swift */; };
+		EE0000000000000000006001 /* PrayerTimesComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000000000000000006002 /* PrayerTimesComponents.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -132,6 +135,9 @@
 		BN000000000000000000AA01 /* AdhaanBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdhaanBannerView.swift; sourceTree = "<group>"; };
 		AB000000000000000000AA01 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		BN000000000000000000AA02 /* AdhaanBannerController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdhaanBannerController.swift; sourceTree = "<group>"; };
+		EE0000000000000000003003 /* Color+App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+App.swift"; sourceTree = "<group>"; };
+		EE0000000000000000006002 /* PrayerTimesComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerTimesComponents.swift; sourceTree = "<group>"; };
+		EE0000000000000000004003 /* IqamahBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IqamahBackground.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -181,6 +187,7 @@
 				AA0000000000000000000012 /* ContentView.swift */,
 				AA0000000000000000000033 /* Models */,
 				AA0000000000000000000034 /* Services */,
+				EE0000000000000000005001 /* Extensions */,
 				AA0000000000000000000035 /* Views */,
 				AA0000000000000000000036 /* Resources */,
 				AA000000000000000000001C /* Assets.xcassets */,
@@ -229,6 +236,14 @@
 			path = Services;
 			sourceTree = "<group>";
 		};
+		EE0000000000000000005001 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				EE0000000000000000003003 /* Color+App.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
 		AA0000000000000000000035 /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -241,6 +256,8 @@
 				AB000000000000000000AA01 /* AboutView.swift */,
 				CC000000000000000000001B /* StepIndicatorView.swift */,
 				BB000000000000000000001A /* SettingsSheetView.swift */,
+				EE0000000000000000004003 /* IqamahBackground.swift */,
+				EE0000000000000000006002 /* PrayerTimesComponents.swift */,
 				944B0D982F635A0500EC6A01 /* TestsAdditionalTests.swift */,
 				944B0D9A2F635AC100EC6A01 /* DocsFINAL_SESSION_SUMMARY.md */,
 			);
@@ -405,6 +422,7 @@
 				AA0000000000000000000006 /* LocationService.swift in Sources */,
 				AA0000000000000000000007 /* PrayerCalculator.swift in Sources */,
 				94CAD5672F23CBD100E1689F /* SettingsManager.swift in Sources */,
+				EE0000000000000000003002 /* Color+App.swift in Sources */,
 				FF000000000000000000BB01 /* Adhaan.swift in Sources */,
 				FF000000000000000000BB02 /* AdhaaanPlayer.swift in Sources */,
 				BN000000000000000000BB01 /* AdhaanBannerView.swift in Sources */,
@@ -416,6 +434,8 @@
 				AA000000000000000000000D /* QiblahView.swift in Sources */,
 				CC000000000000000000000B /* StepIndicatorView.swift in Sources */,
 				BB000000000000000000000A /* SettingsSheetView.swift in Sources */,
+				EE0000000000000000004002 /* IqamahBackground.swift in Sources */,
+				EE0000000000000000006001 /* PrayerTimesComponents.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -593,7 +613,7 @@ CURRENT_PROJECT_VERSION = 5;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.3.0;
 				ONLY_ACTIVE_ARCH = NO;
-				PRODUCT_BUNDLE_IDENTIFIER = com.iqamah.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fablesoft.iqamah;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -631,7 +651,7 @@ CURRENT_PROJECT_VERSION = 5;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.3.0;
 				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.iqamah.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fablesoft.iqamah;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -646,7 +666,7 @@ CURRENT_PROJECT_VERSION = 5;
 				FRAMEWORK_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)";
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.iqamah.app.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fablesoft.iqamah.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_INCLUDE_PATHS = "$(BUILT_PRODUCTS_DIR)";
@@ -662,7 +682,7 @@ CURRENT_PROJECT_VERSION = 5;
 				FRAMEWORK_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)";
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.iqamah.app.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fablesoft.iqamah.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_INCLUDE_PATHS = "$(BUILT_PRODUCTS_DIR)";
