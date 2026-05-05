@@ -79,10 +79,9 @@ final class AdhaanBannerController {
             .filter { !$0 }
             .first()
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
+            .sink { _ in
                 // isPlaying flipped to false — banner view already shows CLOSE button;
                 // no extra action needed here, user closes manually
-                _ = self
             }
     }
 
@@ -108,7 +107,9 @@ final class AdhaanBannerController {
                 )
             } completionHandler: { [weak self] in
                 panel.orderOut(nil)
-                self?.panel = nil
+                // completionHandler is @Sendable but always fires on main thread;
+                // MainActor.assumeIsolated asserts that without a dispatch overhead.
+                MainActor.assumeIsolated { self?.panel = nil }
             }
         } else {
             panel.orderOut(nil)
