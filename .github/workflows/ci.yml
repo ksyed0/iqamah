@@ -13,7 +13,7 @@ concurrency:
 env:
   SCHEME: iqamah
   PROJECT: iqamah.xcodeproj
-  XCODE_VERSION: "26"
+  XCODE_VERSION: "26.4"
 
 jobs:
 
