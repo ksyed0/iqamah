@@ -223,7 +223,8 @@ struct SettingsSheetView: View {
             .padding(.horizontal, 28)
             .padding(.vertical, 20)
         }
-        .frame(width: 480, minHeight: 540, maxHeight: 700)
+        .frame(width: 480)
+        .frame(minHeight: 540, maxHeight: 700)
         .background {
             Rectangle().fill(.regularMaterial)
         }
