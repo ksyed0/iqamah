@@ -63,10 +63,14 @@ class AdhaaanPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
 
         do {
             stop()
-            player = try AVAudioPlayer(contentsOf: url)
-            player?.delegate = self
-            player?.play()
-            isPlaying = true
+            let newPlayer = try AVAudioPlayer(contentsOf: url)
+            newPlayer.delegate = self
+            if newPlayer.play() {
+                player = newPlayer
+                isPlaying = true
+            } else {
+                print("AdhaaanPlayer: play() returned false — audio subsystem busy or unavailable")
+            }
         } catch {
             print("AdhaaanPlayer: playback error — \(error.localizedDescription)")
         }

@@ -8,6 +8,12 @@ struct QiblahView: View {
     private let kaabahLat = 21.4225
     private let kaabahLon = 39.8262
 
+    private var isValidCoordinate: Bool {
+        latitude.isFinite && longitude.isFinite &&
+            latitude >= -90 && latitude <= 90 &&
+            longitude >= -180 && longitude <= 180
+    }
+
     private var qiblahBearing: Double {
         let lat1 = latitude * .pi / 180
         let lat2 = kaabahLat * .pi / 180
@@ -25,6 +31,33 @@ struct QiblahView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
+        guard isValidCoordinate else {
+            return AnyView(invalidCoordinateView)
+        }
+        return AnyView(compassView)
+    }
+
+    private var invalidCoordinateView: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "location.slash")
+                .font(.system(size: 48))
+                .foregroundColor(.secondary)
+            Text("Location Unavailable")
+                .font(.title3.bold())
+            Text("A valid location is required to calculate the Qiblah direction.")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
+            Button("Done") { dismiss() }
+                .buttonStyle(.borderedProminent)
+                .padding(.top, 8)
+        }
+        .frame(width: 420, height: 520)
+        .accessibilityElement(children: .contain)
+    }
+
+    private var compassView: some View {
         VStack(spacing: 0) {
             // Title
             Text("Qiblah Direction")

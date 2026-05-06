@@ -121,6 +121,7 @@ struct LocationSetupView: View {
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.large)
+                    .keyboardShortcut(.escape, modifiers: [])
                 }
                 Spacer()
                 Button(action: {
@@ -133,6 +134,7 @@ struct LocationSetupView: View {
                 .tint(.appGold)
                 .controlSize(.large)
                 .disabled(selectedCity == nil)
+                .keyboardShortcut(.defaultAction)
             }
             .padding(.horizontal, 32)
             .padding(.bottom, 28)
