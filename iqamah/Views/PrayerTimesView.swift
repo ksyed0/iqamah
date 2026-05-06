@@ -17,7 +17,7 @@ struct PrayerTimesView: View {
     @ObservedObject private var settingsStore = SettingsManager.shared
 
     // AC-0064: scale the serif title with the user's Dynamic Type size preference
-    @ScaledMetric(relativeTo: .title3) private var titleFontSize: CGFloat = 20
+    @ScaledMetric(relativeTo: .title3) private var titleFontSize: CGFloat = 28
 
     private let timer = Timer.publish(every: 60, on: .main, in: .common)
 
@@ -27,7 +27,7 @@ struct PrayerTimesView: View {
             HStack(spacing: 12) {
                 Image(nsImage: NSImage(named: NSImage.applicationIconName) ?? NSImage())
                     .resizable()
-                    .frame(width: 32, height: 32)
+                    .frame(width: 64, height: 64)
                     .shadow(color: Color.primary.opacity(0.10), radius: 3, x: 0, y: 1)
 
                 Text("Iqamah")
@@ -45,11 +45,11 @@ struct PrayerTimesView: View {
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(city.name)
-                        .font(.subheadline.weight(.semibold))
+                        .font(.title3.weight(.semibold))
                         .lineLimit(1)
                         .minimumScaleFactor(0.85)
                     Text(calculationMethod.shortName)
-                        .font(.caption2.weight(.medium))
+                        .font(.caption.weight(.medium))
                         .foregroundColor(.secondary)
                         .lineLimit(1)
                 }
@@ -69,7 +69,7 @@ struct PrayerTimesView: View {
                 .accessibilityLabel(AdhaaanPlayer.shared.isMuted ? "Adhaan muted — tap to unmute" : "Adhaan on — tap to mute")
             }
             .padding(.horizontal, 22)
-            .padding(.top, 46)
+            .padding(.top, 16)
             .padding(.bottom, 10)
             .background {
                 Rectangle().fill(.ultraThinMaterial)
@@ -90,6 +90,7 @@ struct PrayerTimesView: View {
                     action: { showSettings = true }
                 )
                 .accessibilityLabel("Open settings")
+                .keyboardShortcut(",", modifiers: .command)
 
                 SecondaryToolbarButton(
                     label: "About",
@@ -102,7 +103,7 @@ struct PrayerTimesView: View {
 
                 // Hijri date lives here — frees the date block below for Gregorian only
                 Text(currentDate.formattedHijriDate())
-                    .font(.caption)
+                    .font(.subheadline)
                     .foregroundColor(.secondary)
                     .padding(.trailing, 16)
             }

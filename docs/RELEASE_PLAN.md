@@ -378,17 +378,19 @@ Detailed release plan defining MVP and subsequent milestones. Contains Epics, Us
 
 ---
 
-#### US-0014 (Future — Release 1.1): As a user, I want adhan (call to prayer) audio alerts, so that I'm reminded when it's time to pray.
+#### US-0014: As a user, I want adhan (call to prayer) audio alerts, so that I'm reminded when it's time to pray.
 
 **Priority:** Medium  
-**Status:** 🔴 Deferred to v1.1  
+**Status:** ✅ Implemented in v1.0  
+**Notes:** Implemented in EPIC-0007. `AppDelegate` polls every 60s and fires `AdhaaanPlayer.shared.play()` + `AdhaanBannerController.shared.show()` within a 90s window after each prayer time. Per-prayer adhaan selection (including Fajr-specific recordings) persists via UserDefaults. Was incorrectly marked as deferred.
 
 ---
 
-#### US-0015 (Future — Release 1.1): As a user, I want a menu bar quick view, so that I can see next prayer time without opening the full app.
+#### US-0015: As a user, I want a menu bar quick view, so that I can see next prayer time without opening the full app.
 
 **Priority:** Medium  
-**Status:** 🔴 Deferred to v1.1
+**Status:** 🟡 Partially implemented in v1.0 — countdown only  
+**Notes:** Menu bar status item shows countdown to next prayer (turns red < 10 min) and right-click menu with "Show Prayer Times" / Help / Privacy / Quit. A full popover showing all 6 prayer times inline from the status bar is **not** implemented — deferred to v1.1 if desired (P3).
 
 ---
 
