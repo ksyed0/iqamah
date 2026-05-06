@@ -11,16 +11,16 @@ struct SunriseRow: View {
         HStack(spacing: 16) {
             HStack(spacing: 14) {
                 Image(systemName: "sunrise.fill")
-                    .font(.callout)
+                    .font(.body)
                     .foregroundColor(.secondary) // AC-0063: no opacity reduction on semantic colour
                     .frame(width: 44, height: 36)
                 Text("Sunrise")
-                    .font(.callout)
+                    .font(.body)
                     .foregroundColor(.secondary)
             }
             Spacer()
             Text(formatter.string(from: time))
-                .font(.callout)
+                .font(.title3.weight(.medium))
                 .foregroundColor(.secondary)
                 .monospacedDigit()
                 .frame(minWidth: 100, alignment: .trailing)

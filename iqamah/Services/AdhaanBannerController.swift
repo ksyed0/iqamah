@@ -51,7 +51,6 @@ final class AdhaanBannerController {
         // Size the panel to fit the view
         let bannerWidth: CGFloat = 440
         hosting.frame = CGRect(x: 0, y: 0, width: bannerWidth, height: 1)
-        hosting.layoutSubtreeIfNeeded()
         let fittingHeight = hosting.fittingSize.height
         let bannerSize = CGSize(width: bannerWidth, height: max(fittingHeight, 180))
 

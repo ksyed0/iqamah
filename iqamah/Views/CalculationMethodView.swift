@@ -74,6 +74,7 @@ struct CalculationMethodView: View {
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.large)
+                .keyboardShortcut(.escape, modifiers: [])
 
                 Spacer()
 
@@ -84,6 +85,7 @@ struct CalculationMethodView: View {
                 .buttonStyle(.borderedProminent)
                 .tint(.appGold)
                 .controlSize(.large)
+                .keyboardShortcut(.defaultAction)
             }
             .padding(.horizontal, 32)
             .padding(.bottom, 28)

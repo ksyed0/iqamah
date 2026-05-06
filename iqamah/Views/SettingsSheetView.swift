@@ -157,8 +157,10 @@ struct SettingsSheetView: View {
             }
             .buttonStyle(.plain)
             .disabled(settings.uiScale <= SettingsManager.uiScaleMin)
+            .accessibilityLabel("Decrease display size")
             Text("\(Int(settings.uiScale * 100))%")
                 .font(.body.monospacedDigit()).frame(minWidth: 42, alignment: .center)
+                .accessibilityLabel("Display size \(Int(settings.uiScale * 100)) percent")
             Button {
                 if settings.uiScale < SettingsManager.uiScaleMax {
                     settings.uiScale = (settings.uiScale + SettingsManager.uiScaleStep).rounded(toPlaces: 1)
@@ -170,9 +172,11 @@ struct SettingsSheetView: View {
             }
             .buttonStyle(.plain)
             .disabled(settings.uiScale >= SettingsManager.uiScaleMax)
+            .accessibilityLabel("Increase display size")
             if settings.uiScale != 1.0 {
                 Button("Reset") { settings.uiScale = 1.0 }
                     .font(.caption).buttonStyle(.plain).foregroundStyle(.secondary)
+                    .accessibilityLabel("Reset display size to default")
             }
         }
     }
