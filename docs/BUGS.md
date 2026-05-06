@@ -1715,3 +1715,62 @@ _ = try City(name: "Test", countryCode: "XX", latitude: 91, longitude: 0, timezo
 ---
 
 **Last Updated:** 2026-05-05
+
+---
+
+## Milestone — 2026-05-05: App Store Submission
+
+Iqamah v1.0 submitted to App Store Connect for review.
+- Screenshots uploaded
+- Archive built from `develop` @ `747a5b2`
+- Bundle ID: `com.fablesoft.iqamah`, Team: `96Y29SP9JR`
+- BUG-0034 (App Store Connect registration) → **Resolved**
+
+---
+
+## New Bugs — 2026-05-05 (Xcode console log review)
+
+**BUG-0049: layoutSubtreeIfNeeded called during active layout pass in AdhaanBannerController**
+
+**Severity:** Low  
+**Discovered:** 2026-05-05 Xcode console  
+**Status:** Open
+
+**Description:**  
+`AdhaanBannerController.show()` calls `hosting.layoutSubtreeIfNeeded()` to measure the banner's fitting height, but this fires during an active layout cycle causing the warning "It's not legal to call -layoutSubtreeIfNeeded on a view which is already being laid out."
+
+**Code Location:** `iqamah/Services/AdhaanBannerController.swift` — size measurement block
+
+```swift
+// Problematic:
+hosting.frame = CGRect(x: 0, y: 0, width: bannerWidth, height: 1)
+hosting.layoutSubtreeIfNeeded()
+let fittingHeight = hosting.fittingSize.height
+
+// Fix: use fittingSize directly — it triggers layout internally without recursion
+let fittingHeight = hosting.fittingSize.height
+```
+
+**Priority:** Low — cosmetic console warning; adhaan banner still displays correctly
+
+---
+
+**BUG-0050: Audio queue timeout causes silent adhaan failure**
+
+**Severity:** Medium  
+**Discovered:** 2026-05-05 Xcode console  
+**Status:** Open
+
+**Description:**  
+Console logs show `AQMEIO timed out after 15s` followed by `MEDeviceStreamClient: client stopping after failed start: AudioQueueObject`. An audio queue was unable to start (audio subsystem busy or hardware unavailable). If this occurs at prayer time the adhaan plays silently with no user feedback.
+
+**Code Location:** `iqamah/Services/AdhaaanPlayer.swift` — `play()` / `preview()` methods
+
+**Recommended Fix:**  
+Check `AVAudioPlayer.play()` return value and handle `false` (failure to start). Show a visual fallback (e.g., banner still appears, mute icon pulses) so the user knows prayer time arrived even if audio failed.
+
+**Priority:** Medium — silent failure at prayer time is user-facing
+
+---
+
+**Last Updated:** 2026-05-05 (App Store submission complete; BUG-0049, BUG-0050 logged)
