@@ -832,3 +832,216 @@ All features implemented and Release build succeeds with zero errors.
 ---
 
 **Last Updated:** 2026-05-03
+
+
+---
+
+## EPIC-0009: App Store Resubmission — v1.0 (2026-05-05)
+
+**Description:** Work required following the first App Store rejection. Two separate rejection reasons must be resolved before resubmitting: a technical entitlement error (Guideline 2.4.5i) and an information request (Guideline 2.1). Additionally, UI issues identified during review must be fixed before the next archive.
+
+**Release Target:** v1.0 (resubmission)
+**Status:** 🟡 In Progress
+**Dependencies:** EPIC-0005
+
+---
+
+### US-0035 — Fix invalid entitlement (BUG-0051) ✅
+
+**Status:** ✅ Fixed — merged PR #47 to `develop` @ `7bb12fa`
+
+**Rejection:** Guideline 2.4.5(i) — `com.apple.security.network.client = false` is invalid.
+
+**What was wrong:** `iqamah.entitlements` contained `com.apple.security.network.client` set to `<false/>`. Apple's sandbox treats entitlement keys as grants — a key set to `false` is a malformed declaration. Iqamah makes no network requests so the key should not exist at all.
+
+**Fix applied:** Removed `com.apple.security.network.client` entirely. Entitlements file now contains only:
+- `com.apple.security.app-sandbox = true`
+- `com.apple.security.personal-information.location = true`
+
+**Acceptance Criteria:**
+- [x] AC-0153: `iqamah.entitlements` has exactly two keys, both set to `<true/>`
+- [x] AC-0154: No entitlement key is set to `<false/>`
+- [x] AC-0155: Release build succeeds with updated entitlements
+
+---
+
+### US-0036 — Provide App Review information (Guideline 2.1) ⚠️
+
+**Status:** ❌ Pending — manual action required in App Store Connect
+
+**Rejection:** Guideline 2.1 — Apple requested a screen recording and app details.
+
+**Action required — fill in App Store Connect → App Review Information → Notes:**
+
+```
+APP OVERVIEW
+Iqamah is a macOS menu bar prayer times app for Muslims. It calculates
+the five daily Islamic prayer times using classical astronomical algorithms,
+displays a countdown to the next prayer in the menu bar, and optionally
+plays an adhaan sound at prayer time. No account required. Fully offline.
+
+TESTED DEVICES & OS
+- MacBook Pro 14-inch (M3, Nov 2024), macOS 26.3
+
+SETUP INSTRUCTIONS
+1. Launch the app — a brief splash screen appears
+2. Select your country and city (or allow location detection)
+3. Select your calculation method (MWL is the default)
+4. The main window shows all six daily prayer times
+5. A countdown to the next prayer appears in the menu bar
+No login credentials required. No account of any kind.
+
+CORE FEATURES
+- Menu bar countdown to next prayer
+- Six calculation methods (MWL, ISNA, Egypt, Umm Al-Qura, Karachi, Tehran)
+- Per-prayer adhaan sound selection from bundled MP3 library
+- Qiblah compass showing direction of Mecca
+- Hijri (Islamic) calendar date display
+- ±1 minute per-prayer adjustment
+- Appearance switcher (Light/Dark/System)
+- Launch at login
+
+EXTERNAL SERVICES
+None. The app is 100% offline. Prayer times are calculated on-device
+using astronomical algorithms. No APIs, no data providers, no analytics,
+no payment processors, no AI services.
+
+LOCATION PERMISSION
+The app requests location access only to auto-detect the nearest city.
+The permission prompt appears on the Location Setup screen. Location is
+optional — users may manually select their city instead.
+
+REGIONAL DIFFERENCES
+None. The app functions identically in all regions.
+
+REGULATED CONTENT
+The app is a utility for Islamic religious practice. It does not provide
+religious rulings, legal advice, financial advice, or medical advice.
+```
+
+**Screen recording required (upload to App Review Information):**
+Record on Mac using QuickTime Player → New Screen Recording. Show:
+1. App launch → splash screen
+2. Location Setup → select city
+3. Calculation method selection → Continue
+4. Main prayer times view — click adhaan column on a prayer
+5. Open Settings sheet
+6. Open Qiblah compass
+7. Menu bar icon showing countdown
+Keep under 3 minutes.
+
+**Acceptance Criteria:**
+- [ ] AC-0156: Notes field in App Review Information is filled with the text above
+- [ ] AC-0157: Screen recording (≤3 min) uploaded to App Review Information showing full first-launch flow
+- [ ] AC-0158: Notes saved in App Store Connect before resubmitting build
+
+---
+
+### US-0037 — Fix UI issues before resubmission (BUG-0052, 0053, 0054) ❌
+
+**Status:** ❌ Open — code fixes needed
+
+**Issues to fix before archiving next build:**
+
+#### Task 1 — Remove top gap above header (BUG-0054)
+**File:** `iqamah/Views/PrayerTimesView.swift:72`
+```swift
+// Change:
+.padding(.top, 46)
+// To:
+.padding(.top, 16)
+```
+
+#### Task 2 — Increase header icon and text sizes (BUG-0052)
+**File:** `iqamah/Views/PrayerTimesView.swift`
+- Icon: `.frame(width: 32, height: 32)` → `.frame(width: 64, height: 64)` (line 30)
+- App name font base: `titleFontSize: CGFloat = 20` → `28` (line 20)
+- City name: `.font(.subheadline.weight(.semibold))` → `.font(.title3.weight(.semibold))` (line 48)
+- Method: `.font(.caption2.weight(.medium))` → `.font(.caption.weight(.medium))` (line 52)
+- Hijri date: `.font(.caption)` → `.font(.subheadline)` (line 104)
+
+#### Task 3 — Match Sunrise text size to prayer rows (BUG-0053)
+**File:** `iqamah/Views/PrayerTimesComponents.swift`
+```swift
+// SunriseRow — change all three .callout instances:
+Image → .font(.body)           // icon (line 14)
+Text("Sunrise") → .font(.body) // label (line 18)
+Text(time) → .font(.title3.weight(.medium)) // time (line 23)
+```
+
+**Acceptance Criteria:**
+- [ ] AC-0159: No visible gap between window top edge and app icon
+- [ ] AC-0160: App icon renders at 64×64pt in header
+- [ ] AC-0161: App name, city, method, and Hijri date are noticeably larger than before
+- [ ] AC-0162: Sunrise row text is the same size as inactive prayer row text
+
+---
+
+### US-0038 — Trim adhaan_4.mp3 silent lead-in (BUG-0055) ❌
+
+**Status:** ❌ Open — audio edit needed
+
+**Issue:** `adhaan_4.mp3` has ~5 seconds of silence before the adhaan begins, making it sound broken.
+
+**Task — trim using ffmpeg (requires ffmpeg installed via Homebrew):**
+```bash
+# Install if needed:
+brew install ffmpeg
+
+# Trim first 4 seconds (leaves ~1s natural lead-in):
+cd iqamah/Resources
+ffmpeg -i adhaan_4.mp3 -ss 4 -acodec copy adhaan_4_trimmed.mp3
+
+# Listen to verify the result sounds correct, then replace:
+mv adhaan_4.mp3 adhaan_4_original_backup.mp3
+mv adhaan_4_trimmed.mp3 adhaan_4.mp3
+
+# Remove backup once verified:
+rm adhaan_4_original_backup.mp3
+```
+
+**Acceptance Criteria:**
+- [ ] AC-0163: `adhaan_4.mp3` begins with ≤1 second of silence before audio
+- [ ] AC-0164: Adhaan audio is not clipped or distorted after trimming
+- [ ] AC-0165: File size reduced proportionally (≈ 4/213 × 2.8 MB smaller)
+
+---
+
+### US-0039 — Archive and resubmit to App Store ❌
+
+**Status:** ❌ Blocked — requires US-0035 ✅, US-0036, US-0037, US-0038 complete first
+
+**Steps:**
+1. Ensure `develop` is at `7bb12fa` or later (entitlement fix merged)
+2. Complete US-0037 code fixes → commit → push → verify CI green
+3. Complete US-0038 audio trim → commit → push
+4. In Xcode: **Product → Archive**
+5. Organizer → **Distribute App → App Store Connect → Upload**
+   - Use **Automatically manage signing**
+   - Team: KAMAL M SYED (96Y29SP9JR)
+6. Wait 5–15 min for Apple to process the build
+7. In App Store Connect: select new build, verify all fields, click **Submit for Review**
+
+**Acceptance Criteria:**
+- [ ] AC-0166: New build uploaded successfully (no ITMS errors)
+- [ ] AC-0167: App Review Information Notes and screen recording present before submitting
+- [ ] AC-0168: Submission accepted (not immediately rejected at upload)
+
+---
+
+## Updated Summary Statistics (2026-05-05)
+
+**Total Epics:** 9
+**Total User Stories:** 39 (US-0001 through US-0039)
+**Total Acceptance Criteria:** 168 (AC-0001 through AC-0168)
+
+**Open for resubmission:**
+- ✅ US-0035 — Entitlement fix (done, merged PR #47)
+- ❌ US-0036 — App Review Notes + screen recording (manual, App Store Connect)
+- ❌ US-0037 — UI sizing fixes (BUG-0052/053/054)
+- ❌ US-0038 — adhaan_4.mp3 trim (BUG-0055)
+- ❌ US-0039 — Archive & resubmit (blocked on above)
+
+---
+
+**Last Updated:** 2026-05-05 (EPIC-0009 added — App Store resubmission tasks)
