@@ -1774,3 +1774,33 @@ Check `AVAudioPlayer.play()` return value and handle `false` (failure to start).
 ---
 
 **Last Updated:** 2026-05-05 (App Store submission complete; BUG-0049, BUG-0050 logged)
+
+---
+
+## App Store Rejection — 2026-05-05
+
+**BUG-0051: Invalid entitlement value causes App Store rejection (Guideline 2.4.5(i))**
+
+**Severity:** Critical (blocks App Store distribution)  
+**Discovered:** 2026-05-05 — App Store review rejection  
+**Status:** ✅ Fixed
+
+**Rejection message:**  
+> Guideline 2.4.5(i) - Performance  
+> The app incorrectly implements sandboxing, or it contains one or more entitlements with invalid values.  
+> `com.apple.security.network.client	False`
+
+**Root Cause:**  
+`iqamah.entitlements` contained `com.apple.security.network.client` set to `<false/>`. Entitlements are capability grants — a key's *presence* means "grant this capability". Setting a key to `<false/>` is contradictory and invalid. Apple's codesigning validator rejects it under Guideline 2.4.5(i).
+
+**Fix:**  
+Removed `com.apple.security.network.client` entirely. Iqamah makes no network requests and does not need this entitlement. The entitlements file now contains only two valid keys:
+- `com.apple.security.app-sandbox = true`
+- `com.apple.security.personal-information.location = true`
+
+**Next steps:**  
+Archive a new build and resubmit to App Store Connect.
+
+---
+
+**Last Updated:** 2026-05-05 (App Store rejection resolved — resubmit required)
