@@ -1686,3 +1686,32 @@ Without this file, App Store Connect will reject the binary at upload with: *"IT
 ---
 
 **Last Updated:** 2026-05-03 (Design review — BUG-0038 through BUG-0047 added)
+
+---
+
+## New Bugs — 2026-05-05
+
+**BUG-0048: "Result of 'City' initializer is unused" warning in test**
+
+**Severity:** Low (test warning only — no production impact)  
+**Discovered:** 2026-05-05 Xcode Issue Navigator  
+**Status:** Open
+
+**Description:**  
+`IntegrationAndEdgeCaseTests.swift:173` calls `try City(...)` inside a `do { } catch` block to verify it throws an error, but the constructed value is never assigned. Swift warns "Result of 'City' initializer is unused".
+
+**Code Location:** `Tests/IntegrationAndEdgeCaseTests.swift:173`
+
+```swift
+// Before (warns):
+try City(name: "Test", countryCode: "XX", latitude: 91, longitude: 0, timezone: "UTC")
+
+// Fix:
+_ = try City(name: "Test", countryCode: "XX", latitude: 91, longitude: 0, timezone: "UTC")
+```
+
+**Priority:** Low — test-only, zero runtime impact
+
+---
+
+**Last Updated:** 2026-05-05
