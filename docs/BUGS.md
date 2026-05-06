@@ -4,13 +4,13 @@ All bugs and defects tracked here with BUG-XXXX identifiers and status.
 
 ---
 
-## Active Bugs
+**Total Active Bugs:** 2  
+**Critical:** 0  
+**High:** 0  
+**Medium:** 1  
+**Low:** 1
 
-**Total Active Bugs:** 9  
-**Critical:** 4  
-**High:** 3  
-**Medium:** 2  
-**Low:** 0
+> BUG-0001 through BUG-0055 resolved. Two open: BUG-0031 (dev .md docs in bundle), BUG-0032 (PrivacyInfo.xcprivacy missing).
 
 ---
 
@@ -463,292 +463,6 @@ All bugs discovered during initial code review. No user-reported bugs yet.
 ---
 
 **Last Updated:** 2026-03-12 (Comprehensive code review completed)
-
----
-
-## Bugs by Status
-
-### Open
-
----
-
-**BUG-0001: Missing splash.jpg bundled resource**
-
-**Severity:** High  
-**Related Story:** US-0018 (Onboarding & First Launch)  
-**Related Task:** TBD  
-**Discovered:** 2026-03-12 during code review
-
-**Steps to Reproduce:**
-1. Build and run the app
-2. Observe splash screen on first launch
-
-**Expected:** Splash screen displays charity message overlaid on background image  
-**Actual:** Splash screen shows black fallback background (image not found in bundle)
-
-**Root Cause:** `SplashScreenView.swift` references `Bundle.main.url(forResource: "splash", withExtension: "jpg")` but resource is not included in project
-
-**Fix Branch:** bugfix/BUG-0001-add-splash-image  
-**Lesson Encoded:** No
-
-**Priority:** High — First impression for all users
-
----
-
-**BUG-0002: No error handling when cities.json fails to load**
-
-**Severity:** Critical  
-**Related Story:** US-0002 (City Selection)  
-**Related Task:** TBD  
-**Discovered:** 2026-03-12 during code review
-
-**Steps to Reproduce:**
-1. Remove or corrupt `cities.json` from bundle
-2. Launch app
-3. Try to select location
-
-**Expected:** Display user-friendly error message and fallback option (manual coordinate entry?)  
-**Actual:** App shows empty country/city pickers with no explanation
-
-**Root Cause:** `CitiesLoader.load()` returns `nil` on failure, but `LocationSetupView` doesn't handle nil database gracefully
-
-**Code Location:**
-```swift
-// Location.swift line ~60
-guard let url = Bundle.main.url(forResource: "cities", withExtension: "json") else {
-    print("Could not find cities.json") // Only prints to console
-    return nil
-}
-```
-
-**Fix Branch:** bugfix/BUG-0002-cities-error-handling  
-**Lesson Encoded:** No
-
-**Priority:** Critical — App unusable without cities database
-
----
-
-**BUG-0003: Forced 10-second splash screen with no skip option**
-
-**Severity:** Medium  
-**Related Story:** US-0018 (Onboarding & First Launch)  
-**Related Task:** TBD  
-**Discovered:** 2026-03-12 during code review
-
-**Steps to Reproduce:**
-1. Launch app (even on subsequent launches if setup not completed)
-2. Wait for splash screen
-3. Try to skip or tap to dismiss
-
-**Expected:** Allow user to tap to continue, or reduce delay to 2-3 seconds  
-**Actual:** User forced to wait 10 full seconds every time setup is not completed
-
-**Root Cause:**
-```swift
-// ContentView.swift line ~28
-DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
-    // Hardcoded 10-second delay
-}
-```
-
-**Fix Branch:** bugfix/BUG-0003-splash-skip  
-**Lesson Encoded:** No
-
-**Priority:** Medium — Poor UX, but not blocking
-
----
-
-**BUG-0004: fatalError crashes app on invalid date components**
-
-**Severity:** Critical  
-**Related Story:** US-0004 (Prayer Time Calculation)  
-**Related Task:** TBD  
-**Discovered:** 2026-03-12 during code review
-
-**Steps to Reproduce:**
-1. Pass invalid date to `PrayerCalculator.calculate(for:)`
-2. App crashes
-
-**Expected:** Graceful error handling with IqamahError.invalidDate  
-**Actual:** App crashes with fatal error
-
-**Code Location:**
-```swift
-// PrayerCalculator.swift line ~23
-guard let year = components.year,
-      let month = components.month,
-      let day = components.day else {
-    fatalError("Could not extract date components") // CRASH
-}
-```
-
-**Fix Branch:** bugfix/BUG-0004-prayer-calc-error-handling  
-**Lesson Encoded:** No
-
-**Priority:** Critical — Violates error handling standards (AGENTS.md §13)
-
-**Recommended Fix:**
-```swift
-guard let year = components.year,
-      let month = components.month,
-      let day = components.day else {
-    throw IqamahError.invalidDate("Could not extract date components from \(date)")
-}
-```
-
----
-
-**BUG-0005: No validation on coordinate ranges**
-
-**Severity:** High  
-**Related Story:** US-0002 (City Selection), US-0003 (Auto-detect location)  
-**Related Task:** TBD  
-**Discovered:** 2026-03-12 during code review
-
-**Steps to Reproduce:**
-1. Create City with invalid coordinates (e.g., latitude = 200°)
-2. App accepts invalid data
-3. Prayer calculations produce incorrect results
-
-**Expected:** Validate latitude ∈ [-90, 90], longitude ∈ [-180, 180]  
-**Actual:** No validation performed
-
-**Code Location:**
-- `City` model has no validation
-- `PrayerCalculator` accepts any CLLocationCoordinate2D
-- `QiblahView` accepts any lat/lon values
-
-**Fix Branch:** bugfix/BUG-0005-coordinate-validation  
-**Lesson Encoded:** No
-
-**Priority:** High — Can lead to incorrect prayer times
-
-**Recommended Fix:**
-```swift
-struct City {
-    init(name: String, countryCode: String, latitude: Double, longitude: Double, timezone: String) throws {
-        guard latitude >= -90 && latitude <= 90 else {
-            throw IqamahError.invalidCoordinates(latitude: latitude, longitude: longitude)
-        }
-        guard longitude >= -180 && longitude <= 180 else {
-            throw IqamahError.invalidCoordinates(latitude: latitude, longitude: longitude)
-        }
-        // ... assign properties
-    }
-}
-```
-
----
-
-**BUG-0006: Timer memory leak in PrayerTimesView**
-
-**Severity:** Medium  
-**Related Story:** US-0004 (Prayer Times Display)  
-**Related Task:** TBD  
-**Discovered:** 2026-03-12 during code review
-
-**Steps to Reproduce:**
-1. Open prayer times view
-2. Navigate away (e.g., to settings and back to location setup)
-3. Timer continues running in background
-
-**Expected:** Timer cancels when view disappears  
-**Actual:** Timer continues indefinitely, updating state for dismissed view
-
-**Code Location:**
-```swift
-// PrayerTimesView.swift line ~12
-private let timer = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
-```
-
-**Fix Branch:** bugfix/BUG-0006-timer-cleanup  
-**Lesson Encoded:** No
-
-**Priority:** Medium — Memory leak, but impact is low (1-minute interval)
-
-**Recommended Fix:**
-```swift
-.onDisappear {
-    timer.upstream.connect().cancel()
-}
-```
-Or use @State var with manual Cancellable management.
-
----
-
-## Bugs by Severity
-
-### Critical (2)
-- BUG-0002: No error handling when cities.json fails to load
-- BUG-0004: fatalError crashes app on invalid date components
-
-### High (2)
-- BUG-0001: Missing splash.jpg bundled resource
-- BUG-0005: No validation on coordinate ranges
-
-### Medium (2)
-- BUG-0003: Forced 10-second splash screen with no skip option
-- BUG-0006: Timer memory leak in PrayerTimesView
-
-### Low (0)
-*None*
-
----
-
-## Fixed (Awaiting Verification)
-
-*None*
-
----
-
-## Verified (Awaiting Closure)
-
-*None*
-
----
-
-## Closed
-
-*None*
-
----
-
-## Retired/Cancelled Bugs
-
-*None*
-
----
-
-## Bug Fix Priority Recommendations
-
-**Phase 1 (Before MVP release):**
-1. BUG-0004 — Critical crash risk
-2. BUG-0002 — Critical functionality blocker
-3. BUG-0005 — High data integrity risk
-4. BUG-0001 — High UX issue (first impression)
-
-**Phase 2 (Before Beta):**
-5. BUG-0003 — Medium UX annoyance
-6. BUG-0006 — Medium technical debt
-
----
-
-## Testing Notes
-
-All bugs discovered during initial code review. No user-reported bugs yet.
-
-**Next Steps:**
-1. Create bug fix branches for each defect
-2. Write test cases to reproduce each bug
-3. Implement fixes per ERROR_TAXONOMY.md standards
-4. Verify fixes with unit and integration tests
-5. Update LESSONS.md with learnings from each fix
-
----
-
-**Last Updated:** 2026-04-29 (Pre-release code review — 7 new bugs added, BUG-0010 through BUG-0016)
-
----
 
 ## New Bugs — 2026-04-29 Pre-Release Review
 
@@ -1804,3 +1518,32 @@ Archive a new build and resubmit to App Store Connect.
 ---
 
 **Last Updated:** 2026-05-05 (App Store rejection resolved — resubmit required)
+
+---
+
+## Fixed — 2026-05-05/06 Session (PR #47, PR #48)
+
+**BUG-0049: layoutSubtreeIfNeeded called during active layout pass** — ✅ Fixed  
+Removed redundant `hosting.layoutSubtreeIfNeeded()` call in `AdhaanBannerController.show()`. `fittingSize.height` triggers layout internally.
+
+**BUG-0050: Audio queue timeout causes silent adhaan failure** — ✅ Fixed  
+`AdhaaanPlayer.startPlayback()` now checks `AVAudioPlayer.play()` return value. `isPlaying` only set `true` when audio actually starts; failed plays log a diagnostic and leave the banner visible.
+
+**BUG-0051: Invalid entitlement causes App Store rejection** — ✅ Fixed (PR #47)  
+Removed `com.apple.security.network.client = false` from `iqamah.entitlements`.
+
+**BUG-0052: Header icon and text too small** — ✅ Fixed  
+Icon 32→64pt; title font 20→28pt; city `.subheadline`→`.title3`; method `.caption2`→`.caption`; Hijri date `.caption`→`.subheadline`.
+
+**BUG-0053: Sunrise row text smaller than prayer rows** — ✅ Fixed  
+SunriseRow icon and label `.callout`→`.body`; time `.callout`→`.title3.weight(.medium)`.
+
+**BUG-0054: Top gap above header** — ✅ Fixed  
+`.padding(.top, 46)` → `.padding(.top, 16)` in `PrayerTimesView`.
+
+**BUG-0055: adhaan_4.mp3 has 8s silent lead-in** — ✅ Fixed  
+Trimmed 8 seconds via ffmpeg (`-ss 4` applied twice); 213s→205s.
+
+---
+
+**Last Updated:** 2026-05-06 (Build 6 submitted to App Store)
