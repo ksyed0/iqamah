@@ -165,6 +165,9 @@ struct PrayerTimesView: View {
         .onReceive(timer) { _ in
             updateDate()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .openSettings)) { _ in
+            showSettings = true
+        }
     }
 
     private func calculatePrayerTimes() {
