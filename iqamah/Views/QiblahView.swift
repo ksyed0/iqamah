@@ -28,6 +28,11 @@ struct QiblahView: View {
         return directions[Int((qiblahBearing + 22.5).truncatingRemainder(dividingBy: 360) / 45)]
     }
 
+    private func cardinalDirection(for bearing: Double) -> String {
+        let dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+        return dirs[Int((bearing + 22.5) / 45) % 8]
+    }
+
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -150,7 +155,8 @@ struct QiblahView: View {
                     .frame(width: 64, height: 96)
                     .drawingGroup()
                     .rotationEffect(.degrees(qiblahBearing))
-                    .accessibilityLabel("Prayer mat pointing toward Qiblah")
+                    .accessibilityLabel("Prayer mat facing Qiblah direction")
+                    .accessibilityHidden(false)
 
                 // ── Ka'bah icon on ring ──────────────────────────────────
                 Image("KaabahIcon")
@@ -168,12 +174,14 @@ struct QiblahView: View {
                         x: 155 * CGFloat(sin(qiblahBearing * .pi / 180)),
                         y: -155 * CGFloat(cos(qiblahBearing * .pi / 180))
                     )
-                    .accessibilityLabel("Ka'bah direction indicator")
+                    .accessibilityLabel("Ka'bah direction marker")
+                    .accessibilityHidden(false)
             }
             .frame(width: 380, height: 380)
             .padding(.top, 12)
-            .accessibilityElement(children: .combine)
-            .accessibilityLabel("Qiblah compass: \(Int(qiblahBearing))° \(cardinalDirection)")
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Qiblah direction: \(Int(qiblahBearing)) degrees \(cardinalDirection(for: qiblahBearing))")
+            .accessibilityValue("Face \(cardinalDirection(for: qiblahBearing)) to face Mecca")
 
             Spacer()
 
