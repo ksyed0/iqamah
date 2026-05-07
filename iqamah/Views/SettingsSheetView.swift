@@ -184,7 +184,7 @@ struct SettingsSheetView: View {
     private static let adjustmentPrayerNames = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"]
 
     private func adjustmentRow(for prayerName: String) -> some View {
-        let current = SettingsManager.shared.getAdjustment(for: prayerName)
+        let current = settings.prayerAdjustments[prayerName] ?? 0
         return HStack {
             Text(prayerName)
             Spacer()
@@ -282,7 +282,7 @@ struct SettingsSheetView: View {
             .padding(.vertical, 20)
         }
         .frame(width: 480)
-        .frame(minHeight: 540, maxHeight: 700)
+        .frame(minHeight: 480)
         .background {
             Rectangle().fill(.regularMaterial)
         }
