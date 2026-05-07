@@ -181,12 +181,66 @@ struct SettingsSheetView: View {
         }
     }
 
+    private static let adjustmentPrayerNames = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"]
+
+    private func adjustmentRow(for prayerName: String) -> some View {
+        let current = settings.prayerAdjustments[prayerName] ?? 0
+        return HStack {
+            Text(prayerName)
+            Spacer()
+            Button {
+                SettingsManager.shared.setAdjustment(current - 1, for: prayerName)
+            } label: {
+                Image(systemName: "minus.circle.fill")
+                    .symbolRenderingMode(.hierarchical)
+                    .foregroundStyle(current > -60 ? Color.accentColor : .secondary)
+            }
+            .buttonStyle(.plain)
+            .disabled(current <= -60)
+            .accessibilityLabel("Decrease \(prayerName) adjustment")
+
+            Text(current == 0 ? "±0" : (current > 0 ? "+\(current)" : "\(current)"))
+                .font(.body.monospacedDigit())
+                .foregroundStyle(current == 0 ? AnyShapeStyle(.secondary) : AnyShapeStyle(Color.orange))
+                .frame(minWidth: 36, alignment: .center)
+                .accessibilityLabel("\(prayerName) adjustment: \(current) minutes")
+
+            Button {
+                SettingsManager.shared.setAdjustment(current + 1, for: prayerName)
+            } label: {
+                Image(systemName: "plus.circle.fill")
+                    .symbolRenderingMode(.hierarchical)
+                    .foregroundStyle(current < 60 ? Color.accentColor : .secondary)
+            }
+            .buttonStyle(.plain)
+            .disabled(current >= 60)
+            .accessibilityLabel("Increase \(prayerName) adjustment")
+        }
+    }
+
+    @ViewBuilder private var adjustmentsSection: some View {
+        ForEach(Self.adjustmentPrayerNames, id: \.self) { prayerName in
+            adjustmentRow(for: prayerName)
+        }
+    }
+
     private var settingsForm: AnyView {
         AnyView(
             Form {
-                Section("Location") { locationSection }
-                Section("Calculation") { calculationSection }
-                Section("Display") { displaySection }
+                Section { locationSection } header: { Label("Location", systemImage: "location.fill") }
+                Section { calculationSection } header: { Label("Calculation", systemImage: "function") }
+                Section { displaySection } header: { Label("Display", systemImage: "display") }
+                Section {
+                    adjustmentsSection
+                } header: {
+                    Label("Adjustments", systemImage: "timer")
+                } footer: {
+                    Button("Reset all adjustments") {
+                        SettingsManager.shared.resetAdjustments()
+                    }
+                    .foregroundStyle(.red)
+                    .font(.footnote)
+                }
             }
             .formStyle(.grouped)
         )
@@ -228,7 +282,7 @@ struct SettingsSheetView: View {
             .padding(.vertical, 20)
         }
         .frame(width: 480)
-        .frame(minHeight: 540, maxHeight: 700)
+        .frame(minHeight: 480)
         .background {
             Rectangle().fill(.regularMaterial)
         }

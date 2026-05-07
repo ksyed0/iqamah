@@ -94,6 +94,8 @@ class SettingsManager: ObservableObject {
         }
     }
 
+    @Published var prayerAdjustments: [String: Int] = [:]
+
     @Published var locationSource: String {
         didSet { defaults.set(locationSource, forKey: Keys.locationSource) }
     }
@@ -141,6 +143,13 @@ class SettingsManager: ObservableObject {
         locationSource = userDefaults.string(forKey: Keys.locationSource) ?? "manual"
         gpsLocality    = userDefaults.string(forKey: Keys.gpsLocality) ?? ""
         gpsTimezone    = userDefaults.string(forKey: Keys.gpsTimezone) ?? TimeZone.current.identifier
+
+        if let data = userDefaults.data(forKey: Keys.prayerAdjustments),
+           let decoded = try? JSONDecoder().decode([String: Int].self, from: data) {
+            prayerAdjustments = decoded
+        } else if let dict = userDefaults.dictionary(forKey: Keys.prayerAdjustments) as? [String: Int] {
+            prayerAdjustments = dict
+        }
     }
 
     func saveCity(_ city: City) {
@@ -251,6 +260,7 @@ class SettingsManager: ObservableObject {
         var adjustments = defaults.dictionary(forKey: Keys.prayerAdjustments) as? [String: Int] ?? [:]
         adjustments[prayerName] = minutes
         defaults.set(adjustments, forKey: Keys.prayerAdjustments)
+        prayerAdjustments[prayerName] = minutes
         NotificationCenter.default.post(name: .settingsDidChange, object: nil)
     }
 
@@ -261,6 +271,7 @@ class SettingsManager: ObservableObject {
 
     func resetAdjustments() {
         defaults.removeObject(forKey: Keys.prayerAdjustments)
+        prayerAdjustments = [:]
         NotificationCenter.default.post(name: .settingsDidChange, object: nil)
     }
 }
