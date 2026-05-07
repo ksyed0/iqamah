@@ -1387,14 +1387,10 @@ Without this file, App Store Connect will reject the binary at upload with: *"IT
 **Severity:** Low  
 **Related Story:** US-0021 (Privacy Policy)  
 **Discovered:** Carried forward from AC-0089  
-**Status:** Open
+**Status:** ✅ Resolved — 2026-05-07
 
-**Description:**  
-`Privacy_Policy.md` exists in the repo but is not hosted at a public URL. App Store Connect requires a privacy policy URL before submission can be completed. AC-0089, AC-0090, and AC-0091 are all still open.
-
-**Fix:** Host the privacy policy at a public URL (GitHub Pages, or a simple web page). Enter the URL in App Store Connect before submitting.
-
-**Priority:** Low — blocks final submission step, not a code issue
+**Resolution:**  
+Published at `https://www.fablesoft.biz/products/iqamah/privacy`. Support page also live at `https://www.fablesoft.biz/products/iqamah/support`. Both URLs updated in `AppDelegate.swift` and `AboutView.swift`. AC-0089, AC-0090, AC-0091 closed.
 
 ---
 

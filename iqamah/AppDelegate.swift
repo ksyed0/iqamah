@@ -299,12 +299,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     @objc func openSupport() {
         // swiftlint:disable:next force_unwrapping
-        NSWorkspace.shared.open(URL(string: "https://ksyed0.github.io/iqamah/support.html")!)
+        NSWorkspace.shared.open(URL(string: "https://www.fablesoft.biz/products/iqamah/support")!)
     }
 
     @objc func openPrivacy() {
         // swiftlint:disable:next force_unwrapping
-        NSWorkspace.shared.open(URL(string: "https://ksyed0.github.io/iqamah/privacy-policy.html")!)
+        NSWorkspace.shared.open(URL(string: "https://www.fablesoft.biz/products/iqamah/privacy")!)
     }
 
     @objc func quitApp() {
