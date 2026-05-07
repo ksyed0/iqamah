@@ -27,6 +27,7 @@
 		AA000000000000000000000C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001C /* Assets.xcassets */; };
 		AA000000000000000000000D /* QiblahView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001E /* QiblahView.swift */; };
 		AB000000000000000000BB01 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000000000000000000AA01 /* AboutView.swift */; };
+		MB000000000000000000BB02 /* MenuBarPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = MB000000000000000000BB01 /* MenuBarPopoverView.swift */; };
 		AD000000000000000000BB01 /* adhaan_1.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = AD000000000000000000AA01 /* adhaan_1.mp3 */; };
 		AD000000000000000000BB02 /* adhaan_2.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = AD000000000000000000AA02 /* adhaan_2.mp3 */; };
 		AD000000000000000000BB03 /* adhaan_3.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = AD000000000000000000AA03 /* adhaan_3.mp3 */; };
@@ -103,6 +104,7 @@
 		AA000000000000000000001D /* iqamah.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iqamah.entitlements; sourceTree = "<group>"; };
 		AA000000000000000000001E /* QiblahView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QiblahView.swift; sourceTree = "<group>"; };
 		AB000000000000000000AA01 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
+		MB000000000000000000BB01 /* MenuBarPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarPopoverView.swift; sourceTree = "<group>"; };
 		AD000000000000000000AA01 /* adhaan_1.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = adhaan_1.mp3; sourceTree = "<group>"; };
 		AD000000000000000000AA02 /* adhaan_2.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = adhaan_2.mp3; sourceTree = "<group>"; };
 		AD000000000000000000AA03 /* adhaan_3.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = adhaan_3.mp3; sourceTree = "<group>"; };
@@ -240,6 +242,7 @@
 				AA000000000000000000001E /* QiblahView.swift */,
 				BN000000000000000000AA01 /* AdhaanBannerView.swift */,
 				AB000000000000000000AA01 /* AboutView.swift */,
+				MB000000000000000000BB01 /* MenuBarPopoverView.swift */,
 				CC000000000000000000001B /* StepIndicatorView.swift */,
 				BB000000000000000000001A /* SettingsSheetView.swift */,
 				EE0000000000000000004003 /* IqamahBackground.swift */,
@@ -421,6 +424,7 @@
 				FF000000000000000000BB02 /* AdhaaanPlayer.swift in Sources */,
 				BN000000000000000000BB01 /* AdhaanBannerView.swift in Sources */,
 				AB000000000000000000BB01 /* AboutView.swift in Sources */,
+				MB000000000000000000BB02 /* MenuBarPopoverView.swift in Sources */,
 				BN000000000000000000BB02 /* AdhaanBannerController.swift in Sources */,
 				AA0000000000000000000008 /* LocationSetupView.swift in Sources */,
 				AA0000000000000000000009 /* CalculationMethodView.swift in Sources */,

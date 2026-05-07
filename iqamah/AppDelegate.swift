@@ -320,6 +320,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         NSApplication.shared.terminate(nil)
     }
 
+    /// Stub — full implementation added in US-0015 popover wiring task.
+    @objc func closePopover() {}
+
     func windowShouldClose(_ sender: NSWindow) -> Bool {
         hideWindow(sender)
         return false
