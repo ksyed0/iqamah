@@ -52,6 +52,18 @@ struct AdhaanBannerView: View {
                     }
                 }
 
+                if player.audioFailed {
+                    HStack(spacing: 4) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.caption2)
+                            .foregroundStyle(Color.yellow.opacity(0.85))
+                        Text("Audio unavailable")
+                            .font(.caption2)
+                            .foregroundStyle(Color.yellow.opacity(0.85))
+                    }
+                    .transition(.opacity)
+                }
+
                 Spacer(minLength: 0)
 
                 // Stop / Close button
