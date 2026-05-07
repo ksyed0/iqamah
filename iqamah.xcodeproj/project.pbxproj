@@ -43,6 +43,7 @@
 		EE000000000000000000100E /* IqamahModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE000000000000000000100D /* IqamahModelTests.swift */; };
 		EE0000000000000000001010 /* IntegrationAndEdgeCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE000000000000000000100F /* IntegrationAndEdgeCaseTests.swift */; };
 		EE0000000000000000001012 /* PrayerAccuracyRegressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000000000000000001011 /* PrayerAccuracyRegressionTests.swift */; };
+		EE0000000000000000001014 /* ENH001GPSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000000000000000001013 /* ENH001GPSTests.swift */; };
 		EE0000000000000000002000 /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000013 /* Location.swift */; };
 		EE0000000000000000002001 /* CalculationMethod.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000014 /* CalculationMethod.swift */; };
 		EE0000000000000000002002 /* PrayerTimes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000015 /* PrayerTimes.swift */; };
@@ -119,6 +120,7 @@
 		EE000000000000000000100D /* IqamahModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IqamahModelTests.swift; sourceTree = "<group>"; };
 		EE000000000000000000100F /* IntegrationAndEdgeCaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationAndEdgeCaseTests.swift; sourceTree = "<group>"; };
 		EE0000000000000000001011 /* PrayerAccuracyRegressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerAccuracyRegressionTests.swift; sourceTree = "<group>"; };
+		EE0000000000000000001013 /* ENH001GPSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ENH001GPSTests.swift; sourceTree = "<group>"; };
 		EE0000000000000000003003 /* Color+App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+App.swift"; sourceTree = "<group>"; };
 		EE0000000000000000004003 /* IqamahBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IqamahBackground.swift; sourceTree = "<group>"; };
 		EE0000000000000000006002 /* PrayerTimesComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerTimesComponents.swift; sourceTree = "<group>"; };
@@ -278,6 +280,7 @@
 				EE000000000000000000100D /* IqamahModelTests.swift */,
 				EE000000000000000000100F /* IntegrationAndEdgeCaseTests.swift */,
 				EE0000000000000000001011 /* PrayerAccuracyRegressionTests.swift */,
+				EE0000000000000000001013 /* ENH001GPSTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -445,6 +448,7 @@
 				EE000000000000000000100E /* IqamahModelTests.swift in Sources */,
 				EE0000000000000000001010 /* IntegrationAndEdgeCaseTests.swift in Sources */,
 				EE0000000000000000001012 /* PrayerAccuracyRegressionTests.swift in Sources */,
+				EE0000000000000000001014 /* ENH001GPSTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
