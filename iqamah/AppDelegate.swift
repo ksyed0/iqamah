@@ -106,6 +106,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             return
         }
 
+        // ENH-001: prefer authoritative GPS locality name over nearest-city name
+        let displayCity: String
+        if settings.locationSource == "gps", !settings.gpsLocality.isEmpty {
+            displayCity = settings.gpsLocality
+        } else {
+            displayCity = settings.loadCity()?.name ?? "—"
+        }
+        _ = displayCity // available for future status bar city display
+
         let timezone = TimeZone(identifier: city.timezone) ?? .current
         let calculator = PrayerCalculator(
             coordinate: city.coordinate,
