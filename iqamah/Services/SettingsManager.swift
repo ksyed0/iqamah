@@ -1,3 +1,4 @@
+import CoreLocation
 import Foundation
 import SwiftUI
 
@@ -45,6 +46,12 @@ class SettingsManager: ObservableObject {
         static let mutedPrayers = "mutedPrayers"
         static let uiScale = "uiScale"
         static let appearance = "appAppearance"
+        static let locationSource  = "locationSource"   // "gps" or "manual"
+        static let gpsLocality     = "gpsLocality"
+        static let gpsTimezone     = "gpsTimezone"
+        static let gpsLatitude     = "gpsLatitude"
+        static let gpsLongitude    = "gpsLongitude"
+        static let gpsCoordinateCached = "gpsCoordinateCached"
     }
 
     @Published var hasCompletedSetup: Bool {
@@ -87,6 +94,16 @@ class SettingsManager: ObservableObject {
         }
     }
 
+    @Published var locationSource: String {
+        didSet { defaults.set(locationSource, forKey: Keys.locationSource) }
+    }
+    @Published var gpsLocality: String {
+        didSet { defaults.set(gpsLocality, forKey: Keys.gpsLocality) }
+    }
+    @Published var gpsTimezone: String {
+        didSet { defaults.set(gpsTimezone, forKey: Keys.gpsTimezone) }
+    }
+
     static let uiScaleMin: Double = 0.7
     static let uiScaleMax: Double = 1.5
     static let uiScaleStep: Double = 0.1
@@ -120,6 +137,10 @@ class SettingsManager: ObservableObject {
         } else {
             appearance = .system
         }
+
+        locationSource = userDefaults.string(forKey: Keys.locationSource) ?? "manual"
+        gpsLocality    = userDefaults.string(forKey: Keys.gpsLocality) ?? ""
+        gpsTimezone    = userDefaults.string(forKey: Keys.gpsTimezone) ?? TimeZone.current.identifier
     }
 
     func saveCity(_ city: City) {
@@ -153,6 +174,20 @@ class SettingsManager: ObservableObject {
             longitude: longitude,
             timezone: timezone
         )
+    }
+
+    func saveGPSCoordinates(_ coordinate: CLLocationCoordinate2D) {
+        defaults.set(coordinate.latitude,  forKey: Keys.gpsLatitude)
+        defaults.set(coordinate.longitude, forKey: Keys.gpsLongitude)
+        defaults.set(true, forKey: Keys.gpsCoordinateCached)
+        NotificationCenter.default.post(name: .settingsDidChange, object: nil)
+    }
+
+    func cachedGPSCoordinate() -> CLLocationCoordinate2D? {
+        guard defaults.bool(forKey: Keys.gpsCoordinateCached) else { return nil }
+        let lat = defaults.double(forKey: Keys.gpsLatitude)
+        let lon = defaults.double(forKey: Keys.gpsLongitude)
+        return CLLocationCoordinate2D(latitude: lat, longitude: lon)
     }
 
     func completeSetup(city: City, calculationMethod: CalculationMethod, asrMethod: AsrJuristicMethod) {
