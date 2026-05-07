@@ -15,6 +15,7 @@ struct PrayerTimesView: View {
     @State private var showAbout = false
     @State private var timerSubscription: Cancellable?
     @ObservedObject private var settingsStore = SettingsManager.shared
+    @ObservedObject private var player = AdhaaanPlayer.shared
 
     // AC-0064: scale the serif title with the user's Dynamic Type size preference
     @ScaledMetric(relativeTo: .title3) private var titleFontSize: CGFloat = 28
