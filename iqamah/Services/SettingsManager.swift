@@ -4,6 +4,7 @@ import SwiftUI
 
 extension Notification.Name {
     static let settingsDidChange = Notification.Name("settingsDidChange")
+    static let openSettings = Notification.Name("openSettings")
 }
 
 enum AppAppearance: String, CaseIterable {

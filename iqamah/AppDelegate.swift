@@ -6,6 +6,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var statusItem: NSStatusItem?
     var mainWindow: NSWindow?
     var updateTimer: Timer?
+    private var popover: NSPopover?
 
     // MARK: - Adhaan auto-play tracking
 
@@ -234,36 +235,74 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     @objc func statusBarButtonClicked(_: NSStatusBarButton) {
         guard let event = NSApp.currentEvent else { return }
-
         if event.type == .rightMouseUp {
             showMenu()
         } else {
-            toggleWindow()
+            showPopover()
+        }
+    }
+
+    private func makePopover() -> NSPopover {
+        let pop = NSPopover()
+        pop.contentSize = NSSize(width: 320, height: 440)
+        pop.behavior = .transient
+        pop.animates = true
+        pop.contentViewController = NSHostingController(rootView: MenuBarPopoverView())
+        return pop
+    }
+
+    private func showPopover() {
+        guard let button = statusItem?.button else { return }
+        if popover == nil { popover = makePopover() }
+        guard let pop = popover else { return }
+        if pop.isShown {
+            pop.close()
+        } else {
+            pop.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         }
     }
 
     private func showMenu() {
         let menu = NSMenu()
 
-        // target must be set explicitly — NSStatusItem menus do not walk the
-        // normal responder chain, so without a target the action fires into void.
-        let showItem = NSMenuItem(title: "Show Prayer Times", action: #selector(showWindow), keyEquivalent: "")
-        showItem.target = self
-        menu.addItem(showItem)
+        // Identity header — non-interactive
+        let headerItem = NSMenuItem()
+        let city = SettingsManager.shared.locationSource == "gps" && !SettingsManager.shared.gpsLocality.isEmpty
+            ? SettingsManager.shared.gpsLocality
+            : SettingsManager.shared.loadCity()?.name ?? "Iqamah"
+        let method = SettingsManager.shared.calculationMethod.shortName
+        let headerView = NSHostingView(rootView:
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Iqamah")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Color.primary)
+                Text("📍 \(city) · \(method)")
+                    .font(.system(size: 11))
+                    .foregroundStyle(Color.secondary)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .frame(width: 220, alignment: .leading)
+        )
+        headerView.frame = NSRect(x: 0, y: 0, width: 220, height: 46)
+        headerItem.view = headerView
+        menu.addItem(headerItem)
 
         menu.addItem(NSMenuItem.separator())
 
-        let supportItem = NSMenuItem(title: "Help & Support", action: #selector(openSupport), keyEquivalent: "")
-        supportItem.target = self
-        menu.addItem(supportItem)
+        let windowItem = NSMenuItem(title: "Open Main Window", action: #selector(showWindow), keyEquivalent: "")
+        windowItem.target = self
+        menu.addItem(windowItem)
 
-        let privacyItem = NSMenuItem(title: "Privacy Policy", action: #selector(openPrivacy), keyEquivalent: "")
-        privacyItem.target = self
-        menu.addItem(privacyItem)
+        let settingsItem = NSMenuItem(title: "Settings", action: #selector(openSettingsFromMenu), keyEquivalent: ",")
+        settingsItem.keyEquivalentModifierMask = .command
+        settingsItem.target = self
+        menu.addItem(settingsItem)
 
         menu.addItem(NSMenuItem.separator())
 
         let quitItem = NSMenuItem(title: "Quit Iqamah", action: #selector(quitApp), keyEquivalent: "q")
+        quitItem.keyEquivalentModifierMask = .command
         quitItem.target = self
         menu.addItem(quitItem)
 
@@ -318,6 +357,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     @objc func quitApp() {
         NSApplication.shared.terminate(nil)
+    }
+
+    @objc func closePopover() {
+        popover?.close()
+    }
+
+    @objc func openSettingsFromMenu() {
+        showWindow()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            NotificationCenter.default.post(name: .openSettings, object: nil)
+        }
     }
 
     func windowShouldClose(_ sender: NSWindow) -> Bool {
