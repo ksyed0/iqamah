@@ -208,7 +208,7 @@ struct LocationSetupView: View {
         // Skip if same location as cache (within 5 km)
         if let cached = SettingsManager.shared.cachedGPSCoordinate() {
             let cachedLoc = CLLocation(latitude: cached.latitude, longitude: cached.longitude)
-            let newLoc    = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+            let newLoc = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
             if cachedLoc.distance(from: newLoc) < 5000,
                !SettingsManager.shared.gpsLocality.isEmpty { return }
         }

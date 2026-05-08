@@ -108,11 +108,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
 
         // ENH-001: prefer authoritative GPS locality name over nearest-city name
-        let displayCity: String
-        if settings.locationSource == "gps", !settings.gpsLocality.isEmpty {
-            displayCity = settings.gpsLocality
+        let displayCity: String = if settings.locationSource == "gps", !settings.gpsLocality.isEmpty {
+            settings.gpsLocality
         } else {
-            displayCity = settings.loadCity()?.name ?? "—"
+            settings.loadCity()?.name ?? "—"
         }
         _ = displayCity // available for future status bar city display
 
@@ -282,8 +281,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 8)
-            .frame(width: 220, alignment: .leading)
-        )
+            .frame(width: 220, alignment: .leading))
         headerView.frame = NSRect(x: 0, y: 0, width: 220, height: 46)
         headerItem.view = headerView
         menu.addItem(headerItem)

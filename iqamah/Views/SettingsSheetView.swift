@@ -32,7 +32,7 @@ struct SettingsSheetView: View {
     @State private var launchAtLogin = false
     @State private var isDetectingLocation = false
     @StateObject private var locationService = LocationService()
-    @State private var detectedLocationInfo: String? = nil  // inline result text
+    @State private var detectedLocationInfo: String? = nil // inline result text
 
     // US-0031: track whether the user has manually changed the method
     @State private var userOverrodeMethod = false
@@ -147,8 +147,8 @@ struct SettingsSheetView: View {
                     }
                     // Create and cache GPS city so it appears in the dropdown
                     let gpsCity = try? City(name: detectedCityName, countryCode: countryCode,
-                                           latitude: lat, longitude: lon,
-                                           timezone: TimeZone.current.identifier)
+                                            latitude: lat, longitude: lon,
+                                            timezone: TimeZone.current.identifier)
                     SettingsManager.shared.gpsDetectedCity = gpsCity
                     selectedCity = gpsCity
                     let latStr = String(format: "%.4f°%@", abs(lat), lat >= 0 ? "N" : "S")
@@ -168,16 +168,16 @@ struct SettingsSheetView: View {
                         if let locality { SettingsManager.shared.gpsLocality = locality }
                         SettingsManager.shared.gpsTimezone = tz
                         // Update GPS city cache with refined name and timezone
-                        if let db = self.database,
+                        if let db = database,
                            let nearest = db.closestCity(to: CLLocationCoordinate2D(latitude: lat, longitude: lon)),
                            let refined = try? City(name: finalName, countryCode: nearest.countryCode,
                                                    latitude: lat, longitude: lon, timezone: tz) {
                             SettingsManager.shared.gpsDetectedCity = refined
-                            self.selectedCity = refined
+                            selectedCity = refined
                         }
                         let latStr = String(format: "%.4f°%@", abs(lat), lat >= 0 ? "N" : "S")
                         let lonStr = String(format: "%.4f°%@", abs(lon), lon >= 0 ? "E" : "W")
-                        self.detectedLocationInfo = "📍 \(finalName) — \(latStr), \(lonStr)"
+                        detectedLocationInfo = "📍 \(finalName) — \(latStr), \(lonStr)"
                     }
                 }
             } catch {
@@ -298,85 +298,7 @@ struct SettingsSheetView: View {
         ).calculate(for: Date())
     }
 
-    private func adjustmentRow(for prayerName: String) -> some View {
-        let current = settings.prayerAdjustments[prayerName] ?? 0
-        let fmt: DateFormatter? = {
-            guard let tz = selectedCity.flatMap({ TimeZone(identifier: $0.timezone) }) else { return nil }
-            return PrayerTimes.timeFormatter(for: tz, use24Hour: use24Hour)
-        }()
-        let baseTime: Date? = {
-            guard let times = previewTimes else { return nil }
-            switch prayerName {
-            case "Fajr":    return times.fajr
-            case "Dhuhr":   return times.dhuhr
-            case "Asr":     return times.asr
-            case "Maghrib": return times.maghrib
-            case "Isha":    return times.isha
-            default:        return nil
-            }
-        }()
-        let finalTime = baseTime.flatMap {
-            Calendar.current.date(byAdding: .minute, value: current, to: $0)
-        }
-
-        return HStack(spacing: 0) {
-            // Prayer name — flexible, takes remaining space
-            Text(prayerName)
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            // Calculated time
-            Group {
-                if let fmt, let base = baseTime {
-                    Text(fmt.string(from: base))
-                        .foregroundStyle(.secondary)
-                } else {
-                    Text("—").foregroundStyle(.tertiary)
-                }
-            }
-            .font(.caption.monospacedDigit())
-            .frame(width: 66, alignment: .trailing)
-
-            // Adj controls — fixed width, centred
-            HStack(spacing: 4) {
-                Button { SettingsManager.shared.setAdjustment(current - 1, for: prayerName) } label: {
-                    Image(systemName: "minus.circle.fill").symbolRenderingMode(.hierarchical)
-                        .foregroundStyle(current > -60 ? Color.accentColor : .secondary)
-                }
-                .buttonStyle(.plain).disabled(current <= -60)
-                .accessibilityLabel("Decrease \(prayerName) adjustment")
-
-                Text(current == 0 ? "±0" : (current > 0 ? "+\(current)" : "\(current)"))
-                    .font(.body.monospacedDigit())
-                    .foregroundStyle(current == 0 ? AnyShapeStyle(.secondary) : AnyShapeStyle(Color.orange))
-                    .frame(width: 32, alignment: .center)
-                    .accessibilityLabel("\(prayerName) adjustment: \(current) minutes")
-
-                Button { SettingsManager.shared.setAdjustment(current + 1, for: prayerName) } label: {
-                    Image(systemName: "plus.circle.fill").symbolRenderingMode(.hierarchical)
-                        .foregroundStyle(current < 60 ? Color.accentColor : .secondary)
-                }
-                .buttonStyle(.plain).disabled(current >= 60)
-                .accessibilityLabel("Increase \(prayerName) adjustment")
-            }
-            .frame(width: 86, alignment: .center)
-
-            // Final time
-            Group {
-                if let fmt, let final_ = finalTime {
-                    Text(fmt.string(from: final_))
-                        .foregroundStyle(current != 0 ? AnyShapeStyle(Color.appGold) : AnyShapeStyle(Color.primary))
-                        .fontWeight(current != 0 ? .semibold : .regular)
-                } else {
-                    Text("—").foregroundStyle(.tertiary)
-                }
-            }
-            .font(.callout.monospacedDigit())
-            .frame(width: 66, alignment: .trailing)
-        }
-    }
-
     @ViewBuilder private var adjustmentsSection: some View {
-        // Column header row — mirrors adjustmentRow column widths
         HStack(spacing: 0) {
             Text("Prayer").frame(maxWidth: .infinity, alignment: .leading)
             Text("Calc'd").frame(width: 66, alignment: .trailing)
@@ -387,7 +309,20 @@ struct SettingsSheetView: View {
         .foregroundStyle(.secondary)
 
         ForEach(Self.adjustmentPrayerNames, id: \.self) { prayerName in
-            adjustmentRow(for: prayerName)
+            let fmt = selectedCity.flatMap { TimeZone(identifier: $0.timezone) }
+                .map { PrayerTimes.timeFormatter(for: $0, use24Hour: use24Hour) }
+            let baseTime: Date? = {
+                guard let t = previewTimes else { return nil }
+                switch prayerName {
+                case "Fajr": return t.fajr
+                case "Dhuhr": return t.dhuhr
+                case "Asr": return t.asr
+                case "Maghrib": return t.maghrib
+                case "Isha": return t.isha
+                default: return nil
+                }
+            }()
+            SettingsAdjustmentRow(prayerName: prayerName, baseTime: baseTime, formatter: fmt)
         }
     }
 
@@ -514,5 +449,73 @@ struct SettingsSheetView: View {
         SettingsManager.shared.use24HourTime = use24Hour
         SettingsManager.shared.appearance = selectedAppearance
         onSave(city, selectedMethod, selectedAsrMethod)
+    }
+}
+
+// MARK: - Adjustment row (extracted to keep SettingsSheetView under line limit)
+
+private struct SettingsAdjustmentRow: View {
+    let prayerName: String
+    let baseTime: Date?
+    let formatter: DateFormatter?
+
+    @ObservedObject private var settings = SettingsManager.shared
+
+    private var current: Int { settings.prayerAdjustments[prayerName] ?? 0 }
+
+    private var finalTime: Date? {
+        baseTime.flatMap { Calendar.current.date(byAdding: .minute, value: current, to: $0) }
+    }
+
+    var body: some View {
+        HStack(spacing: 0) {
+            Text(prayerName)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            Group {
+                if let fmt = formatter, let base = baseTime {
+                    Text(fmt.string(from: base)).foregroundStyle(.secondary)
+                } else {
+                    Text("—").foregroundStyle(.tertiary)
+                }
+            }
+            .font(.caption.monospacedDigit())
+            .frame(width: 66, alignment: .trailing)
+
+            HStack(spacing: 4) {
+                Button { SettingsManager.shared.setAdjustment(current - 1, for: prayerName) } label: {
+                    Image(systemName: "minus.circle.fill").symbolRenderingMode(.hierarchical)
+                        .foregroundStyle(current > -60 ? Color.accentColor : .secondary)
+                }
+                .buttonStyle(.plain).disabled(current <= -60)
+                .accessibilityLabel("Decrease \(prayerName) adjustment")
+
+                Text(current == 0 ? "±0" : (current > 0 ? "+\(current)" : "\(current)"))
+                    .font(.body.monospacedDigit())
+                    .foregroundStyle(current == 0 ? AnyShapeStyle(.secondary) : AnyShapeStyle(Color.orange))
+                    .frame(width: 32, alignment: .center)
+                    .accessibilityLabel("\(prayerName) adjustment: \(current) minutes")
+
+                Button { SettingsManager.shared.setAdjustment(current + 1, for: prayerName) } label: {
+                    Image(systemName: "plus.circle.fill").symbolRenderingMode(.hierarchical)
+                        .foregroundStyle(current < 60 ? Color.accentColor : .secondary)
+                }
+                .buttonStyle(.plain).disabled(current >= 60)
+                .accessibilityLabel("Increase \(prayerName) adjustment")
+            }
+            .frame(width: 86, alignment: .center)
+
+            Group {
+                if let fmt = formatter, let adjusted = finalTime {
+                    Text(fmt.string(from: adjusted))
+                        .foregroundStyle(current != 0 ? AnyShapeStyle(Color.appGold) : AnyShapeStyle(Color.primary))
+                        .fontWeight(current != 0 ? .semibold : .regular)
+                } else {
+                    Text("—").foregroundStyle(.tertiary)
+                }
+            }
+            .font(.callout.monospacedDigit())
+            .frame(width: 66, alignment: .trailing)
+        }
     }
 }

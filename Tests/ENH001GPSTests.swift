@@ -1,6 +1,5 @@
 import XCTest
 import CoreLocation
-@testable import iqamah
 
 final class ENH001GPSTests: XCTestCase {
     var settings: SettingsManager!

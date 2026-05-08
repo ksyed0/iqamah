@@ -13,8 +13,8 @@ import Combine
 
 struct MenuBarPopoverView: View {
     @ObservedObject private var settings = SettingsManager.shared
-    @ObservedObject private var player   = AdhaaanPlayer.shared
-    @StateObject  private var timer      = PopoverTimerState()
+    @ObservedObject private var player = AdhaaanPlayer.shared
+    @StateObject private var timer = PopoverTimerState()
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
@@ -28,7 +28,7 @@ struct MenuBarPopoverView: View {
         .frame(width: 320)
         .background(Color(NSColor.windowBackgroundColor))
         .preferredColorScheme(settings.appearance.colorScheme)
-        .onAppear  { timer.start(settings: settings) }
+        .onAppear { timer.start(settings: settings) }
         .onDisappear { timer.stop() }
     }
 
@@ -137,7 +137,7 @@ struct MenuBarPopoverView: View {
                     PopoverPrayerRow(
                         row: row,
                         isNext: row.name == timer.nextPrayerName,
-                        isMasterMuted: player.isMuted,
+                        isGlobalMuted: player.isMuted,
                         settings: settings
                     )
                 }
@@ -174,7 +174,7 @@ struct MenuBarPopoverView: View {
 
     private var dateBarString: String {
         let date = Date()
-        let greg  = DateFormatter()
+        let greg = DateFormatter()
         greg.dateFormat = "EEEE, d MMM yyyy"
         let hijri = DateFormatter()
         hijri.calendar = Calendar(identifier: .islamicUmmAlQura)
@@ -188,7 +188,7 @@ struct MenuBarPopoverView: View {
 struct PopoverPrayerRow: View {
     let row: PopoverRowData
     let isNext: Bool
-    let isMasterMuted: Bool
+    let isGlobalMuted: Bool
     @ObservedObject var settings: SettingsManager
 
     private var isPrayerMuted: Bool { settings.isPrayerMuted(row.name) }
@@ -234,7 +234,7 @@ struct PopoverPrayerRow: View {
                     .font(.system(size: 12))
                     .foregroundStyle(
                         isPrayerMuted ? Color.orange :
-                        (isMasterMuted ? Color.secondary.opacity(0.3) : Color.secondary)
+                            (isGlobalMuted ? Color.secondary.opacity(0.3) : Color.secondary)
                     )
                     .frame(width: 28, height: 28)
                     .background(
@@ -292,7 +292,7 @@ struct PopoverRowData: Identifiable {
         "Dhuhr": "sun.max.fill",
         "Asr": "sun.min.fill",
         "Maghrib": "sunset.fill",
-        "Isha": "moon.stars.fill"
+        "Isha": "moon.stars.fill",
     ]
 }
 
@@ -321,23 +321,23 @@ final class PopoverTimerState: ObservableObject {
 
     private func recalculate(settings: SettingsManager) {
         guard let city = settings.loadCity(),
-              let tz   = TimeZone(identifier: city.timezone),
+              let tz = TimeZone(identifier: city.timezone),
               let times = try? PrayerCalculator(
-                coordinate: city.coordinate,
-                timezone: tz,
-                method: settings.calculationMethod,
-                asrMethod: settings.asrMethod
+                  coordinate: city.coordinate,
+                  timezone: tz,
+                  method: settings.calculationMethod,
+                  asrMethod: settings.asrMethod
               ).calculate(for: Date())
         else { return }
 
         let formatter = PrayerTimes.timeFormatter(for: tz, use24Hour: settings.use24HourTime)
-        let now       = Date()
+        let now = Date()
 
         // Build rows — prayers only (Sunrise inserted after Fajr)
         let prayerNames = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"]
         let prayerTimes: [String: Date] = [
             "Fajr": times.fajr, "Dhuhr": times.dhuhr,
-            "Asr": times.asr, "Maghrib": times.maghrib, "Isha": times.isha
+            "Asr": times.asr, "Maghrib": times.maghrib, "Isha": times.isha,
         ]
 
         var builtRows: [PopoverRowData] = []
