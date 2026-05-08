@@ -494,13 +494,17 @@ Detailed release plan defining MVP and subsequent milestones. Contains Epics, Us
 
 **Priority:** Critical  
 **Estimate:** 1 Story Point  
-**Status:** ✅ Draft Created (`Privacy_Policy.md` in repo root)
+**Status:** ✅ Complete — 2026-05-07
+
+**URLs (live):**
+- Privacy Policy: `https://www.fablesoft.biz/products/iqamah/privacy`
+- Support: `https://www.fablesoft.biz/products/iqamah/support`
 
 **Acceptance Criteria:**
-- [ ] AC-0088: `Privacy_Policy.md` exists in the repository with complete policy text
-- [ ] AC-0089: Policy is hosted at a publicly accessible URL (e.g., GitHub Pages or similar)
-- [ ] AC-0090: Privacy policy URL is entered in App Store Connect before submission
-- [ ] AC-0091: Policy accurately states that no personal data is collected or transmitted
+- [x] AC-0088: `Privacy_Policy.md` exists in the repository with complete policy text
+- [x] AC-0089: Policy hosted at `https://www.fablesoft.biz/products/iqamah/privacy`
+- [x] AC-0090: Privacy policy URL entered in App Store Connect
+- [x] AC-0091: Policy accurately states that no personal data is collected or transmitted
 
 ---
 
@@ -939,9 +943,9 @@ Keep under 3 minutes.
 
 ---
 
-### US-0037 — Fix UI issues before resubmission (BUG-0052, 0053, 0054) ❌
+### US-0037 — Fix UI issues before resubmission (BUG-0052, 0053, 0054) ✅
 
-**Status:** ❌ Open — code fixes needed
+**Status:** ✅ Implemented — confirmed in code; included in PR #48 (build 6)
 
 **Issues to fix before archiving next build:**
 

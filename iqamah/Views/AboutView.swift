@@ -91,7 +91,7 @@ struct AboutView: View {
                     Text("·").foregroundColor(.secondary)
 
                     // swiftlint:disable:next force_unwrapping
-                    Link(destination: URL(string: "https://ksyed0.github.io/iqamah/support.html")!) {
+                    Link(destination: URL(string: "https://www.fablesoft.biz/products/iqamah/support")!) {
                         HStack(spacing: 5) {
                             Image(systemName: "questionmark.circle")
                                 .font(.caption)
@@ -105,7 +105,7 @@ struct AboutView: View {
                     Text("·").foregroundColor(.secondary)
 
                     // swiftlint:disable:next force_unwrapping
-                    Link(destination: URL(string: "https://ksyed0.github.io/iqamah/privacy-policy.html")!) {
+                    Link(destination: URL(string: "https://www.fablesoft.biz/products/iqamah/privacy")!) {
                         HStack(spacing: 5) {
                             Image(systemName: "lock.shield")
                                 .font(.caption)

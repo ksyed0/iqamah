@@ -15,6 +15,7 @@ struct PrayerTimesView: View {
     @State private var showAbout = false
     @State private var timerSubscription: Cancellable?
     @ObservedObject private var settingsStore = SettingsManager.shared
+    @ObservedObject private var player = AdhaaanPlayer.shared
 
     // AC-0064: scale the serif title with the user's Dynamic Type size preference
     @ScaledMetric(relativeTo: .title3) private var titleFontSize: CGFloat = 28
@@ -164,6 +165,9 @@ struct PrayerTimesView: View {
         }
         .onReceive(timer) { _ in
             updateDate()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .openSettings)) { _ in
+            showSettings = true
         }
     }
 
@@ -367,38 +371,44 @@ struct PrayerTimeRow: View {
     // Extracted to keep body under the Swift type-checker expression limit
     private var adhaanColumnButton: some View {
         Button(action: onTogglePicker) {
-            HStack(spacing: 4) {
-                Image(systemName: "music.note")
-                    .font(.caption2)
+            HStack(spacing: 3) {
+                Text(selectedAdhaan.id == "silent" ? "No adhaan" : selectedAdhaan.shortName)
+                    .font(.caption.weight(.medium))
                     .foregroundStyle(selectedAdhaan.id == "silent"
-                        ? Color.secondary.opacity(0.4)
-                        : effectiveGold.opacity(0.75))
-                if selectedAdhaan.id == "silent" {
-                    Text("—")
-                        .font(.caption.italic())
-                        .foregroundStyle(.secondary.opacity(0.5))
-                } else {
-                    Text(selectedAdhaan.shortName)
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(effectiveGold.opacity(0.85))
-                        .lineLimit(1)
-                }
+                        ? Color.secondary.opacity(0.5)
+                        : (isPrayerMuted
+                            ? Color.secondary.opacity(0.4)
+                            : effectiveGold.opacity(0.85)))
+                    .lineLimit(1)
+                    .strikethrough(
+                        isPrayerMuted && selectedAdhaan.id != "silent",
+                        color: Color.secondary.opacity(0.5)
+                    )
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 8, weight: .semibold))
+                    .foregroundStyle(.tertiary)
             }
-            .padding(.horizontal, 6)
-            .padding(.vertical, 3)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
             .background(
-                RoundedRectangle(cornerRadius: 4, style: .continuous)
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
                     .fill(selectedAdhaan.id == "silent"
-                        ? Color.clear
-                        : effectiveGold.opacity(colorScheme == .dark ? 0.10 : 0.12))
+                        ? Color.secondary.opacity(0.07)
+                        : (isPrayerMuted
+                            ? Color.secondary.opacity(0.05)
+                            : effectiveGold.opacity(colorScheme == .dark ? 0.10 : 0.12)))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 4, style: .continuous)
-                    .strokeBorder(selectedAdhaan.id == "silent"
-                        ? Color.clear
-                        : effectiveGold.opacity(0.22), lineWidth: 0.5)
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .strokeBorder(
+                        selectedAdhaan.id == "silent"
+                            ? Color.secondary.opacity(0.15)
+                            : (isPrayerMuted
+                                ? Color.secondary.opacity(0.10)
+                                : effectiveGold.opacity(0.22)),
+                        lineWidth: 0.5
+                    )
             )
-            .frame(minWidth: 72, alignment: .center)
         }
         .buttonStyle(.plain)
         .help(selectedAdhaan.id == "silent"
@@ -411,15 +421,15 @@ struct PrayerTimeRow: View {
 
     private var mainRowContent: some View {
         HStack(spacing: 0) {
-            // Left accent stripe (highlighted only)
+            // Left accent stripe
             Rectangle()
                 .fill(isHighlighted ? effectiveGold : Color.clear)
                 .frame(width: 4)
                 .clipShape(RoundedRectangle(cornerRadius: 2, style: .continuous))
                 .padding(.vertical, 8)
 
-            HStack(spacing: 16) {
-                // Prayer icon + name
+            HStack(spacing: 0) {
+                // Icon + name
                 HStack(spacing: 14) {
                     ZStack {
                         Circle()
@@ -443,56 +453,67 @@ struct PrayerTimeRow: View {
                         }
                     }
                 }
+                .padding(.leading, 16)
 
                 Spacer()
 
-                adhaanColumnButton
-
-                // Time + optional adjustment badge
-                Text(formatter.string(from: time))
-                    .font(isHighlighted ? .title2.weight(.semibold) : .title3.weight(.medium))
-                    .foregroundStyle(isHighlighted ? effectiveGold : .primary)
-                    .monospacedDigit()
-                    .frame(minWidth: 72, alignment: .trailing)
-                    .overlay(alignment: .topTrailing) {
-                        if adjustment != 0 {
-                            Text(adjustment > 0 ? "+\(adjustment)" : "\(adjustment)")
-                                .font(.system(size: 8, weight: .bold))
-                                .foregroundStyle(.white)
-                                .padding(.horizontal, 4)
-                                .padding(.vertical, 1)
-                                .background(Capsule().fill(Color.red.opacity(0.8)))
-                                .offset(x: 4, y: -4)
-                                .accessibilityLabel("\(abs(adjustment)) minute adjustment")
+                // Time + ± controls grouped together
+                HStack(spacing: 8) {
+                    Text(formatter.string(from: time))
+                        .font(isHighlighted ? .title2.weight(.semibold) : .title3.weight(.medium))
+                        .foregroundStyle(isHighlighted ? effectiveGold : .primary)
+                        .monospacedDigit()
+                        .frame(minWidth: 72, alignment: .trailing)
+                        .overlay(alignment: .topTrailing) {
+                            if adjustment != 0 {
+                                Text(adjustment > 0 ? "+\(adjustment)" : "\(adjustment)")
+                                    .font(.system(size: 8, weight: .bold))
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 4)
+                                    .padding(.vertical, 1)
+                                    .background(Capsule().fill(Color.red.opacity(0.8)))
+                                    .offset(x: 4, y: -4)
+                                    .accessibilityLabel("\(abs(adjustment)) minute adjustment")
+                            }
                         }
-                    }
 
-                // Adjustment controls
-                HStack(spacing: 6) {
-                    Button(action: { onAdjust(-1) }) {
-                        Image(systemName: "minus.circle.fill")
-                            .font(.title3)
-                            .foregroundStyle(.secondary)
-                            .symbolRenderingMode(.hierarchical)
-                    }
-                    .buttonStyle(.plain)
-                    .help("Decrease \(name) by 1 minute")
-                    .accessibilityLabel("Decrease \(name) time by 1 minute")
-                    .accessibilityHint("Current adjustment: \(adjustment) minutes")
+                    HStack(spacing: 6) {
+                        Button(action: { onAdjust(-1) }) {
+                            Image(systemName: "minus.circle.fill")
+                                .font(.title3)
+                                .foregroundStyle(.secondary)
+                                .symbolRenderingMode(.hierarchical)
+                        }
+                        .buttonStyle(.plain)
+                        .help("Decrease \(name) by 1 minute")
+                        .accessibilityLabel("Decrease \(name) time by 1 minute")
+                        .accessibilityHint("Current adjustment: \(adjustment) minutes")
 
-                    Button(action: { onAdjust(1) }) {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.title3)
-                            .foregroundStyle(.secondary)
-                            .symbolRenderingMode(.hierarchical)
+                        Button(action: { onAdjust(1) }) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.title3)
+                                .foregroundStyle(.secondary)
+                                .symbolRenderingMode(.hierarchical)
+                        }
+                        .buttonStyle(.plain)
+                        .help("Increase \(name) by 1 minute")
+                        .accessibilityLabel("Increase \(name) time by 1 minute")
+                        .accessibilityHint("Current adjustment: \(adjustment) minutes")
                     }
-                    .buttonStyle(.plain)
-                    .help("Increase \(name) by 1 minute")
-                    .accessibilityLabel("Increase \(name) time by 1 minute")
-                    .accessibilityHint("Current adjustment: \(adjustment) minutes")
                 }
+                .padding(.trailing, 8)
 
-                // Per-prayer mute
+                // Divider between time/± and adhaan column
+                Rectangle()
+                    .fill(Color.primary.opacity(0.08))
+                    .frame(width: 1, height: 28)
+                    .padding(.horizontal, 10)
+
+                // Adhaan pill — always visible, fixed column
+                adhaanColumnButton
+                    .frame(width: 100)
+
+                // Mute toggle — fixed column
                 Button(action: { isPrayerMuted.toggle() }) {
                     Image(systemName: isPrayerMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
                         .font(.callout)
@@ -505,8 +526,9 @@ struct PrayerTimeRow: View {
                 .help(isPrayerMuted ? "Unmute \(name) adhaan" : "Mute \(name) adhaan")
                 .accessibilityLabel(isPrayerMuted ? "Unmute \(name) adhaan" : "Mute \(name) adhaan")
                 .opacity(player.isMuted ? 0.4 : 1.0)
+                .frame(width: 36)
+                .padding(.trailing, 16)
             }
-            .padding(.horizontal, 16)
             .padding(.vertical, isHighlighted ? 18 : 14)
         }
     }
@@ -532,7 +554,7 @@ struct PrayerTimeRow: View {
                         .buttonStyle(.plain)
                     }
                 }
-                ScrollView(.horizontal, showsIndicators: false) {
+                ScrollView(.horizontal) {
                     HStack(spacing: 6) {
                         ForEach(adhaanOptions) { option in
                             Button(action: {
@@ -566,7 +588,10 @@ struct PrayerTimeRow: View {
                         }
                     }
                     .padding(.horizontal, 2)
+                    .padding(.bottom, 4)
                 }
+                .frame(maxWidth: .infinity)
+                .scrollIndicators(.visible)
             }
             .padding(.leading, 20)
             .padding(.trailing, 16)

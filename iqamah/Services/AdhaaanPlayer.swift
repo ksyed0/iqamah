@@ -11,6 +11,7 @@ class AdhaaanPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
     }
 
     @Published var isPlaying = false
+    @Published var audioFailed = false
 
     private var player: AVAudioPlayer?
 
@@ -34,6 +35,7 @@ class AdhaaanPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
         player?.stop()
         player = nil
         isPlaying = false
+        audioFailed = false
     }
 
     func toggleMute() {
@@ -46,6 +48,7 @@ class AdhaaanPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
     nonisolated func audioPlayerDidFinishPlaying(_: AVAudioPlayer, successfully _: Bool) {
         Task { @MainActor in
             self.isPlaying = false
+            self.audioFailed = false
             self.player = nil
         }
     }
@@ -68,8 +71,10 @@ class AdhaaanPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
             if newPlayer.play() {
                 player = newPlayer
                 isPlaying = true
+                audioFailed = false
             } else {
-                print("AdhaaanPlayer: play() returned false — audio subsystem busy or unavailable")
+                print("[AdhaaanPlayer] play() returned false — audio subsystem busy or unavailable")
+                audioFailed = true
             }
         } catch {
             print("AdhaaanPlayer: playback error — \(error.localizedDescription)")

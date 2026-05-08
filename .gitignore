@@ -192,3 +192,8 @@ venv/
 # ========================================
 coverage-report/
 *.xcresult
+
+# ========================================
+# Superpowers brainstorm sessions
+# ========================================
+.superpowers/

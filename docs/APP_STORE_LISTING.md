@@ -69,15 +69,13 @@ prayer,times,salah,namaz,fajr,qiblah,muslim,islamic,hijri,asr,isha,dhuhr,maghrib
 
 ## Support URL
 
-*(Host your GitHub repo or a simple support page — e.g.:)*  
-`https://github.com/ksyed0/iqamah`
+`https://www.fablesoft.biz/products/iqamah/support`
 
 ---
 
 ## Privacy Policy URL
 
-*(Host Privacy_Policy.md as a web page — e.g.:)*  
-`https://ksyed0.github.io/iqamah/privacy`
+`https://www.fablesoft.biz/products/iqamah/privacy`
 
 ---
 
