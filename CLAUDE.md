@@ -47,10 +47,19 @@ Singletons (`SettingsManager.shared`, `CitiesLoader.shared`) → SwiftUI @StateO
 - `splash.jpg` — Splash screen background
 - `Assets.xcassets` — App icons (generated via `AppIconView.swift`/`AppIconGenerator.swift` at project root)
 
+## Project Documentation
+
+Key docs in `docs/`:
+- `RELEASE_PLAN.md` — Epics (EPIC-XXXX), User Stories (US-XXXX), Acceptance Criteria (AC-XXXX); canonical feature backlog
+- `BUGS.md` — Bug register (BUG-XXXX)
+- `ENHANCEMENTS.md` — Lightweight future enhancement backlog (ENH-XXXX); competitive gap items and ideas not yet ready for a formal Epic. When an enhancement is approved for development, promote it to an EPIC + US in RELEASE_PLAN.md and cross-reference the ENH ID.
+- `ID_REGISTRY.md` — Single source of truth for next available ID in every sequence (EPIC, US, AC, BUG, TASK, TC, ENH). Always consult before creating a new artefact.
+- `competitive-analysis.md` — Feature comparison against top 10 App Store competitors; basis for ENH items
+
 ## Key Implementation Details
 
 - Window size: 450x500 default, max 620x680, hidden title bar
 - Prayer times recalculate on day change and every 60 seconds
 - UserDefaults keys: `hasCompletedSetup`, `selectedCity*`, `calculationMethod`, `asrMethod`, `prayerAdjustments`
-- Bundle ID: `com.iqamah.app`, Team: `96Y29SP9JR`
+- Bundle ID: `com.fablesoft.iqamah`, Team: `96Y29SP9JR`
 - Entitlements: App Sandbox enabled, location access via Info.plist keys

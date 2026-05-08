@@ -65,57 +65,6 @@ struct CalculationMethodView: View {
             .padding(.horizontal, 32)
             .padding(.top, 16)
 
-            // ── Display size (quick pick before first use) ──────────
-            HStack(spacing: 10) {
-                Image(systemName: "textformat.size")
-                    .foregroundColor(.secondary)
-                    .font(.callout)
-                Text("Display Size:")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                Button(action: {
-                    if settings.uiScale > SettingsManager.uiScaleMin {
-                        settings.uiScale =
-                            (settings.uiScale - SettingsManager.uiScaleStep)
-                                .rounded(toPlaces: 1)
-                    }
-                }) {
-                    Image(systemName: "minus.circle")
-                        .foregroundColor(
-                            settings.uiScale > SettingsManager.uiScaleMin
-                                ? .accentColor : .secondary
-                        )
-                }
-                .buttonStyle(.plain)
-                .disabled(settings.uiScale <= SettingsManager.uiScaleMin)
-
-                Text("\(Int(settings.uiScale * 100))%")
-                    .font(.subheadline.monospacedDigit())
-                    .frame(minWidth: 38, alignment: .center)
-
-                Button(action: {
-                    if settings.uiScale < SettingsManager.uiScaleMax {
-                        settings.uiScale =
-                            (settings.uiScale + SettingsManager.uiScaleStep)
-                                .rounded(toPlaces: 1)
-                    }
-                }) {
-                    Image(systemName: "plus.circle")
-                        .foregroundColor(
-                            settings.uiScale < SettingsManager.uiScaleMax
-                                ? .accentColor : .secondary
-                        )
-                }
-                .buttonStyle(.plain)
-                .disabled(settings.uiScale >= SettingsManager.uiScaleMax)
-
-                Text("(you can change this later in Settings)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            .padding(.horizontal, 32)
-            .padding(.top, 12)
-
             Spacer()
 
             // ── Navigation buttons ──────────────────────────────────
@@ -125,6 +74,7 @@ struct CalculationMethodView: View {
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.large)
+                .keyboardShortcut(.escape, modifiers: [])
 
                 Spacer()
 
@@ -133,7 +83,9 @@ struct CalculationMethodView: View {
                         .frame(minWidth: 100)
                 }
                 .buttonStyle(.borderedProminent)
+                .tint(.appGold)
                 .controlSize(.large)
+                .keyboardShortcut(.defaultAction)
             }
             .padding(.horizontal, 32)
             .padding(.bottom, 28)

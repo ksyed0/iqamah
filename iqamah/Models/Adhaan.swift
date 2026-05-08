@@ -6,6 +6,13 @@ struct Adhaan: Identifiable, Codable, Hashable {
     let displayName: String
     let filename: String // empty for .silent
 
+    var shortName: String {
+        if displayName.hasPrefix("Adhaan ") {
+            return String(displayName.dropFirst("Adhaan ".count))
+        }
+        return displayName
+    }
+
     // MARK: - Built-in options
 
     static let silent = Adhaan(id: "silent", displayName: "Silent", filename: "")

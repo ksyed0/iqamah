@@ -4,13 +4,32 @@ All bugs and defects tracked here with BUG-XXXX identifiers and status.
 
 ---
 
-## Active Bugs
+**Total Active Bugs:** 2  
+**Critical:** 0  
+**High:** 0  
+**Medium:** 1  
+**Low:** 1
 
-**Total Active Bugs:** 9  
-**Critical:** 4  
-**High:** 3  
-**Medium:** 2  
-**Low:** 0
+> BUG-0001 through BUG-0055 resolved. Two open: BUG-0031 (dev .md docs in bundle), BUG-0032 (PrivacyInfo.xcprivacy missing).
+
+---
+
+## Resolved (sprint 2026-05-03)
+
+**BUG-CI-005: cities.json validation not path-filtered in CI**
+- **Severity:** Low / maintenance
+- **Resolution:** Added `validate-cities.yml` workflow with `paths:` filter on `iqamah/Resources/cities.json` (PR #37)
+- **Resolved:** 2026-05-03
+
+**BUG-CI-006: File size guard checked repo files, not .app bundle**
+- **Severity:** Medium
+- **Resolution:** Replaced `file-size` CI job with Release build + `du -sm` bundle check (50 MB limit) (PR #38)
+- **Resolved:** 2026-05-03
+
+**BUG-TEST-004: No prayer time accuracy regression tests**
+- **Severity:** High
+- **Resolution:** Added `PrayerAccuracyRegressionTests.swift` — 5 cities × 5 prayers on 2024-01-15, ±3 min tolerance (PR #39)
+- **Resolved:** 2026-05-03
 
 ---
 
@@ -463,292 +482,6 @@ All bugs discovered during initial code review. No user-reported bugs yet.
 ---
 
 **Last Updated:** 2026-03-12 (Comprehensive code review completed)
-
----
-
-## Bugs by Status
-
-### Open
-
----
-
-**BUG-0001: Missing splash.jpg bundled resource**
-
-**Severity:** High  
-**Related Story:** US-0018 (Onboarding & First Launch)  
-**Related Task:** TBD  
-**Discovered:** 2026-03-12 during code review
-
-**Steps to Reproduce:**
-1. Build and run the app
-2. Observe splash screen on first launch
-
-**Expected:** Splash screen displays charity message overlaid on background image  
-**Actual:** Splash screen shows black fallback background (image not found in bundle)
-
-**Root Cause:** `SplashScreenView.swift` references `Bundle.main.url(forResource: "splash", withExtension: "jpg")` but resource is not included in project
-
-**Fix Branch:** bugfix/BUG-0001-add-splash-image  
-**Lesson Encoded:** No
-
-**Priority:** High — First impression for all users
-
----
-
-**BUG-0002: No error handling when cities.json fails to load**
-
-**Severity:** Critical  
-**Related Story:** US-0002 (City Selection)  
-**Related Task:** TBD  
-**Discovered:** 2026-03-12 during code review
-
-**Steps to Reproduce:**
-1. Remove or corrupt `cities.json` from bundle
-2. Launch app
-3. Try to select location
-
-**Expected:** Display user-friendly error message and fallback option (manual coordinate entry?)  
-**Actual:** App shows empty country/city pickers with no explanation
-
-**Root Cause:** `CitiesLoader.load()` returns `nil` on failure, but `LocationSetupView` doesn't handle nil database gracefully
-
-**Code Location:**
-```swift
-// Location.swift line ~60
-guard let url = Bundle.main.url(forResource: "cities", withExtension: "json") else {
-    print("Could not find cities.json") // Only prints to console
-    return nil
-}
-```
-
-**Fix Branch:** bugfix/BUG-0002-cities-error-handling  
-**Lesson Encoded:** No
-
-**Priority:** Critical — App unusable without cities database
-
----
-
-**BUG-0003: Forced 10-second splash screen with no skip option**
-
-**Severity:** Medium  
-**Related Story:** US-0018 (Onboarding & First Launch)  
-**Related Task:** TBD  
-**Discovered:** 2026-03-12 during code review
-
-**Steps to Reproduce:**
-1. Launch app (even on subsequent launches if setup not completed)
-2. Wait for splash screen
-3. Try to skip or tap to dismiss
-
-**Expected:** Allow user to tap to continue, or reduce delay to 2-3 seconds  
-**Actual:** User forced to wait 10 full seconds every time setup is not completed
-
-**Root Cause:**
-```swift
-// ContentView.swift line ~28
-DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
-    // Hardcoded 10-second delay
-}
-```
-
-**Fix Branch:** bugfix/BUG-0003-splash-skip  
-**Lesson Encoded:** No
-
-**Priority:** Medium — Poor UX, but not blocking
-
----
-
-**BUG-0004: fatalError crashes app on invalid date components**
-
-**Severity:** Critical  
-**Related Story:** US-0004 (Prayer Time Calculation)  
-**Related Task:** TBD  
-**Discovered:** 2026-03-12 during code review
-
-**Steps to Reproduce:**
-1. Pass invalid date to `PrayerCalculator.calculate(for:)`
-2. App crashes
-
-**Expected:** Graceful error handling with IqamahError.invalidDate  
-**Actual:** App crashes with fatal error
-
-**Code Location:**
-```swift
-// PrayerCalculator.swift line ~23
-guard let year = components.year,
-      let month = components.month,
-      let day = components.day else {
-    fatalError("Could not extract date components") // CRASH
-}
-```
-
-**Fix Branch:** bugfix/BUG-0004-prayer-calc-error-handling  
-**Lesson Encoded:** No
-
-**Priority:** Critical — Violates error handling standards (AGENTS.md §13)
-
-**Recommended Fix:**
-```swift
-guard let year = components.year,
-      let month = components.month,
-      let day = components.day else {
-    throw IqamahError.invalidDate("Could not extract date components from \(date)")
-}
-```
-
----
-
-**BUG-0005: No validation on coordinate ranges**
-
-**Severity:** High  
-**Related Story:** US-0002 (City Selection), US-0003 (Auto-detect location)  
-**Related Task:** TBD  
-**Discovered:** 2026-03-12 during code review
-
-**Steps to Reproduce:**
-1. Create City with invalid coordinates (e.g., latitude = 200°)
-2. App accepts invalid data
-3. Prayer calculations produce incorrect results
-
-**Expected:** Validate latitude ∈ [-90, 90], longitude ∈ [-180, 180]  
-**Actual:** No validation performed
-
-**Code Location:**
-- `City` model has no validation
-- `PrayerCalculator` accepts any CLLocationCoordinate2D
-- `QiblahView` accepts any lat/lon values
-
-**Fix Branch:** bugfix/BUG-0005-coordinate-validation  
-**Lesson Encoded:** No
-
-**Priority:** High — Can lead to incorrect prayer times
-
-**Recommended Fix:**
-```swift
-struct City {
-    init(name: String, countryCode: String, latitude: Double, longitude: Double, timezone: String) throws {
-        guard latitude >= -90 && latitude <= 90 else {
-            throw IqamahError.invalidCoordinates(latitude: latitude, longitude: longitude)
-        }
-        guard longitude >= -180 && longitude <= 180 else {
-            throw IqamahError.invalidCoordinates(latitude: latitude, longitude: longitude)
-        }
-        // ... assign properties
-    }
-}
-```
-
----
-
-**BUG-0006: Timer memory leak in PrayerTimesView**
-
-**Severity:** Medium  
-**Related Story:** US-0004 (Prayer Times Display)  
-**Related Task:** TBD  
-**Discovered:** 2026-03-12 during code review
-
-**Steps to Reproduce:**
-1. Open prayer times view
-2. Navigate away (e.g., to settings and back to location setup)
-3. Timer continues running in background
-
-**Expected:** Timer cancels when view disappears  
-**Actual:** Timer continues indefinitely, updating state for dismissed view
-
-**Code Location:**
-```swift
-// PrayerTimesView.swift line ~12
-private let timer = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
-```
-
-**Fix Branch:** bugfix/BUG-0006-timer-cleanup  
-**Lesson Encoded:** No
-
-**Priority:** Medium — Memory leak, but impact is low (1-minute interval)
-
-**Recommended Fix:**
-```swift
-.onDisappear {
-    timer.upstream.connect().cancel()
-}
-```
-Or use @State var with manual Cancellable management.
-
----
-
-## Bugs by Severity
-
-### Critical (2)
-- BUG-0002: No error handling when cities.json fails to load
-- BUG-0004: fatalError crashes app on invalid date components
-
-### High (2)
-- BUG-0001: Missing splash.jpg bundled resource
-- BUG-0005: No validation on coordinate ranges
-
-### Medium (2)
-- BUG-0003: Forced 10-second splash screen with no skip option
-- BUG-0006: Timer memory leak in PrayerTimesView
-
-### Low (0)
-*None*
-
----
-
-## Fixed (Awaiting Verification)
-
-*None*
-
----
-
-## Verified (Awaiting Closure)
-
-*None*
-
----
-
-## Closed
-
-*None*
-
----
-
-## Retired/Cancelled Bugs
-
-*None*
-
----
-
-## Bug Fix Priority Recommendations
-
-**Phase 1 (Before MVP release):**
-1. BUG-0004 — Critical crash risk
-2. BUG-0002 — Critical functionality blocker
-3. BUG-0005 — High data integrity risk
-4. BUG-0001 — High UX issue (first impression)
-
-**Phase 2 (Before Beta):**
-5. BUG-0003 — Medium UX annoyance
-6. BUG-0006 — Medium technical debt
-
----
-
-## Testing Notes
-
-All bugs discovered during initial code review. No user-reported bugs yet.
-
-**Next Steps:**
-1. Create bug fix branches for each defect
-2. Write test cases to reproduce each bug
-3. Implement fixes per ERROR_TAXONOMY.md standards
-4. Verify fixes with unit and integration tests
-5. Update LESSONS.md with learnings from each fix
-
----
-
-**Last Updated:** 2026-04-29 (Pre-release code review — 7 new bugs added, BUG-0010 through BUG-0016)
-
----
 
 ## New Bugs — 2026-04-29 Pre-Release Review
 
@@ -1387,14 +1120,10 @@ Without this file, App Store Connect will reject the binary at upload with: *"IT
 **Severity:** Low  
 **Related Story:** US-0021 (Privacy Policy)  
 **Discovered:** Carried forward from AC-0089  
-**Status:** Open
+**Status:** ✅ Resolved — 2026-05-07
 
-**Description:**  
-`Privacy_Policy.md` exists in the repo but is not hosted at a public URL. App Store Connect requires a privacy policy URL before submission can be completed. AC-0089, AC-0090, and AC-0091 are all still open.
-
-**Fix:** Host the privacy policy at a public URL (GitHub Pages, or a simple web page). Enter the URL in App Store Connect before submitting.
-
-**Priority:** Low — blocks final submission step, not a code issue
+**Resolution:**  
+Published at `https://www.fablesoft.biz/products/iqamah/privacy`. Support page also live at `https://www.fablesoft.biz/products/iqamah/support`. Both URLs updated in `AppDelegate.swift` and `AboutView.swift`. AC-0089, AC-0090, AC-0091 closed.
 
 ---
 
@@ -1488,4 +1217,348 @@ Without this file, App Store Connect will reject the binary at upload with: *"IT
 
 ---
 
-**Last Updated:** 2026-05-03
+## New Bugs — 2026-05-03 Design Review (All Views)
+
+**Total Active Bugs (updated):** 19  
+**Critical:** 0  
+**High:** 2 (+2)  
+**Medium:** 4 (+4)  
+**Low:** 4 (+4)
+
+---
+
+**BUG-0038: Gold brand color hardcoded as local `let gold` in 6+ files**
+
+**Severity:** Medium  
+**Related Story:** US-0004 (Prayer Times Display), brand consistency  
+**Discovered:** 2026-05-03 design review  
+**Status:** Open
+
+**Description:**  
+`Color(red: 0.88, green: 0.69, blue: 0.06)` (and a slight variant `0.95, 0.76, 0.06`) is defined as `private let gold` in `PrayerTimeRow`, `AdhaanBannerView`, `AboutView`, `SunArcView`, `WaveBar`, and `QiblahView`, plus inline literals in `PrayerTimesView`. Any brand color tweak requires editing 6+ files.
+
+**Code Locations:**  
+- `iqamah/Views/PrayerTimesView.swift:39` — inline literal  
+- `iqamah/Views/PrayerTimesView.swift:356` — `private let gold`  
+- `iqamah/Views/AdhaanBannerView.swift:16` — `private let gold`  
+- `iqamah/Views/AboutView.swift:6` — `private let gold`  
+- `iqamah/Views/QiblahView.swift:64` — inline literal  
+
+**Fix:** Add `Color+App.swift` extension with `static let appGold = Color(red: 0.88, green: 0.69, blue: 0.06)` and replace all local definitions.
+
+**Priority:** Medium — maintainability / brand consistency risk
+
+---
+
+**BUG-0039: Adhaan picker hidden until hover — key feature invisible on first use**
+
+**Severity:** High  
+**Related Story:** US-0032 (Per-prayer adhaan selection)  
+**Discovered:** 2026-05-03 design review  
+**Status:** Open
+
+**Description:**  
+`PrayerTimeRow` shows the adhaan picker only when `isHovering || selectedAdhaan.id != "silent"`. A user who has never hovered over a prayer row will never discover they can assign an adhaan sound. The feature is completely invisible in its default state.
+
+**Code Location:** `iqamah/Views/PrayerTimesView.swift:479`
+
+**Fix:** Show a persistent but minimal hint ("No adhaan" / music note) below each row by default, or keep the picker always visible at minimum size and expand on hover.
+
+**Priority:** High — core feature (US-0032) is undiscoverable
+
+---
+
+**BUG-0040: Settings sheet fixed height (660pt) exceeds main window minHeight (640pt)**
+
+**Severity:** Medium  
+**Related Story:** US-0022 (Settings UX)  
+**Discovered:** 2026-05-03 design review  
+**Status:** Open
+
+**Description:**  
+`SettingsSheetView` declares `.frame(width: 480, height: 660)`. The main `PrayerTimesView` has `minHeight: 640`. On a display where the window opened at or near its minimum height, the sheet can be taller than the window presenting it, causing layout overflow.
+
+**Code Location:** `iqamah/Views/SettingsSheetView.swift:291`
+
+**Fix:** Change to `.frame(width: 480, minHeight: 540, maxHeight: 660)` and let the existing `ScrollView` accommodate variable content height.
+
+**Priority:** Medium — layout overflow on constrained displays
+
+---
+
+**BUG-0041: Stale PIL comment in SplashScreenView references a Python library**
+
+**Severity:** Low  
+**Related Story:** None  
+**Discovered:** 2026-05-03 design review  
+**Status:** Open
+
+**Description:**  
+`SplashScreenView.swift:23` contains `// (CoreText handles Arabic shaping correctly; PIL cannot)`. PIL (Python Imaging Library) has no relevance to a Swift codebase. This is a leftover comment from an image-generation script used during asset creation.
+
+**Code Location:** `iqamah/Views/SplashScreenView.swift:23`
+
+**Fix:** Remove the comment entirely.
+
+**Priority:** Low — cosmetic / misleading comment
+
+---
+
+**BUG-0042: ForEach in PrayerTimesTable uses array offset as identity — breaks animations**
+
+**Severity:** Medium  
+**Related Story:** US-0004 (Prayer Times Display)  
+**Discovered:** 2026-05-03 design review  
+**Status:** Open
+
+**Description:**  
+`ForEach(Array(prayerTimes.prayers.enumerated()), id: \.offset)` uses the integer index as the item identity. SwiftUI cannot track which row corresponds to which prayer across updates, so any state change that reorders or replaces the list will produce incorrect animations and potential state bleed between rows.
+
+**Code Location:** `iqamah/Views/PrayerTimesView.swift:210`
+
+**Fix:** `ForEach(prayerTimes.prayers, id: \.name)` — prayer names are stable and unique.
+
+**Priority:** Medium — incorrect SwiftUI diffing can cause visual glitches
+
+---
+
+**BUG-0043: App icon in PrayerTimesView header is double-rounded**
+
+**Severity:** Low  
+**Related Story:** US-0004 (Prayer Times Display)  
+**Discovered:** 2026-05-03 design review  
+**Status:** Open
+
+**Description:**  
+`NSImage(named: NSImage.applicationIconName)` already returns a pre-rounded square icon (Apple renders all macOS app icons with a rounded rect mask). Applying an additional `.clipShape(RoundedRectangle(cornerRadius: 7))` creates a tighter inner clip that produces a slightly misshapen corner on the displayed icon.
+
+**Code Location:** `iqamah/Views/PrayerTimesView.swift:31`
+
+**Fix:** Remove the `.clipShape(RoundedRectangle(...))` modifier. The icon renders correctly without it.
+
+**Priority:** Low — subtle visual artifact
+
+---
+
+**BUG-0044: Onboarding "Continue" button uses default blue accent — inconsistent with gold brand**
+
+**Severity:** Low  
+**Related Story:** US-0018 (Onboarding & First Launch)  
+**Discovered:** 2026-05-03 design review  
+**Status:** Open
+
+**Description:**  
+`LocationSetupView` and `CalculationMethodView` both use `.buttonStyle(.borderedProminent)` without a `.tint()`, defaulting to the system accent color (blue/teal). The `AboutView` and `QiblahView` done/close buttons use `.tint(gold)`. This creates an inconsistency: the first-run funnel uses blue, the rest of the app uses gold.
+
+**Code Locations:**  
+- `iqamah/Views/LocationSetupView.swift:132`  
+- `iqamah/Views/CalculationMethodView.swift:131`
+
+**Fix:** Add `.tint(.appGold)` (or equivalent) to the `.borderedProminent` buttons in both onboarding views.
+
+**Priority:** Low — brand inconsistency in first-run funnel
+
+---
+
+**BUG-0045: Display Size stepper embedded in step 2 of onboarding breaks focus**
+
+**Severity:** Medium  
+**Related Story:** US-0018 (Onboarding & First Launch)  
+**Discovered:** 2026-05-03 design review  
+**Status:** Open
+
+**Description:**  
+`CalculationMethodView` contains a "Display Size" stepper (±10% scale) after the calculation method section, with the label `"(you can change this later in Settings)"`. Embedding an unrelated display preference inside a focused onboarding step dilutes the task and the apologetic label acknowledges it doesn't belong there. New users should complete onboarding before tuning display preferences.
+
+**Code Location:** `iqamah/Views/CalculationMethodView.swift:68-115`
+
+**Fix:** Remove the Display Size block from `CalculationMethodView`. It remains accessible via Settings → Display Size.
+
+**Priority:** Medium — breaks onboarding focus; setting is duplicated in Settings
+
+---
+
+**BUG-0046: Settings sheet uses custom section/divider pattern instead of native `Form`**
+
+**Severity:** High  
+**Related Story:** US-0022 (Settings UX)  
+**Discovered:** 2026-05-03 design review  
+**Status:** Open
+
+**Description:**  
+`SettingsSheetView` reimplements macOS settings layout manually: custom `SectionHeader` view, manual `Divider()` placement, hand-rolled `SettingsRow`, explicit `padding(.horizontal, 28)` on every section, and a hardcoded `height: 660`. This diverges from `Form { Section { ... } }.formStyle(.grouped)`, which provides the correct macOS-native grouped appearance, automatic insets, focus ring behavior, and content-size adaptation for free.
+
+**Code Location:** `iqamah/Views/SettingsSheetView.swift:66-305`
+
+**Fix:** Wrap the settings content in `Form { }.formStyle(.grouped)`. Replace `SectionHeader` with `Section("Location") { }` headers. Remove manual `Divider()` calls and padding. Remove the fixed `height: 660` frame.
+
+**Priority:** High — deviates from macOS platform conventions; hardcoded height causes layout issues
+
+---
+
+**BUG-0047: AboutView "Close" button uses `.borderedProminent` — wrong prominence for dismiss**
+
+**Severity:** Low  
+**Related Story:** US-0021 (About screen)  
+**Discovered:** 2026-05-03 design review  
+**Status:** Open
+
+**Description:**  
+`AboutView` uses `.buttonStyle(.borderedProminent).tint(gold)` for the "Close" button. Per Apple HIG, `.borderedProminent` is reserved for the primary forward action in a flow (e.g., Save, Continue, Submit). A dismiss button should use `.bordered` or `.plain`. Using `.borderedProminent` for "Close" inverts the visual hierarchy and suggests the action is more significant than it is.
+
+**Code Location:** `iqamah/Views/AboutView.swift:149`
+
+**Fix:** Change to `.buttonStyle(.bordered)` and remove `.tint(gold)`.
+
+**Priority:** Low — HIG violation, subtle but incorrect
+
+---
+
+**Last Updated:** 2026-05-03 (Design review — BUG-0038 through BUG-0047 added)
+
+---
+
+## New Bugs — 2026-05-05
+
+**BUG-0048: "Result of 'City' initializer is unused" warning in test**
+
+**Severity:** Low (test warning only — no production impact)  
+**Discovered:** 2026-05-05 Xcode Issue Navigator  
+**Status:** Open
+
+**Description:**  
+`IntegrationAndEdgeCaseTests.swift:173` calls `try City(...)` inside a `do { } catch` block to verify it throws an error, but the constructed value is never assigned. Swift warns "Result of 'City' initializer is unused".
+
+**Code Location:** `Tests/IntegrationAndEdgeCaseTests.swift:173`
+
+```swift
+// Before (warns):
+try City(name: "Test", countryCode: "XX", latitude: 91, longitude: 0, timezone: "UTC")
+
+// Fix:
+_ = try City(name: "Test", countryCode: "XX", latitude: 91, longitude: 0, timezone: "UTC")
+```
+
+**Priority:** Low — test-only, zero runtime impact
+
+---
+
+**Last Updated:** 2026-05-05
+
+---
+
+## Milestone — 2026-05-05: App Store Submission
+
+Iqamah v1.0 submitted to App Store Connect for review.
+- Screenshots uploaded
+- Archive built from `develop` @ `747a5b2`
+- Bundle ID: `com.fablesoft.iqamah`, Team: `96Y29SP9JR`
+- BUG-0034 (App Store Connect registration) → **Resolved**
+
+---
+
+## New Bugs — 2026-05-05 (Xcode console log review)
+
+**BUG-0049: layoutSubtreeIfNeeded called during active layout pass in AdhaanBannerController**
+
+**Severity:** Low  
+**Discovered:** 2026-05-05 Xcode console  
+**Status:** Open
+
+**Description:**  
+`AdhaanBannerController.show()` calls `hosting.layoutSubtreeIfNeeded()` to measure the banner's fitting height, but this fires during an active layout cycle causing the warning "It's not legal to call -layoutSubtreeIfNeeded on a view which is already being laid out."
+
+**Code Location:** `iqamah/Services/AdhaanBannerController.swift` — size measurement block
+
+```swift
+// Problematic:
+hosting.frame = CGRect(x: 0, y: 0, width: bannerWidth, height: 1)
+hosting.layoutSubtreeIfNeeded()
+let fittingHeight = hosting.fittingSize.height
+
+// Fix: use fittingSize directly — it triggers layout internally without recursion
+let fittingHeight = hosting.fittingSize.height
+```
+
+**Priority:** Low — cosmetic console warning; adhaan banner still displays correctly
+
+---
+
+**BUG-0050: Audio queue timeout causes silent adhaan failure**
+
+**Severity:** Medium  
+**Discovered:** 2026-05-05 Xcode console  
+**Status:** Open
+
+**Description:**  
+Console logs show `AQMEIO timed out after 15s` followed by `MEDeviceStreamClient: client stopping after failed start: AudioQueueObject`. An audio queue was unable to start (audio subsystem busy or hardware unavailable). If this occurs at prayer time the adhaan plays silently with no user feedback.
+
+**Code Location:** `iqamah/Services/AdhaaanPlayer.swift` — `play()` / `preview()` methods
+
+**Recommended Fix:**  
+Check `AVAudioPlayer.play()` return value and handle `false` (failure to start). Show a visual fallback (e.g., banner still appears, mute icon pulses) so the user knows prayer time arrived even if audio failed.
+
+**Priority:** Medium — silent failure at prayer time is user-facing
+
+---
+
+**Last Updated:** 2026-05-05 (App Store submission complete; BUG-0049, BUG-0050 logged)
+
+---
+
+## App Store Rejection — 2026-05-05
+
+**BUG-0051: Invalid entitlement value causes App Store rejection (Guideline 2.4.5(i))**
+
+**Severity:** Critical (blocks App Store distribution)  
+**Discovered:** 2026-05-05 — App Store review rejection  
+**Status:** ✅ Fixed
+
+**Rejection message:**  
+> Guideline 2.4.5(i) - Performance  
+> The app incorrectly implements sandboxing, or it contains one or more entitlements with invalid values.  
+> `com.apple.security.network.client	False`
+
+**Root Cause:**  
+`iqamah.entitlements` contained `com.apple.security.network.client` set to `<false/>`. Entitlements are capability grants — a key's *presence* means "grant this capability". Setting a key to `<false/>` is contradictory and invalid. Apple's codesigning validator rejects it under Guideline 2.4.5(i).
+
+**Fix:**  
+Removed `com.apple.security.network.client` entirely. Iqamah makes no network requests and does not need this entitlement. The entitlements file now contains only two valid keys:
+- `com.apple.security.app-sandbox = true`
+- `com.apple.security.personal-information.location = true`
+
+**Next steps:**  
+Archive a new build and resubmit to App Store Connect.
+
+---
+
+**Last Updated:** 2026-05-05 (App Store rejection resolved — resubmit required)
+
+---
+
+## Fixed — 2026-05-05/06 Session (PR #47, PR #48)
+
+**BUG-0049: layoutSubtreeIfNeeded called during active layout pass** — ✅ Fixed  
+Removed redundant `hosting.layoutSubtreeIfNeeded()` call in `AdhaanBannerController.show()`. `fittingSize.height` triggers layout internally.
+
+**BUG-0050: Audio queue timeout causes silent adhaan failure** — ✅ Fixed  
+`AdhaaanPlayer.startPlayback()` now checks `AVAudioPlayer.play()` return value. `isPlaying` only set `true` when audio actually starts; failed plays log a diagnostic and leave the banner visible.
+
+**BUG-0051: Invalid entitlement causes App Store rejection** — ✅ Fixed (PR #47)  
+Removed `com.apple.security.network.client = false` from `iqamah.entitlements`.
+
+**BUG-0052: Header icon and text too small** — ✅ Fixed  
+Icon 32→64pt; title font 20→28pt; city `.subheadline`→`.title3`; method `.caption2`→`.caption`; Hijri date `.caption`→`.subheadline`.
+
+**BUG-0053: Sunrise row text smaller than prayer rows** — ✅ Fixed  
+SunriseRow icon and label `.callout`→`.body`; time `.callout`→`.title3.weight(.medium)`.
+
+**BUG-0054: Top gap above header** — ✅ Fixed  
+`.padding(.top, 46)` → `.padding(.top, 16)` in `PrayerTimesView`.
+
+**BUG-0055: adhaan_4.mp3 has 8s silent lead-in** — ✅ Fixed  
+Trimmed 8 seconds via ffmpeg (`-ss 4` applied twice); 213s→205s.
+
+---
+
+**Last Updated:** 2026-05-06 (Build 6 submitted to App Store)

@@ -36,7 +36,7 @@ final class AdhaanBannerController {
             adhaanDisplayName: adhaan.displayName,
             allPrayers: allPrayers.filter { $0.name != "Sunrise" },
             timezone: timezone,
-            onStop: { [weak self] in
+            onStop: {
                 AdhaaanPlayer.shared.stop()
                 // Button transitions to CLOSE automatically via isPlaying → false
             },
@@ -51,7 +51,6 @@ final class AdhaanBannerController {
         // Size the panel to fit the view
         let bannerWidth: CGFloat = 440
         hosting.frame = CGRect(x: 0, y: 0, width: bannerWidth, height: 1)
-        hosting.layoutSubtreeIfNeeded()
         let fittingHeight = hosting.fittingSize.height
         let bannerSize = CGSize(width: bannerWidth, height: max(fittingHeight, 180))
 
@@ -79,10 +78,9 @@ final class AdhaanBannerController {
             .filter { !$0 }
             .first()
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
+            .sink { _ in
                 // isPlaying flipped to false — banner view already shows CLOSE button;
                 // no extra action needed here, user closes manually
-                _ = self
             }
     }
 
@@ -108,7 +106,9 @@ final class AdhaanBannerController {
                 )
             } completionHandler: { [weak self] in
                 panel.orderOut(nil)
-                self?.panel = nil
+                // completionHandler is @Sendable but always fires on main thread;
+                // MainActor.assumeIsolated asserts that without a dispatch overhead.
+                MainActor.assumeIsolated { self?.panel = nil }
             }
         } else {
             panel.orderOut(nil)

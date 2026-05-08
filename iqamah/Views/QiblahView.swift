@@ -8,6 +8,12 @@ struct QiblahView: View {
     private let kaabahLat = 21.4225
     private let kaabahLon = 39.8262
 
+    private var isValidCoordinate: Bool {
+        latitude.isFinite && longitude.isFinite &&
+            latitude >= -90 && latitude <= 90 &&
+            longitude >= -180 && longitude <= 180
+    }
+
     private var qiblahBearing: Double {
         let lat1 = latitude * .pi / 180
         let lat2 = kaabahLat * .pi / 180
@@ -22,9 +28,41 @@ struct QiblahView: View {
         return directions[Int((qiblahBearing + 22.5).truncatingRemainder(dividingBy: 360) / 45)]
     }
 
+    private func cardinalDirection(for bearing: Double) -> String {
+        let dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+        return dirs[Int((bearing + 22.5) / 45) % 8]
+    }
+
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
+        guard isValidCoordinate else {
+            return AnyView(invalidCoordinateView)
+        }
+        return AnyView(compassView)
+    }
+
+    private var invalidCoordinateView: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "location.slash")
+                .font(.system(size: 48))
+                .foregroundColor(.secondary)
+            Text("Location Unavailable")
+                .font(.title3.bold())
+            Text("A valid location is required to calculate the Qiblah direction.")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
+            Button("Done") { dismiss() }
+                .buttonStyle(.borderedProminent)
+                .padding(.top, 8)
+        }
+        .frame(width: 420, height: 520)
+        .accessibilityElement(children: .contain)
+    }
+
+    private var compassView: some View {
         VStack(spacing: 0) {
             // Title
             Text("Qiblah Direction")
@@ -61,7 +99,7 @@ struct QiblahView: View {
                 // ── Inner gold decorative ring ───────────────────────────
                 Circle()
                     .stroke(
-                        Color(red: 0.88, green: 0.69, blue: 0.06).opacity(0.40),
+                        Color.appGold.opacity(0.40),
                         lineWidth: 1
                     )
                     .frame(width: 294, height: 294)
@@ -96,7 +134,7 @@ struct QiblahView: View {
 
                 // ── Centre dot ──────────────────────────────────────────
                 Circle()
-                    .fill(Color(red: 0.88, green: 0.69, blue: 0.06))
+                    .fill(Color.appGold)
                     .frame(width: 8, height: 8)
                     .accessibilityHidden(true)
 
@@ -117,7 +155,8 @@ struct QiblahView: View {
                     .frame(width: 64, height: 96)
                     .drawingGroup()
                     .rotationEffect(.degrees(qiblahBearing))
-                    .accessibilityLabel("Prayer mat pointing toward Qiblah")
+                    .accessibilityLabel("Prayer mat facing Qiblah direction")
+                    .accessibilityHidden(false)
 
                 // ── Ka'bah icon on ring ──────────────────────────────────
                 Image("KaabahIcon")
@@ -127,31 +166,36 @@ struct QiblahView: View {
                     .drawingGroup()
                     .clipShape(Circle())
                     .overlay(Circle().stroke(
-                        Color(red: 0.88, green: 0.69, blue: 0.06), lineWidth: 2
+                        Color.appGold, lineWidth: 2
                     ))
-                    .shadow(color: Color(red: 0.88, green: 0.69, blue: 0.06).opacity(0.5),
+                    .shadow(color: Color.appGold.opacity(0.5),
                             radius: 4, x: 0, y: 0)
                     .offset(
                         x: 155 * CGFloat(sin(qiblahBearing * .pi / 180)),
                         y: -155 * CGFloat(cos(qiblahBearing * .pi / 180))
                     )
-                    .accessibilityLabel("Ka'bah direction indicator")
+                    .accessibilityLabel("Ka'bah direction marker")
+                    .accessibilityHidden(false)
             }
             .frame(width: 380, height: 380)
             .padding(.top, 12)
-            .accessibilityElement(children: .combine)
-            .accessibilityLabel("Qiblah compass: \(Int(qiblahBearing))° \(cardinalDirection)")
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Qiblah direction: \(Int(qiblahBearing)) degrees \(cardinalDirection(for: qiblahBearing))")
+            .accessibilityValue("Face \(cardinalDirection(for: qiblahBearing)) to face Mecca")
 
             Spacer()
 
             // BUG-0027: gold tint matches app brand instead of default system accent
             Button("Done") { dismiss() }
                 .buttonStyle(.borderedProminent)
-                .tint(Color(red: 0.88, green: 0.69, blue: 0.06))
+                .tint(Color.appGold)
                 .controlSize(.regular)
                 .padding(.bottom, 24)
         }
         .frame(width: 440, height: 560)
+        .background {
+            Rectangle().fill(.regularMaterial)
+        }
     }
 }
 

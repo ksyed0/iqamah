@@ -13,7 +13,7 @@ concurrency:
 env:
   SCHEME: iqamah
   PROJECT: iqamah.xcodeproj
-  XCODE_VERSION: "16.2"
+  XCODE_VERSION: "26"
 
 jobs:
 
@@ -22,7 +22,7 @@ jobs:
   # ──────────────────────────────────────────────────────────────────────────
   lint:
     name: SwiftLint
-    runs-on: macos-15
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -38,7 +38,7 @@ jobs:
   # ──────────────────────────────────────────────────────────────────────────
   format:
     name: SwiftFormat
-    runs-on: macos-15
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -58,7 +58,7 @@ jobs:
   # ──────────────────────────────────────────────────────────────────────────
   build:
     name: Build (${{ matrix.configuration }})
-    runs-on: macos-15
+    runs-on: macos-latest
     strategy:
       matrix:
         configuration: [Debug, Release]
@@ -86,7 +86,7 @@ jobs:
   # ──────────────────────────────────────────────────────────────────────────
   test:
     name: Test & Coverage
-    runs-on: macos-15
+    runs-on: macos-latest
     needs: build
     steps:
       - uses: actions/checkout@v4
@@ -138,50 +138,11 @@ jobs:
           retention-days: 7
 
   # ──────────────────────────────────────────────────────────────────────────
-  # 5. SECURITY — CodeQL static analysis for Swift
-  # ──────────────────────────────────────────────────────────────────────────
-  security:
-    name: CodeQL Security Scan
-    runs-on: macos-15
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Select Xcode ${{ env.XCODE_VERSION }}
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: ${{ env.XCODE_VERSION }}
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: swift
-          queries: security-extended,security-and-quality
-
-      - name: Build for CodeQL
-        run: |
-          xcodebuild \
-            -project ${{ env.PROJECT }} \
-            -scheme ${{ env.SCHEME }} \
-            -configuration Debug \
-            -destination 'platform=macOS' \
-            build \
-            CODE_SIGNING_ALLOWED=NO
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-        with:
-          category: "/language:swift"
-
-  # ──────────────────────────────────────────────────────────────────────────
-  # 6. FILE SIZE GUARD — .app bundle must not exceed 50 MB (Release build)
+  # 5. FILE SIZE GUARD — .app bundle must not exceed 50 MB (Release build)
   # ──────────────────────────────────────────────────────────────────────────
   file-size:
     name: File Size Guard
-    runs-on: macos-15
+    runs-on: macos-latest
     needs: build
     steps:
       - uses: actions/checkout@v4

@@ -8,6 +8,7 @@ struct LocationSetupView: View {
     @State private var selectedCity: City?
     @State private var hasDetectedLocation = false
     @State private var showDetectedBadge = false // US-0026
+    @State private var rawGPSCoordinate: CLLocationCoordinate2D? // ENH-001: raw GPS coordinate
 
     let onLocationConfirmed: (City) -> Void
     let onBack: (() -> Void)? // US-0027 — nil when used in first-run flow
@@ -121,17 +122,39 @@ struct LocationSetupView: View {
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.large)
+                    .keyboardShortcut(.escape, modifiers: [])
                 }
                 Spacer()
                 Button(action: {
-                    if let city = selectedCity { onLocationConfirmed(city) }
+                    guard let city = selectedCity else { return }
+                    if hasDetectedLocation, let coord = rawGPSCoordinate {
+                        // ENH-001 Option A: use raw GPS coords + TimeZone.current
+                        SettingsManager.shared.locationSource = "gps"
+                        SettingsManager.shared.saveGPSCoordinates(coord)
+                        SettingsManager.shared.gpsTimezone = TimeZone.current.identifier
+                        guard let gpsCity = try? City(
+                            name: city.name,
+                            countryCode: city.countryCode,
+                            latitude: coord.latitude,
+                            longitude: coord.longitude,
+                            timezone: TimeZone.current.identifier
+                        ) else { return }
+                        onLocationConfirmed(gpsCity)
+                        reverseGeocodeAndUpdate(coordinate: coord)
+                    } else {
+                        // ENH-001 manual path
+                        SettingsManager.shared.locationSource = "manual"
+                        onLocationConfirmed(city)
+                    }
                 }) {
                     Text("Continue")
                         .frame(minWidth: 100)
                 }
                 .buttonStyle(.borderedProminent)
+                .tint(.appGold)
                 .controlSize(.large)
                 .disabled(selectedCity == nil)
+                .keyboardShortcut(.defaultAction)
             }
             .padding(.horizontal, 32)
             .padding(.bottom, 28)
@@ -149,8 +172,10 @@ struct LocationSetupView: View {
         .onChange(of: selectedCountry) { oldValue, _ in
             if oldValue != nil {
                 selectedCity = nil
-                // Hide GPS badge when user manually changes country
+                // Hide GPS badge when user manually changes country; treat as manual selection
                 if hasDetectedLocation {
+                    hasDetectedLocation = false
+                    rawGPSCoordinate = nil
                     withAnimation { showDetectedBadge = false }
                 }
             }
@@ -168,10 +193,49 @@ struct LocationSetupView: View {
         if let closestCity = database.closestCity(to: coordinate) {
             selectedCountry = database.country(forCode: closestCity.countryCode)
             hasDetectedLocation = true
+            rawGPSCoordinate = coordinate // ENH-001: capture raw GPS coordinate
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 selectedCity = closestCity
                 withAnimation(.spring(response: 0.4)) {
                     showDetectedBadge = true
+                }
+            }
+        }
+    }
+
+    // ENH-001 Option B: CLGeocoder refines locality and timezone asynchronously
+    private func reverseGeocodeAndUpdate(coordinate: CLLocationCoordinate2D) {
+        // Skip if same location as cache (within 5 km)
+        if let cached = SettingsManager.shared.cachedGPSCoordinate() {
+            let cachedLoc = CLLocation(latitude: cached.latitude, longitude: cached.longitude)
+            let newLoc = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+            if cachedLoc.distance(from: newLoc) < 5000,
+               !SettingsManager.shared.gpsLocality.isEmpty { return }
+        }
+
+        CLGeocoder().reverseGeocodeLocation(
+            CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+        ) { placemarks, error in
+            guard error == nil, let placemark = placemarks?.first else {
+                print("[ENH-001] CLGeocoder failed: \(error?.localizedDescription ?? "unknown")")
+                return
+            }
+            let locality = placemark.locality ?? placemark.name ?? SettingsManager.shared.gpsLocality
+            let timezone = placemark.timeZone?.identifier ?? TimeZone.current.identifier
+
+            DispatchQueue.main.async {
+                SettingsManager.shared.gpsLocality = locality
+                SettingsManager.shared.gpsTimezone = timezone
+                // Refine the saved city name and timezone with authoritative values
+                if let city = SettingsManager.shared.loadCity(),
+                   let refined = try? City(
+                       name: locality,
+                       countryCode: city.countryCode,
+                       latitude: coordinate.latitude,
+                       longitude: coordinate.longitude,
+                       timezone: timezone
+                   ) {
+                    SettingsManager.shared.saveCity(refined)
                 }
             }
         }

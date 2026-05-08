@@ -1,0 +1,285 @@
+# Iqamah — Future Enhancements
+
+Logged from competitive analysis (May 2026) and product research. Items are grouped by theme, not priority. See competitive-analysis.md for the feature gap matrix these derive from.
+
+---
+
+## Location Accuracy
+
+### ENH-001 — Exact GPS Prayer Times via CLGeocoder (Option A + B)
+**Source:** Internal — Brampton vs. Toronto discrepancy (~2–3 min offset)
+
+**Problem:** The current flow maps GPS coordinates to the nearest city in `cities.json`, then uses that city's coordinates and timezone for calculation. The mismatch between actual location (e.g. Brampton: 43.685°N, 79.759°W) and the proxy city (Toronto: 43.653°N, 79.383°W) introduces a systematic error in transit time and every derived prayer time.
+
+**Solution (Option A):** For the auto-detect path, replace `TimeZone(identifier: city.timezone)` with `TimeZone.current`. The device's system timezone is always accurate. Combined with the raw GPS coordinate (not the proxy city's coordinate), this eliminates the offset with a one-line change.
+
+**Solution (Option B):** Use `CLGeocoder.reverseGeocodeLocation()` to resolve the exact timezone from raw GPS coordinates. `CLPlacemark.timeZone` returns the authoritative timezone for any point on Earth. Results can be cached to UserDefaults alongside the display name. This is more robust than `.current` for edge cases (timezone boundaries, users calculating for a different location).
+
+**Recommended approach:** A + B together. Use `.current` as an immediate fast path; use CLGeocoder to confirm and persist the resolved timezone. Fall back to the city database only for manual city selection.
+
+**Effort:** Small (Option A: ~5 lines; Option B: ~30 lines + caching logic)  
+**Files:** `LocationSetupView.swift`, `SettingsManager.swift`, `AppDelegate.swift`
+
+---
+
+## Ramadan / Seasonal Features
+
+### ENH-002 — Ramadan Mode (Suhoor & Iftar Countdowns)
+**Source:** Competitor gap — 8 of 10 top apps have this; users expect it  
+**Priority:** High — seasonal but high-visibility
+
+Replace or augment the standard prayer countdown in the menu bar with Suhoor (Fajr) and Iftar (Maghrib) countdowns during Ramadan. Auto-detect Ramadan dates via Hijri calendar. Could show "Suhoor in 2h 14m" or "Iftar in 45m" during the month.
+
+**Effort:** Medium — Hijri calendar logic already present; needs menu bar display logic + Ramadan date range detection
+
+---
+
+### ENH-003 — Hijri Calendar Events (Islamic Holidays)
+**Source:** Competitor gap — 8 of 10 top apps surface Islamic calendar events  
+
+Display upcoming Islamic dates (Eid al-Fitr, Eid al-Adha, Mawlid, etc.) in the prayer times view or a dedicated calendar panel. Use `Calendar(identifier: .islamicUmmAlQura)` which is already imported.
+
+**Effort:** Small-Medium — data is a static list of Hijri dates mapped to display names
+
+---
+
+## macOS-Native Enhancements
+
+### ENH-004 — macOS Menu Bar Widget / Notification Center Widget
+**Source:** Competitor gap — 7 of 10 apps have home/lock screen widgets  
+
+Add a macOS Notification Center widget (WidgetKit) showing today's prayer times and next prayer countdown. The menu bar already computes this data every 60 seconds — the widget would consume the same output.
+
+**Effort:** Medium — requires a new WidgetKit extension target; data sharing via App Groups / UserDefaults suite
+
+---
+
+### ENH-005 — Silent / Do Not Disturb Mode
+**Source:** Competitor gap — Guidance had this; users loved it; no current macOS competitor offers it  
+
+Allow the adhan sound to be suppressed globally (visual indicator only) without per-prayer muting. Distinct from the existing per-prayer mute — this is a global "I'm in a meeting" toggle accessible from the menu bar right-click menu.
+
+**Effort:** Small — one bool in SettingsManager, one menu item in the right-click NSMenu
+
+---
+
+### ENH-006 — Adhan Banner Dismiss Timeout Configuration
+**Source:** Internal UX  
+
+Let users set how long the adhan banner stays on screen before auto-dismissing. Currently hardcoded.
+
+**Effort:** Small
+
+---
+
+## Prayer Tracking
+
+### ENH-007 — Prayer Check-in / Habit Tracker
+**Source:** Competitor gap — Just Pray (4.9★) built an entire app around this  
+
+Allow users to mark each prayer as prayed on time, prayed late, or missed. Show a simple streak counter in the main view. Store history in UserDefaults or a local SQLite database.
+
+**Effort:** Medium-Large — requires persistent storage schema, streak logic, UI additions
+
+---
+
+### ENH-008 — Sunnah Prayer Times (Tahajjud, Duha)
+**Source:** Competitor gap — IslamApp surfaces these  
+
+Display optional Sunnah prayer windows (Tahajjud: last third of night; Duha: 15–45 min after sunrise). These are calculated from existing Fajr/Sunrise/Dhuhr times already computed.
+
+**Effort:** Small — calculation is trivial; UI is a toggle to show/hide extra rows
+
+---
+
+## Qibla
+
+### ENH-009 — Augmented Reality Qibla
+**Source:** Competitor gap — Athan Pro offers AR Qibla  
+
+Overlay the Qibla direction on a live camera view using ARKit/RealityKit. The compass bearing is already calculated; AR adds a visual layer.
+
+**Effort:** Large — requires ARKit integration, camera entitlement, separate UI flow
+
+---
+
+## Audio & Adhan
+
+### ENH-010 — Additional Adhan Voices
+**Source:** Competitor feature — Namaz offers "multiple maqams from famous mosques"  
+
+Expand the adhan library beyond the current 5 regular + 3 Fajr. Potential additions: Makkah (Sheikh Sudais), Madinah, Al-Aqsa.
+
+**Effort:** Small (content acquisition) + Small (code — the player infrastructure already supports it)
+
+---
+
+### ENH-011 — Per-Prayer Adhan Preview in Settings
+**Source:** UX gap — users cannot audition an adhan before committing to it  
+
+Add a play/preview button next to each adhan option in the settings sheet so users can hear a short clip before selecting.
+
+**Effort:** Small
+
+---
+
+## Content & Information
+
+### ENH-012 — Hadith of the Day
+**Source:** Competitor gap — 4 of 10 apps surface a daily Hadith  
+
+Show a rotating Hadith in the main view or as a menu bar tooltip. Could be a static bundled JSON of curated Hadith to avoid network dependency.
+
+**Effort:** Small — static data + UI card
+
+---
+
+### ENH-013 — Tasbih / Dhikr Counter
+**Source:** Competitor gap — Muslim Pro and Athan have this  
+
+A simple tap counter for post-prayer dhikr. Could live as a popover from the main view.
+
+**Effort:** Small
+
+---
+
+### ENH-014 — Zakat Calculator
+**Source:** Competitor feature — Muslim Pro, Athan  
+
+A one-time calculator for annual Zakat based on nisab. Could be a modal or separate screen.
+
+**Effort:** Small — math is straightforward; primarily a UI task
+
+---
+
+## Platform Expansion
+
+### ENH-015 — iPhone & iPad App
+See the multi-platform migration assessment in this file (below).
+
+### ENH-016 — Apple Watch App
+See the multi-platform migration assessment in this file (below).
+
+### ENH-017 — Apple Vision Pro App
+See the multi-platform migration assessment in this file (below).
+
+---
+
+## Multi-Platform Migration Assessment
+
+### Overview
+
+Iqamah is currently a macOS-only app. Expanding to iPhone, iPad, Apple Watch, and Vision Pro requires understanding which parts of the codebase are already cross-platform and which are macOS-specific.
+
+---
+
+### What Is Already Cross-Platform (Zero Changes Needed)
+
+| Component | Why portable |
+|---|---|
+| `PrayerCalculator.swift` | Pure math — Foundation + CoreLocation only |
+| `Models/Location.swift` | Codable structs, no platform APIs |
+| `Models/PrayerTimes.swift` | Pure structs |
+| `Models/CalculationMethod.swift` | Enums + pure Swift |
+| `LocationService.swift` | CoreLocation is cross-platform |
+| `cities.json` | Data resource |
+
+These five form a clean, portable core. Extracting them into a local Swift Package would make sharing across targets explicit and compile-time verified.
+
+---
+
+### What Is macOS-Specific (Needs Replacement or Conditional Compilation)
+
+| Component | macOS APIs Used | Notes |
+|---|---|---|
+| `AppDelegate.swift` | `NSApplication`, `NSStatusItem`, `NSStatusBar`, `NSWindow`, `NSMenu`, `NSMenuItem`, `NSWindowDelegate`, `AppKit` throughout | The entire file is macOS-only. On iOS there is no menu bar or status item concept. |
+| `iqamahApp.swift` | `@NSApplicationDelegateAdaptor`, `.windowStyle(.hiddenTitleBar)` | Entry point needs `#if os(macOS)` branching |
+| `PrayerTimesView.swift` | `NSImage(named:)`, `NSImage.applicationIconName` | Needs `Image(...)` / `#if` conditionals |
+| `AdhaanBannerController.swift` | Likely uses `NSWindow` overlay | Needs a UIKit/SwiftUI equivalent on iOS |
+| `AdhaaanPlayer.swift` | `AVFoundation` (cross-platform), but background audio session differs | iOS requires `AVAudioSession` category setup; background playback rules differ |
+| Adhan trigger mechanism (`Timer` in AppDelegate) | macOS keeps background timers alive indefinitely | On iOS, background timers are killed after ~30s. Must use `UNUserNotificationCenter` scheduled local notifications with custom sounds instead. |
+
+---
+
+### Platform-by-Platform Effort
+
+#### iPhone + iPad — Effort: **Medium (4–6 weeks)**
+
+The views and core logic port well. The primary engineering work is:
+
+1. **Adhan scheduling re-architecture** — the biggest change. On iOS, a 60-second background Timer does not survive. Replace with `UNUserNotificationCenter` local notifications: schedule all 5 daily prayers as notifications with `.sound = UNNotificationSound(named:)` at setup time and re-schedule when settings change. The adhan files must be packaged as `.caf` or `.aiff` (iOS notification sound format, max 30s per system limit — full adhans that exceed this need a different approach, e.g. playing via an iOS background audio mode on app launch).
+
+2. **Replace AppDelegate** — iOS uses `UIApplicationDelegate` or pure SwiftUI `App` lifecycle. The status bar concept becomes a home screen widget + push/local notifications.
+
+3. **View adaptations** — Replace `NSImage` with `Image`. Add `NavigationStack` or tab-based navigation appropriate for iPhone's smaller screen. The current single-window layout will need responsive adaptation (`adaptiveModalPresentation`, size class branching).
+
+4. **iPad** — iPad gets the iPhone app for free. A dedicated iPad layout (split view, sidebar navigation) would be a polish pass on top.
+
+5. **Entitlements** — `Background Modes` (audio, background fetch) required for iOS adhan delivery.
+
+**iCloud sync** (UserDefaults → NSUbiquitousKeyValueStore) is optional but strongly recommended so settings sync between Mac and iPhone.
+
+---
+
+#### Apple Watch — Effort: **High (6–10 weeks)**
+
+Watch is a genuinely separate platform with its own constraints:
+
+1. **Separate watchOS target** in Xcode — cannot share the macOS/iOS app target directly.
+
+2. **PrayerCalculator is fully portable** — pure Swift, no AppKit/UIKit. Copy or package-share it; it runs fine on watchOS.
+
+3. **Data sync** — use `WCSession` (Watch Connectivity) to push today's prayer times from the iPhone to the watch. Alternatively, run the calculator on-watch (it's lightweight enough).
+
+4. **No adhan audio on watch** — watchOS does not support custom notification sounds beyond system haptics. The watch experience is: complication showing next prayer + countdown, and a haptic tap at prayer time.
+
+5. **Complications** — the main value-add on watch. Implement `WidgetKit` complications (used for watchOS 7+ complications) showing next prayer name + time, or a countdown. Requires the complication family matrix (corner, circular, rectangular, etc.).
+
+6. **UI** — `WKInterfaceController` / SwiftUI for watchOS. A simple list of today's prayers with the next one highlighted. Very limited screen real estate.
+
+---
+
+#### Apple Vision Pro (visionOS) — Effort: **Low–Medium**
+
+Two paths:
+
+**Path 1 — "Designed for iPad" compatibility (Low, ~1 week of testing)**
+visionOS automatically runs iPad apps in a floating window. If the iPhone/iPad app is built first, it runs on Vision Pro in compatibility mode with zero additional code. Users can resize the window in their space. This gets Iqamah on Vision Pro at no extra cost once the iOS app exists.
+
+**Path 2 — Native visionOS experience (Medium, 3–4 weeks on top of iOS)**
+A native visionOS app uses ornaments (toolbars floating beside a window), volumes (3D content), and the spatial audio system. For a prayer times app the native additions would be:
+- A 3D Qibla direction indicator as a RealityKit volume
+- An ornament showing the next prayer countdown beside the main window
+- Spatial adhan audio (plays from a fixed point in the room)
+
+For a v1 visionOS release, Path 1 is the right call.
+
+---
+
+### Recommended Sequencing
+
+| Phase | Platforms | Rationale |
+|---|---|---|
+| 1 | iPhone + iPad | Largest user base; proves the multi-platform architecture; required before Watch |
+| 2 | Apple Watch | Depends on iPhone for Watch Connectivity; complications are high-value for this app |
+| 3 | Vision Pro | Free via iPad compatibility; native experience is a polish pass after Watch |
+
+---
+
+### Architectural Recommendation
+
+Extract the portable core into a local Swift Package (`IqamahCore`) before starting phase 1:
+
+```
+IqamahCore/
+  Sources/
+    PrayerCalculator.swift
+    PrayerTimes.swift
+    CalculationMethod.swift
+    Location.swift
+    LocationService.swift
+```
+
+All four app targets (macOS, iOS, watchOS, visionOS) import `IqamahCore`. Platform-specific code (AppDelegate, status bar, notification scheduling, complications) lives in each target separately. This prevents the codebase from becoming a sea of `#if os(macOS)` conditionals and makes the boundaries explicit.
+
+**Estimated total effort across all platforms:** 12–18 weeks of focused development, assuming one developer.

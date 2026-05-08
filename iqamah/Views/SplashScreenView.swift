@@ -20,7 +20,6 @@ struct SplashScreenView: View {
                 }
 
                 // SwiftUI overlay: Arabic text centred in the upper title zone
-                // (CoreText handles Arabic shaping correctly; PIL cannot)
                 VStack(spacing: 0) {
                     Text("إقامة")
                         .font(.system(size: 42, weight: .medium, design: .serif))

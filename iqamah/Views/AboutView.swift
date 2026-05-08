@@ -3,8 +3,6 @@ import SwiftUI
 struct AboutView: View {
     @Environment(\.dismiss) private var dismiss
 
-    private let gold = Color(red: 0.88, green: 0.69, blue: 0.06)
-
     private var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
     }
@@ -41,7 +39,7 @@ struct AboutView: View {
                             .font(.system(size: 36, weight: .bold, design: .serif))
                             .foregroundStyle(
                                 LinearGradient(
-                                    colors: [Color(red: 0.95, green: 0.76, blue: 0.06),
+                                    colors: [Color.appGoldDim,
                                              Color(red: 0.80, green: 0.60, blue: 0.10)],
                                     startPoint: .top, endPoint: .bottom
                                 )
@@ -50,7 +48,7 @@ struct AboutView: View {
 
                         Text("إقامة")
                             .font(.system(size: 18, weight: .medium, design: .serif))
-                            .foregroundColor(gold.opacity(0.85))
+                            .foregroundColor(Color.appGold.opacity(0.85))
                             .shadow(color: .black.opacity(0.5), radius: 3)
                     }
                     .padding(.bottom, 20)
@@ -76,18 +74,47 @@ struct AboutView: View {
                         .font(.title3.weight(.semibold))
                 }
 
-                // GitHub link
-                // Literal URL string — cannot fail to parse
-                // swiftlint:disable:next force_unwrapping
-                Link(destination: URL(string: "https://github.com/ksyed0/iqamah")!) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "globe")
-                            .font(.callout)
-                        Text("github.com/ksyed0/iqamah")
-                            .font(.callout)
-                            .underline()
+                // Links — literal URL strings cannot fail to parse
+                HStack(spacing: 20) {
+                    // swiftlint:disable:next force_unwrapping
+                    Link(destination: URL(string: "https://github.com/ksyed0/iqamah")!) {
+                        HStack(spacing: 5) {
+                            Image(systemName: "chevron.left.forwardslash.chevron.right")
+                                .font(.caption)
+                            Text("GitHub")
+                                .font(.callout)
+                                .underline()
+                        }
+                        .foregroundColor(Color.appGold)
                     }
-                    .foregroundColor(gold)
+
+                    Text("·").foregroundColor(.secondary)
+
+                    // swiftlint:disable:next force_unwrapping
+                    Link(destination: URL(string: "https://www.fablesoft.biz/products/iqamah/support")!) {
+                        HStack(spacing: 5) {
+                            Image(systemName: "questionmark.circle")
+                                .font(.caption)
+                            Text("Support")
+                                .font(.callout)
+                                .underline()
+                        }
+                        .foregroundColor(Color.appGold)
+                    }
+
+                    Text("·").foregroundColor(.secondary)
+
+                    // swiftlint:disable:next force_unwrapping
+                    Link(destination: URL(string: "https://www.fablesoft.biz/products/iqamah/privacy")!) {
+                        HStack(spacing: 5) {
+                            Image(systemName: "lock.shield")
+                                .font(.caption)
+                            Text("Privacy")
+                                .font(.callout)
+                                .underline()
+                        }
+                        .foregroundColor(Color.appGold)
+                    }
                 }
 
                 Divider()
@@ -118,14 +145,15 @@ struct AboutView: View {
 
             // ── Close button ─────────────────────────────────────────
             Button("Close") { dismiss() }
-                .buttonStyle(.borderedProminent)
-                .tint(gold)
+                .buttonStyle(.bordered)
                 .controlSize(.regular)
                 .keyboardShortcut(.escape, modifiers: [])
                 .padding(.bottom, 24)
         }
         .frame(width: 380)
-        .background(Color(nsColor: .windowBackgroundColor))
+        .background {
+            Rectangle().fill(.regularMaterial)
+        }
     }
 
     private func loadSplashImage() -> NSImage? {
