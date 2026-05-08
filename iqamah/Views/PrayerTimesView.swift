@@ -554,7 +554,7 @@ struct PrayerTimeRow: View {
                         .buttonStyle(.plain)
                     }
                 }
-                ScrollView(.horizontal, showsIndicators: false) {
+                ScrollView(.horizontal) {
                     HStack(spacing: 6) {
                         ForEach(adhaanOptions) { option in
                             Button(action: {
@@ -588,7 +588,10 @@ struct PrayerTimeRow: View {
                         }
                     }
                     .padding(.horizontal, 2)
+                    .padding(.bottom, 4)
                 }
+                .frame(maxWidth: .infinity)
+                .scrollIndicators(.visible)
             }
             .padding(.leading, 20)
             .padding(.trailing, 16)

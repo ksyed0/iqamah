@@ -53,6 +53,7 @@ class SettingsManager: ObservableObject {
         static let gpsLatitude     = "gpsLatitude"
         static let gpsLongitude    = "gpsLongitude"
         static let gpsCoordinateCached = "gpsCoordinateCached"
+        static let gpsDetectedCity = "gpsDetectedCity"  // JSON-encoded City
     }
 
     @Published var hasCompletedSetup: Bool {
@@ -106,6 +107,18 @@ class SettingsManager: ObservableObject {
     @Published var gpsTimezone: String {
         didSet { defaults.set(gpsTimezone, forKey: Keys.gpsTimezone) }
     }
+    /// The most recently GPS-detected city (precise coords + CLGeocoder locality).
+    /// Injected into the city picker so users can select it without it being in cities.json.
+    @Published var gpsDetectedCity: City? {
+        didSet {
+            if let city = gpsDetectedCity,
+               let data = try? JSONEncoder().encode(city) {
+                defaults.set(data, forKey: Keys.gpsDetectedCity)
+            } else {
+                defaults.removeObject(forKey: Keys.gpsDetectedCity)
+            }
+        }
+    }
 
     static let uiScaleMin: Double = 0.7
     static let uiScaleMax: Double = 1.5
@@ -144,6 +157,12 @@ class SettingsManager: ObservableObject {
         locationSource = userDefaults.string(forKey: Keys.locationSource) ?? "manual"
         gpsLocality    = userDefaults.string(forKey: Keys.gpsLocality) ?? ""
         gpsTimezone    = userDefaults.string(forKey: Keys.gpsTimezone) ?? TimeZone.current.identifier
+        if let data = userDefaults.data(forKey: Keys.gpsDetectedCity),
+           let city = try? JSONDecoder().decode(City.self, from: data) {
+            gpsDetectedCity = city
+        } else {
+            gpsDetectedCity = nil
+        }
 
         if let data = userDefaults.data(forKey: Keys.prayerAdjustments),
            let decoded = try? JSONDecoder().decode([String: Int].self, from: data) {

@@ -1,5 +1,6 @@
 import SwiftUI
 import ServiceManagement
+import CoreLocation
 
 /// Non-destructive settings sheet (US-0020).
 /// All changes are held in local draft state until the user taps Save.
@@ -29,6 +30,9 @@ struct SettingsSheetView: View {
     private let originalUiScale = SettingsManager.shared.uiScale
     @ObservedObject private var settings = SettingsManager.shared
     @State private var launchAtLogin = false
+    @State private var isDetectingLocation = false
+    @StateObject private var locationService = LocationService()
+    @State private var detectedLocationInfo: String? = nil  // inline result text
 
     // US-0031: track whether the user has manually changed the method
     @State private var userOverrodeMethod = false
@@ -67,6 +71,32 @@ struct SettingsSheetView: View {
 
     // Each section extracted so the type-checker handles them independently
     @ViewBuilder private var locationSection: some View {
+        // GPS detect button — fixed layout so it never changes height
+        HStack(spacing: 8) {
+            Button(action: detectLocation) {
+                HStack(spacing: 6) {
+                    Image(systemName: "location.fill")
+                    Text("Detect my location")
+                }
+            }
+            .disabled(isDetectingLocation)
+
+            if isDetectingLocation {
+                ProgressView().controlSize(.small)
+            }
+        }
+
+        // Inline result shown after detection
+        if let info = detectedLocationInfo {
+            HStack(spacing: 6) {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+                Text(info)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+
         if let db = database {
             Picker("Country", selection: $selectedCountry) {
                 Text("Select a country").tag(nil as Country?)
@@ -77,6 +107,11 @@ struct SettingsSheetView: View {
             if selectedCountry != nil {
                 Picker("City", selection: $selectedCity) {
                     Text("Select a city").tag(nil as City?)
+                    // GPS-detected city injected at top when country matches
+                    if let gpsCity = SettingsManager.shared.gpsDetectedCity,
+                       gpsCity.countryCode == selectedCountry?.code {
+                        Text("📍 \(gpsCity.name) (GPS)").tag(gpsCity as City?)
+                    }
                     ForEach(cities) { city in
                         Text(city.name).tag(city as City?)
                     }
@@ -84,6 +119,73 @@ struct SettingsSheetView: View {
             }
         } else {
             ProgressView("Loading cities…")
+        }
+    }
+
+    private func detectLocation() {
+        detectedLocationInfo = nil
+        isDetectingLocation = true
+        Task {
+            do {
+                let coordinate = try await locationService.requestLocationAsync()
+                let lat = coordinate.latitude
+                let lon = coordinate.longitude
+                await MainActor.run {
+                    SettingsManager.shared.locationSource = "gps"
+                    SettingsManager.shared.saveGPSCoordinates(coordinate)
+                    SettingsManager.shared.gpsTimezone = TimeZone.current.identifier
+                    var detectedCityName = "Unknown"
+                    var countryCode = "CA"
+                    if let db = database, let nearestCity = db.closestCity(to: coordinate) {
+                        detectedCityName = nearestCity.name
+                        countryCode = nearestCity.countryCode
+                        selectedCountry = db.country(forCode: nearestCity.countryCode)
+                        if !userOverrodeMethod {
+                            selectedMethod = CalculationMethod.suggested(forCountryCode: nearestCity.countryCode)
+                            recommendationLabel = CalculationMethod.recommendationLabel(forCountryCode: nearestCity.countryCode)
+                        }
+                    }
+                    // Create and cache GPS city so it appears in the dropdown
+                    let gpsCity = try? City(name: detectedCityName, countryCode: countryCode,
+                                           latitude: lat, longitude: lon,
+                                           timezone: TimeZone.current.identifier)
+                    SettingsManager.shared.gpsDetectedCity = gpsCity
+                    selectedCity = gpsCity
+                    let latStr = String(format: "%.4f°%@", abs(lat), lat >= 0 ? "N" : "S")
+                    let lonStr = String(format: "%.4f°%@", abs(lon), lon >= 0 ? "E" : "W")
+                    detectedLocationInfo = "📍 \(detectedCityName) — \(latStr), \(lonStr)"
+                    isDetectingLocation = false
+                }
+                // ENH-001 Option B: CLGeocoder refines locality name
+                CLGeocoder().reverseGeocodeLocation(
+                    CLLocation(latitude: lat, longitude: lon)
+                ) { placemarks, _ in
+                    guard let placemark = placemarks?.first else { return }
+                    let locality = placemark.locality ?? placemark.name
+                    let tz = placemark.timeZone?.identifier ?? TimeZone.current.identifier
+                    DispatchQueue.main.async {
+                        let finalName = locality ?? SettingsManager.shared.gpsLocality
+                        if let locality { SettingsManager.shared.gpsLocality = locality }
+                        SettingsManager.shared.gpsTimezone = tz
+                        // Update GPS city cache with refined name and timezone
+                        if let db = self.database,
+                           let nearest = db.closestCity(to: CLLocationCoordinate2D(latitude: lat, longitude: lon)),
+                           let refined = try? City(name: finalName, countryCode: nearest.countryCode,
+                                                   latitude: lat, longitude: lon, timezone: tz) {
+                            SettingsManager.shared.gpsDetectedCity = refined
+                            self.selectedCity = refined
+                        }
+                        let latStr = String(format: "%.4f°%@", abs(lat), lat >= 0 ? "N" : "S")
+                        let lonStr = String(format: "%.4f°%@", abs(lon), lon >= 0 ? "E" : "W")
+                        self.detectedLocationInfo = "📍 \(finalName) — \(latStr), \(lonStr)"
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    isDetectingLocation = false
+                    detectedLocationInfo = "Location unavailable — select city manually"
+                }
+            }
         }
     }
 
@@ -183,67 +285,136 @@ struct SettingsSheetView: View {
 
     private static let adjustmentPrayerNames = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"]
 
+    // Calculated prayer times using current draft city/method/asr
+    private var previewTimes: PrayerTimes? {
+        guard let city = selectedCity,
+              let tz = TimeZone(identifier: city.timezone)
+        else { return nil }
+        return try? PrayerCalculator(
+            coordinate: city.coordinate,
+            timezone: tz,
+            method: selectedMethod,
+            asrMethod: selectedAsrMethod
+        ).calculate(for: Date())
+    }
+
     private func adjustmentRow(for prayerName: String) -> some View {
         let current = settings.prayerAdjustments[prayerName] ?? 0
-        return HStack {
+        let fmt: DateFormatter? = {
+            guard let tz = selectedCity.flatMap({ TimeZone(identifier: $0.timezone) }) else { return nil }
+            return PrayerTimes.timeFormatter(for: tz, use24Hour: use24Hour)
+        }()
+        let baseTime: Date? = {
+            guard let times = previewTimes else { return nil }
+            switch prayerName {
+            case "Fajr":    return times.fajr
+            case "Dhuhr":   return times.dhuhr
+            case "Asr":     return times.asr
+            case "Maghrib": return times.maghrib
+            case "Isha":    return times.isha
+            default:        return nil
+            }
+        }()
+        let finalTime = baseTime.flatMap {
+            Calendar.current.date(byAdding: .minute, value: current, to: $0)
+        }
+
+        return HStack(spacing: 0) {
+            // Prayer name — flexible, takes remaining space
             Text(prayerName)
-            Spacer()
-            Button {
-                SettingsManager.shared.setAdjustment(current - 1, for: prayerName)
-            } label: {
-                Image(systemName: "minus.circle.fill")
-                    .symbolRenderingMode(.hierarchical)
-                    .foregroundStyle(current > -60 ? Color.accentColor : .secondary)
-            }
-            .buttonStyle(.plain)
-            .disabled(current <= -60)
-            .accessibilityLabel("Decrease \(prayerName) adjustment")
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-            Text(current == 0 ? "±0" : (current > 0 ? "+\(current)" : "\(current)"))
-                .font(.body.monospacedDigit())
-                .foregroundStyle(current == 0 ? AnyShapeStyle(.secondary) : AnyShapeStyle(Color.orange))
-                .frame(minWidth: 36, alignment: .center)
-                .accessibilityLabel("\(prayerName) adjustment: \(current) minutes")
-
-            Button {
-                SettingsManager.shared.setAdjustment(current + 1, for: prayerName)
-            } label: {
-                Image(systemName: "plus.circle.fill")
-                    .symbolRenderingMode(.hierarchical)
-                    .foregroundStyle(current < 60 ? Color.accentColor : .secondary)
+            // Calculated time
+            Group {
+                if let fmt, let base = baseTime {
+                    Text(fmt.string(from: base))
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("—").foregroundStyle(.tertiary)
+                }
             }
-            .buttonStyle(.plain)
-            .disabled(current >= 60)
-            .accessibilityLabel("Increase \(prayerName) adjustment")
+            .font(.caption.monospacedDigit())
+            .frame(width: 66, alignment: .trailing)
+
+            // Adj controls — fixed width, centred
+            HStack(spacing: 4) {
+                Button { SettingsManager.shared.setAdjustment(current - 1, for: prayerName) } label: {
+                    Image(systemName: "minus.circle.fill").symbolRenderingMode(.hierarchical)
+                        .foregroundStyle(current > -60 ? Color.accentColor : .secondary)
+                }
+                .buttonStyle(.plain).disabled(current <= -60)
+                .accessibilityLabel("Decrease \(prayerName) adjustment")
+
+                Text(current == 0 ? "±0" : (current > 0 ? "+\(current)" : "\(current)"))
+                    .font(.body.monospacedDigit())
+                    .foregroundStyle(current == 0 ? AnyShapeStyle(.secondary) : AnyShapeStyle(Color.orange))
+                    .frame(width: 32, alignment: .center)
+                    .accessibilityLabel("\(prayerName) adjustment: \(current) minutes")
+
+                Button { SettingsManager.shared.setAdjustment(current + 1, for: prayerName) } label: {
+                    Image(systemName: "plus.circle.fill").symbolRenderingMode(.hierarchical)
+                        .foregroundStyle(current < 60 ? Color.accentColor : .secondary)
+                }
+                .buttonStyle(.plain).disabled(current >= 60)
+                .accessibilityLabel("Increase \(prayerName) adjustment")
+            }
+            .frame(width: 86, alignment: .center)
+
+            // Final time
+            Group {
+                if let fmt, let final_ = finalTime {
+                    Text(fmt.string(from: final_))
+                        .foregroundStyle(current != 0 ? AnyShapeStyle(Color.appGold) : AnyShapeStyle(Color.primary))
+                        .fontWeight(current != 0 ? .semibold : .regular)
+                } else {
+                    Text("—").foregroundStyle(.tertiary)
+                }
+            }
+            .font(.callout.monospacedDigit())
+            .frame(width: 66, alignment: .trailing)
         }
     }
 
     @ViewBuilder private var adjustmentsSection: some View {
+        // Column header row — mirrors adjustmentRow column widths
+        HStack(spacing: 0) {
+            Text("Prayer").frame(maxWidth: .infinity, alignment: .leading)
+            Text("Calc'd").frame(width: 66, alignment: .trailing)
+            Text("Adj").frame(width: 86, alignment: .center)
+            Text("Final").frame(width: 66, alignment: .trailing)
+        }
+        .font(.caption)
+        .foregroundStyle(.secondary)
+
         ForEach(Self.adjustmentPrayerNames, id: \.self) { prayerName in
             adjustmentRow(for: prayerName)
         }
     }
 
-    private var settingsForm: AnyView {
-        AnyView(
-            Form {
-                Section { locationSection } header: { Label("Location", systemImage: "location.fill") }
-                Section { calculationSection } header: { Label("Calculation", systemImage: "function") }
-                Section { displaySection } header: { Label("Display", systemImage: "display") }
-                Section {
-                    adjustmentsSection
-                } header: {
-                    Label("Adjustments", systemImage: "timer")
-                } footer: {
+    private var settingsForm: some View {
+        Form {
+            Section { locationSection } header: { Label("Location", systemImage: "location.fill") }
+            Section { calculationSection } header: { Label("Calculation", systemImage: "function") }
+            Section { displaySection } header: { Label("Display", systemImage: "display") }
+            Section {
+                adjustmentsSection
+            } header: {
+                Label("Adjustments", systemImage: "timer")
+            } footer: {
+                HStack {
                     Button("Reset all adjustments") {
                         SettingsManager.shared.resetAdjustments()
                     }
                     .foregroundStyle(.red)
                     .font(.footnote)
+                    Spacer()
+                    Text("Calc'd → adj → Final")
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
                 }
             }
-            .formStyle(.grouped)
-        )
+        }
+        .formStyle(.grouped)
     }
 
     var body: some View {
@@ -258,7 +429,9 @@ struct SettingsSheetView: View {
             .padding(.top, 28)
             .padding(.bottom, 20)
 
-            settingsForm
+            ScrollView {
+                settingsForm
+            }
 
             // ── Action buttons ───────────────────────────────────────
             HStack(spacing: 12) {
@@ -281,8 +454,7 @@ struct SettingsSheetView: View {
             .padding(.horizontal, 28)
             .padding(.vertical, 20)
         }
-        .frame(width: 480)
-        .frame(minHeight: 480)
+        .frame(width: 480, height: min((NSScreen.main?.visibleFrame.height ?? 900) - 80, 820))
         .background {
             Rectangle().fill(.regularMaterial)
         }
@@ -309,9 +481,24 @@ struct SettingsSheetView: View {
         // Load cities database
         if case let .success(db) = CitiesLoader.shared.load() {
             database = db
-            // Pre-select the current city's country and city
             selectedCountry = db.country(forCode: currentCity.countryCode)
-            selectedCity = currentCity
+            // If the current city is the GPS-detected city, restore it
+            if SettingsManager.shared.locationSource == "gps",
+               let gpsCity = SettingsManager.shared.gpsDetectedCity,
+               gpsCity.countryCode == currentCity.countryCode {
+                selectedCity = gpsCity
+            } else {
+                selectedCity = currentCity
+            }
+        }
+        // Restore GPS detection info banner if present
+        if SettingsManager.shared.locationSource == "gps",
+           !SettingsManager.shared.gpsLocality.isEmpty,
+           let coord = SettingsManager.shared.cachedGPSCoordinate() {
+            let lat = coord.latitude, lon = coord.longitude
+            let latStr = String(format: "%.4f°%@", abs(lat), lat >= 0 ? "N" : "S")
+            let lonStr = String(format: "%.4f°%@", abs(lon), lon >= 0 ? "E" : "W")
+            detectedLocationInfo = "📍 \(SettingsManager.shared.gpsLocality) — \(latStr), \(lonStr)"
         }
         // Set recommendation label for current country (without treating it as override)
         recommendationLabel = CalculationMethod.recommendationLabel(

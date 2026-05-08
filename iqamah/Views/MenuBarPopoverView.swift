@@ -27,6 +27,7 @@ struct MenuBarPopoverView: View {
         }
         .frame(width: 320)
         .background(Color(NSColor.windowBackgroundColor))
+        .preferredColorScheme(settings.appearance.colorScheme)
         .onAppear  { timer.start(settings: settings) }
         .onDisappear { timer.stop() }
     }
@@ -78,7 +79,7 @@ struct MenuBarPopoverView: View {
 
                 Text("All sounds")
                     .font(.system(size: 9, weight: .semibold))
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(.secondary)
                     .textCase(.uppercase)
                     .tracking(0.4)
             }
@@ -93,7 +94,7 @@ struct MenuBarPopoverView: View {
     private var datebar: some View {
         Text(dateBarString)
             .font(.system(size: 10))
-            .foregroundStyle(.tertiary)
+            .foregroundStyle(.secondary)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 16)
             .padding(.vertical, 5)
@@ -113,13 +114,13 @@ struct MenuBarPopoverView: View {
                 .frame(width: 72, alignment: .trailing)
             Color.clear.frame(width: 1 + 20) // divider + padding
             Text("Sound")
-                .frame(width: 28, alignment: .center)
+                .frame(width: 44, alignment: .center)
             Color.clear.frame(width: 12) // trailing pad
         }
         .font(.system(size: 9, weight: .bold))
         .textCase(.uppercase)
         .tracking(0.6)
-        .foregroundStyle(.quaternary)
+        .foregroundStyle(.secondary)
         .padding(.horizontal, 16)
         .padding(.vertical, 4)
         .overlay(alignment: .bottom) { Divider().opacity(0.4) }
