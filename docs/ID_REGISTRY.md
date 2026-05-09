@@ -12,7 +12,7 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 | US           | US-0046               | US-0045           |
 | TASK         | TASK-0001             | None              |
 | AC           | AC-0204               | AC-0203           |
-| TC           | TC-0001               | None              |
+| TC           | TC-0036               | TC-0035           |
 | BUG          | BUG-0056              | BUG-0055          |
 
 ---
@@ -27,4 +27,4 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 ---
 
-**Last Updated:** 2026-05-09 (EPIC-0010 added — iOS universal app conversion: US-0040–US-0045, AC-0169–AC-0203). Registry was previously stale; refreshed to reflect actual highest IDs in RELEASE_PLAN.md (EPIC-0009, US-0039, AC-0168) and BUGS.md (BUG-0055).
+**Last Updated:** 2026-05-09 (TC-0001–TC-0035 added covering EPIC-0010 acceptance criteria. Earlier on the same day: EPIC-0010 + US-0040–US-0045 + AC-0169–AC-0203 added; registry refreshed from previously stale state to reflect actual highest IDs in RELEASE_PLAN.md and BUGS.md).
