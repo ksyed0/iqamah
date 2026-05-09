@@ -314,11 +314,12 @@ content.userInfo = ["prayerName": prayerName, "scheduledFor": isoTimestamp]
 ```
 
 **Sound resolution:**
-- If user has selected a custom adhaan for this prayer AND the file is ≤30s (iOS limit) AND adhaan-as-notification-sound preference is enabled → use that file as `UNNotificationSound(named:)`
+- If user has selected a custom adhaan for this prayer AND the user has not muted notifications for that prayer → use that adhaan as `UNNotificationSound(named:)`
 - Else fall back to `.default`
-- Existing adhaan files exceed 30s and need a 30s "preview" version added to `IqamahCore/Resources/` for notification use, OR the full file plays only when the app is foregrounded
 
-**v1 simplification:** Use `.default` sound for all notifications in PR 4. A follow-up PR can add the 30s preview clips and per-prayer custom sounds. This keeps the notification PR small and avoids audio editing in the main path.
+**30-second iOS sound limit:** iOS notification sounds must be ≤30 seconds. Existing adhaan files in `IqamahCore/Resources/` are full-length recordings that exceed this. To satisfy AC-0190, US-0040 (or a sub-task of US-0043) must add a `Resources/Notifications/` subfolder containing trimmed 30-second variants of each adhaan file (`adhaan_1_notif.caf`, `adhaan_2_notif.caf`, etc.). Format: `.caf` is recommended over `.mp3` for `UNNotificationSound`. The `NotificationScheduler` resolves the user's selected adhaan to the corresponding `_notif.caf` variant when constructing the notification content.
+
+If a `_notif.caf` variant is missing for a given adhaan, fall back to `.default` and log a warning — never crash, never play silence.
 
 **Tap handling:** `UNUserNotificationCenterDelegate.didReceive(_:withCompletionHandler:)` posts a `NotificationCenter` message that the iOS app's root view observes and switches to the Times tab.
 
@@ -396,9 +397,11 @@ public struct PrayerActivityAttributes: ActivityAttributes {
 
 **Lifecycle:**
 - Triggered when app calculates next prayer is ≤60 minutes away
-- App calls `Activity.request(attributes:contentState:pushType:)`
-- Activity ends automatically at `scheduledTime` via `Activity.end(_:dismissalPolicy:)`
-- Only one activity per prayer at a time (dedupe by prayer name)
+- App calls `Activity.request(attributes:contentState:pushType:)` with `staleDate: scheduledTime`
+- The `staleDate` ensures the system stops rendering live updates at the prayer's scheduled time
+- On every `scenePhase` transition to `.active`, the app sweeps `Activity<PrayerActivityAttributes>.activities` and explicitly ends any whose `state.scheduledTime` is in the past via `Activity.end(_:dismissalPolicy:.immediate)`
+- This pattern is robust to app suspension/termination — relying on `Task.sleep` in a long-lived background task is unreliable because the task is cancelled when the app is suspended
+- Only one activity per prayer at a time (dedupe by prayer name before requesting)
 
 **Layouts:**
 - **Compact leading:** prayer icon
@@ -411,7 +414,8 @@ public struct PrayerActivityAttributes: ActivityAttributes {
 - Respects per-prayer enable toggle from US-0043 (disabled prayers do not start Live Activities)
 - Activity must update countdown without push (use `Text(timerInterval:)` for self-updating UI)
 - No more than one Live Activity simultaneously for the same prayer
-- If user kills the app, Live Activities continue (system-managed); ending the activity at prayer time still works
+- If the user kills the app, Live Activities continue (system-managed) but stop receiving foreground sweeps; the `staleDate` causes the system to dim the activity and the user can swipe to dismiss
+- The next time the app is opened, the foreground sweep cleans up any stale activities
 
 ---
 

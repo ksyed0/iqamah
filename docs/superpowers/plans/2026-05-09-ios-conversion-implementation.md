@@ -111,7 +111,7 @@ This requires editing `project.pbxproj` directly: find the `PBXBuildFile` and `P
 
 - [ ] **Step 4:** Add `import IqamahCore` to every macOS app file that references the moved types
 ```bash
-grep -l "PrayerTimes\|CalculationMethod\|City\|Country\|CitiesDatabase" iqamah/**/*.swift
+find iqamah -name "*.swift" -exec grep -l "PrayerTimes\|CalculationMethod\|\bCity\b\|\bCountry\b\|CitiesDatabase" {} +
 ```
 Add `import IqamahCore` near the top of each.
 
@@ -144,7 +144,7 @@ git mv iqamah/Services/ModelsIqamahError.swift Packages/IqamahCore/Sources/Iqama
 
 - [ ] **Step 4:** Add `import IqamahCore` to consumers
 ```bash
-grep -l "SettingsManager\|PrayerCalculator\|LocationService\|AdhaaanPlayer" iqamah/**/*.swift
+find iqamah -name "*.swift" -exec grep -l "SettingsManager\|PrayerCalculator\|LocationService\|AdhaaanPlayer" {} +
 ```
 
 - [ ] **Step 5:** Build & fix access errors. The most likely issues:
@@ -165,8 +165,11 @@ git commit -m "feat(US-0040): move Services into IqamahCore package"
 git mv iqamah/Resources/cities.json     Packages/IqamahCore/Sources/IqamahCore/Resources/
 git mv iqamah/Resources/adhaan_*.mp3    Packages/IqamahCore/Sources/IqamahCore/Resources/
 git mv iqamah/Resources/tone_*.aiff     Packages/IqamahCore/Sources/IqamahCore/Resources/
+git mv iqamah/Resources/splash.jpg      Packages/IqamahCore/Sources/IqamahCore/Resources/
 ```
-Leave `splash.jpg`, `PrivacyInfo.xcprivacy`, and `Media/` in the app target — these are macOS-app-specific.
+`splash.jpg` is shared by both platforms (macOS `SplashScreenView` and the iOS animated splash post-launch). Move it to IqamahCore so both targets read from a single source.
+
+Leave `PrivacyInfo.xcprivacy` and `Media/` in the macOS app target — these are macOS-app-specific.
 
 - [ ] **Step 2:** Remove the moved resource references from the macOS app target's Copy Bundle Resources phase (Xcode UI or `project.pbxproj` edit).
 
@@ -260,7 +263,7 @@ git mv Tests/IntegrationAndEdgeCaseTests.swift     Packages/IqamahCore/Tests/Iqa
 ```
 Leave any UI/AppKit-dependent tests in the app target.
 
-- [ ] **Step 2:** Add `@testable import IqamahCore` to each moved test file (replacing `@testable import iqamah` if present).
+- [ ] **Step 2:** Replace any `@testable import iqamah` with plain `import IqamahCore` in each moved test file. `@testable` is only needed if a test reaches into `internal` symbols across module boundaries; within the package's own test target, `internal` access is the default and `@testable` is redundant. Use `@testable import IqamahCore` only if a specific test needs access to `private` members exposed via `@testable`.
 
 - [ ] **Step 3:** Run package tests
 ```bash
@@ -419,23 +422,23 @@ git commit -m "feat(US-0041): implement iOS root navigation with TabView"
 For each view in `iqamah/Views/` that the iOS app needs, add cross-platform branches:
 
 - [ ] **Step 1: SplashScreenView**
-Replace `NSImage(contentsOf:)` with:
+`splash.jpg` is already in IqamahCore (per Task 1.4), so use `Bundle.module` and platform-branch the image type:
 ```swift
 #if os(macOS)
 import AppKit
 private func loadSplashImage() -> NSImage? {
-    guard let url = Bundle.main.url(forResource: "splash", withExtension: "jpg") else { return nil }
+    guard let url = Bundle.module.url(forResource: "splash", withExtension: "jpg") else { return nil }
     return NSImage(contentsOf: url)
 }
 #else
 import UIKit
 private func loadSplashImage() -> UIImage? {
-    guard let url = Bundle.main.url(forResource: "splash", withExtension: "jpg") else { return nil }
+    guard let url = Bundle.module.url(forResource: "splash", withExtension: "jpg") else { return nil }
     return UIImage(contentsOfFile: url.path)
 }
 #endif
 ```
-Also adjust the SwiftUI `Image` rendering site to consume the right type:
+Adjust the SwiftUI `Image` rendering site to consume the right type:
 ```swift
 #if os(macOS)
 if let img = loadSplashImage() { Image(nsImage: img).resizable() }
@@ -444,7 +447,7 @@ if let img = loadSplashImage() { Image(uiImage: img).resizable() }
 #endif
 ```
 
-For the iOS target, add `splash.jpg` to its bundle resources (or move it to IqamahCore if you want a single source).
+⚠️ The `loadSplashImage` function must live inside the IqamahCore package (alongside the resource) so `Bundle.module` resolves correctly. Move the helper into a new `Sources/IqamahCore/Helpers/SplashImage.swift` and expose it via a public API; `SplashScreenView` calls it from either target.
 
 - [ ] **Step 2: AboutView** — same pattern as SplashScreenView.
 
@@ -705,12 +708,130 @@ git commit -m "feat(US-0042): bridge SettingsManager setters to NSUbiquitousKeyV
 
 **Branch:** `feat/US-0043-ios-notifications`
 **Risk:** Low–medium — iOS-only, well-understood APIs
-**Estimated effort:** 0.5–1 day
+**Estimated effort:** 1 day (added scope: SettingsManager API additions + 30s sound clips)
 **Depends on:** US-0041 merged (US-0042 not strictly required)
 
-### Task 4.1 — NotificationScheduler service
+### Task 4.1 — Extend SettingsManager with notification-related APIs
 
-- [ ] **Step 1:** Create `iqamah-iOS/NotificationScheduler.swift`:
+The `NotificationScheduler` and widget code reference settings APIs that don't exist on the current `SettingsManager`. Add these in IqamahCore first so the package builds for both targets before any iOS-specific code lands.
+
+**Files:**
+- Modify: `Packages/IqamahCore/Sources/IqamahCore/Services/SettingsManager.swift`
+- Modify: `Packages/IqamahCore/Tests/IqamahCoreTests/IqamahModelTests.swift` (or add a new test file)
+
+- [ ] **Step 1:** Add per-prayer enable storage. Inside `SettingsManager`, add:
+```swift
+private static let defaultEnabledPrayers: Set<String> = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"]
+
+@Published public var enabledPrayers: Set<String> {
+    didSet {
+        guard !isApplyingRemote else { return }
+        let array = Array(enabledPrayers).sorted()
+        defaults.set(array, forKey: Keys.enabledPrayers)
+        kvs.set(array, forKey: Keys.enabledPrayers)  // synced via KVS once US-0042 lands
+    }
+}
+
+public func isPrayerEnabled(_ name: String) -> Bool {
+    enabledPrayers.contains(name)
+}
+```
+In `Keys`, add `static let enabledPrayers = "enabledPrayers"`.
+In `init()`:
+```swift
+if let arr = defaults.array(forKey: Keys.enabledPrayers) as? [String] {
+    enabledPrayers = Set(arr)
+} else {
+    enabledPrayers = Self.defaultEnabledPrayers
+}
+```
+
+- [ ] **Step 2:** Add unified accessors for "active" location data — single source of truth used by both notifications and widget. The settings model stores either GPS (lat/lon/timezone/locality) or a manually selected city; consumers shouldn't reach into either branch directly.
+```swift
+public var activeCoordinate: CLLocationCoordinate2D? {
+    if locationSource == "gps" {
+        let lat = defaults.double(forKey: Keys.gpsLatitude)
+        let lon = defaults.double(forKey: Keys.gpsLongitude)
+        guard lat != 0 || lon != 0 else { return nil }
+        return CLLocationCoordinate2D(latitude: lat, longitude: lon)
+    }
+    return selectedCity?.coordinate
+}
+
+public var activeTimezoneIdentifier: String {
+    if locationSource == "gps", !gpsTimezone.isEmpty { return gpsTimezone }
+    return selectedCity?.timezone ?? TimeZone.current.identifier
+}
+
+public var activeCityName: String {
+    if locationSource == "gps", !gpsLocality.isEmpty { return gpsLocality }
+    return selectedCity?.name ?? ""
+}
+```
+
+- [ ] **Step 3:** Add tests in `IqamahModelTests.swift`:
+  - `enabledPrayers` defaults to all five non-Sunrise prayers
+  - `isPrayerEnabled("Sunrise")` returns false by default
+  - Toggling a prayer off and re-instantiating SettingsManager preserves the change (UserDefaults round-trip)
+  - `activeCoordinate` returns city coord when `locationSource == "manual"`
+  - `activeCoordinate` returns GPS coord when `locationSource == "gps"` and GPS lat/lon are non-zero
+  - `activeTimezoneIdentifier` falls back to `TimeZone.current.identifier` when neither GPS timezone nor city is set
+
+- [ ] **Step 4:** Build the package and run tests
+```bash
+cd Packages/IqamahCore && swift test 2>&1 | tail -20
+```
+Expected: all tests pass, including new ones.
+
+- [ ] **Step 5:** Commit
+```bash
+git commit -m "feat(US-0043): extend SettingsManager with enabledPrayers and active* accessors"
+```
+
+### Task 4.2 — Add 30-second adhaan clips to IqamahCore
+
+iOS notification sounds must be ≤30 seconds and the file must ship in the app bundle (or app group) — `UNNotificationSound(named:)` cannot reference URLs. AC-0190 requires per-prayer custom adhaan as the notification sound, so we need trimmed variants alongside the full-length files.
+
+**Files:**
+- New: `Packages/IqamahCore/Sources/IqamahCore/Resources/Notifications/adhaan_*_notif.caf` (one per existing adhaan)
+
+- [ ] **Step 1:** Install ffmpeg if needed
+```bash
+brew install ffmpeg
+```
+
+- [ ] **Step 2:** Generate 30-second `.caf` variants for each adhaan
+```bash
+mkdir -p Packages/IqamahCore/Sources/IqamahCore/Resources/Notifications
+cd Packages/IqamahCore/Sources/IqamahCore/Resources
+
+for src in adhaan_*.mp3; do
+  base="${src%.mp3}"
+  ffmpeg -i "$src" -t 29 -ar 44100 -ac 2 -c:a pcm_s16le "Notifications/${base}_notif.caf"
+done
+```
+The `-t 29` caps duration at 29 seconds (margin for Apple's 30s limit). `pcm_s16le` in `.caf` is the most compatible format for `UNNotificationSound`.
+
+- [ ] **Step 3:** Listen-test each generated clip — confirm none are clipped mid-word at the trim point. For the Fajr-specific files (which start with the longer "Allahu akbar... as-salatu khayrun min an-nawm" prelude), use a different trim strategy if needed:
+```bash
+# Example: skip first 5s and take next 25s
+ffmpeg -i adhaan_fajr_1.mp3 -ss 5 -t 25 -ar 44100 -ac 2 -c:a pcm_s16le Notifications/adhaan_fajr_1_notif.caf
+```
+
+- [ ] **Step 4:** Verify file sizes are reasonable (each `_notif.caf` should be 4–6 MB at PCM 16-bit stereo 44.1kHz × 30s).
+
+- [ ] **Step 5:** Commit
+```bash
+git add Packages/IqamahCore/Sources/IqamahCore/Resources/Notifications/
+git commit -m "feat(US-0043): add 30s notification-sound variants for each adhaan"
+```
+
+### Task 4.3 — NotificationScheduler service
+
+**Files:**
+- New: `iqamah-iOS/NotificationScheduler.swift`
+
+- [ ] **Step 1:** Create the file:
 ```swift
 import Foundation
 import UserNotifications
@@ -725,8 +846,7 @@ final class NotificationScheduler: ObservableObject {
         let settings = await center.notificationSettings()
         switch settings.authorizationStatus {
         case .notDetermined:
-            let granted = (try? await center.requestAuthorization(options: [.alert, .sound])) ?? false
-            return granted
+            return (try? await center.requestAuthorization(options: [.alert, .sound])) ?? false
         case .authorized, .provisional, .ephemeral:
             return true
         case .denied:
@@ -741,9 +861,8 @@ final class NotificationScheduler: ObservableObject {
         center.removeAllPendingNotificationRequests()
 
         let settings = SettingsManager.shared
-        guard let coord = settings.activeCoordinate,
-              let timezone = TimeZone(identifier: settings.activeTimezoneIdentifier)
-        else { return }
+        guard let coord = settings.activeCoordinate else { return }
+        let timezone = TimeZone(identifier: settings.activeTimezoneIdentifier) ?? .current
 
         let calc = PrayerCalculator(
             coordinate: coord,
@@ -760,13 +879,14 @@ final class NotificationScheduler: ObservableObject {
             let times = calc.prayerTimes(for: day)
 
             for prayer in times.prayers where settings.isPrayerEnabled(prayer.name) {
-                let request = makeRequest(prayer: prayer, date: day)
+                guard prayer.time > Date() else { continue }  // skip past times today
+                let request = makeRequest(prayer: prayer, date: day, settings: settings)
                 try? await center.add(request)
             }
         }
     }
 
-    private func makeRequest(prayer: PrayerTime, date: Date) -> UNNotificationRequest {
+    private func makeRequest(prayer: PrayerTime, date: Date, settings: SettingsManager) -> UNNotificationRequest {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         let id = "prayer.\(prayer.name).\(formatter.string(from: date))"
@@ -774,7 +894,7 @@ final class NotificationScheduler: ObservableObject {
         let content = UNMutableNotificationContent()
         content.title = "Iqamah"
         content.body = "It is time for \(prayer.name)"
-        content.sound = .default
+        content.sound = resolveSound(for: prayer.name, settings: settings)
         content.userInfo = ["prayerName": prayer.name]
 
         let components = Calendar.current.dateComponents(
@@ -784,44 +904,56 @@ final class NotificationScheduler: ObservableObject {
         let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
         return UNNotificationRequest(identifier: id, content: content, trigger: trigger)
     }
+
+    private func resolveSound(for prayer: String, settings: SettingsManager) -> UNNotificationSound {
+        // Skip if user has muted this prayer's adhaan
+        if settings.prayerMuteStates[prayer] == true {
+            return .default
+        }
+        // Resolve user's selected adhaan to its _notif.caf variant
+        guard let selected = settings.selectedAdhaanFile(for: prayer) else { return .default }
+        let notifFile = "\(selected)_notif.caf"
+        // Verify the file exists in the bundle (defensive — missing variants must not crash)
+        guard Bundle.module.url(forResource: notifFile, withExtension: nil, subdirectory: "Notifications") != nil else {
+            print("⚠️ Missing notification sound: \(notifFile); falling back to default")
+            return .default
+        }
+        return UNNotificationSound(named: UNNotificationSoundName(notifFile))
+    }
 }
 ```
 
-- [ ] **Step 2:** Add `isPrayerEnabled(_:)` and per-prayer toggle storage to `SettingsManager` (in IqamahCore):
-```swift
-@Published public var enabledPrayers: Set<String> {
-    didSet { /* persist + KVS */ }
-}
+⚠️ This references `settings.selectedAdhaanFile(for:)` and `settings.prayerMuteStates[prayer]`. Both should already exist on `SettingsManager` (per the existing macOS `MenuBarPopoverView` and adhaan selection feature). If their actual API shape differs, adjust the call sites here. If they don't exist, add them in Task 4.1.
 
-public func isPrayerEnabled(_ name: String) -> Bool {
-    enabledPrayers.contains(name)
-}
-```
-Default value: all five prayers enabled (Fajr, Dhuhr, Asr, Maghrib, Isha — Sunrise excluded).
-
-- [ ] **Step 3:** Wire up scheduling triggers in iOS app:
+- [ ] **Step 2:** Wire up scheduling triggers in iOS app:
 ```swift
 // In iqamahApp_iOS.swift
+@Environment(\.scenePhase) var scenePhase
+
 .onChange(of: settings.calculationMethod) { _, _ in Task { await NotificationScheduler.shared.rescheduleAll() } }
 .onChange(of: settings.selectedCity)      { _, _ in Task { await NotificationScheduler.shared.rescheduleAll() } }
 .onChange(of: settings.enabledPrayers)    { _, _ in Task { await NotificationScheduler.shared.rescheduleAll() } }
-
-// On scenePhase becoming active:
-@Environment(\.scenePhase) var scenePhase
 .onChange(of: scenePhase) { _, new in
     if new == .active { Task { await NotificationScheduler.shared.rescheduleAll() } }
 }
 ```
 
-- [ ] **Step 4:** Add per-prayer toggles to the iOS Settings tab UI.
+- [ ] **Step 3:** Add per-prayer toggles to the iOS Settings tab UI bound to `settings.enabledPrayers`.
 
-- [ ] **Step 5:** Implement notification tap handler — on `didReceive`, post a `NotificationCenter` message that `iOSRootView` observes to switch to the Times tab.
+- [ ] **Step 4:** Implement notification tap handler. Add `UNUserNotificationCenterDelegate` conformance to a singleton at app startup; on `didReceive`, post a `NotificationCenter` message that `iOSRootView` observes to switch to the Times tab.
 
-- [ ] **Step 6:** Test on simulator (Features → Trigger Notification at scheduled time, or set device clock).
+- [ ] **Step 5:** Test on simulator: Features → Trigger Notification at scheduled time, or set device clock to ~5 minutes before next prayer.
 
-- [ ] **Step 7:** Verify ACs (AC-0187 through AC-0192).
+- [ ] **Step 6:** Test on a physical device with locked screen — verify the custom adhaan plays as the notification sound.
 
-- [ ] **Step 8:** Push and open PR.
+- [ ] **Step 7:** Verify ACs (AC-0187 through AC-0192). Specifically:
+  - AC-0190 ("Notification sound matches the user's per-prayer adhaan selection") requires the `_notif.caf` resolution path works end-to-end.
+
+- [ ] **Step 8:** Commit and push
+```bash
+git commit -m "feat(US-0043): NotificationScheduler with per-prayer custom adhaan sounds"
+git push -u origin feat/US-0043-ios-notifications
+```
 
 ---
 
@@ -845,23 +977,40 @@ Default value: all five prayers enabled (Fajr, Dhuhr, Asr, Maghrib, Isha — Sun
 
 ### Task 5.2 — App Group for shared UserDefaults
 
-- [ ] **Step 1:** Both iOS app and widget targets → Signing & Capabilities → + App Groups → add `group.com.fablesoft.iqamah`.
+The widget extension and the iOS app must read/write the same UserDefaults snapshot. The cleanest approach is a single App Group used by **all three targets**: macOS app, iOS app, and iOS widget extension. This way `SettingsManager` has one storage location everywhere and the widget reads exactly what the iOS app wrote. Existing macOS users get a one-time migration on first launch after upgrade.
 
-- [ ] **Step 2:** Modify `SettingsManager` to optionally use a suite name:
+**App Group ID:** `group.com.fablesoft.iqamah`
+
+- [ ] **Step 1:** Add the App Group capability to all three targets in Xcode → Signing & Capabilities → + App Groups → check `group.com.fablesoft.iqamah`:
+  - iqamah (macOS)
+  - iqamah-iOS
+  - IqamahWidget
+
+- [ ] **Step 2:** Modify `SettingsManager` in IqamahCore to use the App Group suite as its UserDefaults backing store. Single `shared` instance — no per-target configuration:
 ```swift
-public init(suiteName: String? = nil) {
-    self.defaults = suiteName.flatMap { UserDefaults(suiteName: $0) } ?? .standard
-    // ...
-}
-public static let shared = SettingsManager(suiteName: "group.com.fablesoft.iqamah")
-```
-Caveat: this changes UserDefaults storage location — existing users will appear to lose their settings on first launch after upgrade. Mitigation: one-time migration that copies values from `.standard` to the group suite at init.
+private static let appGroupID = "group.com.fablesoft.iqamah"
 
-- [ ] **Step 3:** Add the migration:
+public static let shared: SettingsManager = {
+    let suite = UserDefaults(suiteName: appGroupID) ?? .standard
+    return SettingsManager(defaults: suite)
+}()
+
+private init(defaults: UserDefaults) {
+    self.defaults = defaults
+    migrateFromStandardDefaultsIfNeeded()
+    loadFromDefaults()
+    subscribeToKVS()  // from US-0042
+}
+```
+
+If `UserDefaults(suiteName:)` returns nil (e.g. App Group entitlement misconfigured), fall back to `.standard` rather than crashing.
+
+- [ ] **Step 3:** Add the one-time migration. Runs on every target the first time they launch with the new build — copies any existing keys from `.standard` to the group suite, then sets a marker.
 ```swift
 private func migrateFromStandardDefaultsIfNeeded() {
     let migrationKey = "didMigrateToAppGroupV1"
     guard !defaults.bool(forKey: migrationKey) else { return }
+
     let std = UserDefaults.standard
     for key in Keys.allKeys {
         if let value = std.object(forKey: key) {
@@ -871,6 +1020,22 @@ private func migrateFromStandardDefaultsIfNeeded() {
     defaults.set(true, forKey: migrationKey)
 }
 ```
+Add `Keys.allKeys` as a static array of every key constant (or use a runtime enumeration). The marker is per-suite, so each target migrates independently — but they all converge on the same final state because they share the suite.
+
+- [ ] **Step 4:** Verify migration on macOS first (lower risk; no widget yet). Build and launch the macOS app:
+  - Check that all existing settings (city, calculation method, adhaan selections, etc.) are preserved
+  - Verify `defaults read group.com.fablesoft.iqamah` (via Terminal on macOS) shows the migrated keys
+
+- [ ] **Step 5:** Verify on iOS:
+  - Settings written by the iOS app appear in the widget's read of the App Group
+  - Widget timeline reload (triggered by app's `WidgetCenter.shared.reloadAllTimelines()`) reflects new settings within the next refresh window
+
+- [ ] **Step 6:** Commit
+```bash
+git commit -m "feat(US-0044): unify SettingsManager storage on App Group with one-time migration"
+```
+
+⚠️ **Risk:** If a user has macOS + iOS installed and the macOS migration runs first, then iOS migrates from a clean `.standard` (since iOS install just happened), iOS's migration will copy nothing and the App Group is already populated by macOS — correct behavior. If iOS migrates first (fresh install before macOS upgrade), the macOS migration on next launch finds existing App Group keys but the marker is `defaults.bool(forKey:)` returning `false` for the macOS suite — so it'll re-copy from macOS's `.standard`, potentially clobbering iOS's choices. Mitigation: check `defaults.bool(forKey: migrationKey)` AND `defaults.dictionaryRepresentation().count > 1` before running migration; skip if the suite already has data.
 
 ### Task 5.3 — Widget timeline + views
 
@@ -1061,6 +1226,13 @@ struct IqamahWidgetBundle: WidgetBundle {
 
 ### Task 6.3 — Triggering Live Activities from the iOS app
 
+End strategy: do **not** rely on `Task.sleep` to end the activity at prayer time — the task is cancelled when the app is suspended/killed, and the activity would persist indefinitely. Instead:
+
+1. Set `staleDate = prayer.time` on the activity content. The system stops live updates and dims the activity at this moment, even if the app is suspended.
+2. On every app foreground (`scenePhase` → `.active`), sweep all active `PrayerActivityAttributes` activities and explicitly end any whose `state.scheduledTime` is in the past.
+
+This pattern is robust to app suspension and termination.
+
 - [ ] **Step 1:** Add `LiveActivityManager.swift` to iOS target:
 ```swift
 import ActivityKit
@@ -1070,42 +1242,76 @@ import IqamahCore
 @MainActor
 final class LiveActivityManager {
     static let shared = LiveActivityManager()
-    private var activities: [String: Activity<PrayerActivityAttributes>] = [:]
 
     func startIfDue(prayer: PrayerTime, methodName: String) {
         let secondsUntil = prayer.time.timeIntervalSinceNow
         guard secondsUntil > 0, secondsUntil <= 3600 else { return }
-        guard activities[prayer.name] == nil else { return }
+
+        // Dedupe: don't start if an activity for this prayer (today) already exists
+        let alreadyRunning = Activity<PrayerActivityAttributes>.activities.contains { activity in
+            activity.attributes.prayerName == prayer.name &&
+            Calendar.current.isDate(activity.content.state.scheduledTime, inSameDayAs: prayer.time)
+        }
+        guard !alreadyRunning else { return }
 
         let attributes = PrayerActivityAttributes(prayerName: prayer.name, methodName: methodName)
         let state = PrayerActivityAttributes.ContentState(scheduledTime: prayer.time)
 
         do {
-            let activity = try Activity.request(
+            _ = try Activity.request(
                 attributes: attributes,
-                content: .init(state: state, staleDate: prayer.time.addingTimeInterval(60))
+                content: .init(state: state, staleDate: prayer.time)
             )
-            activities[prayer.name] = activity
-            // Schedule end at prayer time
-            Task {
-                try? await Task.sleep(nanoseconds: UInt64(secondsUntil * 1_000_000_000))
-                await activity.end(nil, dismissalPolicy: .immediate)
-                activities.removeValue(forKey: prayer.name)
-            }
         } catch {
             print("Live Activity failed: \(error)")
+        }
+    }
+
+    /// Ends any active Live Activities whose scheduledTime is in the past.
+    /// Call from scenePhase → .active and on a low-frequency timer while foregrounded.
+    func sweepStaleActivities() async {
+        let now = Date()
+        for activity in Activity<PrayerActivityAttributes>.activities
+            where activity.content.state.scheduledTime <= now
+        {
+            await activity.end(nil, dismissalPolicy: .immediate)
         }
     }
 }
 ```
 
-- [ ] **Step 2:** Add `NSSupportsLiveActivities = true` to iOS target Info.plist.
+- [ ] **Step 2:** Wire the sweep into the app lifecycle:
+```swift
+// In iqamahApp_iOS.swift
+@Environment(\.scenePhase) var scenePhase
 
-- [ ] **Step 3:** Drive `startIfDue` from the iOS app on timer (every minute) or on app foreground; respect `enabledPrayers`.
+.onChange(of: scenePhase) { _, new in
+    guard new == .active, #available(iOS 16.1, *) else { return }
+    Task { await LiveActivityManager.shared.sweepStaleActivities() }
+}
+```
 
-- [ ] **Step 4:** Test on a physical device (Live Activities don't render in simulator's Dynamic Island reliably).
+Optionally, while the app is foregrounded, run a 1-minute timer that also calls `sweepStaleActivities` so an open app doesn't leave a stale Live Activity visible past prayer time:
+```swift
+Timer.publish(every: 60, on: .main, in: .common)
+    .autoconnect()
+    .sink { _ in
+        guard #available(iOS 16.1, *) else { return }
+        Task { await LiveActivityManager.shared.sweepStaleActivities() }
+    }
+```
 
-- [ ] **Step 5:** Verify ACs (AC-0198 through AC-0203). Push and open PR.
+- [ ] **Step 3:** Add `NSSupportsLiveActivities = true` to iOS target Info.plist.
+
+- [ ] **Step 4:** Drive `startIfDue` from the iOS app on a 1-minute timer or on app foreground; respect `enabledPrayers` (skip prayers the user has disabled per US-0043).
+
+- [ ] **Step 5:** Test on a physical device — Live Activities don't render in the simulator's Dynamic Island reliably. Verify:
+  - Activity appears in Dynamic Island within 1 minute of the 60-minute-before mark
+  - Compact / expanded / minimal layouts all render correctly
+  - At prayer time: activity dims (staleDate hit); on next foreground, activity is removed (sweep)
+  - Killing the app and reopening does not leave a stale activity visible
+
+- [ ] **Step 6:** Verify ACs (AC-0198 through AC-0203). Push and open PR.
 
 ---
 
@@ -1126,9 +1332,11 @@ final class LiveActivityManager {
 |------|------------|
 | Xcode `project.pbxproj` corruption during file moves | Make moves in Xcode UI, not text edits; commit after each task |
 | `Bundle.module` resource lookups fail at runtime | Smoke-test cities and audio loading after Branch 1 |
-| App Group migration loses existing macOS user settings | One-time migration code in Branch 5 (Task 5.2 Step 3) |
+| App Group migration race when both macOS and iOS migrate independently | Migration checks both the marker AND `dictionaryRepresentation().count` to detect already-populated suite (Task 5.2 Step 3) |
 | iCloud KVS sync feedback loop | `isApplyingRemote` flag in Branch 3 (Task 3.2 Step 5) |
-| iOS notification sound files exceed 30s limit | Use `.default` sound for v1 (per spec §6.4); custom sounds = follow-up PR |
+| iOS notification sound files exceed 30s limit | Generate trimmed `_notif.caf` variants in IqamahCore (Task 4.2); resolver falls back to `.default` if a variant is missing |
+| Adhaan `_notif.caf` clipped mid-word at trim point | Listen-test each generated clip; use targeted `-ss` offset for Fajr-specific files (Task 4.2 Step 3) |
+| Live Activity persists after app suspension | Use `staleDate` + foreground sweep instead of `Task.sleep` (Task 6.3) |
 | Live Activity not appearing on simulator | Test on physical device; document in PR test plan |
 | Universal bundle ID conflicts in App Store Connect | Validate bundle ID is configured for both macOS and iOS in App Store Connect before submitting |
 
