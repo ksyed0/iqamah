@@ -1035,19 +1035,222 @@ rm adhaan_4_original_backup.mp3
 
 ---
 
-## Updated Summary Statistics (2026-05-05)
+## EPIC-0010: iOS Universal App Conversion (2026-05-09)
 
-**Total Epics:** 9
-**Total User Stories:** 39 (US-0001 through US-0039)
-**Total Acceptance Criteria:** 168 (AC-0001 through AC-0168)
+**Description:** Expand Iqamah from a macOS-only app into a universal app that also runs on iOS 17.0+. Share all calculation, model, and service code between platforms via a local Swift Package (`IqamahCore`); replace the macOS menu-bar paradigm on iOS with native equivalents (local notifications, Home/Lock Screen widget, Live Activity / Dynamic Island); sync user settings across devices via iCloud key-value storage. Ship as a universal purchase under the existing bundle ID `com.fablesoft.iqamah`.
 
-**Open for resubmission:**
+**Release Target:** v2.0 (iOS expansion)
+**Status:** 🟡 Planned
+**Dependencies:** EPIC-0001, EPIC-0002, EPIC-0003 (existing macOS feature surface stable)
+
+**Architectural Decisions:**
+- **Shared code packaging:** Local Swift Package `Packages/IqamahCore/` with platforms `.macOS(.v14), .iOS(.v17)`
+- **Bundle ID strategy:** Universal app — single bundle ID `com.fablesoft.iqamah` shared across macOS and iOS targets
+- **iOS deployment target:** iOS 17.0 (enables Observable, modern WidgetKit, interactive widgets)
+- **Cross-device sync:** `NSUbiquitousKeyValueStore` for settings (location, calculation method, Asr method, per-prayer adjustments, adhaan preferences)
+- **PR strategy:** Staged across six independently reviewable PRs (US-0040 through US-0045); each lands without breaking the macOS app
+
+**PR sequence:**
+1. US-0040 — Extract IqamahCore Swift Package (no behavior change)
+2. US-0041 — Add iOS app target + core flow
+3. US-0042 — iCloud settings sync
+4. US-0043 — Local prayer notifications (iOS)
+5. US-0044 — Widget Extension (Home/Lock Screen)
+6. US-0045 — Live Activity / Dynamic Island
+
+---
+
+### US-0040 (EPIC-0010) — Extract IqamahCore Swift Package
+
+**Description:** Move all platform-agnostic model, service, and resource code into a local Swift Package shared between the macOS app and (later) the iOS app. macOS app behavior must be identical after the move.
+
+**Priority:** High
+**Estimate:** 5 Story Points
+**Status:** 🟡 Planned
+**Dependencies:** None
+
+**Scope — files moved into `Packages/IqamahCore/Sources/IqamahCore/`:**
+- `Models/Location.swift`, `PrayerTimes.swift`, `CalculationMethod.swift`, `Adhaan.swift`
+- `Services/PrayerCalculator.swift`, `LocationService.swift`, `SettingsManager.swift`, `AdhaaanPlayer.swift`, `ModelsIqamahError.swift`
+- `Resources/cities.json`, `adhaan_*.mp3`, `tone_*.aiff`
+
+**Scope — files that stay in the macOS app target:**
+- `AppDelegate.swift`, `MenuBarPopoverView.swift`, `AdhaanBannerController.swift`, `ContentView.swift` (icon-export utility), `AppIconView.swift`, `AppIconGenerator.swift`, all of `Views/`
+
+**Required edits during the move:**
+- Replace `Bundle.main` with `Bundle.module` for resource loading inside the package
+- Add `#if os(iOS)` `AVAudioSession.sharedInstance().setCategory(.playback)` in `AdhaaanPlayer` (dormant on macOS)
+- Audit `Color+App.swift` and any service file for `NSColor`/`AppKit` leaks; gate with `#if canImport(AppKit)` if present
+- Move existing tests (`PrayerCalculatorTests`, `IqamahModelTests`, `ENH001GPSTests`, `IntegrationAndEdgeCaseTests`, `PrayerAccuracyRegressionTests`) into `Tests/IqamahCoreTests/`
+
+**Acceptance Criteria:**
+- [ ] AC-0169: `Packages/IqamahCore/Package.swift` declares `.macOS(.v14)` and `.iOS(.v17)` platforms
+- [ ] AC-0170: macOS app target depends on `IqamahCore`; `xcodebuild -scheme iqamah` builds clean with zero warnings introduced by the move
+- [ ] AC-0171: All existing tests pass after relocation into the package's test target
+- [ ] AC-0172: No `import AppKit` statement appears anywhere under `Packages/IqamahCore/Sources/`
+- [ ] AC-0173: Launching the macOS app produces identical prayer times and identical UI behavior to the pre-extraction build for the same location and method
+- [ ] AC-0174: A throwaway iOS scheme that imports `IqamahCore` and instantiates `PrayerCalculator` for a known location compiles for the iOS simulator
+
+---
+
+### US-0041 (EPIC-0010) — Add iOS App Target & Core Flow
+
+**Description:** Stand up a new iOS app target sharing the `com.fablesoft.iqamah` bundle ID and depending on `IqamahCore`. Port the existing user flow — Location Setup → Calculation Method → Prayer Times — plus Qiblah and Settings into native iOS UI.
+
+**Priority:** High
+**Estimate:** 8 Story Points
+**Status:** 🟡 Planned
+**Dependencies:** US-0040
+
+**Scope:**
+- New `iqamah-iOS` target, deployment target iOS 17.0, bundle ID `com.fablesoft.iqamah`, team `96Y29SP9JR`
+- New iOS-only files: `iqamahApp_iOS.swift` (pure SwiftUI `App`, no `NSApplicationDelegateAdaptor`), `iOSRootView.swift` (TabView: Times / Qiblah / Settings)
+- Port views with `#if os(iOS)` tweaks: `LocationSetupView`, `CalculationMethodView`, `PrayerTimesView`, `QiblahView`, `SettingsSheetView`
+- Replace `NSImage(contentsOf:)` → `UIImage(contentsOfFile:)` in `SplashScreenView` and `AboutView`
+- Replace `NSImage(named: NSImage.applicationIconName)` → `Image("AppIcon")` in `PrayerTimesView`
+- Drop `NSScreen.main`-based frame sizing in `SettingsSheetView`
+- iOS Launch Screen via Info.plist `UILaunchScreen`; existing `SplashScreenView` becomes the post-launch animated splash
+- Info.plist `NSLocationWhenInUseUsageDescription` (text matching macOS)
+- Add iOS app icons to `Assets.xcassets`
+- App Store Connect: configure existing app record as universal (single SKU, two platforms)
+
+**Acceptance Criteria:**
+- [ ] AC-0175: `iqamah-iOS` target builds and installs on iOS 17 simulator and a physical device
+- [ ] AC-0176: Bundle ID `com.fablesoft.iqamah` is shared between macOS and iOS targets; App Store Connect shows universal purchase
+- [ ] AC-0177: First-launch flow completes end-to-end (location → method → main view) without crashes
+- [ ] AC-0178: Prayer times displayed on iOS match macOS to the second for the same city, calculation method, Asr method, and date
+- [ ] AC-0179: Qiblah view renders correctly and updates with device heading on a physical iOS device
+- [ ] AC-0180: No `import AppKit` or `NS*` references appear in any file compiled by the iOS target
+
+---
+
+### US-0042 (EPIC-0010) — iCloud Settings Sync via Key-Value Store
+
+**Description:** Sync user settings (selected city, calculation method, Asr method, per-prayer minute adjustments, adhaan preferences, appearance) across the user's devices via `NSUbiquitousKeyValueStore`. UserDefaults remains the local cache; KVS is the cross-device source of truth.
+
+**Priority:** Medium
+**Estimate:** 5 Story Points
+**Status:** 🟡 Planned
+**Dependencies:** US-0040, US-0041
+
+**Scope:**
+- Add iCloud Key-Value Storage entitlement (`com.apple.developer.ubiquity-kvstore-identifier`) to both macOS and iOS app targets
+- Refactor `SettingsManager` to write through to `NSUbiquitousKeyValueStore` alongside `UserDefaults` on every setter
+- Subscribe to `NSUbiquitousKeyValueStore.didChangeExternallyNotification`; on receipt, update the matching `@Published` properties on the main actor
+- Conflict resolution: rely on KVS native last-writer-wins — no custom merge logic needed
+- Graceful fallback when iCloud is unavailable or the user is signed out: continue operating from UserDefaults; do not surface error UI for this case
+
+**Acceptance Criteria:**
+- [ ] AC-0181: iCloud Key-Value Storage entitlement is present in both app targets and provisioning profiles
+- [ ] AC-0182: Changing calculation method on macOS causes iOS to reflect the new method within 30 seconds (and vice versa)
+- [ ] AC-0183: Changing selected city, Asr method, per-prayer adjustments, or adhaan selection syncs in both directions
+- [ ] AC-0184: When iCloud is unavailable (signed-out test account), the app continues to function using UserDefaults and surfaces no error
+- [ ] AC-0185: First launch on a second device populates settings from iCloud rather than showing the setup flow, when an iCloud-backed configuration already exists
+- [ ] AC-0186: No setting is lost or reverted across a sync cycle of macOS → iOS → macOS
+
+---
+
+### US-0043 (EPIC-0010) — iOS Local Prayer Notifications
+
+**Description:** Schedule local notifications on iOS for each enabled prayer time, replacing the macOS menu-bar countdown as the primary "next prayer awareness" mechanism. Support per-prayer enable/disable and choice between adhaan audio and a default tone.
+
+**Priority:** High
+**Estimate:** 5 Story Points
+**Status:** 🟡 Planned
+**Dependencies:** US-0041
+
+**Scope:**
+- New `NotificationScheduler.swift` in iOS target
+- Request `UNUserNotificationCenter` authorization on first run after main view
+- Schedule `UNNotificationRequest` for each enabled prayer for the next 7 days; reschedule on settings change, on app foreground, and at midnight via background task
+- Per-prayer enable/disable toggle in iOS Settings tab
+- Notification sound: respect existing `SettingsManager` per-prayer adhaan selection (use bundled audio file as `UNNotificationSound`); fall back to default tone when adhaan playback is disabled
+- Add `UIBackgroundModes = audio` to iOS Info.plist when adhaan-as-notification-sound is enabled
+- Tapping a notification opens the app to the Prayer Times view
+
+**Acceptance Criteria:**
+- [ ] AC-0187: First-run authorization prompt appears with clear rationale; denial does not crash the app or block other functionality
+- [ ] AC-0188: A notification fires at the correct prayer time on a locked device, accurate to within ±5 seconds of the scheduled time
+- [ ] AC-0189: Each of the five prayers can be independently enabled or disabled from the Settings tab
+- [ ] AC-0190: Notification sound matches the user's per-prayer adhaan selection from `SettingsManager`
+- [ ] AC-0191: Tapping the notification launches the app and lands on the Prayer Times view
+- [ ] AC-0192: Notifications continue to fire correctly across day boundaries and after settings or location changes
+
+---
+
+### US-0044 (EPIC-0010) — iOS Widget Extension (Home/Lock Screen)
+
+**Description:** Provide a WidgetKit extension showing the next prayer name and a live countdown. Support small and medium Home Screen families plus the rectangular Lock Screen family.
+
+**Priority:** Medium
+**Estimate:** 5 Story Points
+**Status:** 🟡 Planned
+**Dependencies:** US-0040, US-0041
+
+**Scope:**
+- New `IqamahWidget` widget extension target, depending on `IqamahCore`
+- Single widget kind, families: `.systemSmall`, `.systemMedium`, `.accessoryRectangular` (Lock Screen)
+- `TimelineProvider` produces entries up to next prayer transition plus interim entries every minute for countdown text
+- App-group container shared between iOS app and widget for reading current settings/location
+- Refresh strategy: `Timeline.policy = .after(nextPrayerTime)` plus relevant `WidgetCenter.shared.reloadAllTimelines()` calls when settings change
+
+**Acceptance Criteria:**
+- [ ] AC-0193: Widget appears in Home Screen widget gallery as "Iqamah — Next Prayer"
+- [ ] AC-0194: Small and medium families render the next prayer name and countdown correctly
+- [ ] AC-0195: Rectangular Lock Screen widget renders correctly in light and dark wallpaper variants
+- [ ] AC-0196: Widget transitions to the next prayer's name within one minute of that prayer's scheduled time
+- [ ] AC-0197: Widget reflects updated calculation method or location within one minute of the change in the main app
+
+---
+
+### US-0045 (EPIC-0010) — iOS Live Activity / Dynamic Island
+
+**Description:** Show a live countdown to the next prayer in the Dynamic Island and on the Lock Screen during the hour before each prayer.
+
+**Priority:** Medium
+**Estimate:** 5 Story Points
+**Status:** 🟡 Planned
+**Dependencies:** US-0044
+
+**Scope:**
+- `ActivityAttributes` defining: prayer name, scheduled time, calculation context
+- Dynamic Island layouts: compact leading/trailing, expanded, minimal
+- Lock Screen presentation showing prayer name + countdown
+- iOS app starts the activity automatically one hour before each enabled prayer; ends the activity at iqamah time (i.e. when the prayer time elapses)
+- Respect per-prayer enable toggle from US-0043
+- Live Activity entitlement (`NSSupportsLiveActivities = true` in Info.plist)
+
+**Acceptance Criteria:**
+- [ ] AC-0198: Activity appears in the Dynamic Island within one minute of the one-hour-before mark for each enabled prayer
+- [ ] AC-0199: Compact, expanded, and minimal Dynamic Island presentations all render correctly with live countdown
+- [ ] AC-0200: Lock Screen presentation shows prayer name and accurate countdown
+- [ ] AC-0201: Activity ends automatically at the prayer's scheduled time without leaving stale state
+- [ ] AC-0202: Disabling a prayer via US-0043 settings prevents its Live Activity from starting
+- [ ] AC-0203: No more than one Live Activity for the same prayer is ever active simultaneously
+
+---
+
+## Updated Summary Statistics (2026-05-09)
+
+**Total Epics:** 10
+**Total User Stories:** 45 (US-0001 through US-0045)
+**Total Acceptance Criteria:** 203 (AC-0001 through AC-0203)
+
+**Open for resubmission (EPIC-0009):**
 - ✅ US-0035 — Entitlement fix (done, merged PR #47)
 - ❌ US-0036 — App Review Notes + screen recording (manual, App Store Connect)
 - ❌ US-0037 — UI sizing fixes (BUG-0052/053/054)
 - ❌ US-0038 — adhaan_4.mp3 trim (BUG-0055)
 - ❌ US-0039 — Archive & resubmit (blocked on above)
 
+**iOS expansion (EPIC-0010, v2.0 target):**
+- 🟡 US-0040 — Extract IqamahCore Swift Package
+- 🟡 US-0041 — Add iOS app target & core flow
+- 🟡 US-0042 — iCloud settings sync via KVS
+- 🟡 US-0043 — Local prayer notifications (iOS)
+- 🟡 US-0044 — Widget Extension (Home/Lock Screen)
+- 🟡 US-0045 — Live Activity / Dynamic Island
+
 ---
 
-**Last Updated:** 2026-05-05 (EPIC-0009 added — App Store resubmission tasks)
+**Last Updated:** 2026-05-09 (EPIC-0010 added — iOS universal app conversion: 6 stories, 35 acceptance criteria)

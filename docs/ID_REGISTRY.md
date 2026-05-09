@@ -8,12 +8,12 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 | **Sequence** | **Next Available ID** | **Last Assigned** |
 |--------------|-----------------------|-------------------|
-| EPIC         | EPIC-0007             | EPIC-0006         |
-| US           | US-0032               | US-0031           |
+| EPIC         | EPIC-0011             | EPIC-0010         |
+| US           | US-0046               | US-0045           |
 | TASK         | TASK-0001             | None              |
-| AC           | AC-0142               | AC-0141           |
+| AC           | AC-0204               | AC-0203           |
 | TC           | TC-0001               | None              |
-| BUG          | BUG-0031              | BUG-0030          |
+| BUG          | BUG-0056              | BUG-0055          |
 
 ---
 
@@ -27,4 +27,4 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 ---
 
-**Last Updated:** 2026-04-30 (Live UI review: BUG-0022–BUG-0030 added — Qiblah compass and general screen feedback)
+**Last Updated:** 2026-05-09 (EPIC-0010 added — iOS universal app conversion: US-0040–US-0045, AC-0169–AC-0203). Registry was previously stale; refreshed to reflect actual highest IDs in RELEASE_PLAN.md (EPIC-0009, US-0039, AC-0168) and BUGS.md (BUG-0055).
