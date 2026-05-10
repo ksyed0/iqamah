@@ -7,35 +7,19 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		944B0D972F63596200EC6A01 /* ModelsIqamahError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 944B0D962F63596200EC6A01 /* ModelsIqamahError.swift */; };
 		944B0D992F635A0500EC6A01 /* TestsAdditionalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 944B0D982F635A0500EC6A01 /* TestsAdditionalTests.swift */; };
 		94CAD5652F23CBB800E1689F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CAD5642F23CBB800E1689F /* AppDelegate.swift */; };
-		94CAD5672F23CBD100E1689F /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CAD5662F23CBD100E1689F /* SettingsManager.swift */; };
 		94CAD5692F23D23800E1689F /* splash.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 94CAD5682F23D23800E1689F /* splash.jpg */; };
 		94CAD56B2F23D3C800E1689F /* SplashScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CAD56A2F23D3C800E1689F /* SplashScreenView.swift */; };
 		AA0000000000000000000001 /* iqamahApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000011 /* iqamahApp.swift */; };
 		AA0000000000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000012 /* ContentView.swift */; };
-		AA0000000000000000000003 /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000013 /* Location.swift */; };
-		AA0000000000000000000004 /* CalculationMethod.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000014 /* CalculationMethod.swift */; };
-		AA0000000000000000000005 /* PrayerTimes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000015 /* PrayerTimes.swift */; };
-		AA0000000000000000000006 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000016 /* LocationService.swift */; };
-		AA0000000000000000000007 /* PrayerCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000017 /* PrayerCalculator.swift */; };
 		AA0000000000000000000008 /* LocationSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000018 /* LocationSetupView.swift */; };
 		AA0000000000000000000009 /* CalculationMethodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000019 /* CalculationMethodView.swift */; };
 		AA000000000000000000000A /* PrayerTimesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001A /* PrayerTimesView.swift */; };
-		AA000000000000000000000B /* cities.json in Resources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001B /* cities.json */; };
 		AA000000000000000000000C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001C /* Assets.xcassets */; };
 		AA000000000000000000000D /* QiblahView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001E /* QiblahView.swift */; };
 		AB000000000000000000BB01 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000000000000000000AA01 /* AboutView.swift */; };
 		MB000000000000000000BB02 /* MenuBarPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = MB000000000000000000BB01 /* MenuBarPopoverView.swift */; };
-		AD000000000000000000BB01 /* adhaan_1.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = AD000000000000000000AA01 /* adhaan_1.mp3 */; };
-		AD000000000000000000BB02 /* adhaan_2.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = AD000000000000000000AA02 /* adhaan_2.mp3 */; };
-		AD000000000000000000BB03 /* adhaan_3.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = AD000000000000000000AA03 /* adhaan_3.mp3 */; };
-		AD000000000000000000BB04 /* adhaan_4.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = AD000000000000000000AA04 /* adhaan_4.mp3 */; };
-		AD000000000000000000BB05 /* adhaan_5.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = AD000000000000000000AA05 /* adhaan_5.mp3 */; };
-		AD000000000000000000BB06 /* adhaan_fajr_1.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = AD000000000000000000AA06 /* adhaan_fajr_1.mp3 */; };
-		AD000000000000000000BB07 /* adhaan_fajr_2.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = AD000000000000000000AA07 /* adhaan_fajr_2.mp3 */; };
-		AD000000000000000000BB08 /* adhaan_fajr_3.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = AD000000000000000000AA08 /* adhaan_fajr_3.mp3 */; };
 		BB000000000000000000000A /* SettingsSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB000000000000000000001A /* SettingsSheetView.swift */; };
 		BN000000000000000000BB01 /* AdhaanBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BN000000000000000000AA01 /* AdhaanBannerView.swift */; };
 		BN000000000000000000BB02 /* AdhaanBannerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BN000000000000000000AA02 /* AdhaanBannerController.swift */; };
@@ -56,15 +40,9 @@
 		EE0000000000000000003002 /* Color+App.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000000000000000003003 /* Color+App.swift */; };
 		EE0000000000000000004002 /* IqamahBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000000000000000004003 /* IqamahBackground.swift */; };
 		EE0000000000000000006001 /* PrayerTimesComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000000000000000006002 /* PrayerTimesComponents.swift */; };
-		FF000000000000000000BB01 /* Adhaan.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000000000000000000AA01 /* Adhaan.swift */; };
-		FF000000000000000000BB02 /* AdhaaanPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000000000000000000AA02 /* AdhaaanPlayer.swift */; };
 		PI000000000000000000BB01 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = PI000000000000000000AA01 /* PrivacyInfo.xcprivacy */; };
-		TT000000000000000000BB01 /* tone_glass.aiff in Resources */ = {isa = PBXBuildFile; fileRef = TT000000000000000000AA01 /* tone_glass.aiff */; };
-		TT000000000000000000BB02 /* tone_ping.aiff in Resources */ = {isa = PBXBuildFile; fileRef = TT000000000000000000AA02 /* tone_ping.aiff */; };
-		TT000000000000000000BB03 /* tone_tink.aiff in Resources */ = {isa = PBXBuildFile; fileRef = TT000000000000000000AA03 /* tone_tink.aiff */; };
-		TT000000000000000000BB04 /* tone_hero.aiff in Resources */ = {isa = PBXBuildFile; fileRef = TT000000000000000000AA04 /* tone_hero.aiff */; };
-		TT000000000000000000BB05 /* tone_breeze.aiff in Resources */ = {isa = PBXBuildFile; fileRef = TT000000000000000000AA05 /* tone_breeze.aiff */; };
-/* End PBXBuildFile section */
+		IC0000000000000000000003 /* IqamahCore in Frameworks */ = {isa = PBXBuildFile; productRef = IC0000000000000000000002 /* IqamahCore */; };
+		/* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		944B0D7D2F6340DD00EC6A01 /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
@@ -181,9 +159,8 @@
 				94CAD5642F23CBB800E1689F /* AppDelegate.swift */,
 				AA0000000000000000000011 /* iqamahApp.swift */,
 				AA0000000000000000000012 /* ContentView.swift */,
-				AA0000000000000000000033 /* Models */,
-				AA0000000000000000000034 /* Services */,
 				EE0000000000000000005001 /* Extensions */,
+				AA0000000000000000000034 /* Services */,
 				AA0000000000000000000035 /* Views */,
 				AA0000000000000000000036 /* Resources */,
 				AA000000000000000000001C /* Assets.xcassets */,
@@ -208,26 +185,10 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		AA0000000000000000000033 /* Models */ = {
-			isa = PBXGroup;
-			children = (
-				AA0000000000000000000013 /* Location.swift */,
-				FF000000000000000000AA01 /* Adhaan.swift */,
-				AA0000000000000000000014 /* CalculationMethod.swift */,
-				AA0000000000000000000015 /* PrayerTimes.swift */,
-			);
-			path = Models;
-			sourceTree = "<group>";
-		};
 		AA0000000000000000000034 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				94CAD5662F23CBD100E1689F /* SettingsManager.swift */,
-				FF000000000000000000AA02 /* AdhaaanPlayer.swift */,
 				BN000000000000000000AA02 /* AdhaanBannerController.swift */,
-				AA0000000000000000000016 /* LocationService.swift */,
-				AA0000000000000000000017 /* PrayerCalculator.swift */,
-				944B0D962F63596200EC6A01 /* ModelsIqamahError.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -312,6 +273,9 @@
 			dependencies = (
 			);
 			name = iqamah;
+			packageProductDependencies = (
+				IC0000000000000000000002 /* IqamahCore */,
+			);
 			productName = iqamah;
 			productReference = AA0000000000000000000010 /* iqamah.app */;
 			productType = "com.apple.product-type.application";
@@ -357,6 +321,9 @@
 				Base,
 			);
 			mainGroup = AA0000000000000000000030;
+			packageReferences = (
+				IC0000000000000000000001 /* XCLocalSwiftPackageReference "Packages/IqamahCore" */,
+			);
 			productRefGroup = AA0000000000000000000032 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -373,21 +340,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				94CAD5692F23D23800E1689F /* splash.jpg in Resources */,
-				TT000000000000000000BB01 /* tone_glass.aiff in Resources */,
-				TT000000000000000000BB02 /* tone_ping.aiff in Resources */,
-				TT000000000000000000BB03 /* tone_tink.aiff in Resources */,
-				TT000000000000000000BB04 /* tone_hero.aiff in Resources */,
-				TT000000000000000000BB05 /* tone_breeze.aiff in Resources */,
-				AD000000000000000000BB01 /* adhaan_1.mp3 in Resources */,
-				AD000000000000000000BB02 /* adhaan_2.mp3 in Resources */,
-				AD000000000000000000BB03 /* adhaan_3.mp3 in Resources */,
-				AD000000000000000000BB04 /* adhaan_4.mp3 in Resources */,
-				AD000000000000000000BB05 /* adhaan_5.mp3 in Resources */,
-				AD000000000000000000BB06 /* adhaan_fajr_1.mp3 in Resources */,
-				AD000000000000000000BB07 /* adhaan_fajr_2.mp3 in Resources */,
-				AD000000000000000000BB08 /* adhaan_fajr_3.mp3 in Resources */,
 				PI000000000000000000BB01 /* PrivacyInfo.xcprivacy in Resources */,
-				AA000000000000000000000B /* cities.json in Resources */,
 				AA000000000000000000000C /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -408,20 +361,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				94CAD5652F23CBB800E1689F /* AppDelegate.swift in Sources */,
-				944B0D972F63596200EC6A01 /* ModelsIqamahError.swift in Sources */,
 				94CAD56B2F23D3C800E1689F /* SplashScreenView.swift in Sources */,
 				AA0000000000000000000001 /* iqamahApp.swift in Sources */,
 				944B0D992F635A0500EC6A01 /* TestsAdditionalTests.swift in Sources */,
 				AA0000000000000000000002 /* ContentView.swift in Sources */,
-				AA0000000000000000000003 /* Location.swift in Sources */,
-				AA0000000000000000000004 /* CalculationMethod.swift in Sources */,
-				AA0000000000000000000005 /* PrayerTimes.swift in Sources */,
-				AA0000000000000000000006 /* LocationService.swift in Sources */,
-				AA0000000000000000000007 /* PrayerCalculator.swift in Sources */,
-				94CAD5672F23CBD100E1689F /* SettingsManager.swift in Sources */,
 				EE0000000000000000003002 /* Color+App.swift in Sources */,
-				FF000000000000000000BB01 /* Adhaan.swift in Sources */,
-				FF000000000000000000BB02 /* AdhaaanPlayer.swift in Sources */,
 				BN000000000000000000BB01 /* AdhaanBannerView.swift in Sources */,
 				AB000000000000000000BB01 /* AboutView.swift in Sources */,
 				MB000000000000000000BB02 /* MenuBarPopoverView.swift in Sources */,
@@ -686,6 +630,14 @@
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		IC0000000000000000000001 /* XCLocalSwiftPackageReference "Packages/IqamahCore" */ = {isa = XCLocalSwiftPackageReference; relativePath = Packages/IqamahCore; };
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		IC0000000000000000000002 /* IqamahCore */ = {isa = XCSwiftPackageProductDependency; package = IC0000000000000000000001 /* XCLocalSwiftPackageReference "Packages/IqamahCore" */; productName = IqamahCore; };
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCConfigurationList section */
 		AA0000000000000000000051 /* Build configuration list for PBXProject "iqamah" */ = {
