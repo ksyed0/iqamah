@@ -1,6 +1,6 @@
 import Foundation
 
-enum CalculationMethod: String, CaseIterable, Identifiable {
+public enum CalculationMethod: String, CaseIterable, Identifiable {
     case muslimWorldLeague = "mwl"
     case isna
     case egypt
@@ -8,9 +8,9 @@ enum CalculationMethod: String, CaseIterable, Identifiable {
     case karachi
     case tehran
 
-    var id: String { rawValue }
+    public var id: String { rawValue }
 
-    var displayName: String {
+    public var displayName: String {
         switch self {
         case .muslimWorldLeague:
             "Muslim World League"
@@ -28,7 +28,7 @@ enum CalculationMethod: String, CaseIterable, Identifiable {
     }
 
     /// Abbreviated name suitable for constrained UI (header toolbar).
-    var shortName: String {
+    public var shortName: String {
         switch self {
         case .muslimWorldLeague: "MWL"
         case .isna: "ISNA"
@@ -39,7 +39,7 @@ enum CalculationMethod: String, CaseIterable, Identifiable {
         }
     }
 
-    var fajrAngle: Double {
+    public var fajrAngle: Double {
         switch self {
         case .muslimWorldLeague:
             18.0
@@ -56,7 +56,7 @@ enum CalculationMethod: String, CaseIterable, Identifiable {
         }
     }
 
-    var ishaAngle: Double {
+    public var ishaAngle: Double {
         switch self {
         case .muslimWorldLeague:
             17.0
@@ -73,7 +73,7 @@ enum CalculationMethod: String, CaseIterable, Identifiable {
         }
     }
 
-    var ishaInterval: Int? {
+    public var ishaInterval: Int? {
         switch self {
         case .ummAlQura:
             90 // 90 minutes after Maghrib
@@ -82,7 +82,7 @@ enum CalculationMethod: String, CaseIterable, Identifiable {
         }
     }
 
-    var maghribAngle: Double? {
+    public var maghribAngle: Double? {
         switch self {
         case .tehran:
             4.5
@@ -96,7 +96,7 @@ enum CalculationMethod: String, CaseIterable, Identifiable {
 
 extension CalculationMethod {
     /// Returns the calculation method most commonly used in a given ISO 3166-1 alpha-2 country.
-    static func suggested(forCountryCode code: String) -> CalculationMethod {
+    public static func suggested(forCountryCode code: String) -> CalculationMethod {
         switch code.uppercased() {
         case "US", "CA":
             .isna
@@ -114,19 +114,19 @@ extension CalculationMethod {
     }
 
     /// Human-readable region label used in the "Recommended for…" badge.
-    static func recommendationLabel(forCountryCode code: String) -> String? {
+    public static func recommendationLabel(forCountryCode code: String) -> String? {
         let name = Locale.current.localizedString(forRegionCode: code)
         return name.map { "Recommended for \($0)" }
     }
 }
 
-enum AsrJuristicMethod: String, CaseIterable, Identifiable {
+public enum AsrJuristicMethod: String, CaseIterable, Identifiable {
     case standard
     case hanafi
 
-    var id: String { rawValue }
+    public var id: String { rawValue }
 
-    var displayName: String {
+    public var displayName: String {
         switch self {
         case .standard:
             "Standard (Shafi'i/Maliki/Hanbali)"
@@ -135,7 +135,7 @@ enum AsrJuristicMethod: String, CaseIterable, Identifiable {
         }
     }
 
-    var shadowFactor: Double {
+    public var shadowFactor: Double {
         switch self {
         case .standard:
             1.0

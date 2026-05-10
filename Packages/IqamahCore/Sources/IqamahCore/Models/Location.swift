@@ -1,28 +1,28 @@
 import Foundation
 import CoreLocation
 
-struct Country: Codable, Identifiable, Hashable {
-    let name: String
-    let code: String
+public struct Country: Codable, Identifiable, Hashable {
+    public let name: String
+    public let code: String
 
-    var id: String { code }
+    public var id: String { code }
 }
 
-struct City: Codable, Identifiable, Hashable {
-    let name: String
-    let countryCode: String
-    let latitude: Double
-    let longitude: Double
-    let timezone: String
+public struct City: Codable, Identifiable, Hashable {
+    public let name: String
+    public let countryCode: String
+    public let latitude: Double
+    public let longitude: Double
+    public let timezone: String
 
-    var id: String { "\(countryCode)-\(name)" }
+    public var id: String { "\(countryCode)-\(name)" }
 
-    var coordinate: CLLocationCoordinate2D {
+    public var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }
 
     // Custom initializer with validation
-    init(name: String, countryCode: String, latitude: Double, longitude: Double, timezone: String) throws {
+    public init(name: String, countryCode: String, latitude: Double, longitude: Double, timezone: String) throws {
         // Validate coordinates
         guard latitude >= -90, latitude <= 90 else {
             throw IqamahError.invalidCoordinates(latitude: latitude, longitude: longitude)
@@ -44,7 +44,7 @@ struct City: Codable, Identifiable, Hashable {
     }
 
     // Codable conformance (for JSON decoding)
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let name = try container.decode(String.self, forKey: .name)
         let countryCode = try container.decode(String.self, forKey: .countryCode)
@@ -56,40 +56,40 @@ struct City: Codable, Identifiable, Hashable {
         try self.init(name: name, countryCode: countryCode, latitude: latitude, longitude: longitude, timezone: timezone)
     }
 
-    func distance(from coordinate: CLLocationCoordinate2D) -> CLLocationDistance {
+    public func distance(from coordinate: CLLocationCoordinate2D) -> CLLocationDistance {
         let cityLocation = CLLocation(latitude: latitude, longitude: longitude)
         let otherLocation = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
         return cityLocation.distance(from: otherLocation)
     }
 }
 
-struct CitiesDatabase: Codable {
-    let countries: [Country]
-    let cities: [City]
+public struct CitiesDatabase: Codable {
+    public let countries: [Country]
+    public let cities: [City]
 
-    func country(forCode code: String) -> Country? {
+    public func country(forCode code: String) -> Country? {
         countries.first { $0.code == code }
     }
 
-    func cities(forCountryCode code: String) -> [City] {
+    public func cities(forCountryCode code: String) -> [City] {
         cities.filter { $0.countryCode == code }.sorted { $0.name < $1.name }
     }
 
-    func closestCity(to coordinate: CLLocationCoordinate2D) -> City? {
+    public func closestCity(to coordinate: CLLocationCoordinate2D) -> City? {
         cities.min { $0.distance(from: coordinate) < $1.distance(from: coordinate) }
     }
 }
 
-class CitiesLoader {
-    static let shared = CitiesLoader()
+public class CitiesLoader {
+    public static let shared = CitiesLoader()
 
     private var database: CitiesDatabase?
     private var loadError: IqamahError?
 
-    // Internal init allows test targets to create isolated instances (avoiding shared-cache races)
-    init() {}
+    // Public init allows test targets to create isolated instances (avoiding shared-cache races)
+    public init() {}
 
-    func load() -> Result<CitiesDatabase, IqamahError> {
+    public func load() -> Result<CitiesDatabase, IqamahError> {
         // Return cached database if already loaded successfully
         if let database {
             return .success(database)
@@ -100,9 +100,8 @@ class CitiesLoader {
             return .failure(error)
         }
 
-        // Bundle(for:) resolves correctly in both app and test targets
-        let bundle = Bundle(for: CitiesLoader.self)
-        guard let url = bundle.url(forResource: "cities", withExtension: "json") else {
+        // Bundle.module resolves to the IqamahCore package bundle in both app and test targets
+        guard let url = Bundle.module.url(forResource: "cities", withExtension: "json") else {
             let error = IqamahError.citiesDatabaseNotFound
             loadError = error
             logError(error, context: "CitiesLoader.load()")
