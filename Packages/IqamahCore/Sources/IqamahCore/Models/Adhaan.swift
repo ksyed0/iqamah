@@ -50,7 +50,7 @@ public struct Adhaan: Identifiable, Codable, Hashable {
             ("tone_breeze", "Gentle Breeze", ["aiff", "mp3"]),
         ]
         return known.compactMap { entry in
-            for ext in entry.exts where Bundle.main.url(forResource: entry.id, withExtension: ext) != nil {
+            for ext in entry.exts where Bundle.module.url(forResource: entry.id, withExtension: ext) != nil {
                 return Adhaan(id: entry.id, displayName: entry.name, filename: "\(entry.id).\(ext)")
             }
             return nil
@@ -61,7 +61,7 @@ public struct Adhaan: Identifiable, Codable, Hashable {
     public static var adhaanRecordings: [Adhaan] {
         (1 ... 10).compactMap { i in
             let id = "adhaan_\(i)"
-            for ext in ["mp3", "m4a", "aac", "aiff"] where Bundle.main.url(forResource: id, withExtension: ext) != nil {
+            for ext in ["mp3", "m4a", "aac", "aiff"] where Bundle.module.url(forResource: id, withExtension: ext) != nil {
                 return Adhaan(id: id, displayName: "Adhaan \(i)", filename: "\(id).\(ext)")
             }
             return nil
@@ -73,7 +73,7 @@ public struct Adhaan: Identifiable, Codable, Hashable {
     public static var adhaanFajrRecordings: [Adhaan] {
         (1 ... 5).compactMap { i in
             let id = "adhaan_fajr_\(i)"
-            for ext in ["mp3", "m4a", "aac", "aiff"] where Bundle.main.url(forResource: id, withExtension: ext) != nil {
+            for ext in ["mp3", "m4a", "aac", "aiff"] where Bundle.module.url(forResource: id, withExtension: ext) != nil {
                 return Adhaan(id: id, displayName: "Fajr Adhaan \(i)", filename: "\(id).\(ext)")
             }
             return nil

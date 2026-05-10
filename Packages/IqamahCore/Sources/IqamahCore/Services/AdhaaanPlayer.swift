@@ -63,7 +63,7 @@ public class AdhaaanPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
         let name = (adhaan.filename as NSString).deletingPathExtension
         let ext = (adhaan.filename as NSString).pathExtension
 
-        guard let url = Bundle.main.url(forResource: name, withExtension: ext) else {
+        guard let url = Bundle.module.url(forResource: name, withExtension: ext) else {
             print("AdhaaanPlayer: file not found — \(adhaan.filename)")
             return
         }
