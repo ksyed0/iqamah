@@ -15,7 +15,8 @@ let package = Package(
         ),
         .testTarget(
             name: "IqamahCoreTests",
-            dependencies: ["IqamahCore"]
+            dependencies: ["IqamahCore"],
+            resources: [.process("Fixtures")]
         ),
     ]
 )
