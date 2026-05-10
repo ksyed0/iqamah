@@ -59,6 +59,7 @@ public class SettingsManager: ObservableObject {
         static let gpsLongitude = "gpsLongitude"
         static let gpsCoordinateCached = "gpsCoordinateCached"
         static let gpsDetectedCity = "gpsDetectedCity" // JSON-encoded City
+        static let enabledPrayers = "enabledPrayers"
     }
 
     // MARK: - Keys synced via iCloud KVS
@@ -81,6 +82,7 @@ public class SettingsManager: ObservableObject {
         Keys.prayerAdjustments,
         Keys.prayerAdhaanIds,
         Keys.mutedPrayers,
+        Keys.enabledPrayers,
     ]
 
     @Published public var hasCompletedSetup: Bool {
@@ -136,6 +138,50 @@ public class SettingsManager: ObservableObject {
     }
 
     @Published public var prayerAdjustments: [String: Int] = [:]
+
+    /// Prayers for which local notifications are enabled. Defaults to the five
+    /// canonical prayer times (Sunrise excluded).
+    public static let defaultEnabledPrayers: Set<String> = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"]
+
+    @Published public var enabledPrayers: Set<String> {
+        didSet {
+            let array = Array(enabledPrayers).sorted()
+            defaults.set(array, forKey: Keys.enabledPrayers)
+            guard !isApplyingRemote else { return }
+            kvs.set(array, forKey: Keys.enabledPrayers)
+        }
+    }
+
+    /// Returns true if local notifications are enabled for the given prayer name.
+    public func isPrayerEnabled(_ name: String) -> Bool {
+        enabledPrayers.contains(name)
+    }
+
+    // MARK: - Active location accessors (single source of truth for notifications + widget)
+
+    /// The coordinate to use for prayer-time calculations — GPS if locationSource == "gps",
+    /// otherwise the manually selected city's coordinate.
+    public var activeCoordinate: CLLocationCoordinate2D? {
+        if locationSource == "gps" {
+            let lat = defaults.double(forKey: Keys.gpsLatitude)
+            let lon = defaults.double(forKey: Keys.gpsLongitude)
+            guard lat != 0 || lon != 0 else { return nil }
+            return CLLocationCoordinate2D(latitude: lat, longitude: lon)
+        }
+        return loadCity()?.coordinate
+    }
+
+    /// The IANA timezone identifier for the active location.
+    public var activeTimezoneIdentifier: String {
+        if locationSource == "gps", !gpsTimezone.isEmpty { return gpsTimezone }
+        return loadCity()?.timezone ?? TimeZone.current.identifier
+    }
+
+    /// The display name for the active location (locality or city name).
+    public var activeCityName: String {
+        if locationSource == "gps", !gpsLocality.isEmpty { return gpsLocality }
+        return loadCity()?.name ?? ""
+    }
 
     @Published public var locationSource: String {
         didSet {
@@ -226,6 +272,12 @@ public class SettingsManager: ObservableObject {
             prayerAdjustments = dict
         }
 
+        if let arr = userDefaults.array(forKey: Keys.enabledPrayers) as? [String] {
+            enabledPrayers = Set(arr)
+        } else {
+            enabledPrayers = Self.defaultEnabledPrayers
+        }
+
         // Start KVS sync: subscribe to remote changes and trigger an initial pull.
         NotificationCenter.default.addObserver(
             self,
@@ -302,6 +354,10 @@ public class SettingsManager: ObservableObject {
         case Keys.mutedPrayers:
             if let arr = kvs.array(forKey: key) as? [String] {
                 defaults.set(arr, forKey: key)
+            }
+        case Keys.enabledPrayers:
+            if let arr = kvs.array(forKey: key) as? [String] {
+                enabledPrayers = Set(arr)
             }
         default:
             break

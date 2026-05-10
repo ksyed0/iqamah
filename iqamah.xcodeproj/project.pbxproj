@@ -33,6 +33,7 @@
 		EE0000000000000000009001 /* testsIqamahTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 944B0D8E2F63478F00EC6A01 /* testsIqamahTests.swift */; };
 		iOS0000000000000000000001 /* iqamahApp_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = iOS0000000000000000000011 /* iqamahApp_iOS.swift */; };
 		iOS0000000000000000000002 /* iOSRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = iOS0000000000000000000012 /* iOSRootView.swift */; };
+		iOS000000000000000000002F /* NotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = iOS000000000000000000001F /* NotificationScheduler.swift */; };
 		iOS0000000000000000000003 /* PrayerTimesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001A /* PrayerTimesView.swift */; };
 		iOS0000000000000000000004 /* LocationSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000018 /* LocationSetupView.swift */; };
 		iOS0000000000000000000005 /* CalculationMethodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000019 /* CalculationMethodView.swift */; };
@@ -114,6 +115,7 @@
 		TT000000000000000000AA05 /* tone_breeze.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; path = tone_breeze.aiff; sourceTree = "<group>"; };
 		iOS0000000000000000000011 /* iqamahApp_iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iqamahApp_iOS.swift; sourceTree = "<group>"; };
 		iOS0000000000000000000012 /* iOSRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSRootView.swift; sourceTree = "<group>"; };
+		iOS000000000000000000001F /* NotificationScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationScheduler.swift; sourceTree = "<group>"; };
 		iOS0000000000000000000013 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		iOS0000000000000000000014 /* iqamah-iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "iqamah-iOS.entitlements"; sourceTree = "<group>"; };
 		iOS0000000000000000000015 /* iqamah-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "iqamah-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -266,6 +268,7 @@
 			children = (
 				iOS0000000000000000000011 /* iqamahApp_iOS.swift */,
 				iOS0000000000000000000012 /* iOSRootView.swift */,
+				iOS000000000000000000001F /* NotificationScheduler.swift */,
 				iOS0000000000000000000013 /* Info.plist */,
 				iOS0000000000000000000014 /* iqamah-iOS.entitlements */,
 			);
@@ -461,6 +464,7 @@
 				iOS000000000000000000000C /* IqamahBackground.swift in Sources */,
 				iOS000000000000000000000D /* PrayerTimesComponents.swift in Sources */,
 				iOS000000000000000000000E /* SplashScreenView.swift in Sources */,
+				iOS000000000000000000002F /* NotificationScheduler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

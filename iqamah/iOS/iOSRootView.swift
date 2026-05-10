@@ -1,12 +1,17 @@
-import SwiftUI
 import IqamahCore
+import SwiftUI
 
 struct IOSRootView: View {
     @EnvironmentObject private var settings: SettingsManager
+    /// Drives switching to the Times tab when a prayer notification is tapped.
+    @State private var selectedTab: Int = 0
 
     var body: some View {
         if settings.hasCompletedSetup {
-            MainTabView()
+            MainTabView(selectedTab: $selectedTab)
+                .onReceive(NotificationCenter.default.publisher(for: .openPrayerTimesTab)) { _ in
+                    selectedTab = 0
+                }
         } else {
             OnboardingFlow()
         }
@@ -15,11 +20,12 @@ struct IOSRootView: View {
 
 struct MainTabView: View {
     @EnvironmentObject private var settings: SettingsManager
+    @Binding var selectedTab: Int
 
     private var city: City? { settings.loadCity() }
 
     var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
             NavigationStack {
                 if let city {
                     PrayerTimesView(
@@ -37,6 +43,7 @@ struct MainTabView: View {
                 }
             }
             .tabItem { Label("Times", systemImage: "clock") }
+            .tag(0)
 
             NavigationStack {
                 if let city {
@@ -47,6 +54,7 @@ struct MainTabView: View {
                 }
             }
             .tabItem { Label("Qiblah", systemImage: "location.north.line") }
+            .tag(1)
 
             NavigationStack {
                 if let city {
@@ -66,6 +74,7 @@ struct MainTabView: View {
                 }
             }
             .tabItem { Label("Settings", systemImage: "gear") }
+            .tag(2)
         }
     }
 }
