@@ -14,6 +14,7 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 | AC           | AC-0142               | AC-0141           |
 | TC           | TC-0001               | None              |
 | BUG          | BUG-0031              | BUG-0030          |
+| ENH          | ENH-019               | ENH-018           |
 
 ---
 
@@ -27,4 +28,4 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 ---
 
-**Last Updated:** 2026-04-30 (Live UI review: BUG-0022–BUG-0030 added — Qiblah compass and general screen feedback)
+**Last Updated:** 2026-05-09 (ENH-018 added — Hilal Watch global crescent sighting map; ENH row added to the registry — was previously missing despite ENH being a tracked sequence). Other rows (EPIC/US/AC/TC/BUG) reflect develop's current state and are known to be stale relative to in-flight planning work on other branches.

@@ -43,6 +43,64 @@ Display upcoming Islamic dates (Eid al-Fitr, Eid al-Adha, Mawlid, etc.) in the p
 
 ---
 
+## Astronomy & Calendar
+
+### ENH-018 — Hilal Watch: Global Crescent Sighting Map
+**Source:** Internal product exploration via Claude conversation (May 2026); cross-checked against moonsighting.com / OmegaHilalSighting
+**Priority:** Medium — distinctive feature; 0/10 surveyed competitors offer this
+
+**Problem:** The Islamic lunar calendar depends on physically sighting the new crescent moon at the start of each month. Iqamah's current Hijri date display uses arithmetic tabular conversion (via Foundation `Calendar(identifier: .islamicUmmAlQura)`) which is accurate to ±1 day but provides no insight into *where on Earth* the crescent will actually be visible on the 29th and 30th of the current Hijri month — the two evenings on which the new month is determined globally.
+
+**Solution:** Add a Hilal Watch screen that computes and displays global crescent visibility for both watch evenings, plus precise local visibility from the user's prayer-times location.
+
+**Algorithm:**
+- **Visibility criterion:** Odeh (2004), peer-reviewed against 737 ICOP observations. `V = ARCV − f(W)` where `ARCV` is moon altitude at sunset and `W` is topocentric crescent width in arcminutes. Four zones: A (easily visible naked eye), B (visible under good conditions), C (optical aid to locate), D (optical aid only).
+- **Position engine:** Full Meeus lunar ephemeris (60+ longitude terms, ±0.01°). Simplified 10-term approaches produce false positives near the 6.4° Danjon limit; full Meeus eliminates these. Reference implementation: [astronomy-engine v2](https://github.com/cosinekitty/astronomy) (MIT, ~3000 LOC of pure math — portable to Swift). Alternatives for Swift: [SwiftAA](https://github.com/onekiloparsec/SwiftAA), or port astronomy-engine directly.
+- **Sunset timing:** Fast ±15 min approximation is sufficient — sunset timing error contributes only ~0.15° to ARCV, well below the noise floor.
+- **Grid:** 2° × 2° equirectangular, 90 × 180 = 16,200 points per evening. Both evenings (d29 and d30) computed once on screen mount and cached. Tab switching is instant. Estimated compute: 100–250 ms on iPhone 12 or newer.
+- **Hijri month navigation:** Reuse the existing arithmetic tabular conversion. Month arrows step ±1 synodic period (29.530588853 days). Each month is labelled with the confirmation context (e.g. "Confirms start of Sha'ban 1447").
+- **Date locking:** Maps lock to the next new-moon conjunction. d29 = evening of conjunction day; d30 = evening after. Each longitude's local sunset falls at a different UTC offset from conjunction, producing different crescent ages and the characteristic S-curve visibility arcs.
+
+**Local sighting card:** When the user's prayer-times location is known, compute local Odeh values and display the raw inputs (ARCL elongation, ARCV moon altitude, W crescent width in arcmin) plus the V-score and zone, allowing cross-check against moonsighting.com tables.
+
+**Colour scheme:** Match moonsighting.com / OmegaHilalSighting convention so users familiar with the global standard orient immediately:
+- A — forest green (easily visible naked eye)
+- B — teal/cyan (good conditions)
+- C — grey (optical aid to locate)
+- D — red (optical aid only)
+
+**Acceptance criteria (when promoted to an Epic):**
+- [ ] 29th watch map produces S-curve arcs consistent with moonsighting.com for the same date
+- [ ] 30th watch map shows substantially wider visibility zones than the 29th
+- [ ] Local sighting card shows ARCL, ARCV, W, V values matchable against moonsighting.com tables to within ±0.5°
+- [ ] Grid computes in under 300 ms on iPhone 12 or newer
+- [ ] Both grids cached; switching between 29th/30th tabs produces no visible recompute delay
+- [ ] Colour scheme matches the OmegaHilalSighting A/B/C/D convention
+
+**Open design questions:**
+- Is this a feature on the existing Hijri date row, or a dedicated tab/screen? (Mockup assumes dedicated screen)
+- macOS-only, iOS-only, or both? (Recommend both — fits naturally inside the planned EPIC-0010 universal app structure once that lands)
+- Calculation can be done in `IqamahCore` so both platforms share it
+
+**Mockup:** [`docs/mockups/2026-05-09-hilal-watch-mockup.tsx`](mockups/2026-05-09-hilal-watch-mockup.tsx) — React/web prototype iterated in Claude conversation, kept for reference. Will be ported to SwiftUI when promoted to an Epic. Contains the working Odeh criterion implementation, astronomy-engine integration, grid computation, moon-phase canvas, world-map canvas, and the OmegaHilalSighting-compatible colour scheme.
+
+**Effort:** Medium-Large — the algorithm is mechanical (mockup contains the full implementation) but porting an astronomical position engine to Swift, building the map UI, and validating against moonsighting.com is a multi-week effort. Should be a standalone Epic.
+
+**Files (when implemented):**
+- `IqamahCore/Sources/IqamahCore/Astronomy/HilalCalculator.swift` (new)
+- `IqamahCore/Sources/IqamahCore/Astronomy/OdehCriterion.swift` (new)
+- `IqamahCore/Sources/IqamahCore/Astronomy/MoonPosition.swift` (new — full Meeus port or SwiftAA wrapper)
+- `iqamah/Views/HilalWatchView.swift` (macOS) and `iqamah-iOS/HilalWatchView.swift` (iOS) — most likely shareable
+- New `IqamahCore/Tests/` cases validating against ICOP observation set
+
+**External references:**
+- Odeh (2004) criterion: [astronomycenter.net/pdf/2006_cri.pdf](https://astronomycenter.net/pdf/2006_cri.pdf)
+- astronomy-engine: [github.com/cosinekitty/astronomy](https://github.com/cosinekitty/astronomy)
+- crescent-moon-visibility (MIT): [github.com/crescent-moon-visibility/crescent-moon-visibility](https://github.com/crescent-moon-visibility/crescent-moon-visibility)
+- moonsighting.com (visual cross-check baseline)
+
+---
+
 ## macOS-Native Enhancements
 
 ### ENH-004 — macOS Menu Bar Widget / Notification Center Widget
