@@ -1,4 +1,5 @@
 import SwiftUI
+import IqamahCore
 
 // MARK: - Banner root view
 

@@ -1,4 +1,5 @@
 import SwiftUI
+import IqamahCore
 
 struct CalculationMethodView: View {
     @Binding var selectedMethod: CalculationMethod

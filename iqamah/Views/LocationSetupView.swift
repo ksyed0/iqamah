@@ -1,5 +1,6 @@
 import SwiftUI
 import CoreLocation
+import IqamahCore
 
 struct LocationSetupView: View {
     @StateObject private var locationService = LocationService()

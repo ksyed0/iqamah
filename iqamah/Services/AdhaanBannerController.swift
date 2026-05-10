@@ -1,6 +1,7 @@
 import AppKit
 import SwiftUI
 import Combine
+import IqamahCore
 
 /// Manages the floating adhaan notification panel that slides down from the menu bar.
 ///

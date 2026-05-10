@@ -1,6 +1,7 @@
 import SwiftUI
 import ServiceManagement
 import CoreLocation
+import IqamahCore
 
 /// Non-destructive settings sheet (US-0020).
 /// All changes are held in local draft state until the user taps Save.
