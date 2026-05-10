@@ -14,7 +14,7 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 | AC           | AC-0252               | AC-0251           |
 | TC           | TC-0001               | None              |
 | BUG          | BUG-0056              | BUG-0055          |
-| ENH          | ENH-019               | ENH-018           |
+| ENH          | ENH-020               | ENH-019           |
 
 > **Cross-branch reservations (in flight, not yet on `develop`):**
 > - `claude/explore-ios-conversion-Su3MF` (PR #54) — EPIC-0010, US-0040 – US-0045, AC-0169 – AC-0203, TC-0001 – TC-0035
@@ -34,4 +34,4 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 ---
 
-**Last Updated:** 2026-05-10 (ENH-018 promoted to EPIC-0011 Hilal Watch — added US-0046 – US-0052 / AC-0204 – AC-0251; AC-0249 – AC-0251 added for Materials + Liquid Glass UI conventions per CLAUDE.md; cross-branch reservation note covers both `feat/ENH-018-hilal-watch-spec` and `claude/explore-ios-conversion-Su3MF` PR #54).
+**Last Updated:** 2026-05-10 (ENH-018 promoted to EPIC-0011 Hilal Watch — added US-0046 – US-0052 / AC-0204 – AC-0251; AC-0249 – AC-0251 added for Materials + Liquid Glass UI conventions per CLAUDE.md; ENH-019 added for app-wide multilingual support / i18n; cross-branch reservation note covers both `feat/ENH-018-hilal-watch-spec` and `claude/explore-ios-conversion-Su3MF` PR #54).
