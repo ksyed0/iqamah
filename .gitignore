@@ -197,8 +197,3 @@ coverage-report/
 # Superpowers brainstorm sessions
 # ========================================
 .superpowers/
-
-# ENH-018 Hilal Watch — generated map mockups
-# (binary uploads blocked by upload proxy; regenerate locally via
-#  docs/mockups/gen_hilal_mockups.py)
-docs/mockups/2026-05-10-hilal-map-option*.png
