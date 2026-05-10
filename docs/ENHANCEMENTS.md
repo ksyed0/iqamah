@@ -46,7 +46,7 @@ Display upcoming Islamic dates (Eid al-Fitr, Eid al-Adha, Mawlid, etc.) in the p
 ## Astronomy & Calendar
 
 ### ENH-018 — Hilal Watch: Global Crescent Sighting Map
-**Status:** ✅ Promoted to EPIC-0011 on 2026-05-10 — see `RELEASE_PLAN.md` (US-0046 – US-0052, AC-0204 – AC-0248). Map rendering approach changed during brainstorm: MapKit `MKPolygonRenderer` overlays chosen over the original Canvas + bundled-PNG approach for native pan / zoom and built-in geographic context. See `docs/mockups/2026-05-10-hilal-map-option3-mapkit.png`.
+**Status:** ✅ Promoted to EPIC-0011 on 2026-05-10 — see `RELEASE_PLAN.md` (US-0046 – US-0052, AC-0204 – AC-0248). Map rendering approach changed during brainstorm: MapKit `MKPolygonRenderer` overlays chosen over the original Canvas + bundled-PNG approach for native pan / zoom and built-in geographic context.
 **Source:** Internal product exploration via Claude conversation (May 2026); cross-checked against moonsighting.com / OmegaHilalSighting
 **Priority:** Medium — distinctive feature; 0/10 surveyed competitors offer this
 
