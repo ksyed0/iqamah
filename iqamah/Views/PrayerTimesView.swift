@@ -27,7 +27,7 @@ struct PrayerTimesView: View {
         VStack(spacing: 0) {
             // ── Primary header: brand + location + mute only ─────────
             HStack(spacing: 12) {
-                Image(nsImage: NSImage(named: NSImage.applicationIconName) ?? NSImage())
+                Image("AppIcon")
                     .resizable()
                     .frame(width: 64, height: 64)
                     .shadow(color: Color.primary.opacity(0.10), radius: 3, x: 0, y: 1)

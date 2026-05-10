@@ -58,11 +58,13 @@ struct SecondaryToolbarButton: View {
             .background(
                 RoundedRectangle(cornerRadius: 6, style: .continuous)
                     .fill(isHovering
-                        ? Color(nsColor: .quaternaryLabelColor).opacity(0.5)
+                        ? Color.secondary.opacity(0.15)
                         : Color.clear)
             )
         }
         .buttonStyle(.plain)
+#if os(macOS)
         .onHover { isHovering = $0 }
+#endif
     }
 }

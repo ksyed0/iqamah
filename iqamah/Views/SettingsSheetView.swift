@@ -1,5 +1,7 @@
 import SwiftUI
+#if os(macOS)
 import ServiceManagement
+#endif
 import CoreLocation
 import IqamahCore
 
@@ -30,7 +32,9 @@ struct SettingsSheetView: View {
     // Scale is applied live; originalUiScale lets Cancel restore it
     private let originalUiScale = SettingsManager.shared.uiScale
     @ObservedObject private var settings = SettingsManager.shared
+#if os(macOS)
     @State private var launchAtLogin = false
+#endif
     @State private var isDetectingLocation = false
     @StateObject private var locationService = LocationService()
     @State private var detectedLocationInfo: String? = nil // inline result text
@@ -207,7 +211,11 @@ struct SettingsSheetView: View {
                 Text(method.displayName).tag(method)
             }
         }
+#if os(macOS)
         .pickerStyle(.radioGroup)
+#else
+        .pickerStyle(.segmented)
+#endif
     }
 
     @ViewBuilder private var displaySection: some View {
@@ -219,6 +227,7 @@ struct SettingsSheetView: View {
             }
         }
         .toggleStyle(.switch)
+#if os(macOS)
         Toggle(isOn: $launchAtLogin) {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Launch at Login")
@@ -236,6 +245,7 @@ struct SettingsSheetView: View {
                 }
             } catch { launchAtLogin = !enabled }
         }
+#endif
         Picker("Appearance", selection: $selectedAppearance) {
             ForEach(AppAppearance.allCases, id: \.self) { mode in
                 Text(mode.displayName).tag(mode)
@@ -390,7 +400,11 @@ struct SettingsSheetView: View {
             .padding(.horizontal, 28)
             .padding(.vertical, 20)
         }
+#if os(macOS)
         .frame(width: 480, height: min((NSScreen.main?.visibleFrame.height ?? 900) - 80, 820))
+#else
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+#endif
         .background {
             Rectangle().fill(.regularMaterial)
         }
@@ -412,7 +426,9 @@ struct SettingsSheetView: View {
     // MARK: - Helpers
 
     private func loadInitialState() {
+#if os(macOS)
         launchAtLogin = SMAppService.mainApp.status == .enabled
+#endif
 
         // Load cities database
         if case let .success(db) = CitiesLoader.shared.load() {
