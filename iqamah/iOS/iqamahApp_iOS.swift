@@ -1,5 +1,6 @@
 import IqamahCore
 import SwiftUI
+import WidgetKit
 
 @main
 struct IqamahiOSApp: App {
@@ -11,8 +12,8 @@ struct IqamahiOSApp: App {
             IOSRootView()
                 .environmentObject(settings)
                 // Reschedule when settings that affect prayer times change
-                .onChange(of: settings.calculationMethod) { _, _ in reschedule() }
-                .onChange(of: settings.asrMethod) { _, _ in reschedule() }
+                .onChange(of: settings.calculationMethod) { _, _ in reschedule(); reloadWidget() }
+                .onChange(of: settings.asrMethod) { _, _ in reschedule(); reloadWidget() }
                 .onChange(of: settings.enabledPrayers) { _, _ in reschedule() }
                 // Reschedule on each app-active to advance the 7-day window
                 .onChange(of: scenePhase) { _, phase in
@@ -23,5 +24,9 @@ struct IqamahiOSApp: App {
 
     private func reschedule() {
         Task { await NotificationScheduler.shared.rescheduleAll() }
+    }
+
+    private func reloadWidget() {
+        WidgetCenter.shared.reloadAllTimelines()
     }
 }
