@@ -48,6 +48,9 @@
 		iOS000000000000000000000E /* SplashScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CAD56A2F23D3C800E1689F /* SplashScreenView.swift */; };
 		iOS000000000000000000000F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001C /* Assets.xcassets */; };
 		iOS0000000000000000000010 /* IqamahCore in Frameworks */ = {isa = PBXBuildFile; productRef = iOS0000000000000000000020 /* IqamahCore */; };
+		WG000000000000000000021 /* IqamahWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = WG000000000000000000011 /* IqamahWidget.swift */; };
+		WG000000000000000000031 /* IqamahCore in Frameworks */ = {isa = PBXBuildFile; productRef = WG000000000000000000032 /* IqamahCore */; };
+		WG000000000000000000041 /* IqamahWidget.appex in PlugIns */ = {isa = PBXBuildFile; fileRef = WG000000000000000000042 /* IqamahWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +60,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = AA0000000000000000000040;
 			remoteInfo = iqamah;
+		};
+		WG000000000000000000051 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA0000000000000000000050 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = WG000000000000000000001;
+			remoteInfo = IqamahWidget;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -119,6 +129,10 @@
 		iOS0000000000000000000013 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		iOS0000000000000000000014 /* iqamah-iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "iqamah-iOS.entitlements"; sourceTree = "<group>"; };
 		iOS0000000000000000000015 /* iqamah-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "iqamah-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		WG000000000000000000011 /* IqamahWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IqamahWidget.swift; sourceTree = "<group>"; };
+		WG000000000000000000012 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		WG000000000000000000013 /* IqamahWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = IqamahWidget.entitlements; sourceTree = "<group>"; };
+		WG000000000000000000042 /* IqamahWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = IqamahWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -149,6 +163,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		WG000000000000000000062 /* Frameworks (Widget) */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				WG000000000000000000031 /* IqamahCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -157,6 +179,7 @@
 			children = (
 				944B0D7D2F6340DD00EC6A01 /* AGENTS.md */,
 				AA0000000000000000000031 /* iqamah */,
+				WG000000000000000000070 /* IqamahWidget */,
 				AA0000000000000000000032 /* Products */,
 		
 				9457D7C42F2BDF2D00549E92 /* AppIconView.swift */,
@@ -199,6 +222,7 @@
 				AA0000000000000000000010 /* iqamah.app */,
 				EE0000000000000000001001 /* iqamahTests.xctest */,
 				iOS0000000000000000000015 /* iqamah-iOS.app */,
+				WG000000000000000000042 /* IqamahWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -275,6 +299,16 @@
 			path = iOS;
 			sourceTree = "<group>";
 		};
+		WG000000000000000000070 /* IqamahWidget */ = {
+			isa = PBXGroup;
+			children = (
+				WG000000000000000000011 /* IqamahWidget.swift */,
+				WG000000000000000000012 /* Info.plist */,
+				WG000000000000000000013 /* IqamahWidget.entitlements */,
+			);
+			path = IqamahWidget;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -326,10 +360,12 @@
 				iOS0000000000000000000042 /* Sources (iOS) */,
 				iOS0000000000000000000041 /* Frameworks (iOS) */,
 				iOS0000000000000000000043 /* Resources (iOS) */,
+				WG000000000000000000090 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				WG000000000000000000052 /* PBXTargetDependency */,
 			);
 			name = "iqamah-iOS";
 			packageProductDependencies = (
@@ -338,6 +374,26 @@
 			productName = "iqamah-iOS";
 			productReference = iOS0000000000000000000015 /* iqamah-iOS.app */;
 			productType = "com.apple.product-type.application";
+		};
+		WG000000000000000000001 /* IqamahWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = WG000000000000000000080 /* Build configuration list for PBXNativeTarget "IqamahWidget" */;
+			buildPhases = (
+				WG000000000000000000060 /* Sources (Widget) */,
+				WG000000000000000000062 /* Frameworks (Widget) */,
+				WG000000000000000000061 /* Resources (Widget) */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = IqamahWidget;
+			packageProductDependencies = (
+				WG000000000000000000032 /* IqamahCore */,
+			);
+			productName = IqamahWidget;
+			productReference = WG000000000000000000042 /* IqamahWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -380,6 +436,7 @@
 				AA0000000000000000000040 /* iqamah */,
 				EE0000000000000000001000 /* iqamahTests */,
 				iOS0000000000000000000040 /* iqamah-iOS */,
+				WG000000000000000000001 /* IqamahWidget */,
 			);
 		};
 /* End PBXProject section */
@@ -407,6 +464,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				iOS000000000000000000000F /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		WG000000000000000000061 /* Resources (Widget) */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -468,13 +532,40 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		WG000000000000000000060 /* Sources (Widget) */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				WG000000000000000000021 /* IqamahWidget.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		WG000000000000000000090 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				WG000000000000000000041 /* IqamahWidget.appex in PlugIns */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
 		EE0000000000000000007002 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = AA0000000000000000000040 /* iqamah */;
 			targetProxy = EE0000000000000000007001 /* PBXContainerItemProxy */;
+		};
+		WG000000000000000000052 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = WG000000000000000000001 /* IqamahWidget */;
+			targetProxy = WG000000000000000000051 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -767,6 +858,60 @@
 			};
 			name = Release;
 		};
+		WG000000000000000000081 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = IqamahWidget/IqamahWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 6;
+				DEAD_CODE_STRIPPING = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = IqamahWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fablesoft.iqamah.widget;
+				PRODUCT_NAME = IqamahWidget;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.10;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Debug;
+		};
+		WG000000000000000000082 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = IqamahWidget/IqamahWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 6;
+				DEAD_CODE_STRIPPING = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = IqamahWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fablesoft.iqamah.widget;
+				PRODUCT_NAME = IqamahWidget;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.10;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCLocalSwiftPackageReference section */
@@ -777,6 +922,7 @@
 		IC0000000000000000000002 /* IqamahCore */ = {isa = XCSwiftPackageProductDependency; package = IC0000000000000000000001 /* XCLocalSwiftPackageReference "Packages/IqamahCore" */; productName = IqamahCore; };
 		IC0000000000000000000004 /* IqamahCore */ = {isa = XCSwiftPackageProductDependency; package = IC0000000000000000000001 /* XCLocalSwiftPackageReference "Packages/IqamahCore" */; productName = IqamahCore; };
 		iOS0000000000000000000020 /* IqamahCore */ = {isa = XCSwiftPackageProductDependency; package = IC0000000000000000000001 /* XCLocalSwiftPackageReference "Packages/IqamahCore" */; productName = IqamahCore; };
+		WG000000000000000000032 /* IqamahCore */ = {isa = XCSwiftPackageProductDependency; package = IC0000000000000000000001 /* XCLocalSwiftPackageReference "Packages/IqamahCore" */; productName = IqamahCore; };
 /* End XCSwiftPackageProductDependency section */
 
 /* Begin XCConfigurationList section */
@@ -812,6 +958,15 @@
 			buildConfigurations = (
 				iOS0000000000000000000061 /* Debug */,
 				iOS0000000000000000000062 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		WG000000000000000000080 /* Build configuration list for PBXNativeTarget "IqamahWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				WG000000000000000000081 /* Debug */,
+				WG000000000000000000082 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

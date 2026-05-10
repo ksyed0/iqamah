@@ -28,7 +28,12 @@ public enum AppAppearance: String, CaseIterable {
 }
 
 public class SettingsManager: ObservableObject {
-    public static let shared = SettingsManager()
+    private static let appGroupID = "group.com.fablesoft.iqamah"
+
+    public static let shared: SettingsManager = {
+        let suite = UserDefaults(suiteName: appGroupID) ?? .standard
+        return SettingsManager(userDefaults: suite)
+    }()
 
     private let defaults: UserDefaults
     private let kvs = NSUbiquitousKeyValueStore.default
@@ -286,6 +291,40 @@ public class SettingsManager: ObservableObject {
             object: kvs
         )
         kvs.synchronize()
+
+        migrateFromStandardDefaultsIfNeeded()
+    }
+
+    // MARK: - App Group migration
+
+    private func migrateFromStandardDefaultsIfNeeded() {
+        let migrationKey = "didMigrateToAppGroupV1"
+        // Skip if already migrated OR if the suite already has meaningful data
+        guard !defaults.bool(forKey: migrationKey),
+              defaults.dictionaryRepresentation().count <= 2
+        else {
+            defaults.set(true, forKey: migrationKey)
+            return
+        }
+        let std = UserDefaults.standard
+        // Only migrate if standard has setup data to copy
+        guard std.bool(forKey: "hasCompletedSetup") else {
+            defaults.set(true, forKey: migrationKey)
+            return
+        }
+        let keysToMigrate = [
+            "hasCompletedSetup", "selectedCityName", "selectedCityCountryCode",
+            "selectedCityLatitude", "selectedCityLongitude", "selectedCityTimezone",
+            "calculationMethod", "asrMethod", "prayerAdjustments", "use24HourTime",
+            "prayerAdhaanIds", "mutedPrayers", "uiScale", "appAppearance",
+            "locationSource", "gpsLocality", "gpsTimezone",
+        ]
+        for key in keysToMigrate {
+            if let value = std.object(forKey: key) {
+                defaults.set(value, forKey: key)
+            }
+        }
+        defaults.set(true, forKey: migrationKey)
     }
 
     // MARK: - iCloud KVS remote change handler
