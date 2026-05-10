@@ -1,3 +1,4 @@
+import IqamahCore
 import Testing
 import Foundation
 import CoreLocation

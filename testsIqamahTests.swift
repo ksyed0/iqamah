@@ -1,7 +1,7 @@
 import XCTest
 import Foundation
 import CoreLocation
-@testable import Iqamah
+import IqamahCore
 
 // MARK: - Prayer Calculator Tests
 
@@ -22,7 +22,7 @@ final class PrayerCalculatorTests: XCTestCase {
         let dateComponents = DateComponents(year: 2024, month: 6, day: 21, hour: 12)
         let date = Calendar.current.date(from: dateComponents)!
         
-        let prayerTimes = calculator.calculate(for: date)
+        let prayerTimes = try calculator.calculate(for: date)
         
         let formatter = DateFormatter()
         formatter.timeZone = timezone
@@ -58,7 +58,7 @@ final class PrayerCalculatorTests: XCTestCase {
         let dateComponents = DateComponents(year: 2024, month: 1, day: 15, hour: 12)
         let date = Calendar.current.date(from: dateComponents)!
         
-        let prayerTimes = calculator.calculate(for: date)
+        let prayerTimes = try calculator.calculate(for: date)
         
         // Verify chronological order
         XCTAssertLessThan(prayerTimes.fajr, prayerTimes.sunrise)
@@ -94,8 +94,8 @@ final class PrayerCalculatorTests: XCTestCase {
         let dateComponents = DateComponents(year: 2024, month: 6, day: 21, hour: 12)
         let date = Calendar.current.date(from: dateComponents)!
         
-        let standardTimes = standardCalculator.calculate(for: date)
-        let hanafiTimes = hanafiCalculator.calculate(for: date)
+        let standardTimes = try standardCalculator.calculate(for: date)
+        let hanafiTimes = try hanafiCalculator.calculate(for: date)
         
         // Hanafi Asr should be later than Standard Asr
         XCTAssertGreaterThan(hanafiTimes.asr, standardTimes.asr, "Hanafi Asr should be later than Standard Asr")
@@ -124,7 +124,7 @@ final class PrayerCalculatorTests: XCTestCase {
                 asrMethod: .standard
             )
             
-            let prayerTimes = calculator.calculate(for: date)
+            let prayerTimes = try calculator.calculate(for: date)
             
             // Verify chronological order for each method
             XCTAssertLessThan(prayerTimes.fajr, prayerTimes.sunrise, "Fajr before Sunrise for \(method.displayName)")
@@ -152,8 +152,8 @@ final class PrayerCalculatorTests: XCTestCase {
         let date2Components = DateComponents(year: 2024, month: 7, day: 1, hour: 12)
         let date2 = Calendar.current.date(from: date2Components)!
         
-        let times1 = calculator.calculate(for: date1)
-        let times2 = calculator.calculate(for: date2)
+        let times1 = try calculator.calculate(for: date1)
+        let times2 = try calculator.calculate(for: date2)
         
         // Prayer times should be different between winter and summer
         XCTAssertNotEqual(times1.fajr, times2.fajr, "Winter and summer Fajr times should differ")
@@ -315,8 +315,8 @@ final class SettingsManagerTests: XCTestCase {
     
     func testCityPersistence() throws {
         let settings = SettingsManager.shared
-        
-        let testCity = City(
+
+        let testCity = try City(
             name: "New York",
             countryCode: "US",
             latitude: 40.7128,
@@ -384,8 +384,8 @@ final class SettingsManagerTests: XCTestCase {
     
     func testCompleteSetup() throws {
         let settings = SettingsManager.shared
-        
-        let testCity = City(
+
+        let testCity = try City(
             name: "London",
             countryCode: "GB",
             latitude: 51.5074,
@@ -411,8 +411,8 @@ final class SettingsManagerTests: XCTestCase {
     
     func testResetSettings() throws {
         let settings = SettingsManager.shared
-        
-        let testCity = City(
+
+        let testCity = try City(
             name: "Toronto",
             countryCode: "CA",
             latitude: 43.65107,
@@ -438,94 +438,96 @@ final class SettingsManagerTests: XCTestCase {
 // MARK: - Cities Database Tests
 
 final class CitiesDatabaseTests: XCTestCase {
-    
+
     func testLoadDatabase() throws {
-        let database = CitiesLoader.shared.load()
-        
-        XCTAssertNotNil(database, "Cities database should load")
-        XCTAssertGreaterThan(database!.countries.count, 0, "Should have countries")
-        XCTAssertGreaterThan(database!.cities.count, 0, "Should have cities")
+        let result = CitiesLoader.shared.load()
+        guard case .success(let database) = result else {
+            XCTFail("Cities database should load")
+            return
+        }
+        XCTAssertGreaterThan(database.countries.count, 0, "Should have countries")
+        XCTAssertGreaterThan(database.cities.count, 0, "Should have cities")
     }
-    
+
     func testFindCountry() throws {
-        guard let database = CitiesLoader.shared.load() else {
+        guard case .success(let database) = CitiesLoader.shared.load() else {
             XCTFail("Failed to load cities database")
             return
         }
-        
+
         let usa = database.country(forCode: "US")
         XCTAssertNotNil(usa, "Should find USA")
         XCTAssertNotNil(usa?.name, "USA should have a name")
     }
-    
+
     func testCitiesByCountry() throws {
-        guard let database = CitiesLoader.shared.load() else {
+        guard case .success(let database) = CitiesLoader.shared.load() else {
             XCTFail("Failed to load cities database")
             return
         }
-        
+
         let usCities = database.cities(forCountryCode: "US")
         XCTAssertGreaterThan(usCities.count, 0, "USA should have cities")
-        
+
         // Verify cities are sorted
         for i in 0..<(usCities.count - 1) {
             XCTAssertLessThanOrEqual(usCities[i].name, usCities[i + 1].name, "Cities should be sorted alphabetically")
         }
     }
-    
+
     func testClosestCity() throws {
-        guard let database = CitiesLoader.shared.load() else {
+        guard case .success(let database) = CitiesLoader.shared.load() else {
             XCTFail("Failed to load cities database")
             return
         }
-        
+
         // New York coordinates
         let coordinate = CLLocationCoordinate2D(latitude: 40.7128, longitude: -74.0060)
         let closestCity = database.closestCity(to: coordinate)
-        
+
         XCTAssertNotNil(closestCity, "Should find closest city")
-        
+
         // The closest city should be relatively close (within ~500km for major cities)
         if let city = closestCity {
             let distance = city.distance(from: coordinate)
             XCTAssertLessThan(distance, 500000, "Closest city should be within 500km (got \(distance / 1000)km)")
         }
     }
-    
+
     func testCityCoordinate() throws {
-        let city = City(
+        let city = try City(
             name: "Makkah",
             countryCode: "SA",
             latitude: 21.4225,
             longitude: 39.8262,
             timezone: "Asia/Riyadh"
         )
-        
+
         let coordinate = city.coordinate
         XCTAssertEqual(coordinate.latitude, city.latitude)
         XCTAssertEqual(coordinate.longitude, city.longitude)
     }
-    
+
     func testCityDistance() throws {
-        let newYork = City(
+        let newYork = try City(
             name: "New York",
             countryCode: "US",
             latitude: 40.7128,
             longitude: -74.0060,
             timezone: "America/New_York"
         )
-        
-        let london = City(
+
+        let london = try City(
             name: "London",
             countryCode: "GB",
             latitude: 51.5074,
             longitude: -0.1278,
             timezone: "Europe/London"
         )
-        
+
         let londonCoord = CLLocationCoordinate2D(latitude: london.latitude, longitude: london.longitude)
         let distance = newYork.distance(from: londonCoord)
-        
+
         // Distance between New York and London is approximately 5,570 km
         XCTAssertGreaterThan(distance, 5000000, "Distance should be > 5000km")
         XCTAssertLessThan(distance, 6000000, "Distance should be < 6000km")
@@ -597,24 +599,27 @@ final class CalculationMethodConfigTests: XCTestCase {
 // MARK: - Location Service Tests
 
 final class LocationServiceTests: XCTestCase {
-    
-    func testInitialization() throws {
-        let locationService = LocationService()
-        
+
+    func testInitialization() async throws {
+        let locationService = await MainActor.run { LocationService() }
+
         // Should initialize with default state
-        XCTAssertNil(locationService.currentLocation, "Should start with no location")
-        XCTAssertFalse(locationService.isLoading, "Should not be loading initially")
-        XCTAssertNil(locationService.locationError, "Should have no error initially")
+        let currentLocation = await MainActor.run { locationService.currentLocation }
+        let isLoading = await MainActor.run { locationService.isLoading }
+        let locationError = await MainActor.run { locationService.locationError }
+        XCTAssertNil(currentLocation, "Should start with no location")
+        XCTAssertFalse(isLoading, "Should not be loading initially")
+        XCTAssertNil(locationError, "Should have no error initially")
     }
-    
-    func testAuthorizationStatus() throws {
-        let locationService = LocationService()
-        
+
+    func testAuthorizationStatus() async throws {
+        let locationService = await MainActor.run { LocationService() }
+
         // Should have an authorization status
+        let status = await MainActor.run { locationService.authorizationStatus }
         let validStatuses: [CLAuthorizationStatus] = [
-            .notDetermined, .restricted, .denied, .authorizedAlways, .authorizedWhenInUse
+            .notDetermined, .restricted, .denied, .authorizedAlways
         ]
-        
-        XCTAssertTrue(validStatuses.contains(locationService.authorizationStatus), "Should have valid authorization status")
+        XCTAssertTrue(validStatuses.contains(status), "Should have valid authorization status")
     }
 }

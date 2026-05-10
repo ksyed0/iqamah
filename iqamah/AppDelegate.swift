@@ -1,6 +1,7 @@
 import AppKit
 import SwiftUI
 import CoreLocation
+import IqamahCore
 
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var statusItem: NSStatusItem?

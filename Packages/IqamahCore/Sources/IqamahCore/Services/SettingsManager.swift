@@ -2,15 +2,15 @@ import CoreLocation
 import Foundation
 import SwiftUI
 
-extension Notification.Name {
+public extension Notification.Name {
     static let settingsDidChange = Notification.Name("settingsDidChange")
     static let openSettings = Notification.Name("openSettings")
 }
 
-enum AppAppearance: String, CaseIterable {
+public enum AppAppearance: String, CaseIterable {
     case system, light, dark
 
-    var colorScheme: ColorScheme? {
+    public var colorScheme: ColorScheme? {
         switch self {
         case .system: nil
         case .light: .light
@@ -18,7 +18,7 @@ enum AppAppearance: String, CaseIterable {
         }
     }
 
-    var displayName: String {
+    public var displayName: String {
         switch self {
         case .system: "System"
         case .light: "Light"
@@ -27,8 +27,8 @@ enum AppAppearance: String, CaseIterable {
     }
 }
 
-class SettingsManager: ObservableObject {
-    static let shared = SettingsManager()
+public class SettingsManager: ObservableObject {
+    public static let shared = SettingsManager()
 
     private let defaults: UserDefaults
 
@@ -56,25 +56,25 @@ class SettingsManager: ObservableObject {
         static let gpsDetectedCity = "gpsDetectedCity" // JSON-encoded City
     }
 
-    @Published var hasCompletedSetup: Bool {
+    @Published public var hasCompletedSetup: Bool {
         didSet {
             defaults.set(hasCompletedSetup, forKey: Keys.hasCompletedSetup)
         }
     }
 
-    @Published var calculationMethod: CalculationMethod {
+    @Published public var calculationMethod: CalculationMethod {
         didSet {
             defaults.set(calculationMethod.rawValue, forKey: Keys.calculationMethod)
         }
     }
 
-    @Published var asrMethod: AsrJuristicMethod {
+    @Published public var asrMethod: AsrJuristicMethod {
         didSet {
             defaults.set(asrMethod.rawValue, forKey: Keys.asrMethod)
         }
     }
 
-    @Published var use24HourTime: Bool {
+    @Published public var use24HourTime: Bool {
         didSet {
             defaults.set(use24HourTime, forKey: Keys.use24HourTime)
             NotificationCenter.default.post(name: .settingsDidChange, object: nil)
@@ -82,34 +82,34 @@ class SettingsManager: ObservableObject {
     }
 
     /// UI display scale — 0.7 (70%) to 1.5 (150%) in 0.1 increments. Default 1.0.
-    @Published var uiScale: Double {
+    @Published public var uiScale: Double {
         didSet {
             defaults.set(uiScale, forKey: Keys.uiScale)
             NotificationCenter.default.post(name: .settingsDidChange, object: nil)
         }
     }
 
-    @Published var appearance: AppAppearance {
+    @Published public var appearance: AppAppearance {
         didSet {
             defaults.set(appearance.rawValue, forKey: Keys.appearance)
             NotificationCenter.default.post(name: .settingsDidChange, object: nil)
         }
     }
 
-    @Published var prayerAdjustments: [String: Int] = [:]
+    @Published public var prayerAdjustments: [String: Int] = [:]
 
-    @Published var locationSource: String {
+    @Published public var locationSource: String {
         didSet { defaults.set(locationSource, forKey: Keys.locationSource) }
     }
-    @Published var gpsLocality: String {
+    @Published public var gpsLocality: String {
         didSet { defaults.set(gpsLocality, forKey: Keys.gpsLocality) }
     }
-    @Published var gpsTimezone: String {
+    @Published public var gpsTimezone: String {
         didSet { defaults.set(gpsTimezone, forKey: Keys.gpsTimezone) }
     }
     /// The most recently GPS-detected city (precise coords + CLGeocoder locality).
     /// Injected into the city picker so users can select it without it being in cities.json.
-    @Published var gpsDetectedCity: City? {
+    @Published public var gpsDetectedCity: City? {
         didSet {
             if let city = gpsDetectedCity,
                let data = try? JSONEncoder().encode(city) {
@@ -120,11 +120,11 @@ class SettingsManager: ObservableObject {
         }
     }
 
-    static let uiScaleMin: Double = 0.7
-    static let uiScaleMax: Double = 1.5
-    static let uiScaleStep: Double = 0.1
+    public static let uiScaleMin: Double = 0.7
+    public static let uiScaleMax: Double = 1.5
+    public static let uiScaleStep: Double = 0.1
 
-    init(userDefaults: UserDefaults = .standard) {
+    public init(userDefaults: UserDefaults = .standard) {
         defaults = userDefaults
         hasCompletedSetup = userDefaults.bool(forKey: Keys.hasCompletedSetup)
 
@@ -172,7 +172,7 @@ class SettingsManager: ObservableObject {
         }
     }
 
-    func saveCity(_ city: City) {
+    public func saveCity(_ city: City) {
         defaults.set(city.name, forKey: Keys.selectedCityName)
         defaults.set(city.countryCode, forKey: Keys.selectedCityCountryCode)
         defaults.set(city.latitude, forKey: Keys.selectedCityLatitude)
@@ -180,7 +180,7 @@ class SettingsManager: ObservableObject {
         defaults.set(city.timezone, forKey: Keys.selectedCityTimezone)
     }
 
-    func loadCity() -> City? {
+    public func loadCity() -> City? {
         guard let name = defaults.string(forKey: Keys.selectedCityName),
               let countryCode = defaults.string(forKey: Keys.selectedCityCountryCode),
               let timezone = defaults.string(forKey: Keys.selectedCityTimezone)
@@ -205,21 +205,21 @@ class SettingsManager: ObservableObject {
         )
     }
 
-    func saveGPSCoordinates(_ coordinate: CLLocationCoordinate2D) {
+    public func saveGPSCoordinates(_ coordinate: CLLocationCoordinate2D) {
         defaults.set(coordinate.latitude, forKey: Keys.gpsLatitude)
         defaults.set(coordinate.longitude, forKey: Keys.gpsLongitude)
         defaults.set(true, forKey: Keys.gpsCoordinateCached)
         NotificationCenter.default.post(name: .settingsDidChange, object: nil)
     }
 
-    func cachedGPSCoordinate() -> CLLocationCoordinate2D? {
+    public func cachedGPSCoordinate() -> CLLocationCoordinate2D? {
         guard defaults.bool(forKey: Keys.gpsCoordinateCached) else { return nil }
         let lat = defaults.double(forKey: Keys.gpsLatitude)
         let lon = defaults.double(forKey: Keys.gpsLongitude)
         return CLLocationCoordinate2D(latitude: lat, longitude: lon)
     }
 
-    func completeSetup(city: City, calculationMethod: CalculationMethod, asrMethod: AsrJuristicMethod) {
+    public func completeSetup(city: City, calculationMethod: CalculationMethod, asrMethod: AsrJuristicMethod) {
         saveCity(city)
         self.calculationMethod = calculationMethod
         self.asrMethod = asrMethod
@@ -229,7 +229,7 @@ class SettingsManager: ObservableObject {
         NotificationCenter.default.post(name: .settingsDidChange, object: nil)
     }
 
-    func resetSettings() {
+    public func resetSettings() {
         hasCompletedSetup = false
         calculationMethod = .muslimWorldLeague
         asrMethod = .standard
@@ -244,20 +244,20 @@ class SettingsManager: ObservableObject {
 
     // MARK: - Prayer Time Adjustments
 
-    func getAdjustment(for prayerName: String) -> Int {
+    public func getAdjustment(for prayerName: String) -> Int {
         let adjustments = defaults.dictionary(forKey: Keys.prayerAdjustments) as? [String: Int] ?? [:]
         return adjustments[prayerName] ?? 0
     }
 
     // MARK: - Adhaan Selection
 
-    func getAdhaan(for prayerName: String) -> Adhaan {
+    public func getAdhaan(for prayerName: String) -> Adhaan {
         let map = defaults.dictionary(forKey: Keys.prayerAdhaanIds) as? [String: String] ?? [:]
         let id = map[prayerName] ?? "silent"
         return Adhaan.available.first { $0.id == id } ?? .silent
     }
 
-    func setAdhaan(_ adhaan: Adhaan, for prayerName: String) {
+    public func setAdhaan(_ adhaan: Adhaan, for prayerName: String) {
         var map = defaults.dictionary(forKey: Keys.prayerAdhaanIds) as? [String: String] ?? [:]
         map[prayerName] = adhaan.id
         defaults.set(map, forKey: Keys.prayerAdhaanIds)
@@ -265,18 +265,18 @@ class SettingsManager: ObservableObject {
 
     // MARK: - Per-Prayer Mute
 
-    func isPrayerMuted(_ prayerName: String) -> Bool {
+    public func isPrayerMuted(_ prayerName: String) -> Bool {
         let arr = defaults.stringArray(forKey: Keys.mutedPrayers) ?? []
         return arr.contains(prayerName)
     }
 
-    func setPrayerMuted(_ muted: Bool, for prayerName: String) {
+    public func setPrayerMuted(_ muted: Bool, for prayerName: String) {
         var set = Set(defaults.stringArray(forKey: Keys.mutedPrayers) ?? [])
         if muted { set.insert(prayerName) } else { set.remove(prayerName) }
         defaults.set(Array(set), forKey: Keys.mutedPrayers)
     }
 
-    func setAdjustment(_ minutes: Int, for prayerName: String) {
+    public func setAdjustment(_ minutes: Int, for prayerName: String) {
         var adjustments = defaults.dictionary(forKey: Keys.prayerAdjustments) as? [String: Int] ?? [:]
         adjustments[prayerName] = minutes
         defaults.set(adjustments, forKey: Keys.prayerAdjustments)
@@ -284,20 +284,20 @@ class SettingsManager: ObservableObject {
         NotificationCenter.default.post(name: .settingsDidChange, object: nil)
     }
 
-    func hasAnyAdjustments() -> Bool {
+    public func hasAnyAdjustments() -> Bool {
         let adjustments = defaults.dictionary(forKey: Keys.prayerAdjustments) as? [String: Int] ?? [:]
         return adjustments.values.contains { $0 != 0 }
     }
 
-    func resetAdjustments() {
+    public func resetAdjustments() {
         defaults.removeObject(forKey: Keys.prayerAdjustments)
         prayerAdjustments = [:]
         NotificationCenter.default.post(name: .settingsDidChange, object: nil)
     }
 }
 
-extension Double {
-    func rounded(toPlaces places: Int) -> Double {
+public extension Double {
+    public func rounded(toPlaces places: Int) -> Double {
         let factor = pow(10.0, Double(places))
         return (self * factor).rounded() / factor
     }

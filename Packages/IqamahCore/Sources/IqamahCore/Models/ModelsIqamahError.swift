@@ -2,7 +2,7 @@ import Foundation
 import CoreLocation
 
 /// Application-wide error types following the error taxonomy defined in architecture/ERROR_TAXONOMY.md
-enum IqamahError: Error {
+public enum IqamahError: Error {
     // MARK: - ValidationError
 
     /// Bad input from user or external system
@@ -42,7 +42,7 @@ enum IqamahError: Error {
 // MARK: - LocalizedError Conformance
 
 extension IqamahError: LocalizedError {
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         // ValidationError
         case let .invalidCoordinates(lat, lon):
@@ -89,7 +89,7 @@ extension IqamahError: LocalizedError {
         }
     }
 
-    var failureReason: String? {
+    public var failureReason: String? {
         switch self {
         case .locationServicesDenied, .locationServicesRestricted:
             "Location permission is required to calculate accurate prayer times for your current location."
@@ -100,7 +100,7 @@ extension IqamahError: LocalizedError {
         }
     }
 
-    var recoverySuggestion: String? {
+    public var recoverySuggestion: String? {
         switch self {
         case .locationServicesDenied:
             "Open System Settings, go to Privacy & Security > Location Services, and enable location access for Iqamah."
@@ -120,7 +120,7 @@ extension IqamahError: LocalizedError {
 
 extension IqamahError {
     /// Returns true if this is a user-recoverable error
-    var isRecoverable: Bool {
+    public var isRecoverable: Bool {
         switch self {
         case .locationServicesDenied, .locationServicesRestricted,
              .citiesDatabaseNotFound, .invalidCoordinates:
@@ -131,7 +131,7 @@ extension IqamahError {
     }
 
     /// Returns the logging level this error should use
-    var logLevel: String {
+    public var logLevel: String {
         switch self {
         case .invalidCoordinates, .invalidDate, .invalidCalculationMethod,
              .invalidTimezone, .invalidAdjustment:

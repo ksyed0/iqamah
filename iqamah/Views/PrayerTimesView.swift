@@ -1,6 +1,7 @@
 import SwiftUI
 import CoreLocation
 import Combine
+import IqamahCore
 
 struct PrayerTimesView: View {
     let city: City

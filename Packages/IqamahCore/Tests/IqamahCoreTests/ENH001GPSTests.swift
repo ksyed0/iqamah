@@ -1,3 +1,4 @@
+import IqamahCore
 import XCTest
 import CoreLocation
 

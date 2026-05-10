@@ -1,4 +1,5 @@
 import SwiftUI
+import IqamahCore
 
 @main
 struct iqamahApp: App {

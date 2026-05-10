@@ -93,9 +93,10 @@ playground.xcworkspace
 # Swift Package Manager
 .build/
 .swiftpm/
-Packages/
 Package.pins
 Package.resolved
+# Note: Packages/ is NOT ignored — Packages/IqamahCore/ is a local Swift package
+# committed to the repo (source code, not a fetched dependency).
 # *.xcodeproj intentionally NOT ignored — this is an Xcode project, not SPM
 
 # CocoaPods (if used)
@@ -197,3 +198,8 @@ coverage-report/
 # Superpowers brainstorm sessions
 # ========================================
 .superpowers/
+
+# ========================================
+# Git worktrees (local development isolation)
+# ========================================
+.worktrees/

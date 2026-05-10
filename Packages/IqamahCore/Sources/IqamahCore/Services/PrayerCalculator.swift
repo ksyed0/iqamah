@@ -1,20 +1,20 @@
 import Foundation
 import CoreLocation
 
-class PrayerCalculator {
+public class PrayerCalculator {
     private let coordinate: CLLocationCoordinate2D
     private let timezone: TimeZone
     private let method: CalculationMethod
     private let asrMethod: AsrJuristicMethod
 
-    init(coordinate: CLLocationCoordinate2D, timezone: TimeZone, method: CalculationMethod, asrMethod: AsrJuristicMethod = .standard) {
+    public init(coordinate: CLLocationCoordinate2D, timezone: TimeZone, method: CalculationMethod, asrMethod: AsrJuristicMethod = .standard) {
         self.coordinate = coordinate
         self.timezone = timezone
         self.method = method
         self.asrMethod = asrMethod
     }
 
-    func calculate(for date: Date) throws -> PrayerTimes {
+    public func calculate(for date: Date) throws -> PrayerTimes {
         let calendar = Calendar(identifier: .gregorian)
         let components = calendar.dateComponents(in: timezone, from: date)
 
@@ -199,7 +199,7 @@ class PrayerCalculator {
 // MARK: - Hijri Date Conversion
 
 extension Date {
-    func hijriDate() -> (day: Int, month: Int, year: Int, monthName: String) {
+    public func hijriDate() -> (day: Int, month: Int, year: Int, monthName: String) {
         let hijriCalendar = Calendar(identifier: .islamicUmmAlQura)
         let components = hijriCalendar.dateComponents([.day, .month, .year], from: self)
 
@@ -219,13 +219,13 @@ extension Date {
         )
     }
 
-    func formattedGregorianDate() -> String {
+    public func formattedGregorianDate() -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "EEEE, MMMM d, yyyy"
         return formatter.string(from: self)
     }
 
-    func formattedHijriDate() -> String {
+    public func formattedHijriDate() -> String {
         let hijri = hijriDate()
         return "\(hijri.day) \(hijri.monthName) \(hijri.year) AH"
     }

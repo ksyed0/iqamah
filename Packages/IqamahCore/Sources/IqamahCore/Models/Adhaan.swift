@@ -1,12 +1,18 @@
 import Foundation
 
 /// A single audio option selectable per prayer — either a full Adhaan recording or a gentle alert tone.
-struct Adhaan: Identifiable, Codable, Hashable {
-    let id: String
-    let displayName: String
-    let filename: String // empty for .silent
+public struct Adhaan: Identifiable, Codable, Hashable {
+    public let id: String
+    public let displayName: String
+    public let filename: String // empty for .silent
 
-    var shortName: String {
+    public init(id: String, displayName: String, filename: String) {
+        self.id = id
+        self.displayName = displayName
+        self.filename = filename
+    }
+
+    public var shortName: String {
         if displayName.hasPrefix("Adhaan ") {
             return String(displayName.dropFirst("Adhaan ".count))
         }
@@ -15,10 +21,10 @@ struct Adhaan: Identifiable, Codable, Hashable {
 
     // MARK: - Built-in options
 
-    static let silent = Adhaan(id: "silent", displayName: "Silent", filename: "")
+    public static let silent = Adhaan(id: "silent", displayName: "Silent", filename: "")
 
     /// All options for standard prayers: Silent → Alert Tones → Adhaan recordings
-    static var available: [Adhaan] {
+    public static var available: [Adhaan] {
         var options: [Adhaan] = [.silent]
         options += alertTones
         options += adhaanRecordings
@@ -26,7 +32,7 @@ struct Adhaan: Identifiable, Codable, Hashable {
     }
 
     /// All options for Fajr prayer — includes Fajr-specific adhaans (with "prayer is better than sleep").
-    static var availableForFajr: [Adhaan] {
+    public static var availableForFajr: [Adhaan] {
         var options: [Adhaan] = [.silent]
         options += alertTones
         options += adhaanRecordings
@@ -35,7 +41,7 @@ struct Adhaan: Identifiable, Codable, Hashable {
     }
 
     /// Bundled gentle alert tones (tone_*.aiff / tone_*.mp3)
-    static var alertTones: [Adhaan] {
+    public static var alertTones: [Adhaan] {
         let known: [(id: String, name: String, exts: [String])] = [
             ("tone_glass", "Glass Bell", ["aiff", "mp3"]),
             ("tone_ping", "Soft Ping", ["aiff", "mp3"]),
@@ -44,7 +50,7 @@ struct Adhaan: Identifiable, Codable, Hashable {
             ("tone_breeze", "Gentle Breeze", ["aiff", "mp3"]),
         ]
         return known.compactMap { entry in
-            for ext in entry.exts where Bundle.main.url(forResource: entry.id, withExtension: ext) != nil {
+            for ext in entry.exts where Bundle.module.url(forResource: entry.id, withExtension: ext) != nil {
                 return Adhaan(id: entry.id, displayName: entry.name, filename: "\(entry.id).\(ext)")
             }
             return nil
@@ -52,10 +58,10 @@ struct Adhaan: Identifiable, Codable, Hashable {
     }
 
     /// Standard Adhaan recordings (adhaan_1…adhaan_10) — suitable for all prayers.
-    static var adhaanRecordings: [Adhaan] {
+    public static var adhaanRecordings: [Adhaan] {
         (1 ... 10).compactMap { i in
             let id = "adhaan_\(i)"
-            for ext in ["mp3", "m4a", "aac", "aiff"] where Bundle.main.url(forResource: id, withExtension: ext) != nil {
+            for ext in ["mp3", "m4a", "aac", "aiff"] where Bundle.module.url(forResource: id, withExtension: ext) != nil {
                 return Adhaan(id: id, displayName: "Adhaan \(i)", filename: "\(id).\(ext)")
             }
             return nil
@@ -64,10 +70,10 @@ struct Adhaan: Identifiable, Codable, Hashable {
 
     /// Fajr-specific Adhaan recordings — include "As-salatu khayrun minan nawm"
     /// (Prayer is better than sleep), as prescribed for the Fajr call.
-    static var adhaanFajrRecordings: [Adhaan] {
+    public static var adhaanFajrRecordings: [Adhaan] {
         (1 ... 5).compactMap { i in
             let id = "adhaan_fajr_\(i)"
-            for ext in ["mp3", "m4a", "aac", "aiff"] where Bundle.main.url(forResource: id, withExtension: ext) != nil {
+            for ext in ["mp3", "m4a", "aac", "aiff"] where Bundle.module.url(forResource: id, withExtension: ext) != nil {
                 return Adhaan(id: id, displayName: "Fajr Adhaan \(i)", filename: "\(id).\(ext)")
             }
             return nil
