@@ -5,6 +5,11 @@ public struct Country: Codable, Identifiable, Hashable {
     public let name: String
     public let code: String
 
+    public init(name: String, code: String) {
+        self.name = name
+        self.code = code
+    }
+
     public var id: String { code }
 }
 
@@ -66,6 +71,11 @@ public struct City: Codable, Identifiable, Hashable {
 public struct CitiesDatabase: Codable {
     public let countries: [Country]
     public let cities: [City]
+
+    public init(countries: [Country], cities: [City]) {
+        self.countries = countries
+        self.cities = cities
+    }
 
     public func country(forCode code: String) -> Country? {
         countries.first { $0.code == code }
