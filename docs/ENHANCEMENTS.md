@@ -83,7 +83,7 @@ Display upcoming Islamic dates (Eid al-Fitr, Eid al-Adha, Mawlid, etc.) in the p
 - macOS-only, iOS-only, or both? (Recommend both — fits naturally inside the planned EPIC-0010 universal app structure once that lands)
 - Calculation can be done in `IqamahCore` so both platforms share it
 
-**Mockup:** [`docs/mockups/2026-05-09-hilal-watch-mockup.tsx`](mockups/2026-05-09-hilal-watch-mockup.tsx) — React/web prototype iterated in Claude conversation, kept for reference. Will be ported to SwiftUI when promoted to an Epic. Contains the working Odeh criterion implementation, astronomy-engine integration, grid computation, moon-phase canvas, world-map canvas, and the OmegaHilalSighting-compatible colour scheme.
+**Mockup:** Original React/web prototype iterated during the brainstorm has been retired now that the algorithm and UI design are fully captured in the EPIC-0011 spec. The Odeh criterion implementation reference lives in [astronomy-engine v2](https://github.com/cosinekitty/astronomy); the colour scheme and visibility thresholds are codified in AC-0213.
 
 **Effort:** Medium-Large — the algorithm is mechanical (mockup contains the full implementation) but porting an astronomical position engine to Swift, building the map UI, and validating against moonsighting.com is a multi-week effort. Should be a standalone Epic.
 
