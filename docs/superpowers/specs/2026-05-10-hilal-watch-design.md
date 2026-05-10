@@ -520,16 +520,16 @@ The two platform targets ideally share these files via Xcode group membership. W
 
 ## 15. Open questions
 
-1. **Yallop / HMNAO coefficient verification** — pre-implementation task. Block Branch 1 closure until two authoritative sources are reconciled.
-2. **Hijri offset display when crossing month boundaries** — if user offsets +1 and the underlying date is the last day of the month, the displayed label rolls over to the next month. Confirm this is the desired behaviour (recommendation: yes — that's exactly what offsetting means; no special-casing).
-3. **macOS window mode for Hilal Watch** — sheet vs separate panel window? Existing window max is 620×680. Map is 720×360 minimum to be readable. Recommendation: separate panel window (`Window` + `WindowResizability.contentSize`) so it doesn't fight the main window.
-4. **First-launch About card auto-display** — block the map until dismissed, or peek through? Recommendation: peek through — the map computes in the background and the About card slides up over a partially-rendered map; users can dismiss any time.
-5. **Notification permission already granted via EPIC-0010?** — confirm that when EPIC-0010 lands, the notification permission flow is shared. We don't want a second permission prompt for Hilal Watch.
-6. **AC-0245 share dialog UI on macOS** — `NSSharingServicePicker` doesn't natively support a "resolution toggle" in its picker. Implementation needs a small pre-share dialog with the toggle, then invoke the picker with the chosen resolution. Confirm UX is acceptable.
-7. **Performance benchmark methodology** — define before merging. Proposed: XCTest performance test running `HilalCalculator.computeGrid` 100× on a known date in a representative criterion, measuring p50 / p95.
-8. **MapKit polygon-overlay scaling spike** — confirm 16,200 polygons render at ≥ 50 fps on iPhone 12 before Branch 3 commits to the `MKPolygon` strategy. Fallback `MKTileOverlay` path is documented in §7.5 but not detailed.
-9. **Arabic / multilingual rollout** — handled by ENH-019 (App-wide Multilingual Support), not in EPIC-0011 scope. EPIC-0011 only commits to being i18n-ready (§12.5).
-10. **Cell `accessibilityLabel` density** — 16,200 individually-labelled overlays may bloat the accessibility tree to the point where VoiceOver navigation is unusable. Confirm the labels are exposed only at a reasonable map zoom level, or grouped into accessibility regions.
+1. **Yallop / HMNAO coefficient verification** — ✅ Resolved 2026-05-10: all three criteria ship in v1. Coefficient sourcing is the implementation plan's Task 1.0, blocking Branch 1 closure until ≥ 2 authoritative sources reconcile per criterion.
+2. **Hijri offset display when crossing month boundaries** — ✅ Resolved 2026-05-10: no special-casing. If user offsets +1 and the underlying date is the last day of the month, the displayed label rolls over — that's exactly what offsetting means.
+3. **macOS window mode for Hilal Watch** — ✅ Resolved 2026-05-10: separate panel window via SwiftUI `Window` scene + `WindowResizability.contentSize`, default 720×640. Doesn't fight the main 580×640 window.
+4. **First-launch About card auto-display** — ✅ Resolved 2026-05-10: peek-through. The map computes in the background and the About card slides up over a partially-rendered map; users can dismiss any time.
+5. **Notification permission already granted via EPIC-0010?** — ⏳ To verify at Branch 5 kickoff. EPIC-0010 introduces the permission flow for prayer notifications; Hilal Watch reuses the same `UNUserNotificationCenter` handle. We don't want a second permission prompt for Hilal Watch.
+6. **AC-0245 share dialog UI on macOS** — ✅ Resolved 2026-05-10: small pre-share dialog with the resolution toggle, then invoke `NSSharingServicePicker` with the chosen resolution.
+7. **Performance benchmark methodology** — ✅ Resolved 2026-05-10: XCTest performance test running `HilalCalculator.computeGrid` 100× on a known date in a representative criterion, measuring p50 / p95.
+8. **MapKit polygon-overlay scaling spike** — ⏳ To execute at Branch 3 kickoff. Hardware: iPhone XR (oldest accessible) for a conservative gate of ≥ 30 fps; Mobitru iPhone 12 for the AC-0217 reference gate of ≥ 50 fps. If either fails, pivot to `MKTileOverlay` (Branch 3 Task 3.7).
+9. **Arabic / multilingual rollout** — ✅ Resolved 2026-05-10: handled by ENH-019 (App-wide Multilingual Support), not in EPIC-0011 scope. EPIC-0011 only commits to being i18n-ready (§12.5).
+10. **Cell `accessibilityLabel` density** — ✅ Resolved 2026-05-10: VoiceOver labels exposed only at MapKit zoom level ≥ 4. At lower zoom levels the map view as a whole has a single summary label ("Hilal visibility map for [Month] [Year], [N] regions visible").
 
 ---
 
@@ -555,14 +555,16 @@ The two platform targets ideally share these files via Xcode group membership. W
 
 ## 17. Implementation plan
 
-To follow in `docs/superpowers/plans/2026-05-10-hilal-watch-implementation.md`. Anticipated structure: 5 staged branches.
+See `docs/superpowers/plans/2026-05-10-hilal-watch-implementation.md` for the full 5-branch staged plan.
 
-1. **Astronomy port + Odeh + tests** (IqamahCore-only, no UI)
-2. **HilalCalculator + grid + caching + Yallop / HMNAO criteria**
-3. **macOS HilalWatchView shell + map + local card + criterion picker + About card**
-4. **Entry-point integration: PrayerTimesView moon preview, NSStatusItem menu, Hijri offset settings, share**
-5. **iOS-side wiring + d29 notification + KVS sync of new keys**
+1. **Astronomy port + 3 criteria + tests** (IqamahCore-only, no UI) — 2 weeks
+2. **HilalCalculator + grid + caching** — 1 week
+3. **macOS HilalWatchView + map + local card + criterion picker + About card** — 2 weeks
+4. **Entry-point integration: PrayerTimesView moon preview, NSStatusItem menu, Hijri offset settings, share** — 1 week
+5. **iOS-side wiring + d29 notification + KVS sync of new keys** — 1 week
+
+**Total estimate:** 7 weeks, with Branch 1 starting in parallel to EPIC-0010 (~2026-05-17 merge target). Calendar projection: EPIC-0011 v1 ready ~2026-06-28.
 
 ---
 
-**Last Updated:** 2026-05-10 (Draft)
+**Last Updated:** 2026-05-10 (Draft — open questions 1, 2, 3, 4, 6, 7, 9, 10 resolved; questions 5 and 8 still pending — to verify at Branch 5 / Branch 3 kickoff respectively)
