@@ -9,28 +9,28 @@ extension CLLocationCoordinate2D: @retroactive Equatable {
 }
 
 @MainActor
-class LocationService: NSObject, ObservableObject {
-    @Published var currentLocation: CLLocationCoordinate2D?
-    @Published var authorizationStatus: CLAuthorizationStatus = .notDetermined
-    @Published var locationError: String?
-    @Published var isLoading = false
+public class LocationService: NSObject, ObservableObject {
+    @Published public var currentLocation: CLLocationCoordinate2D?
+    @Published public var authorizationStatus: CLAuthorizationStatus = .notDetermined
+    @Published public var locationError: String?
+    @Published public var isLoading = false
 
     private let locationManager = CLLocationManager()
     private var locationContinuation: CheckedContinuation<CLLocationCoordinate2D, Error>?
     private var pendingLocationRequest = false
 
-    override init() {
+    public override init() {
         super.init()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyKilometer
         authorizationStatus = locationManager.authorizationStatus
     }
 
-    func requestPermission() {
+    public func requestPermission() {
         locationManager.requestWhenInUseAuthorization()
     }
 
-    func requestLocation() {
+    public func requestLocation() {
         isLoading = true
         locationError = nil
 
@@ -52,7 +52,7 @@ class LocationService: NSObject, ObservableObject {
         }
     }
 
-    func requestLocationAsync() async throws -> CLLocationCoordinate2D {
+    public func requestLocationAsync() async throws -> CLLocationCoordinate2D {
         try await withCheckedThrowingContinuation { [weak self] continuation in
             guard let self else {
                 continuation.resume(throwing: NSError(
@@ -71,7 +71,7 @@ class LocationService: NSObject, ObservableObject {
 }
 
 extension LocationService: CLLocationManagerDelegate {
-    nonisolated func locationManager(_: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    public nonisolated func locationManager(_: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         Task { @MainActor in
             isLoading = false
             pendingLocationRequest = false
@@ -83,7 +83,7 @@ extension LocationService: CLLocationManagerDelegate {
         }
     }
 
-    nonisolated func locationManager(_: CLLocationManager, didFailWithError error: Error) {
+    public nonisolated func locationManager(_: CLLocationManager, didFailWithError error: Error) {
         Task { @MainActor in
             isLoading = false
             pendingLocationRequest = false
@@ -93,7 +93,7 @@ extension LocationService: CLLocationManagerDelegate {
         }
     }
 
-    nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+    public nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         Task { @MainActor in
             let status = manager.authorizationStatus
             authorizationStatus = status
