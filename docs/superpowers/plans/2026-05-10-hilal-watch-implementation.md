@@ -7,7 +7,7 @@
 
 ---
 
-## Decisions (from 2026-05-10 brainstorm + spec review)
+## Decisions (from 2026-05-10 brainstorm + spec review + product-owner answers)
 
 | Question | Decision |
 |---|---|
@@ -21,11 +21,9 @@
 | Perf benchmark | XCTest performance test, p50/p95 over 100 runs of `computeGrid` |
 | Cell a11y density | VoiceOver labels exposed only at zoom level ≥ 4 |
 | Multilingual | i18n-ready only in v1 (`String(localized:)` everywhere); translations in ENH-019 |
-
-**Pending confirmation from product owner:**
-- Yallop / HMNAO criteria scope — proposal: defer to v1.1; ship Branch 2 with Odeh-only.
-- EPIC-0010 merge date — gates Branches 2-5.
-- Hardware for MapKit polygon spike — iPhone 12 preferred; iPhone 13/14 acceptable with derated target.
+| **Visibility criteria scope (v1)** | **All three: Odeh (2004), Yallop (1997), HMNAO Enhanced. Coefficient verification is a Branch 1 prerequisite (Task 1.0).** |
+| **EPIC-0010 merge ETA** | **~1 week from 2026-05-10 (target: 2026-05-17). Branch 1 may start in parallel; Branches 2-5 unblock at merge.** |
+| **MapKit polygon spike hardware** | **Primary: iPhone XR (oldest accessible, sets conservative gate). Verification: Mobitru iPhone 12 (matches AC-0217 reference hardware).** |
 
 ---
 
@@ -67,27 +65,34 @@
 
 ---
 
-## Branch 1 — Astronomy port + Odeh + tests
+## Branch 1 — Astronomy port + 3 criteria + tests
 
-**Goal:** Land a precision-validated astronomy module in `IqamahCore` plus the Odeh visibility criterion. UI-free, internal-only.
+**Goal:** Land a precision-validated astronomy module in `IqamahCore` plus all three visibility criteria (Odeh / Yallop / HMNAO). UI-free, internal-only.
 
 **Branch name:** `feat/EPIC-0011-1-astronomy-port`
 **Base:** `develop` (or whichever branch contains `IqamahCore` once EPIC-0010 lands)
-**Estimated effort:** 1.5 weeks (mostly mechanical port + extensive validation)
-**Risk:** Medium — astronomy port precision is non-negotiable; ICOP regression suite is the merge gate.
+**Estimated effort:** 2 weeks (mechanical port + extensive validation + multi-source coefficient sourcing for Yallop/HMNAO)
+**Risk:** Medium-High — astronomy port precision is non-negotiable (ICOP regression suite is merge gate); coefficient sourcing for Yallop and HMNAO requires reconciling at least two authoritative sources per criterion (Task 1.0).
 
 ### Tasks
 
+- **1.0** **Pre-task: Coefficient sourcing.** Locate authoritative Yallop and HMNAO threshold coefficients before Task 1.7 begins. Sources to reconcile (need at least two):
+  - Yallop, B.D. (1997) "A Method for Predicting the First Sighting of the New Crescent Moon", NAO Technical Note No. 69 (HMNAO)
+  - HMNAO Astronomical Information Sheet — current edition crescent visibility section
+  - Cross-check via [crescent-moon-visibility](https://github.com/crescent-moon-visibility/crescent-moon-visibility) (MIT) source code
+  - Cross-check via Odeh (2004) Appendix A which restates Yallop's coefficients for comparison purposes
+  - Commit a JSON fixture `IqamahCore/Tests/IqamahCoreTests/Fixtures/criterion-coefficients-references.json` recording each source's values + citation. **Branch 1 cannot close until this fixture exists and the values reconcile.**
 - **1.1** Create `IqamahCore/Sources/IqamahCore/Astronomy/` module structure
 - **1.2** Add `Calendar/JulianDay.swift` with `Date.fromJulianDay(_:)` / `julianDay()` helpers
 - **1.3** Port `MoonPosition.swift` — Meeus longitude/latitude/distance series + `Equator()`. Direct translation of astronomy-engine v2 `astronomy.js` lines covering `Body.Moon`. ~250 LOC.
 - **1.4** Port `SunPosition.swift` — solar coordinates + `sunsetJD()` (fast, ±15 min approximation per spec §6.3)
 - **1.5** Port `NewMoon.swift` — `searchMoonPhase(target:startDate:daysAhead:)`. ~80 LOC.
 - **1.6** Add `Coordinates.swift` — `Horizon()`, `separation()`, `crescentWidthArcmin(arcl:distanceKm:)`. ~50 LOC.
-- **1.7** Add `VisibilityCriterion.swift` — protocol + `OdehCriterion` conformance only (Yallop/HMNAO deferred to Branch 2 or later).
+- **1.7** Add `VisibilityCriterion.swift` — protocol + **all three conformances** (`OdehCriterion`, `YallopCriterion`, `HMNAOCriterion`). Coefficients sourced via Task 1.0. ~300 LOC total.
 - **1.8** Add `IqamahCore/Tests/IqamahCoreTests/AstronomyTests.swift` — unit tests against astronomy-engine JS test fixtures. ±0.001° tolerance on RA/Dec for Sun + Moon over 50 sample (date, location) pairs.
 - **1.9** Add `ICOPRegressionTests.swift` — replay 737 ICOP observations through `OdehCriterion`; assert published true-positive / true-negative rates. **Merge-blocking.**
 - **1.10** Add `CriticalPeriodTests.swift` — for the most recent 24 months published by moonsighting.com, compute V values for ~20 sample locations and assert ±0.5° vs reference table. (Reference data committed as JSON fixture.)
+- **1.11** Add `CriterionConsistencyTests.swift` — for ~50 (date, location) pairs spanning the visibility spectrum, assert that Odeh / Yallop / HMNAO produce expected ordering of categories (Yallop is conservatively at-or-below Odeh; HMNAO is at-or-above Yallop).
 
 ### Files added
 ```
@@ -96,27 +101,33 @@ IqamahCore/Sources/IqamahCore/Astronomy/
   SunPosition.swift
   NewMoon.swift
   Coordinates.swift
-  VisibilityCriterion.swift
+  VisibilityCriterion.swift             — protocol + Odeh + Yallop + HMNAO
 IqamahCore/Sources/IqamahCore/Calendar/
   JulianDay.swift
 IqamahCore/Tests/IqamahCoreTests/
   AstronomyTests.swift
   ICOPRegressionTests.swift
   CriticalPeriodTests.swift
+  CriterionConsistencyTests.swift
   Fixtures/icop-observations.json
   Fixtures/moonsighting-2024-2025.json
+  Fixtures/criterion-coefficients-references.json
 ```
 
 ### Test gates
+- ✅ Task 1.0 coefficient-references fixture exists with ≥ 2 reconciled sources per criterion
 - ✅ All `AstronomyTests` pass with ±0.001° tolerance
 - ✅ All `ICOPRegressionTests` pass (100% A-zone hit, 0% D-zone hit per Odeh 2004)
 - ✅ All `CriticalPeriodTests` pass (±0.5° vs moonsighting.com reference)
+- ✅ All `CriterionConsistencyTests` pass (Yallop ≤ Odeh; HMNAO ≥ Yallop)
 - ✅ `swift test` runs in < 30 s for the full IqamahCore suite
 - ✅ Code coverage ≥ 90% on the new files
 
 ### ACs covered
 - (validation underlies AC-0222 — local card values match moonsighting.com to ±0.5°)
 - AC-0218 (TaskGroup parallelism — protocol established, used in Branch 2)
+- AC-0238 (criteria available — Odeh / Yallop / HMNAO all conform to protocol)
+- AC-0240 (criterion swap reuses upstream astronomy)
 
 ---
 
@@ -125,9 +136,9 @@ IqamahCore/Tests/IqamahCoreTests/
 **Goal:** Land the grid-computation engine on top of Branch 1's astronomy, with parallel TaskGroup execution and an LRU memory cache. Still UI-free.
 
 **Branch name:** `feat/EPIC-0011-2-hilal-calculator`
-**Base:** Branch 1 merged into `develop`
+**Base:** Branch 1 merged into `develop` (and EPIC-0010 must be on `develop` since this branch needs `IqamahCore` extensions Branch 1 cannot mock)
 **Estimated effort:** 1 week
-**Risk:** Low — pure compute layer, well-defined inputs/outputs.
+**Risk:** Low — pure compute layer, well-defined inputs/outputs. Yallop/HMNAO criterion implementations already landed in Branch 1.
 
 ### Tasks
 
@@ -139,7 +150,7 @@ IqamahCore/Tests/IqamahCoreTests/
 - **2.4** Add `Evening` enum (`.d29`, `.d30`) and `HilalGridRequest` struct
 - **2.5** Add `HilalCalculatorTests.swift` — performance test asserting ≤ 30 ms on Apple Silicon Mac, ≤ 300 ms on iPhone 12 (skipped on CI hardware that doesn't match)
 - **2.6** Add `HilalCalculatorTests.testGridContent` — for a known new-moon date, sample 50 cells across the grid and assert their categories match a hand-computed reference fixture
-- **2.7** **DECISION POINT** — if Yallop / HMNAO are confirmed in v1: add `YallopCriterion.swift` + `HMNAOCriterion.swift` + cross-references in test fixture. If deferred: skip this task; Branch 2 ships Odeh-only.
+- **2.7** Add per-criterion grid fixtures: same date / different criterion → different grids. Asserts the criterion-swap pathway is correctly wired through to `HilalCalculator` (cells differ where expected, identical where the criterion thresholds don't disagree).
 - **2.8** Performance benchmark XCTest (per decision in §Decisions): p50/p95 over 100 runs
 
 ### Files added
@@ -149,7 +160,9 @@ IqamahCore/Sources/IqamahCore/Astronomy/
   HilalCacheKey.swift
 IqamahCore/Tests/IqamahCoreTests/
   HilalCalculatorTests.swift
-  Fixtures/grid-reference-1448-ramadan.json
+  Fixtures/grid-reference-1448-ramadan-odeh.json
+  Fixtures/grid-reference-1448-ramadan-yallop.json
+  Fixtures/grid-reference-1448-ramadan-hmnao.json
 ```
 
 ### Test gates
@@ -179,7 +192,7 @@ IqamahCore/Tests/IqamahCoreTests/
 
 ### Tasks
 
-- **3.0** **Pre-task: MapKit polygon spike.** Add a debug menu command "Hilal Spike" that loads a synthesised 16,200-cell grid and renders it as `MKPolygon` overlays on a `MKMapView`. Profile pan/zoom on iPhone 12 (or available device). **Acceptance gate:** ≥ 50 fps. If failed, pivot to `MKTileOverlay` strategy in 3.7. Document result in branch description.
+- **3.0** **Pre-task: MapKit polygon spike.** Add a debug menu command "Hilal Spike" that loads a synthesised 16,200-cell grid and renders it as `MKPolygon` overlays on a `MKMapView`. Profile pan/zoom on **iPhone XR** (oldest accessible hardware — sets a conservative gate) plus a **Mobitru iPhone 12** session to verify against AC-0217's reference hardware. **Acceptance gate:** ≥ 50 fps on iPhone 12 (Mobitru), ≥ 30 fps on iPhone XR (acceptable for the 4-year-older device). If failed on either, pivot to `MKTileOverlay` strategy in 3.7. Document spike results (instrument traces + frame-rate measurements) in branch description.
 - **3.1** Create `iqamah/Views/HilalWatch/` directory and group it in Xcode
 - **3.2** `HilalCellOverlay.swift` — `MKPolygon` subclass with `category: Int8`
 - **3.3** `HilalMapView.swift` — `NSViewRepresentable` wrapping `MKMapView`. Renderer applies `HilalPalette.fill / alpha`. Mercator projection accepted; mutedStandard map type.
@@ -187,7 +200,7 @@ IqamahCore/Tests/IqamahCoreTests/
 - **3.5** `LocalSightingCardView.swift` — displays ARCL/ARCV/W/V + category badge + scale bar per spec §local card
 - **3.6** `MoonPhaseView.swift` — SwiftUI Canvas crescent renderer (used here, integrated into PrayerTimesView in Branch 4)
 - **3.7** Conditional: if 3.0 spike failed, replace 3.2/3.3 with `HilalTileOverlay.swift` rendering per-tile CGContext from `[Int8]` grid
-- **3.8** `HilalCriterionPicker.swift` — segmented picker (Odeh / Yallop / HMNAO if 2.7 included them; else single-option non-interactive label)
+- **3.8** `HilalCriterionPicker.swift` — segmented picker (Odeh / Yallop / HMNAO — all three from Branch 1)
 - **3.9** `AboutHilalWatchCard.swift` — peek-through modal with S-curve explanation + criterion explanations per spec §6
 - **3.10** `HilalWatchView.swift` — top-level layout: header (title + criterion picker + (i) info pill + share button), tab selector (29th / 30th), map, local card. Wires up state.
 - **3.11** Add `HilalWatchWindow.swift` — SwiftUI `Window` scene declaration in `iqamahApp.swift` for separate panel window, default size 720×640.
@@ -226,7 +239,7 @@ iqamah/iqamahApp.swift              — add Window scene
 - AC-0210, AC-0211, AC-0213, AC-0214, AC-0215, AC-0216, AC-0219, AC-0220 (map)
 - AC-0212 (cells; via 3.2 or 3.7 depending on spike)
 - AC-0221, AC-0223, AC-0224, AC-0225 (local card)
-- AC-0238, AC-0239 (criterion picker — 3.8 partial if Yallop/HMNAO deferred)
+- AC-0238, AC-0239 (criterion picker — all three options)
 - AC-0242, AC-0243 (About card)
 - AC-0249, AC-0250, AC-0251 (Materials + Liquid Glass + dark/light)
 
@@ -375,42 +388,43 @@ If Branch 3's MapKit polygon spike fails and the `MKTileOverlay` fallback also p
 
 | Branch | Effort |
 |---|---:|
-| 1. Astronomy port + tests | 1.5 weeks |
+| 1. Astronomy port + 3 criteria + tests | 2 weeks (was 1.5 — added Yallop/HMNAO + coefficient sourcing) |
 | 2. HilalCalculator + grid | 1 week |
 | 3. macOS view + map | 2 weeks |
 | 4. Entry + share | 1 week |
 | 5. iOS + notification | 1 week |
-| **Total** | **6.5 weeks** |
+| **Total** | **7 weeks** |
 
-Adds ~1 week of buffer for the MapKit polygon spike resolution and Yallop/HMNAO coefficient verification (if v1).
+Adds ~1 week of buffer for the MapKit polygon spike resolution and any criterion-coefficient ambiguity discovered during Task 1.0.
 
 ---
 
 ## Sequencing with EPIC-0010
 
 ```
-[ EPIC-0010 in flight ]
+[ EPIC-0010 in flight ] (lands ~2026-05-17, 1 week from now)
         │
-        ├── Branch 1 (Astronomy port) can start in parallel ────┐
-        │                                                       │
-        ▼                                                       ▼
-[ EPIC-0010 lands on develop ]                          [ Branch 1 ready ]
-        │                                                       │
-        └────────────────────┬──────────────────────────────────┘
-                             ▼
-                     [ Branch 2-5 sequential ]
+        ├── Branch 1 (Astronomy port + 3 criteria) starts in parallel ────┐
+        │                                                                 │
+        ▼                                                                 ▼
+[ EPIC-0010 lands on develop ~2026-05-17 ]               [ Branch 1 ready ~2026-05-24 ]
+        │                                                                 │
+        └────────────────────────────┬────────────────────────────────────┘
+                                     ▼
+                           [ Branches 2-5 sequential, ~5 weeks ]
+                                     │
+                                     ▼
+                          [ EPIC-0011 v1 ready ~2026-06-28 ]
 ```
 
-Branch 1 is the only one that can begin before EPIC-0010 lands. Everything else strictly depends on EPIC-0010's `IqamahCore` extraction, App Group / KVS infrastructure, and notification deep-link routing being in place.
+Calendar projection assuming EPIC-0010 lands on schedule: EPIC-0011 v1 ready in ~7 weeks (2026-06-28). Branch 1 is the only parallel work; everything else is strictly sequential after EPIC-0010 merges.
 
 ---
 
 ## Open implementation-time decisions
 
-1. **Whether to ship Yallop / HMNAO criteria in v1** — affects Task 2.7 scope. Default: defer to v1.1, ship Branch 2 with Odeh-only.
-2. **MapKit spike result determines Branch 3 path** — `MKPolygon` (Task 3.2/3.3) vs `MKTileOverlay` (Task 3.7).
-3. **EPIC-0010 merge date** — gates Branches 2-5. Branch 1 may begin sooner.
+1. **MapKit spike result determines Branch 3 path** — `MKPolygon` (Task 3.2/3.3) vs `MKTileOverlay` (Task 3.7). Resolved during Task 3.0; both iPhone XR (≥30 fps) and Mobitru iPhone 12 (≥50 fps) gates must pass for the `MKPolygon` path.
 
 ---
 
-**Last Updated:** 2026-05-10 (Draft)
+**Last Updated:** 2026-05-10 (Draft — incorporating product-owner answers: all three criteria in v1, EPIC-0010 ~2026-05-17, hardware iPhone XR + Mobitru iPhone 12)
