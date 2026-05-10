@@ -1,0 +1,22 @@
+[
+  {"date":"1990-04-27","lat":51.5,"lon":-0.12,"arcl":9.2,"arcv":5.1,"w":0.18,"expected_odeh":"C"},
+  {"date":"1992-03-05","lat":24.7,"lon":46.7,"arcl":11.3,"arcv":8.9,"w":0.32,"expected_odeh":"B"},
+  {"date":"1994-09-01","lat":33.9,"lon":35.5,"arcl":7.8,"arcv":3.2,"w":0.10,"expected_odeh":"D"},
+  {"date":"1996-06-12","lat":-33.9,"lon":18.4,"arcl":5.1,"arcv":1.8,"w":0.04,"expected_odeh":"D"},
+  {"date":"2001-11-15","lat":40.4,"lon":-3.7,"arcl":13.5,"arcv":10.1,"w":0.52,"expected_odeh":"A"},
+  {"date":"2003-04-02","lat":51.5,"lon":-0.12,"arcl":6.3,"arcv":2.5,"w":0.06,"expected_odeh":"D"},
+  {"date":"2005-08-05","lat":24.7,"lon":46.7,"arcl":10.1,"arcv":7.2,"w":0.26,"expected_odeh":"C"},
+  {"date":"2007-01-19","lat":48.9,"lon":2.35,"arcl":8.5,"arcv":4.1,"w":0.13,"expected_odeh":"D"},
+  {"date":"2008-09-29","lat":-23.5,"lon":-46.6,"arcl":11.8,"arcv":8.5,"w":0.36,"expected_odeh":"B"},
+  {"date":"2010-03-15","lat":35.7,"lon":51.4,"arcl":7.0,"arcv":3.8,"w":0.08,"expected_odeh":"D"},
+  {"date":"2011-11-25","lat":31.2,"lon":29.9,"arcl":9.5,"arcv":6.3,"w":0.20,"expected_odeh":"C"},
+  {"date":"2013-06-08","lat":51.5,"lon":-0.12,"arcl":4.5,"arcv":0.5,"w":0.02,"expected_odeh":"D"},
+  {"date":"2014-01-01","lat":24.7,"lon":46.7,"arcl":12.5,"arcv":9.5,"w":0.42,"expected_odeh":"B"},
+  {"date":"2015-07-17","lat":40.7,"lon":-74.0,"arcl":6.8,"arcv":2.9,"w":0.07,"expected_odeh":"D"},
+  {"date":"2017-03-28","lat":-26.2,"lon":28.0,"arcl":10.5,"arcv":7.0,"w":0.29,"expected_odeh":"C"},
+  {"date":"2018-09-09","lat":35.2,"lon":33.4,"arcl":8.0,"arcv":4.5,"w":0.11,"expected_odeh":"D"},
+  {"date":"2020-04-23","lat":51.5,"lon":-0.12,"arcl":7.5,"arcv":3.5,"w":0.09,"expected_odeh":"D"},
+  {"date":"2021-10-06","lat":24.7,"lon":46.7,"arcl":11.0,"arcv":8.0,"w":0.30,"expected_odeh":"B"},
+  {"date":"2022-05-30","lat":48.9,"lon":2.35,"arcl":5.8,"arcv":1.5,"w":0.05,"expected_odeh":"D"},
+  {"date":"2023-12-12","lat":31.8,"lon":35.2,"arcl":9.0,"arcv":5.8,"w":0.17,"expected_odeh":"C"}
+]
