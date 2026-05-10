@@ -1041,14 +1041,11 @@ rm adhaan_4_original_backup.mp3
 
 **Description:** Add a "Hilal Watch" feature that computes and visualises global crescent visibility for the two evenings (29th and 30th of each Hijri month) on which the new Islamic month is determined. Uses the Odeh (2004) visibility criterion, validated against 737 ICOP observations, with a full Meeus lunar ephemeris (±0.01°) ported to Swift. Provides both a global map showing the characteristic S-curve visibility band and a local sighting card showing precise Odeh values (ARCL, ARCV, W, V) for the user's location.
 
-**Promoted from:** ENH-018 (see `docs/ENHANCEMENTS.md` and `docs/mockups/2026-05-09-hilal-watch-mockup.tsx`)
+**Promoted from:** ENH-018 (see `docs/ENHANCEMENTS.md`)
 
 **Release Target:** v1.2 (post iOS conversion)
 **Status:** 🔵 Planned
 **Dependencies:** EPIC-0010 (IqamahCore extraction — astronomy code lives there for cross-platform sharing)
-
-**Mockups:**
-- `docs/mockups/2026-05-09-hilal-watch-mockup.tsx` — full screen React prototype (Odeh + grid + UI)
 
 **Key technical decisions (locked in during brainstorm 2026-05-10):**
 - Position engine: direct Swift port of astronomy-engine v2 (~500–700 LOC, no dependency)
@@ -1057,6 +1054,7 @@ rm adhaan_4_original_backup.mp3
 - Performance: parallel TaskGroup over latitude bands → < 30 ms on iPhone 12+ / Apple Silicon Mac for grid compute. Polygon overlay add: ~100 ms on first render.
 - Both d29 / d30 grids computed and cached together per synodic month
 - Code lives in `IqamahCore/Sources/IqamahCore/Astronomy/` — shared macOS / iOS
+- Chrome (cards, headers, popovers, info pill, share / criterion pickers) uses SwiftUI `Material` (`.regular` / `.thin`) so it auto-adapts to dark and light modes; on iOS 26 / macOS 26 or later, `.glassEffect()` Liquid Glass is layered on via `@available` so the chrome upgrades cleanly without bumping the project's iOS 17 / macOS 14 minimum target. See `CLAUDE.md` § UI Conventions.
 
 ---
 
@@ -1094,6 +1092,9 @@ rm adhaan_4_original_backup.mp3
 - [ ] AC-0218: Grid computation parallelised via `withTaskGroup` over latitude bands using `ProcessInfo.processInfo.activeProcessorCount`
 - [ ] AC-0219: 29th map produces S-curve visibility arcs whose underlying Odeh values match moonsighting.com to within ±0.5°. Visual representation differs from moonsighting.com at latitudes > 60° due to the Mercator projection (documented in the About card per AC-0242)
 - [ ] AC-0220: 30th map shows substantially wider visibility zones than the 29th
+- [ ] AC-0249: Hilal Watch chrome (header, criterion picker, About card, local sighting card, share dialog) uses SwiftUI `Material` (`.regular` for primary cards, `.thin` for the floating info pill) and auto-adapts to dark and light modes
+- [ ] AC-0250: All view chrome and labels meet WCAG 2.1 AA contrast in both light and dark mode; map cell colours retain their A/B/C/D distinguishability against the active map style
+- [ ] AC-0251: On iOS 26 / macOS 26 or later, chrome surfaces additionally apply `.glassEffect()` (Liquid Glass) via an `@available(iOS 26.0, macOS 26.0, *)` branch; older OS versions show the Material fallback unchanged with no functional difference
 
 ---
 
@@ -1179,10 +1180,10 @@ rm adhaan_4_original_backup.mp3
 
 **Total Epics:** 10 on `develop` + 1 in flight on `feat/ENH-018-hilal-watch-spec` = 11 (EPIC-0010 reserved for `claude/explore-ios-conversion-Su3MF`)
 **Total User Stories:** 39 on `develop` + 7 here (US-0046–US-0052) = 52 (US-0040–US-0045 reserved for explore branch)
-**Total Acceptance Criteria:** 168 on `develop` + 45 here (AC-0204–AC-0248) = 248 (AC-0169–AC-0203 reserved for explore branch)
+**Total Acceptance Criteria:** 168 on `develop` + 48 here (AC-0204–AC-0220, AC-0221–AC-0248, AC-0249–AC-0251) = 251 (AC-0169–AC-0203 reserved for explore branch)
 
 **EPIC-0011 Stories:** 7 (US-0046 – US-0052)
-**EPIC-0011 Acceptance Criteria:** 45 (AC-0204 – AC-0248)
+**EPIC-0011 Acceptance Criteria:** 48 (AC-0204 – AC-0248, AC-0249 – AC-0251)
 
 **Open for resubmission:**
 - ✅ US-0035 — Entitlement fix (done, merged PR #47)
@@ -1193,4 +1194,4 @@ rm adhaan_4_original_backup.mp3
 
 ---
 
-**Last Updated:** 2026-05-10 (EPIC-0011 added — Hilal Watch promoted from ENH-018; cross-branch coordination note added)
+**Last Updated:** 2026-05-10 (EPIC-0011 added — Hilal Watch promoted from ENH-018; Materials + Liquid Glass ACs added per project UI conventions in CLAUDE.md)
