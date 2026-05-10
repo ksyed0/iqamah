@@ -113,22 +113,32 @@ jobs:
         run: |
           cd Packages/IqamahCore
           swift test --enable-code-coverage 2>&1 | tail -5
+          # Debug: show what coverage files were produced
+          BIN_DIR=$(swift build --show-bin-path 2>/dev/null)
+          echo "Build bin dir: $BIN_DIR"
+          ls "${BIN_DIR}/codecoverage/" 2>/dev/null || echo "(no codecoverage dir)"
+          find "${BIN_DIR}" -name "IqamahCoreTests" 2>/dev/null || echo "(no IqamahCoreTests binary found)"
 
       - name: Enforce ≥80% IqamahCore package coverage
         run: |
           # Measure coverage of the IqamahCore Swift Package using llvm-cov.
           # This covers all domain logic (Models, Services, PrayerCalculator) that
           # moved into the package in US-0040.
-          PKG_COV=$(cd Packages/IqamahCore && \
-            PROF=$(find .build/debug/codecoverage -name "IqamahCoreTests.profdata" 2>/dev/null | head -1) && \
-            BIN=$(find .build/debug -name "IqamahCoreTests" -type f 2>/dev/null | head -1) && \
-            if [ -n "$PROF" ] && [ -n "$BIN" ]; then
-              xcrun llvm-cov report "$BIN" -instr-profile="$PROF" \
-                --ignore-filename-regex=".*Tests.*" 2>/dev/null \
-                | awk '/TOTAL/{print $NF}' | tr -d '%'
-            else
-              echo "0"
-            fi)
+          cd Packages/IqamahCore
+          BIN_DIR=$(swift build --show-bin-path 2>/dev/null)
+          # profdata is always at $BIN_DIR/codecoverage/default.profdata for SPM
+          PROF="${BIN_DIR}/codecoverage/default.profdata"
+          # binary: on macOS the xctest bundle wraps it; find both forms
+          BIN=$(find "${BIN_DIR}" -name "IqamahCoreTests" ! -path "*.dSYM*" 2>/dev/null | head -1)
+          echo "PROF=${PROF}  BIN=${BIN}"
+          if [ -f "$PROF" ] && [ -n "$BIN" ]; then
+            PKG_COV=$(xcrun llvm-cov report "$BIN" -instr-profile="$PROF" \
+              --ignore-filename-regex=".*Tests.*" 2>/dev/null \
+              | awk '/TOTAL/{print $NF}' | tr -d '%')
+          else
+            echo "::warning::Coverage files not found — defaulting to 0%"
+            PKG_COV="0"
+          fi
           echo "IqamahCore package coverage: ${PKG_COV}%"
           if (( $(echo "${PKG_COV:-0} < 80.0" | bc -l) )); then
             echo "::error::IqamahCore coverage ${PKG_COV}% is below the required 80% threshold."
