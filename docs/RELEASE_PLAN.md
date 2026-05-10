@@ -1035,11 +1035,156 @@ rm adhaan_4_original_backup.mp3
 
 ---
 
-## Updated Summary Statistics (2026-05-05)
+## EPIC-0011: Hilal Watch — Global Crescent Sighting Map (2026-05-10)
 
-**Total Epics:** 9
-**Total User Stories:** 39 (US-0001 through US-0039)
-**Total Acceptance Criteria:** 168 (AC-0001 through AC-0168)
+> **Cross-branch note:** EPIC-0010 is reserved for the in-flight iOS conversion work on `claude/explore-ios-conversion-Su3MF` (PR #54), which uses US-0040 – US-0045 and AC-0169 – AC-0203. EPIC-0011 / US-0046+ / AC-0204+ are allocated here on the assumption that PR #54 lands first. If the merge order flips, renumber whichever EPIC merges second.
+
+**Description:** Add a "Hilal Watch" feature that computes and visualises global crescent visibility for the two evenings (29th and 30th of each Hijri month) on which the new Islamic month is determined. Uses the Odeh (2004) visibility criterion, validated against 737 ICOP observations, with a full Meeus lunar ephemeris (±0.01°) ported to Swift. Provides both a global map showing the characteristic S-curve visibility band and a local sighting card showing precise Odeh values (ARCL, ARCV, W, V) for the user's location.
+
+**Promoted from:** ENH-018 (see `docs/ENHANCEMENTS.md` and `docs/mockups/2026-05-09-hilal-watch-mockup.tsx`)
+
+**Release Target:** v1.2 (post iOS conversion)
+**Status:** 🔵 Planned
+**Dependencies:** EPIC-0010 (IqamahCore extraction — astronomy code lives there for cross-platform sharing)
+
+**Mockups:**
+- `docs/mockups/2026-05-09-hilal-watch-mockup.tsx` — full screen React prototype (Odeh + grid + UI)
+- `docs/mockups/2026-05-10-hilal-map-option3-mapkit.png` — MapKit + cell overlays (chosen approach)
+- `docs/mockups/2026-05-10-hilal-map-option2-canvas-png.png` — Canvas + PNG outline (rejected; equirectangular parity not enough to outweigh the loss of native pan/zoom and geographic context)
+
+**Key technical decisions (locked in during brainstorm 2026-05-10):**
+- Position engine: direct Swift port of astronomy-engine v2 (~500–700 LOC, no dependency)
+- Map rendering: SwiftUI `Map` view (iOS 17 / macOS 14 MapKit) with `MKPolygonRenderer` overlays for the visibility cells; native pan / zoom / pinch / borders / labels for free
+- Mercator projection limitation accepted: at latitudes > 60° the cells visibly stretch vs. moonsighting.com's equirectangular maps. The underlying Odeh values are still correct; only the visual representation differs. Documented in the About card.
+- Performance: parallel TaskGroup over latitude bands → < 30 ms on iPhone 12+ / Apple Silicon Mac for grid compute. Polygon overlay add: ~100 ms on first render.
+- Both d29 / d30 grids computed and cached together per synodic month
+- Code lives in `IqamahCore/Sources/IqamahCore/Astronomy/` — shared macOS / iOS
+
+---
+
+### US-0046 (EPIC-0011): As a user, I want a moon phase preview on my prayer times screen, so that I can see tonight's crescent state at a glance and open Hilal Watch when relevant.
+
+**Priority:** High
+**Estimate:** 3 Story Points
+**Status:** 🔵 Planned
+
+**Acceptance Criteria:**
+- [ ] AC-0204: Hijri date row in `PrayerTimesView` shows a 56×56 moon phase preview reflecting the current synodic phase
+- [ ] AC-0205: Moon phase preview uses the same SwiftUI Canvas render as Hilal Watch's moon (consistent visual language)
+- [ ] AC-0206: Below the moon image, a label shows the phase name and age (e.g. "Waxing Gibbous · 4d 8h old") on non-watch nights
+- [ ] AC-0207: On d29 / d30 of the current Hijri month, the label changes to "Hilal Watch tonight"
+- [ ] AC-0208: A `[ Details ]` button opens Hilal Watch (modal sheet on iOS, panel on macOS)
+- [ ] AC-0209: macOS `NSStatusItem` right-click menu includes a "Moon Sighting…" item that opens the same Hilal Watch view
+
+---
+
+### US-0047 (EPIC-0011): As a user, I want to see a global crescent visibility map for the two watch evenings, so that I know whether the new Islamic month will be confirmed locally or elsewhere.
+
+**Priority:** High
+**Estimate:** 8 Story Points
+**Status:** 🔵 Planned
+
+**Acceptance Criteria:**
+- [ ] AC-0210: Hilal Watch screen renders a global crescent visibility map for the d29 evening of the selected Hijri month using a SwiftUI `Map` view (MapKit) as the base layer
+- [ ] AC-0211: A tab selector switches between 29th and 30th evenings; both grids are cached so switching after first load is instant
+- [ ] AC-0212: Visibility cells drawn as `MKPolygon` overlays on a 2° × 2° grid (90 × 180 = 16,200 polygons), rendered via `MKPolygonRenderer` with the appropriate semi-transparent fill per Odeh category
+- [ ] AC-0213: Visibility colour scheme matches OmegaHilalSighting / moonsighting.com (D = red, C = grey, B = teal, A = forest green); fill alpha tuned so country borders and labels remain legible underneath
+- [ ] AC-0214: Map style is `MKMapType.mutedStandard` (light) / equivalent in dark mode; native country borders, ocean labels, and city labels provided by MapKit
+- [ ] AC-0215: User's prayer-times location shown as a native `MKAnnotation` pin (system style)
+- [ ] AC-0216: Native pinch / zoom / pan / two-finger rotate; double-tap to zoom in; map follows standard Apple gesture conventions
+- [ ] AC-0217: Grid compute completes in under 300 ms on iPhone 12+ / Apple Silicon Mac; first polygon render adds ~100 ms; subsequent tab swaps are instant from cache
+- [ ] AC-0218: Grid computation parallelised via `withTaskGroup` over latitude bands using `ProcessInfo.processInfo.activeProcessorCount`
+- [ ] AC-0219: 29th map produces S-curve visibility arcs whose underlying Odeh values match moonsighting.com to within ±0.5°. Visual representation differs from moonsighting.com at latitudes > 60° due to the Mercator projection (documented in the About card per AC-0242)
+- [ ] AC-0220: 30th map shows substantially wider visibility zones than the 29th
+
+---
+
+### US-0048 (EPIC-0011): As a user, I want a local sighting card showing the precise Odeh values for my location, so that I can cross-check against published moonsighting.com tables.
+
+**Priority:** High
+**Estimate:** 3 Story Points
+**Status:** 🔵 Planned
+
+**Acceptance Criteria:**
+- [ ] AC-0221: When the user's location is known, the card shows ARCL (elongation), ARCV (moon altitude at sunset), W (crescent width in arcmin), and V (Odeh value)
+- [ ] AC-0222: All values match moonsighting.com tables to within ±0.5° / ±0.5 arcmin / ±0.5 V units
+- [ ] AC-0223: Visibility category badge (A / B / C / D / Not Visible) displayed with the matching colour from AC-0213
+- [ ] AC-0224: Visibility scale bar showing position from "Optical aid" to "Easily visible naked eye"
+- [ ] AC-0225: When location not yet granted, card displays a "Use GPS" button that triggers the standard `LocationService` flow
+
+---
+
+### US-0049 (EPIC-0011): As a user, I want to navigate between Hijri months and adjust the displayed Hijri date, so that I can check past / future months and align with my local moon-sighting committee.
+
+**Priority:** Medium
+**Estimate:** 5 Story Points
+**Status:** 🔵 Planned
+
+**Acceptance Criteria:**
+- [ ] AC-0226: Left / right arrows step ±1 synodic period using the real new-moon Julian Day from the Meeus engine (not arithmetic extrapolation)
+- [ ] AC-0227: Month label shows "[Month] [Year] AH" plus the contextual line "Confirms start of [Next Month] [Year]"
+- [ ] AC-0228: Navigation supports past months (no lower bound) for retrospective analysis ("why did Ramadan start a day late?")
+- [ ] AC-0229: Settings sheet adds a "Hijri Calendar" picker — Umm Al-Qura (default) / Islamic Civil / Islamic Tabular
+- [ ] AC-0230: Settings sheet adds a "Hijri day offset" stepper (±2 days) stored in `SettingsManager`
+- [ ] AC-0231: The day offset shifts displayed Hijri date labels app-wide (PrayerTimesView header, Hilal Watch month label) but does NOT affect the underlying Odeh astronomy
+- [ ] AC-0232: Hijri calendar identifier and day offset persisted via `SettingsManager` and synced via iCloud KVS (per EPIC-0010 sync infrastructure)
+
+---
+
+### US-0050 (EPIC-0011): As a user, I want to receive a notification on the evening of the 29th, so that I don't miss the chance to look for the crescent at my location.
+
+**Priority:** Medium
+**Estimate:** 3 Story Points
+**Status:** 🔵 Planned
+
+**Acceptance Criteria:**
+- [ ] AC-0233: Settings sheet adds a "Notify me on Hilal Watch evening" toggle (off by default)
+- [ ] AC-0234: When enabled, a `UNNotificationRequest` is scheduled for the d29 evening, ~30 min before local sunset at the user's location
+- [ ] AC-0235: Notification body includes the user's local zone, e.g. "Hilal Watch — B-zone tonight at your location"
+- [ ] AC-0236: Tapping the notification deep-links into Hilal Watch on the d29 tab for the current Hijri month
+- [ ] AC-0237: Notification re-schedules automatically each Hijri month rollover (handled by the existing iOS notification scheduling pipeline introduced in EPIC-0010)
+
+---
+
+### US-0051 (EPIC-0011): As a user, I want to choose between published visibility criteria, so that I can match the criterion used by my local sighting committee.
+
+**Priority:** Medium
+**Estimate:** 3 Story Points
+**Status:** 🔵 Planned
+
+**Acceptance Criteria:**
+- [ ] AC-0238: A criterion picker at the top of Hilal Watch offers Odeh (2004), Yallop (1997), and HMNAO Enhanced
+- [ ] AC-0239: Default criterion is Odeh (2004)
+- [ ] AC-0240: Switching criterion recomputes both grids using the same underlying Meeus astronomy — only the visibility threshold function differs
+- [ ] AC-0241: Selected criterion persisted in `SettingsManager` (and synced via iCloud KVS)
+- [ ] AC-0242: An (i) info pill in the screen header opens an "About Hilal Watch" card explaining the S-curve characteristic AND the differences between Odeh / Yallop / HMNAO criteria
+- [ ] AC-0243: The About card is presented automatically once on first Hilal Watch launch; the (i) pill re-opens it any time afterward
+
+---
+
+### US-0052 (EPIC-0011): As a user, I want to share the global Hilal map, so that I can post it in community / family chat groups during Ramadan and Eid season.
+
+**Priority:** Low
+**Estimate:** 2 Story Points
+**Status:** 🔵 Planned
+
+**Acceptance Criteria:**
+- [ ] AC-0244: A share button in the screen header opens the platform share sheet (`UIActivityViewController` on iOS, `NSSharingServicePicker` on macOS)
+- [ ] AC-0245: Share dialog includes a resolution toggle — Standard (1024 × 768) or Hi-res (3072 × 2304)
+- [ ] AC-0246: Snapshot generated via `MKMapSnapshotter` at the requested scale, with the cell overlays composited on top via `CGContext` drawing
+- [ ] AC-0247: Exported PNG includes a small footer overlay: "Iqamah · Hilal Watch · [Month] [Year] · [Criterion]"
+- [ ] AC-0248: Hi-res snapshot + composite completes in under 2.5 s on iPhone 12+ / Apple Silicon Mac
+
+---
+
+## Updated Summary Statistics (2026-05-10)
+
+**Total Epics:** 10 on `develop` + 1 in flight on `feat/ENH-018-hilal-watch-spec` = 11 (EPIC-0010 reserved for `claude/explore-ios-conversion-Su3MF`)
+**Total User Stories:** 39 on `develop` + 7 here (US-0046–US-0052) = 52 (US-0040–US-0045 reserved for explore branch)
+**Total Acceptance Criteria:** 168 on `develop` + 45 here (AC-0204–AC-0248) = 248 (AC-0169–AC-0203 reserved for explore branch)
+
+**EPIC-0011 Stories:** 7 (US-0046 – US-0052)
+**EPIC-0011 Acceptance Criteria:** 45 (AC-0204 – AC-0248)
 
 **Open for resubmission:**
 - ✅ US-0035 — Entitlement fix (done, merged PR #47)
@@ -1050,4 +1195,4 @@ rm adhaan_4_original_backup.mp3
 
 ---
 
-**Last Updated:** 2026-05-05 (EPIC-0009 added — App Store resubmission tasks)
+**Last Updated:** 2026-05-10 (EPIC-0011 added — Hilal Watch promoted from ENH-018; cross-branch coordination note added)
