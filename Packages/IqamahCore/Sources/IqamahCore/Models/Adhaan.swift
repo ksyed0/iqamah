@@ -79,4 +79,23 @@ public struct Adhaan: Identifiable, Codable, Hashable {
             return nil
         }
     }
+
+    // MARK: - Notification sound helpers
+
+    /// Returns the URL of the 30-second `.caf` notification variant for this adhaan,
+    /// or `nil` if the clip is not present in the bundle (silent / alert tones have no clip).
+    public var notificationSoundURL: URL? {
+        guard id != "silent", !filename.isEmpty else { return nil }
+        let baseName = (filename as NSString).deletingPathExtension
+        let notifFile = "\(baseName)_notif"
+        return Bundle.module.url(forResource: notifFile, withExtension: "caf", subdirectory: "Notifications")
+    }
+
+    /// Returns the filename of the 30-second `.caf` notification variant (base + ext only,
+    /// suitable for `UNNotificationSoundName`), or `nil` if no clip exists.
+    public var notificationSoundFilename: String? {
+        guard notificationSoundURL != nil else { return nil }
+        let baseName = (filename as NSString).deletingPathExtension
+        return "\(baseName)_notif.caf"
+    }
 }
