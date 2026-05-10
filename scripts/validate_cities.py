@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-validate_cities.py — Schema validation for iqamah/Resources/cities.json
+validate_cities.py — Schema validation for Packages/IqamahCore/Sources/IqamahCore/Resources/cities.json
 
 Asserts every city entry has the required fields with valid values:
 - name: non-empty string
@@ -22,7 +22,7 @@ import os
 from zoneinfo import available_timezones
 
 CITIES_PATH = os.path.join(
-    os.path.dirname(__file__), "..", "iqamah", "Resources", "cities.json"
+    os.path.dirname(__file__), "..", "Packages", "IqamahCore", "Sources", "IqamahCore", "Resources", "cities.json"
 )
 
 def error(msg: str) -> None:

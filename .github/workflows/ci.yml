@@ -109,24 +109,54 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             | xcpretty --color && exit ${PIPESTATUS[0]}
 
-      - name: Enforce ≥80% domain coverage
+      - name: Run IqamahCore SPM tests with coverage
+        run: |
+          cd Packages/IqamahCore
+          swift test --enable-code-coverage 2>&1 | tail -5
+
+      - name: Enforce ≥80% IqamahCore package coverage
+        run: |
+          # Measure coverage of the IqamahCore Swift Package using llvm-cov.
+          # This covers all domain logic (Models, Services, PrayerCalculator) that
+          # moved into the package in US-0040.
+          PKG_COV=$(cd Packages/IqamahCore && \
+            PROF=$(find .build/debug/codecoverage -name "IqamahCoreTests.profdata" 2>/dev/null | head -1) && \
+            BIN=$(find .build/debug -name "IqamahCoreTests" -type f 2>/dev/null | head -1) && \
+            if [ -n "$PROF" ] && [ -n "$BIN" ]; then
+              xcrun llvm-cov report "$BIN" -instr-profile="$PROF" \
+                --ignore-filename-regex=".*Tests.*" 2>/dev/null \
+                | awk '/TOTAL/{print $NF}' | tr -d '%'
+            else
+              echo "0"
+            fi)
+          echo "IqamahCore package coverage: ${PKG_COV}%"
+          if (( $(echo "${PKG_COV:-0} < 80.0" | bc -l) )); then
+            echo "::error::IqamahCore coverage ${PKG_COV}% is below the required 80% threshold."
+            exit 1
+          fi
+          echo "::notice::IqamahCore coverage ${PKG_COV}% meets the ≥80% requirement."
+
+      - name: Enforce ≥80% app-layer domain coverage
         run: |
           # SwiftUI Views and system-framework wrappers (CoreLocation, AVFoundation)
           # cannot be unit-tested without XCUITest or real hardware — they are excluded.
-          # Domain code = Models + Services + PrayerCalculator.
-          # Excluded paths (any file whose path contains one of these strings):
-          EXCLUDED="Views/|AppDelegate|ContentView|iqamahApp|AppIconGenerator|AppIconView|LocationService|AdhaaanPlayer"
+          # Domain code in the app layer = any non-View, non-system, non-package file.
+          # IqamahCore package files are measured separately by the SPM step above.
+          EXCLUDED="Views/|AppDelegate|ContentView|iqamahApp|AppIconGenerator|AppIconView|LocationService|AdhaaanPlayer|Packages/"
           COVERAGE=$(xcrun xccov view --report --json TestResults.xcresult 2>/dev/null \
-            | python3 -c "import sys,json,re; d=json.load(sys.stdin); ex=sys.argv[1]; files=[f for t in d.get('targets',[]) for f in t.get('files',[]) if not re.search(ex,f.get('path',''))]; te=sum(f.get('executableLines',0) for f in files); tc=sum(f.get('coveredLines',0) for f in files); print(f'{(tc/te*100) if te>0 else 0:.1f}')" "$EXCLUDED" \
-            2>/dev/null || echo "0")
+            | python3 -c "import sys,json,re; d=json.load(sys.stdin); ex=sys.argv[1]; files=[f for t in d.get('targets',[]) for f in t.get('files',[]) if not re.search(ex,f.get('path',''))]; te=sum(f.get('executableLines',0) for f in files); tc=sum(f.get('coveredLines',0) for f in files); print(f'{(tc/te*100) if te>0 else 0:.1f}') if te > 0 else print('N/A')" "$EXCLUDED" \
+            2>/dev/null || echo "N/A")
 
-          echo "Domain code coverage: ${COVERAGE}% (Views/system wrappers excluded)"
+          echo "App-layer domain coverage: ${COVERAGE}% (Views/system/package files excluded)"
 
-          if (( $(echo "$COVERAGE < 80.0" | bc -l) )); then
-            echo "::error::Domain coverage ${COVERAGE}% is below the required 80% threshold."
+          if [ "$COVERAGE" = "N/A" ]; then
+            echo "::notice::No app-layer domain files to measure (all domain code is in IqamahCore package)."
+          elif (( $(echo "$COVERAGE < 80.0" | bc -l) )); then
+            echo "::error::App-layer domain coverage ${COVERAGE}% is below the required 80% threshold."
             exit 1
+          else
+            echo "::notice::App-layer domain coverage ${COVERAGE}% meets the ≥80% requirement."
           fi
-          echo "::notice::Domain coverage ${COVERAGE}% meets the ≥80% requirement."
 
 
       - name: Upload test results
