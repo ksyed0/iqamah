@@ -43,6 +43,72 @@ Display upcoming Islamic dates (Eid al-Fitr, Eid al-Adha, Mawlid, etc.) in the p
 
 ---
 
+## Localisation & Internationalisation
+
+### ENH-019 — App-wide Multilingual Support (i18n + l10n)
+**Source:** Internal — project has been English-only since inception; see also deferred US-0016 in `RELEASE_PLAN.md`.
+**Priority:** Medium — large global Muslim audience speaks Arabic, Urdu, Indonesian, Turkish, French, Bengali, Bahasa Melayu, Persian, etc. as a first language. English-only excludes most users from a fluent UX.
+
+**Problem:** Iqamah ships with hardcoded English strings throughout views, status bar, settings, adhaan picker labels, and notifications. Foundation gives us a free Hijri calendar localisation, but everything else is fixed. The forthcoming Hilal Watch (EPIC-0011) and iOS conversion (EPIC-0010) screens will inherit the same monolingual constraint unless this is resolved.
+
+**Solution:** Two phases.
+
+**Phase 1 — i18n plumbing (the engineering):**
+- Convert every user-visible string to `String(localized:)` (Swift 5.7+) or `NSLocalizedString` where required. Audit: `iqamah/`, `iqamah-iOS/` (post EPIC-0010), `IqamahCore/`. Estimated ~150–200 string keys app-wide.
+- Add a `Localizable.strings` (or `.xcstrings` Xcode 15+ string catalogue) with the English keys as the source of truth.
+- Replace all hardcoded number formatting with `Measurement.FormatStyle` / `Number.FormatStyle` so locale formatting is automatic (1 234,56 vs 1,234.56).
+- Replace any locale-sensitive comparison with `localizedCaseInsensitiveCompare(_:)` etc.
+- Audit RTL bugs: every horizontal layout must respect `Locale.LanguageDirection`. SwiftUI `HStack` already does this; AppKit views may need leading/trailing constraints.
+
+**Phase 2 — l10n (the translations):**
+Initial languages, in priority order:
+1. **Arabic (`ar`)** — RTL; needs native review for both UI strings and Hijri month names.
+2. **Urdu (`ur`)** — RTL; large diaspora user base.
+3. **Indonesian (`id`)** — largest Muslim country by population.
+4. **Turkish (`tr`)** — modern Latin script, high digital adoption.
+5. **French (`fr`)** — Maghreb + diaspora.
+6. **Bengali (`bn`)** — LTR; Bangladesh + Indian diaspora.
+7. **Bahasa Melayu (`ms`)** — Malaysia / Indonesia regional alternative.
+8. **Persian / Farsi (`fa`)** — RTL; Iran + diaspora.
+
+Per-language acceptance criterion: **a native speaker has reviewed every string in context**, not just translated keys in isolation. Use translation memory (XLIFF) so updates between releases reuse prior reviews.
+
+**RTL-specific work:**
+- All chevrons in pickers / month navigators reverse direction.
+- Times of day in 12-hour format put AM/PM in locale-appropriate position.
+- Status bar countdown text alignment.
+- `MoonPhaseView` does **not** flip — astronomy is direction-neutral.
+- Hilal Watch S-curve map does **not** flip — geography is fixed.
+
+**Acceptance criteria (when promoted to an Epic):**
+- [ ] All user-visible strings in iqamah, iqamah-iOS, and IqamahCore go through `String(localized:)` — no hardcoded English in any view, view model, or service
+- [ ] `Localizable.xcstrings` exists with English source-of-truth and at least Arabic populated end-to-end (50%+ string coverage minimum for v1)
+- [ ] App's user-facing language follows system locale by default; manual override available via Settings sheet → "Language" picker
+- [ ] RTL layouts pass a visual review on Arabic and Urdu — no clipped text, no mis-aligned icons, no chevrons pointing the wrong way
+- [ ] Number formatting respects locale (e.g. `1 234,56` in fr-FR; `1,234.56` in en-US)
+- [ ] Hijri month names use Foundation's localised name on every supported locale (no English fallback)
+- [ ] Notifications fire in the user's selected language, including the d29 Hilal Watch notification body
+- [ ] Voice-Over speaks in the active language for all Hilal Watch / prayer times labels
+
+**Cross-references:**
+- **US-0016** in RELEASE_PLAN.md (Future — Release 1.2) is the user-story shell for this work; promotion to an Epic supersedes US-0016.
+- **EPIC-0011 (Hilal Watch)** strings are written through `String(localized:)` from day 1 so this enhancement only adds translations, not engineering rework.
+- **EPIC-0010 (iOS conversion)** likewise.
+- **competitive-analysis.md** notes 4/10 surveyed apps offer 5+ language support; none of the macOS-native peers do.
+
+**Effort:** Medium-Large
+- Phase 1 plumbing audit + conversion: 2–3 weeks for an experienced developer (mostly mechanical but requires careful review of every view).
+- Phase 2 first language (Arabic): 1 week for translation + 1 week for native review + RTL fixes.
+- Each subsequent language: ~3–5 days assuming TM reuse.
+
+**Files (when implemented):**
+- `iqamah/Localizable.xcstrings` (and equivalent for `iqamah-iOS/`, `IqamahCore/`)
+- `iqamah/Views/Settings/LanguagePicker.swift` (new)
+- Audit + edit every `.swift` view file in `iqamah/Views/` and `iqamah-iOS/Views/`
+- New CI lint: `swift-format` rule or custom script that fails the build if a `Text(...)` literal contains anything other than `String(localized:)` / `LocalizedStringKey` / a referenced variable.
+
+---
+
 ## Astronomy & Calendar
 
 ### ENH-018 — Hilal Watch: Global Crescent Sighting Map
