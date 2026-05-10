@@ -55,21 +55,21 @@ struct CalculationMethodView: View {
                             }
                         }
                         .labelsHidden()
-#if os(macOS)
-                        .pickerStyle(.radioGroup)
-#else
-                        .pickerStyle(.segmented)
-#endif
+                        #if os(macOS)
+                            .pickerStyle(.radioGroup)
+                        #else
+                            .pickerStyle(.segmented)
+                        #endif
                     }
                 }
                 .frame(maxWidth: 400)
                 .padding()
-#if os(macOS)
-                .background(Color(nsColor: .controlBackgroundColor))
-#else
-                .background(Color(.secondarySystemBackground))
-#endif
-                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                #if os(macOS)
+                    .background(Color(nsColor: .controlBackgroundColor))
+                #else
+                    .background(Color(.secondarySystemBackground))
+                #endif
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
             }
             .padding(.horizontal, 32)
             .padding(.top, 16)

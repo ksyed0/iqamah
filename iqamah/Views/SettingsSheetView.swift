@@ -1,6 +1,6 @@
 import SwiftUI
 #if os(macOS)
-import ServiceManagement
+    import ServiceManagement
 #endif
 import CoreLocation
 import IqamahCore
@@ -32,9 +32,9 @@ struct SettingsSheetView: View {
     // Scale is applied live; originalUiScale lets Cancel restore it
     private let originalUiScale = SettingsManager.shared.uiScale
     @ObservedObject private var settings = SettingsManager.shared
-#if os(macOS)
-    @State private var launchAtLogin = false
-#endif
+    #if os(macOS)
+        @State private var launchAtLogin = false
+    #endif
     @State private var isDetectingLocation = false
     @StateObject private var locationService = LocationService()
     @State private var detectedLocationInfo: String? = nil // inline result text
@@ -211,11 +211,11 @@ struct SettingsSheetView: View {
                 Text(method.displayName).tag(method)
             }
         }
-#if os(macOS)
+        #if os(macOS)
         .pickerStyle(.radioGroup)
-#else
+        #else
         .pickerStyle(.segmented)
-#endif
+        #endif
     }
 
     @ViewBuilder private var displaySection: some View {
@@ -227,25 +227,25 @@ struct SettingsSheetView: View {
             }
         }
         .toggleStyle(.switch)
-#if os(macOS)
-        Toggle(isOn: $launchAtLogin) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Launch at Login")
-                Text("Start Iqamah automatically when you log in")
-                    .font(.caption).foregroundStyle(.secondary)
-            }
-        }
-        .toggleStyle(.switch)
-        .onChange(of: launchAtLogin) { _, enabled in
-            do {
-                if enabled {
-                    try SMAppService.mainApp.register()
-                } else {
-                    try SMAppService.mainApp.unregister()
+        #if os(macOS)
+            Toggle(isOn: $launchAtLogin) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Launch at Login")
+                    Text("Start Iqamah automatically when you log in")
+                        .font(.caption).foregroundStyle(.secondary)
                 }
-            } catch { launchAtLogin = !enabled }
-        }
-#endif
+            }
+            .toggleStyle(.switch)
+            .onChange(of: launchAtLogin) { _, enabled in
+                do {
+                    if enabled {
+                        try SMAppService.mainApp.register()
+                    } else {
+                        try SMAppService.mainApp.unregister()
+                    }
+                } catch { launchAtLogin = !enabled }
+            }
+        #endif
         Picker("Appearance", selection: $selectedAppearance) {
             ForEach(AppAppearance.allCases, id: \.self) { mode in
                 Text(mode.displayName).tag(mode)
@@ -400,11 +400,11 @@ struct SettingsSheetView: View {
             .padding(.horizontal, 28)
             .padding(.vertical, 20)
         }
-#if os(macOS)
+        #if os(macOS)
         .frame(width: 480, height: min((NSScreen.main?.visibleFrame.height ?? 900) - 80, 820))
-#else
+        #else
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-#endif
+        #endif
         .background {
             Rectangle().fill(.regularMaterial)
         }
@@ -426,9 +426,9 @@ struct SettingsSheetView: View {
     // MARK: - Helpers
 
     private func loadInitialState() {
-#if os(macOS)
-        launchAtLogin = SMAppService.mainApp.status == .enabled
-#endif
+        #if os(macOS)
+            launchAtLogin = SMAppService.mainApp.status == .enabled
+        #endif
 
         // Load cities database
         if case let .success(db) = CitiesLoader.shared.load() {

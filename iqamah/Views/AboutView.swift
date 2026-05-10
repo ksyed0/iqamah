@@ -157,18 +157,18 @@ struct AboutView: View {
     }
 
     private func loadSplashImage() -> Image? {
-#if os(macOS)
-        if let url = Bundle.main.url(forResource: "splash", withExtension: "jpg"),
-           let nsImage = NSImage(contentsOf: url) {
-            return Image(nsImage: nsImage)
-        }
-        return nil
-#else
-        if let url = Bundle.main.url(forResource: "splash", withExtension: "jpg"),
-           let uiImage = UIImage(contentsOfFile: url.path) {
-            return Image(uiImage: uiImage)
-        }
-        return nil
-#endif
+        #if os(macOS)
+            if let url = Bundle.main.url(forResource: "splash", withExtension: "jpg"),
+               let nsImage = NSImage(contentsOf: url) {
+                return Image(nsImage: nsImage)
+            }
+            return nil
+        #else
+            if let url = Bundle.main.url(forResource: "splash", withExtension: "jpg"),
+               let uiImage = UIImage(contentsOfFile: url.path) {
+                return Image(uiImage: uiImage)
+            }
+            return nil
+        #endif
     }
 }

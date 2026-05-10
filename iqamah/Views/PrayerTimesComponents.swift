@@ -63,8 +63,8 @@ struct SecondaryToolbarButton: View {
             )
         }
         .buttonStyle(.plain)
-#if os(macOS)
-        .onHover { isHovering = $0 }
-#endif
+        #if os(macOS)
+            .onHover { isHovering = $0 }
+        #endif
     }
 }

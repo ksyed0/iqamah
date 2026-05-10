@@ -7,7 +7,7 @@ struct IqamahiOSApp: App {
 
     var body: some Scene {
         WindowGroup {
-            iOSRootView()
+            IOSRootView()
                 .environmentObject(settings)
         }
     }

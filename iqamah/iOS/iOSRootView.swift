@@ -1,7 +1,7 @@
 import SwiftUI
 import IqamahCore
 
-struct iOSRootView: View {
+struct IOSRootView: View {
     @EnvironmentObject private var settings: SettingsManager
 
     var body: some View {
@@ -21,7 +21,7 @@ struct MainTabView: View {
     var body: some View {
         TabView {
             NavigationStack {
-                if let city = city {
+                if let city {
                     PrayerTimesView(
                         city: city,
                         calculationMethod: settings.calculationMethod,
@@ -39,7 +39,7 @@ struct MainTabView: View {
             .tabItem { Label("Times", systemImage: "clock") }
 
             NavigationStack {
-                if let city = city {
+                if let city {
                     QiblahView(latitude: city.latitude, longitude: city.longitude, cityName: city.name)
                 } else {
                     Text("Select a location first")
@@ -49,7 +49,7 @@ struct MainTabView: View {
             .tabItem { Label("Qiblah", systemImage: "location.north.line") }
 
             NavigationStack {
-                if let city = city {
+                if let city {
                     SettingsSheetView(
                         currentCity: city,
                         currentMethod: settings.calculationMethod,
