@@ -288,3 +288,42 @@ Iqamah's defensible position: **the well-maintained, privacy-respecting, macOS-n
 2. **Ramadan mode** — Suhoor/Iftar countdowns replacing the regular prayer countdown during Ramadan; 8/10 competitors have this and users expect it
 3. **Silent / do-not-disturb mode** — adhan plays silently (visual only); Guidance had this, users loved it, no other macOS app offers it
 4. **Exact GPS prayer times** — use `CLGeocoder` to resolve timezone from raw coordinates, eliminating the nearest-city rounding error (e.g. Brampton vs. Toronto)
+
+---
+
+## EPIC-0010 Roadmap Impact (iOS Universal App)
+
+EPIC-0010 expands Iqamah from macOS-only to a universal app (macOS 14+ / iOS 17+) sharing a single bundle ID. This closes the most visible competitive gap (no iOS presence) and adds three iOS-native surfaces. Tracked in `docs/RELEASE_PLAN.md` as US-0040 through US-0045.
+
+### Gap closure
+
+| Gap (today) | Apps that have it | Closed by | After EPIC-0010 |
+|---|---|---|---|
+| iOS app | 10/10 competitors | US-0041 | ✅ Universal (macOS + iOS) |
+| Home/lock screen widgets | 7/10 | US-0044 | ✅ small + medium + Lock Screen rectangular |
+| iOS prayer notifications | 10/10 | US-0043 | ✅ per-prayer with custom adhaan as `UNNotificationSound` |
+| Cross-device sync | 5/10 (cloud-backed) | US-0042 | ✅ via `NSUbiquitousKeyValueStore`; no account required |
+| Live Activity / Dynamic Island | 0/10 | US-0045 | ✅ **new differentiator** |
+
+### Remaining gaps after EPIC-0010
+
+| Gap | Apps with it | Notes |
+|---|---|---|
+| Apple Watch app | 6/10 | Out of scope for EPIC-0010; separate EPIC if pursued |
+| Full Quran reader | 5/10 | Major scope expansion; deliberately not pursued |
+| Ramadan mode | 8/10 | Independent of platform; remains the next-highest-ROI feature |
+| Hijri calendar events | 8/10 | Independent of platform |
+| Prayer habit tracker | 3/10 | Optional |
+
+### New differentiators after EPIC-0010
+
+1. **Live Activity / Dynamic Island countdown** — none of the 10 surveyed competitors ship this; combining it with the existing macOS menu-bar countdown gives Iqamah a unique "always-glanceable next prayer" story across both platforms.
+2. **Custom per-prayer adhaan as the iOS notification sound** — competitors typically use a single global adhaan or a system tone. Iqamah's per-prayer adhaan selection (already present on macOS) carries through to the iOS notification surface via the `_notif.caf` 30-second variants.
+3. **Privacy-respecting cross-device sync** — `NSUbiquitousKeyValueStore` requires no account, no analytics, no third-party server; settings sync transparently while the no-tracking story is preserved.
+
+### Revised highest-ROI ordering after EPIC-0010 ships
+
+1. **Ramadan mode** (Suhoor/Iftar) — closes the largest remaining feature gap; works on both platforms with no per-platform UI rework
+2. **Silent / do-not-disturb mode** — small lift, unique among macOS apps, and on iOS becomes a notification-style toggle
+3. **Apple Watch app** — extends the Live Activity story to the wrist; reuses `IqamahCore`
+4. **Hijri calendar events** — content-light, reuses existing date display
