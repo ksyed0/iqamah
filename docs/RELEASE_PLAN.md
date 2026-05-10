@@ -1049,8 +1049,6 @@ rm adhaan_4_original_backup.mp3
 
 **Mockups:**
 - `docs/mockups/2026-05-09-hilal-watch-mockup.tsx` — full screen React prototype (Odeh + grid + UI)
-- `docs/mockups/2026-05-10-hilal-map-option3-mapkit.png` — MapKit + cell overlays (chosen approach)
-- `docs/mockups/2026-05-10-hilal-map-option2-canvas-png.png` — Canvas + PNG outline (rejected; equirectangular parity not enough to outweigh the loss of native pan/zoom and geographic context)
 
 **Key technical decisions (locked in during brainstorm 2026-05-10):**
 - Position engine: direct Swift port of astronomy-engine v2 (~500–700 LOC, no dependency)
