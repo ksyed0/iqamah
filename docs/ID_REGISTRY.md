@@ -8,12 +8,13 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 | **Sequence** | **Next Available ID** | **Last Assigned** |
 |--------------|-----------------------|-------------------|
-| EPIC         | EPIC-0011             | EPIC-0010         |
-| US           | US-0046               | US-0045           |
+| EPIC         | EPIC-0012             | EPIC-0011         |
+| US           | US-0053               | US-0052           |
 | TASK         | TASK-0001             | None              |
-| AC           | AC-0204               | AC-0203           |
+| AC           | AC-0252               | AC-0251           |
 | TC           | TC-0036               | TC-0035           |
 | BUG          | BUG-0056              | BUG-0055          |
+| ENH          | ENH-020               | ENH-019           |
 
 ---
 
@@ -27,4 +28,4 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 ---
 
-**Last Updated:** 2026-05-09 (TC-0001–TC-0035 added covering EPIC-0010 acceptance criteria. Earlier on the same day: EPIC-0010 + US-0040–US-0045 + AC-0169–AC-0203 added; registry refreshed from previously stale state to reflect actual highest IDs in RELEASE_PLAN.md and BUGS.md).
+**Last Updated:** 2026-05-10 (PR #54 merged — EPIC-0010 + US-0040–US-0045 + AC-0169–AC-0203 + TC-0001–TC-0035 now on develop. PR #55 merged — EPIC-0011 + US-0046–US-0052 + AC-0204–AC-0251 + ENH-019 now on develop.)

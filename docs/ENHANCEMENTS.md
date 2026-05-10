@@ -43,6 +43,131 @@ Display upcoming Islamic dates (Eid al-Fitr, Eid al-Adha, Mawlid, etc.) in the p
 
 ---
 
+## Localisation & Internationalisation
+
+### ENH-019 — App-wide Multilingual Support (i18n + l10n)
+**Source:** Internal — project has been English-only since inception; see also deferred US-0016 in `RELEASE_PLAN.md`.
+**Priority:** Medium — large global Muslim audience speaks Arabic, Urdu, Indonesian, Turkish, French, Bengali, Bahasa Melayu, Persian, etc. as a first language. English-only excludes most users from a fluent UX.
+
+**Problem:** Iqamah ships with hardcoded English strings throughout views, status bar, settings, adhaan picker labels, and notifications. Foundation gives us a free Hijri calendar localisation, but everything else is fixed. The forthcoming Hilal Watch (EPIC-0011) and iOS conversion (EPIC-0010) screens will inherit the same monolingual constraint unless this is resolved.
+
+**Solution:** Two phases.
+
+**Phase 1 — i18n plumbing (the engineering):**
+- Convert every user-visible string to `String(localized:)` (Swift 5.7+) or `NSLocalizedString` where required. Audit: `iqamah/`, `iqamah-iOS/` (post EPIC-0010), `IqamahCore/`. Estimated ~150–200 string keys app-wide.
+- Add a `Localizable.strings` (or `.xcstrings` Xcode 15+ string catalogue) with the English keys as the source of truth.
+- Replace all hardcoded number formatting with `Measurement.FormatStyle` / `Number.FormatStyle` so locale formatting is automatic (1 234,56 vs 1,234.56).
+- Replace any locale-sensitive comparison with `localizedCaseInsensitiveCompare(_:)` etc.
+- Audit RTL bugs: every horizontal layout must respect `Locale.LanguageDirection`. SwiftUI `HStack` already does this; AppKit views may need leading/trailing constraints.
+
+**Phase 2 — l10n (the translations):**
+Initial languages, in priority order:
+1. **Arabic (`ar`)** — RTL; needs native review for both UI strings and Hijri month names.
+2. **Urdu (`ur`)** — RTL; large diaspora user base.
+3. **Indonesian (`id`)** — largest Muslim country by population.
+4. **Turkish (`tr`)** — modern Latin script, high digital adoption.
+5. **French (`fr`)** — Maghreb + diaspora.
+6. **Bengali (`bn`)** — LTR; Bangladesh + Indian diaspora.
+7. **Bahasa Melayu (`ms`)** — Malaysia / Indonesia regional alternative.
+8. **Persian / Farsi (`fa`)** — RTL; Iran + diaspora.
+
+Per-language acceptance criterion: **a native speaker has reviewed every string in context**, not just translated keys in isolation. Use translation memory (XLIFF) so updates between releases reuse prior reviews.
+
+**RTL-specific work:**
+- All chevrons in pickers / month navigators reverse direction.
+- Times of day in 12-hour format put AM/PM in locale-appropriate position.
+- Status bar countdown text alignment.
+- `MoonPhaseView` does **not** flip — astronomy is direction-neutral.
+- Hilal Watch S-curve map does **not** flip — geography is fixed.
+
+**Acceptance criteria (when promoted to an Epic):**
+- [ ] All user-visible strings in iqamah, iqamah-iOS, and IqamahCore go through `String(localized:)` — no hardcoded English in any view, view model, or service
+- [ ] `Localizable.xcstrings` exists with English source-of-truth and at least Arabic populated end-to-end (50%+ string coverage minimum for v1)
+- [ ] App's user-facing language follows system locale by default; manual override available via Settings sheet → "Language" picker
+- [ ] RTL layouts pass a visual review on Arabic and Urdu — no clipped text, no mis-aligned icons, no chevrons pointing the wrong way
+- [ ] Number formatting respects locale (e.g. `1 234,56` in fr-FR; `1,234.56` in en-US)
+- [ ] Hijri month names use Foundation's localised name on every supported locale (no English fallback)
+- [ ] Notifications fire in the user's selected language, including the d29 Hilal Watch notification body
+- [ ] Voice-Over speaks in the active language for all Hilal Watch / prayer times labels
+
+**Cross-references:**
+- **US-0016** in RELEASE_PLAN.md (Future — Release 1.2) is the user-story shell for this work; promotion to an Epic supersedes US-0016.
+- **EPIC-0011 (Hilal Watch)** strings are written through `String(localized:)` from day 1 so this enhancement only adds translations, not engineering rework.
+- **EPIC-0010 (iOS conversion)** likewise.
+- **competitive-analysis.md** notes 4/10 surveyed apps offer 5+ language support; none of the macOS-native peers do.
+
+**Effort:** Medium-Large
+- Phase 1 plumbing audit + conversion: 2–3 weeks for an experienced developer (mostly mechanical but requires careful review of every view).
+- Phase 2 first language (Arabic): 1 week for translation + 1 week for native review + RTL fixes.
+- Each subsequent language: ~3–5 days assuming TM reuse.
+
+**Files (when implemented):**
+- `iqamah/Localizable.xcstrings` (and equivalent for `iqamah-iOS/`, `IqamahCore/`)
+- `iqamah/Views/Settings/LanguagePicker.swift` (new)
+- Audit + edit every `.swift` view file in `iqamah/Views/` and `iqamah-iOS/Views/`
+- New CI lint: `swift-format` rule or custom script that fails the build if a `Text(...)` literal contains anything other than `String(localized:)` / `LocalizedStringKey` / a referenced variable.
+
+---
+
+## Astronomy & Calendar
+
+### ENH-018 — Hilal Watch: Global Crescent Sighting Map
+**Status:** ✅ Promoted to EPIC-0011 on 2026-05-10 — see `RELEASE_PLAN.md` (US-0046 – US-0052, AC-0204 – AC-0248). Map rendering approach changed during brainstorm: MapKit `MKPolygonRenderer` overlays chosen over the original Canvas + bundled-PNG approach for native pan / zoom and built-in geographic context.
+**Source:** Internal product exploration via Claude conversation (May 2026); cross-checked against moonsighting.com / OmegaHilalSighting
+**Priority:** Medium — distinctive feature; 0/10 surveyed competitors offer this
+
+**Problem:** The Islamic lunar calendar depends on physically sighting the new crescent moon at the start of each month. Iqamah's current Hijri date display uses arithmetic tabular conversion (via Foundation `Calendar(identifier: .islamicUmmAlQura)`) which is accurate to ±1 day but provides no insight into *where on Earth* the crescent will actually be visible on the 29th and 30th of the current Hijri month — the two evenings on which the new month is determined globally.
+
+**Solution:** Add a Hilal Watch screen that computes and displays global crescent visibility for both watch evenings, plus precise local visibility from the user's prayer-times location.
+
+**Algorithm:**
+- **Visibility criterion:** Odeh (2004), peer-reviewed against 737 ICOP observations. `V = ARCV − f(W)` where `ARCV` is moon altitude at sunset and `W` is topocentric crescent width in arcminutes. Four zones: A (easily visible naked eye), B (visible under good conditions), C (optical aid to locate), D (optical aid only).
+- **Position engine:** Full Meeus lunar ephemeris (60+ longitude terms, ±0.01°). Simplified 10-term approaches produce false positives near the 6.4° Danjon limit; full Meeus eliminates these. Reference implementation: [astronomy-engine v2](https://github.com/cosinekitty/astronomy) (MIT, ~3000 LOC of pure math — portable to Swift). Alternatives for Swift: [SwiftAA](https://github.com/onekiloparsec/SwiftAA), or port astronomy-engine directly.
+- **Sunset timing:** Fast ±15 min approximation is sufficient — sunset timing error contributes only ~0.15° to ARCV, well below the noise floor.
+- **Grid:** 2° × 2° equirectangular, 90 × 180 = 16,200 points per evening. Both evenings (d29 and d30) computed once on screen mount and cached. Tab switching is instant. Estimated compute: 100–250 ms on iPhone 12 or newer.
+- **Hijri month navigation:** Reuse the existing arithmetic tabular conversion. Month arrows step ±1 synodic period (29.530588853 days). Each month is labelled with the confirmation context (e.g. "Confirms start of Sha'ban 1447").
+- **Date locking:** Maps lock to the next new-moon conjunction. d29 = evening of conjunction day; d30 = evening after. Each longitude's local sunset falls at a different UTC offset from conjunction, producing different crescent ages and the characteristic S-curve visibility arcs.
+
+**Local sighting card:** When the user's prayer-times location is known, compute local Odeh values and display the raw inputs (ARCL elongation, ARCV moon altitude, W crescent width in arcmin) plus the V-score and zone, allowing cross-check against moonsighting.com tables.
+
+**Colour scheme:** Match moonsighting.com / OmegaHilalSighting convention so users familiar with the global standard orient immediately:
+- A — forest green (easily visible naked eye)
+- B — teal/cyan (good conditions)
+- C — grey (optical aid to locate)
+- D — red (optical aid only)
+
+**Acceptance criteria (when promoted to an Epic):**
+- [ ] 29th watch map produces S-curve arcs consistent with moonsighting.com for the same date
+- [ ] 30th watch map shows substantially wider visibility zones than the 29th
+- [ ] Local sighting card shows ARCL, ARCV, W, V values matchable against moonsighting.com tables to within ±0.5°
+- [ ] Grid computes in under 300 ms on iPhone 12 or newer
+- [ ] Both grids cached; switching between 29th/30th tabs produces no visible recompute delay
+- [ ] Colour scheme matches the OmegaHilalSighting A/B/C/D convention
+
+**Open design questions:**
+- Is this a feature on the existing Hijri date row, or a dedicated tab/screen? (Mockup assumes dedicated screen)
+- macOS-only, iOS-only, or both? (Recommend both — fits naturally inside the planned EPIC-0010 universal app structure once that lands)
+- Calculation can be done in `IqamahCore` so both platforms share it
+
+**Mockup:** Original React/web prototype iterated during the brainstorm has been retired now that the algorithm and UI design are fully captured in the EPIC-0011 spec. The Odeh criterion implementation reference lives in [astronomy-engine v2](https://github.com/cosinekitty/astronomy); the colour scheme and visibility thresholds are codified in AC-0213.
+
+**Effort:** Medium-Large — the algorithm is mechanical (mockup contains the full implementation) but porting an astronomical position engine to Swift, building the map UI, and validating against moonsighting.com is a multi-week effort. Should be a standalone Epic.
+
+**Files (when implemented):**
+- `IqamahCore/Sources/IqamahCore/Astronomy/HilalCalculator.swift` (new)
+- `IqamahCore/Sources/IqamahCore/Astronomy/OdehCriterion.swift` (new)
+- `IqamahCore/Sources/IqamahCore/Astronomy/MoonPosition.swift` (new — full Meeus port or SwiftAA wrapper)
+- `iqamah/Views/HilalWatchView.swift` (macOS) and `iqamah-iOS/HilalWatchView.swift` (iOS) — most likely shareable
+- New `IqamahCore/Tests/` cases validating against ICOP observation set
+
+**External references:**
+- Odeh (2004) criterion: [astronomycenter.net/pdf/2006_cri.pdf](https://astronomycenter.net/pdf/2006_cri.pdf)
+- astronomy-engine: [github.com/cosinekitty/astronomy](https://github.com/cosinekitty/astronomy)
+- crescent-moon-visibility (MIT): [github.com/crescent-moon-visibility/crescent-moon-visibility](https://github.com/crescent-moon-visibility/crescent-moon-visibility)
+- moonsighting.com (visual cross-check baseline)
+
+---
+
 ## macOS-Native Enhancements
 
 ### ENH-004 — macOS Menu Bar Widget / Notification Center Widget
