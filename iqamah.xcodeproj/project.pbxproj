@@ -51,6 +51,15 @@
 		WG000000000000000000021 /* IqamahWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = WG000000000000000000011 /* IqamahWidget.swift */; };
 		WG000000000000000000031 /* IqamahCore in Frameworks */ = {isa = PBXBuildFile; productRef = WG000000000000000000032 /* IqamahCore */; };
 		WG000000000000000000041 /* IqamahWidget.appex in PlugIns */ = {isa = PBXBuildFile; fileRef = WG000000000000000000042 /* IqamahWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		HW000000000000000000011 /* HilalPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000001 /* HilalPalette.swift */; };
+		HW000000000000000000012 /* HilalCellOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000002 /* HilalCellOverlay.swift */; };
+		HW000000000000000000013 /* HilalMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000003 /* HilalMapView.swift */; };
+		HW000000000000000000014 /* MoonPhaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000004 /* MoonPhaseView.swift */; };
+		HW000000000000000000015 /* LocalSightingCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000005 /* LocalSightingCardView.swift */; };
+		HW000000000000000000016 /* HilalCriterionPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000006 /* HilalCriterionPicker.swift */; };
+		HW000000000000000000017 /* AboutHilalWatchCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000007 /* AboutHilalWatchCard.swift */; };
+		HW000000000000000000018 /* HilalWatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000008 /* HilalWatchView.swift */; };
+		HW000000000000000000019 /* HilalWatchWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000009 /* HilalWatchWindow.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -133,6 +142,15 @@
 		WG000000000000000000012 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		WG000000000000000000013 /* IqamahWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = IqamahWidget.entitlements; sourceTree = "<group>"; };
 		WG000000000000000000042 /* IqamahWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = IqamahWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		HW000000000000000000001 /* HilalPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HilalPalette.swift; sourceTree = "<group>"; };
+		HW000000000000000000002 /* HilalCellOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HilalCellOverlay.swift; sourceTree = "<group>"; };
+		HW000000000000000000003 /* HilalMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HilalMapView.swift; sourceTree = "<group>"; };
+		HW000000000000000000004 /* MoonPhaseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoonPhaseView.swift; sourceTree = "<group>"; };
+		HW000000000000000000005 /* LocalSightingCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalSightingCardView.swift; sourceTree = "<group>"; };
+		HW000000000000000000006 /* HilalCriterionPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HilalCriterionPicker.swift; sourceTree = "<group>"; };
+		HW000000000000000000007 /* AboutHilalWatchCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutHilalWatchCard.swift; sourceTree = "<group>"; };
+		HW000000000000000000008 /* HilalWatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HilalWatchView.swift; sourceTree = "<group>"; };
+		HW000000000000000000009 /* HilalWatchWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HilalWatchWindow.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -198,6 +216,7 @@
 				94CAD5642F23CBB800E1689F /* AppDelegate.swift */,
 				AA0000000000000000000011 /* iqamahApp.swift */,
 				AA0000000000000000000012 /* ContentView.swift */,
+				HW000000000000000000009 /* HilalWatchWindow.swift */,
 				EE0000000000000000005001 /* Extensions */,
 				AA0000000000000000000034 /* Services */,
 				AA0000000000000000000035 /* Views */,
@@ -250,6 +269,7 @@
 				BB000000000000000000001A /* SettingsSheetView.swift */,
 				EE0000000000000000004003 /* IqamahBackground.swift */,
 				EE0000000000000000006002 /* PrayerTimesComponents.swift */,
+				HW000000000000000000020 /* HilalWatch */,
 				944B0D982F635A0500EC6A01 /* TestsAdditionalTests.swift */,
 				944B0D9A2F635AC100EC6A01 /* DocsFINAL_SESSION_SUMMARY.md */,
 			);
@@ -307,6 +327,21 @@
 				WG000000000000000000013 /* IqamahWidget.entitlements */,
 			);
 			path = IqamahWidget;
+			sourceTree = "<group>";
+		};
+		HW000000000000000000020 /* HilalWatch */ = {
+			isa = PBXGroup;
+			children = (
+				HW000000000000000000001 /* HilalPalette.swift */,
+				HW000000000000000000002 /* HilalCellOverlay.swift */,
+				HW000000000000000000003 /* HilalMapView.swift */,
+				HW000000000000000000004 /* MoonPhaseView.swift */,
+				HW000000000000000000005 /* LocalSightingCardView.swift */,
+				HW000000000000000000006 /* HilalCriterionPicker.swift */,
+				HW000000000000000000007 /* AboutHilalWatchCard.swift */,
+				HW000000000000000000008 /* HilalWatchView.swift */,
+			);
+			path = HilalWatch;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -499,6 +534,15 @@
 				BB000000000000000000000A /* SettingsSheetView.swift in Sources */,
 				EE0000000000000000004002 /* IqamahBackground.swift in Sources */,
 				EE0000000000000000006001 /* PrayerTimesComponents.swift in Sources */,
+				HW000000000000000000011 /* HilalPalette.swift in Sources */,
+				HW000000000000000000012 /* HilalCellOverlay.swift in Sources */,
+				HW000000000000000000013 /* HilalMapView.swift in Sources */,
+				HW000000000000000000014 /* MoonPhaseView.swift in Sources */,
+				HW000000000000000000015 /* LocalSightingCardView.swift in Sources */,
+				HW000000000000000000016 /* HilalCriterionPicker.swift in Sources */,
+				HW000000000000000000017 /* AboutHilalWatchCard.swift in Sources */,
+				HW000000000000000000018 /* HilalWatchView.swift in Sources */,
+				HW000000000000000000019 /* HilalWatchWindow.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
