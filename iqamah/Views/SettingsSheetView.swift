@@ -490,6 +490,9 @@ private struct HilalWatchSettingsSection: View {
 
         Toggle("Notify me on Hilal Watch evening", isOn: $settings.hilalNotificationEnabled)
             .help("Receive a notification ~30 min before sunset on the 29th of the Hijri month")
+
+        Toggle("Live Activity (Dynamic Island)", isOn: $settings.liveActivityEnabled)
+            .help("Shows prayer countdown in Dynamic Island and on the lock screen all day")
     }
 }
 

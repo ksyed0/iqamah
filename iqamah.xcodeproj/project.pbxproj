@@ -101,6 +101,8 @@
 
 		LA000000000000000000010 /* PrayerActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = LA000000000000000000010R; };
 		LA000000000000000000011 /* PrayerLiveActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = LA000000000000000000011R; };
+		AM000000000000000000001 /* PrayerActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AM000000000000000000001R; };
+		AM000000000000000000002 /* PrayerActivityAttributes+iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = AM000000000000000000002R; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -248,6 +250,8 @@
 
 		LA000000000000000000010R /* PrayerActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerActivityAttributes.swift; sourceTree = "<group>"; };
 		LA000000000000000000011R /* PrayerLiveActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerLiveActivityView.swift; sourceTree = "<group>"; };
+		AM000000000000000000001R /* PrayerActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerActivityManager.swift; sourceTree = "<group>"; };
+		AM000000000000000000002R /* PrayerActivityAttributes+iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerActivityAttributes.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -416,6 +420,8 @@
 				iOS0000000000000000000012 /* iOSRootView.swift */,
 				iOS000000000000000000001F /* NotificationScheduler.swift */,
 				B5000000000000000000020 /* HilalWatchSheet.swift */,
+				AM000000000000000000001R /* PrayerActivityManager.swift */,
+				AM000000000000000000002R /* PrayerActivityAttributes+iOS.swift */,
 				iOS0000000000000000000013 /* Info.plist */,
 				iOS0000000000000000000014 /* iqamah-iOS.entitlements */,
 			);
@@ -787,6 +793,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				iOS0000000000000000000001 /* iqamahApp_iOS.swift in Sources */,
+				AM000000000000000000001 /* PrayerActivityManager.swift in Sources */,
+				AM000000000000000000002 /* PrayerActivityAttributes+iOS.swift in Sources */,
 				iOS0000000000000000000002 /* iOSRootView.swift in Sources */,
 				iOS0000000000000000000003 /* PrayerTimesView.swift in Sources */,
 				iOS0000000000000000000004 /* LocationSetupView.swift in Sources */,
