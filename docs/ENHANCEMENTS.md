@@ -287,7 +287,93 @@ See the multi-platform migration assessment in this file (below).
 **Status:** Promoted → EPIC-0012 (US-0053 – US-0057, AC-0252 – AC-0275). See `docs/RELEASE_PLAN.md`.
 
 ### ENH-017 — Apple Vision Pro App
-See the multi-platform migration assessment in this file (below).
+See ENH-021 below (expanded from this placeholder).
+
+### ENH-020 — Apple TV App (tvOS)
+**Source:** Product exploration — prayer times on a shared family screen; strong use case during Ramadan (Suhoor/Iftar countdowns on living-room TV)
+**Priority:** Low-Medium — niche but zero competitors offer it on tvOS
+**Release Target:** Post EPIC-0012 (Watch app must ship first; Watch Connectivity pattern established)
+
+**Problem:** No prayer times app exists on Apple TV. The family living-room screen is underused for Islamic content; a beautiful 4K prayer times display during Ramadan is a compelling differentiator.
+
+**Platform constraints:**
+- No GPS on Apple TV — location must come from iCloud KVS (already synced from iPhone/Mac via EPIC-0010) or manual selection via on-screen keyboard
+- No `UNUserNotificationCenter` for local notifications — the TV cannot alert at prayer time; adhan playback is not possible
+- Siri Remote input model — focus engine only (Up/Down/Left/Right/Select); no touch, no swipe
+- All SwiftUI focus-driven navigation must be tested against the remote
+- Qibla compass is meaningless (no magnetometer) — omit from tvOS
+
+**What ships in v1:**
+- Prayer times list for today, next prayer highlighted in gold
+- City displayed prominently (pulled from App Group / iCloud KVS)
+- Countdown to next prayer in large type
+- Hijri date header
+- Minimal settings: city selection via search (Siri Remote keyboard), calculation method
+- Designed for ambient display (no interaction required — auto-refreshes at midnight)
+
+**IqamahCore changes required:** None — `PrayerCalculator` already runs on tvOS. `SettingsManager` App Group already works across all Apple platforms.
+
+**New target:** `IqamahTV` (tvOS 17+, bundle ID `com.fablesoft.iqamah.tv`, separate App Store record)
+
+**Acceptance criteria (when promoted to an Epic):**
+- [ ] `IqamahTV` target builds and runs on Apple TV simulator
+- [ ] Prayer times display correctly using location pulled from iCloud KVS
+- [ ] All UI elements navigable with Siri Remote (focus engine, no crashes)
+- [ ] Qibla tab is absent from tvOS build
+- [ ] App updates prayer times at midnight without user interaction
+- [ ] First launch (no KVS data): shows city picker via on-screen keyboard
+
+**Effort:** Medium (2–3 weeks) — new target + focus-engine UI adaptation + city selection without touch
+
+---
+
+### ENH-021 — Apple Vision Pro App (visionOS)
+**Source:** ENH-017 placeholder expanded
+**Priority:** Medium — "designed for iPad" path is nearly free; native path is a strong press story
+**Release Target:** Path 1 immediately after EPIC-0010 (iOS app) ships; Path 2 as optional EPIC
+
+**Problem:** visionOS is growing and no Islamic prayer app has a native spatial experience. The "designed for iPad" compatibility path gets Iqamah on Vision Pro at near-zero cost.
+
+**Path 1 — iPad Compatibility (~1 week, recommended for v1):**
+- visionOS automatically runs the iOS app in a floating window; users resize it freely in their space
+- Qibla compass uses Vision Pro's IMU/sensors — works without changes
+- Submit with `UIRequiresFullScreen = NO`; Apple review typically approves
+- Adhan plays from the device speaker (not spatial, but functional)
+- Zero extra code beyond the iOS app (EPIC-0010)
+- **This should be the first visionOS release** — validates demand before investing in native
+
+**Path 2 — Native visionOS (~3–4 weeks on top of Path 1):**
+
+*Ornaments (floating UI beside the main window):*
+- Prayer countdown ornament — always-visible next prayer + time, floating beside any open app
+- Hijri date ornament — small date strip
+
+*Volumes (3D content):*
+- Spatial Qibla indicator: a 3D RealityKit arrow volume floating in the room, pointing toward Makkah using device heading. Updates live as the user turns.
+
+*Spatial audio:*
+- Adhan placed at a fixed spatial point in the room (e.g. slightly above eye level, centred) — `AVAudioEnvironmentNode` with distance attenuation. Unique to Vision Pro; not available on any other platform.
+
+*Window chrome:*
+- `.glassEffect()` already planned for iOS 26 / macOS 26 (AC-0251) — visionOS uses the same API; the Liquid Glass chrome applies automatically.
+
+**IqamahCore changes required:** None for Path 1. Path 2 adds RealityKit and `AVAudioEnvironmentNode` code only to the `IqamahVisionOS` target — IqamahCore is unchanged.
+
+**Acceptance criteria (when promoted to an Epic):**
+
+Path 1:
+- [ ] Iqamah iOS app runs in visionOS simulator in compatibility mode without crashes
+- [ ] All 5 prayer times display correctly
+- [ ] Qibla compass responds to device heading in visionOS
+- [ ] App Store Connect submission accepted as compatible with visionOS
+
+Path 2 (additional):
+- [ ] Prayer countdown ornament persists beside other windows
+- [ ] Spatial Qibla volume renders in the correct direction from the user's position
+- [ ] Adhan plays from a fixed spatial point; headphone users experience directional audio
+- [ ] `.glassEffect()` window chrome applied via `@available(visionOS 1.0, *)`
+
+**Effort:** Path 1: ~1 week testing + submission. Path 2: ~3–4 weeks on top.
 
 ---
 

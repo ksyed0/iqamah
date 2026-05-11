@@ -14,7 +14,7 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 | AC           | AC-0276               | AC-0275           |
 | TC           | TC-0036               | TC-0035           |
 | BUG          | BUG-0056              | BUG-0055          |
-| ENH          | ENH-020               | ENH-019           |
+| ENH          | ENH-022               | ENH-021           |
 
 ---
 
@@ -28,4 +28,4 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 ---
 
-**Last Updated:** 2026-05-10 (EPIC-0012 added — Apple Watch app: EPIC-0012, US-0053–US-0057, AC-0252–AC-0275; promoted from ENH-016.)
+**Last Updated:** 2026-05-11 (ENH-020 added — Apple TV app. ENH-021 added — Apple Vision Pro app expanded from ENH-017 placeholder.)
