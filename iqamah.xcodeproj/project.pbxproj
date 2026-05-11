@@ -79,6 +79,14 @@
 		WT000000000000000000021 /* IqamahWatchWidget.appex in Frameworks (WatchTests) */ = {isa = PBXBuildFile; fileRef = WW000000000000000000005 /* IqamahWatchWidget.appex */; };
 
 		WA000000000000000000050 /* IqamahWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000050R /* IqamahWatchApp.swift */; };
+		WA000000000000000000011 /* LocationSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000011R /* LocationSetupView.swift */; };
+		WA000000000000000000012 /* PrayerTimesTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000012R /* PrayerTimesTab.swift */; };
+		WA000000000000000000013 /* QiblaTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000013R /* QiblaTab.swift */; };
+		WA000000000000000000014 /* SettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000014R /* SettingsTab.swift */; };
+		WA000000000000000000015 /* WatchNotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000015R /* WatchNotificationScheduler.swift */; };
+		WA000000000000000000016 /* WatchSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000016R /* WatchSessionManager.swift */; };
+		WW000000000000000000032 /* IqamahWatchWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = WW000000000000000000032R /* IqamahWatchWidget.swift */; };
+		WT000000000000000000020A /* QiblaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = WT000000000000000000020R /* QiblaTests.swift */; };
 
 		WT000000000000000000041 /* PrayerEntry.swift in Sources (WatchTests) */ = {isa = PBXBuildFile; fileRef = WW000000000000000000040R /* PrayerEntry.swift */; };
 		WT000000000000000000042 /* PrayerTimelineProvider.swift in Sources (WatchTests) */ = {isa = PBXBuildFile; fileRef = WW000000000000000000041R /* PrayerTimelineProvider.swift */; };
@@ -211,6 +219,14 @@
 		WT000000000000000000010R /* TimelineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineTests.swift; sourceTree = "<group>"; };
 
 		WA000000000000000000050R /* IqamahWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IqamahWatchApp.swift; sourceTree = "<group>"; };
+		WA000000000000000000011R /* LocationSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationSetupView.swift; sourceTree = "<group>"; };
+		WA000000000000000000012R /* PrayerTimesTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerTimesTab.swift; sourceTree = "<group>"; };
+		WA000000000000000000013R /* QiblaTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QiblaTab.swift; sourceTree = "<group>"; };
+		WA000000000000000000014R /* SettingsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsTab.swift; sourceTree = "<group>"; };
+		WA000000000000000000015R /* WatchNotificationScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchNotificationScheduler.swift; sourceTree = "<group>"; };
+		WA000000000000000000016R /* WatchSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSessionManager.swift; sourceTree = "<group>"; };
+		WW000000000000000000032R /* IqamahWatchWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IqamahWatchWidget.swift; sourceTree = "<group>"; };
+		WT000000000000000000020R /* QiblaTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QiblaTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -414,6 +430,7 @@
 			children = (
 				WW000000000000000000040R /* PrayerEntry.swift */,
 				WW000000000000000000041R /* PrayerTimelineProvider.swift */,
+				WW000000000000000000032R /* IqamahWatchWidget.swift */,
 			);
 			path = IqamahWatchWidget;
 			sourceTree = "<group>";
@@ -422,6 +439,7 @@
 			isa = PBXGroup;
 			children = (
 				WT000000000000000000010R /* TimelineTests.swift */,
+				WT000000000000000000020R /* QiblaTests.swift */,
 			);
 			path = IqamahWatchTests;
 			sourceTree = "<group>";
@@ -430,6 +448,12 @@
 			isa = PBXGroup;
 			children = (
 				WA000000000000000000050R /* IqamahWatchApp.swift */,
+				WA000000000000000000011R /* LocationSetupView.swift */,
+				WA000000000000000000012R /* PrayerTimesTab.swift */,
+				WA000000000000000000013R /* QiblaTab.swift */,
+				WA000000000000000000014R /* SettingsTab.swift */,
+				WA000000000000000000015R /* WatchNotificationScheduler.swift */,
+				WA000000000000000000016R /* WatchSessionManager.swift */,
 			);
 			path = IqamahWatch;
 			sourceTree = "<group>";
@@ -752,6 +776,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				WA000000000000000000050 /* IqamahWatchApp.swift in Sources */,
+				WA000000000000000000011 /* LocationSetupView.swift in Sources */,
+				WA000000000000000000012 /* PrayerTimesTab.swift in Sources */,
+				WA000000000000000000013 /* QiblaTab.swift in Sources */,
+				WA000000000000000000014 /* SettingsTab.swift in Sources */,
+				WA000000000000000000015 /* WatchNotificationScheduler.swift in Sources */,
+				WA000000000000000000016 /* WatchSessionManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -776,6 +806,7 @@
 			files = (
 				WW000000000000000000040 /* PrayerEntry.swift in Sources */,
 				WW000000000000000000041 /* PrayerTimelineProvider.swift in Sources */,
+				WW000000000000000000032 /* IqamahWatchWidget.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -801,6 +832,7 @@
 				WT000000000000000000010 /* TimelineTests.swift in Sources */,
 				WT000000000000000000041 /* PrayerEntry.swift in Sources (WatchTests) */,
 				WT000000000000000000042 /* PrayerTimelineProvider.swift in Sources (WatchTests) */,
+				WT000000000000000000020A /* QiblaTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
