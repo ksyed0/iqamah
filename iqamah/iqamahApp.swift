@@ -1,10 +1,6 @@
 import SwiftUI
 import IqamahCore
 
-extension Notification.Name {
-    static let openHilalWatch = Notification.Name("openHilalWatch")
-}
-
 @main
 struct iqamahApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate

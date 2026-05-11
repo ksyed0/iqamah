@@ -19,6 +19,19 @@ struct IqamahiOSApp: App {
                 .onChange(of: scenePhase) { _, phase in
                     if phase == .active { reschedule() }
                 }
+                .onChange(of: settings.hilalNotificationEnabled) { _, enabled in
+                    Task {
+                        if enabled {
+                            guard let coord = settings.activeCoordinate else { return }
+                            await HilalNotificationScheduler.shared.scheduleNextWatchEvening(
+                                latitude: coord.latitude,
+                                longitude: coord.longitude
+                            )
+                        } else {
+                            HilalNotificationScheduler.shared.cancel()
+                        }
+                    }
+                }
         }
     }
 

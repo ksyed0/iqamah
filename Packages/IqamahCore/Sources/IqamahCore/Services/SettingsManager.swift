@@ -5,6 +5,7 @@ import SwiftUI
 public extension Notification.Name {
     static let settingsDidChange = Notification.Name("settingsDidChange")
     static let openSettings = Notification.Name("openSettings")
+    static let openHilalWatch = Notification.Name("openHilalWatch")
 }
 
 public enum AppAppearance: String, CaseIterable {
