@@ -342,6 +342,7 @@ struct SettingsSheetView: View {
             Section { locationSection } header: { Label("Location", systemImage: "location.fill") }
             Section { calculationSection } header: { Label("Calculation", systemImage: "function") }
             Section { displaySection } header: { Label("Display", systemImage: "display") }
+            Section { HilalWatchSettingsSection() } header: { Label("Hilal Watch", systemImage: "moon.haze.fill") }
             Section {
                 adjustmentsSection
             } header: {
@@ -466,6 +467,29 @@ struct SettingsSheetView: View {
         SettingsManager.shared.use24HourTime = use24Hour
         SettingsManager.shared.appearance = selectedAppearance
         onSave(city, selectedMethod, selectedAsrMethod)
+    }
+}
+
+// MARK: - Hilal Watch settings (extracted to keep SettingsSheetView under line limit)
+
+private struct HilalWatchSettingsSection: View {
+    @ObservedObject private var settings = SettingsManager.shared
+
+    var body: some View {
+        Picker("Hijri Calendar", selection: $settings.hijriCalendarIdentifier) {
+            Text("Umm Al-Qura").tag("islamic-umalqura")
+            Text("Civil").tag("islamic-civil")
+            Text("Tabular").tag("islamic-tbla")
+        }
+
+        Stepper(
+            "Hijri day offset: \(settings.hijriDayOffset > 0 ? "+" : "")\(settings.hijriDayOffset)",
+            value: $settings.hijriDayOffset,
+            in: -2 ... 2
+        )
+
+        Toggle("Notify me on Hilal Watch evening", isOn: $settings.hilalNotificationEnabled)
+            .help("Receive a notification ~30 min before sunset on the 29th of the Hijri month")
     }
 }
 

@@ -10,6 +10,7 @@ struct HilalWatchView: View {
     @State private var localCard: LocalSightingValues?
     @State private var isLoading = false
     @State private var showAbout = false
+    @State private var showShareSheet = false
     @State private var newMoonDate: Date = Date()
 
     @EnvironmentObject private var settings: SettingsManager
@@ -60,6 +61,13 @@ struct HilalWatchView: View {
         .task { await loadGrid() }
         .onChange(of: selectedEvening) { _, _ in Task { await loadGrid() } }
         .onChange(of: selectedCriterion) { _, _ in Task { await loadGrid() } }
+        .sheet(isPresented: $showShareSheet) {
+            HilalShareSheet(
+                grid: grid,
+                monthLabel: monthLabel,
+                criterionName: selectedCriterion.criterion.name
+            )
+        }
     }
 
     // MARK: - Header
@@ -85,6 +93,14 @@ struct HilalWatchView: View {
             .frame(maxWidth: 120)
 
             HilalCriterionPicker(selectedCriterion: $selectedCriterion)
+
+            Button {
+                showShareSheet = true
+            } label: {
+                Image(systemName: "square.and.arrow.up")
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Share Hilal Map")
 
             Button {
                 withAnimation { showAbout.toggle() }
