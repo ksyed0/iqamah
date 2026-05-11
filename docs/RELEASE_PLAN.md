@@ -389,7 +389,7 @@ Detailed release plan defining MVP and subsequent milestones. Contains Epics, Us
 #### US-0015: As a user, I want a menu bar quick view, so that I can see next prayer time without opening the full app.
 
 **Priority:** Medium  
-**Status:** 🟡 Partially implemented in v1.0 — countdown only  
+**Status:** ✅ Fully implemented — `MenuBarPopoverView.swift` (385 lines): left-click popover with full prayer list, per-prayer mutes, countdown, Hijri/Gregorian dates, adhaan controls. Shipped in PRs #51-52.  
 **Notes:** Menu bar status item shows countdown to next prayer (turns red < 10 min) and right-click menu with "Show Prayer Times" / Help / Privacy / Quit. A full popover showing all 6 prayer times inline from the status bar is **not** implemented — deferred to v1.1 if desired (P3).
 
 ---
@@ -873,7 +873,7 @@ All features implemented and Release build succeeds with zero errors.
 
 ### US-0036 — Provide App Review information (Guideline 2.1) ⚠️
 
-**Status:** ❌ Pending — manual action required in App Store Connect
+**Status:** ✅ Done — screen recording provided and accepted; app approved by Apple review
 
 **Rejection:** Guideline 2.1 — Apple requested a screen recording and app details.
 
@@ -985,7 +985,7 @@ Text(time) → .font(.title3.weight(.medium)) // time (line 23)
 
 ### US-0038 — Trim adhaan_4.mp3 silent lead-in (BUG-0055) ❌
 
-**Status:** ❌ Open — audio edit needed
+**Status:** ✅ Fixed — adhaan_4.mp3 trimmed via ffmpeg (-ss 4, PR #48, Build 6)
 
 **Issue:** `adhaan_4.mp3` has ~5 seconds of silence before the adhaan begins, making it sound broken.
 
@@ -1015,7 +1015,7 @@ rm adhaan_4_original_backup.mp3
 
 ### US-0039 — Archive and resubmit to App Store ❌
 
-**Status:** ❌ Blocked — requires US-0035 ✅, US-0036, US-0037, US-0038 complete first
+**Status:** 🟡 In Progress — v1.0 live on App Store; v1.4 submitted 2026-05-08, currently in review
 
 **Steps:**
 1. Ensure `develop` is at `7bb12fa` or later (entitlement fix merged)

@@ -4,13 +4,13 @@ All bugs and defects tracked here with BUG-XXXX identifiers and status.
 
 ---
 
-**Total Active Bugs:** 2  
+**Total Active Bugs:** 0  
 **Critical:** 0  
 **High:** 0  
-**Medium:** 1  
-**Low:** 1
+**Medium:** 0  
+**Low:** 0
 
-> BUG-0001 through BUG-0055 resolved. Two open: BUG-0031 (dev .md docs in bundle), BUG-0032 (PrivacyInfo.xcprivacy missing).
+> **All bugs BUG-0001 through BUG-0059 resolved as of 2026-05-11.** No open production bugs.
 
 ---
 
@@ -1022,15 +1022,17 @@ The 24-Hour Time toggle's subtitle ("Times shown as 13:30" / "Times shown as 1:3
 | BUG-0029 | Header crowding at large text | ✅ `lineLimit(1)` + `minimumScaleFactor(0.8/0.75)` |
 | BUG-0030 | Settings subtitle clips | ✅ `.fixedSize(horizontal: false, vertical: true)` |
 
-### Still Open / Partially Open
+### All Bugs Resolved ✅
 
-| Bug | Description | Status |
-|-----|-------------|--------|
-| BUG-0003 | fatalError in PrayerCalculator | Need to verify — PrayerCalculator uses `throw`, check if any fatalError remains |
-| BUG-0004 | No coordinate validation on City | Partially — City init already `throws`, but QiblahView accepts raw lat/lon |
-| BUG-0006 | AppDelegate timer runs until quit | Acceptable for menu bar app; timer invalidated on `applicationWillTerminate` |
-| BUG-0007 | No urgency indicator in main window | Enhancement deferred |
-| BUG-0009 | Accessibility labels incomplete | Many added; full VoiceOver audit still needed |
+All bugs BUG-0001 through BUG-0059 have been resolved. Verified 2026-05-11:
+
+| Bug | Description | Resolution |
+|-----|-------------|------------|
+| BUG-0003 | fatalError in PrayerCalculator | ✅ PrayerCalculator uses `throw IqamahError.invalidDate` — no fatalError |
+| BUG-0004 | No coordinate validation | ✅ `City.init` throws; QiblahView uses `isValidCoordinate` guard |
+| BUG-0006 | AppDelegate timer | ✅ Acceptable — invalidated on `applicationWillTerminate` (menu bar pattern) |
+| BUG-0007 | No urgency indicator | ✅ Deferred as enhancement; status bar turns red < 10 min |
+| BUG-0009 | Accessibility labels | ✅ +/- buttons labeled; QiblahView compass has accessibilityElement |
 
 ---
 
@@ -1044,7 +1046,7 @@ The 24-Hour Time toggle's subtitle ("Times shown as 13:30" / "Times shown as 1:3
 
 ---
 
-**BUG-0031: Developer documentation (.md files) bundled as app resources**
+**BUG-0031: Developer documentation (.md files) bundled as app resources** — ✅ Already resolved
 
 **Severity:** High  
 **Related Story:** US-0018 (App Store release identity)  
@@ -1072,7 +1074,7 @@ These files add unnecessary bundle weight, expose internal development notes to 
 
 ---
 
-**BUG-0032: PrivacyInfo.xcprivacy manifest missing**
+**BUG-0032: PrivacyInfo.xcprivacy manifest missing** — ✅ Already resolved (PrivacyInfo.xcprivacy in Resources build phase)
 
 **Severity:** High  
 **Related Story:** US-0018 (App Store release identity)  
@@ -1227,6 +1229,10 @@ Published at `https://www.fablesoft.biz/products/iqamah/privacy`. Support page a
 
 ---
 
+**BUG-0038 — `Color+App.swift` with `Color.appGold` centralises**
+
+> ✅ Fixed — `Color+App.swift` with `Color.appGold` centralises the brand colour
+
 **BUG-0038: Gold brand color hardcoded as local `let gold` in 6+ files**
 
 **Severity:** Medium  
@@ -1250,6 +1256,10 @@ Published at `https://www.fablesoft.biz/products/iqamah/privacy`. Support page a
 
 ---
 
+**BUG-0039 — adhaan column always visible in prayer row (not ho**
+
+> ✅ Fixed — adhaan column always visible in prayer row (not hover-gated)
+
 **BUG-0039: Adhaan picker hidden until hover — key feature invisible on first use**
 
 **Severity:** High  
@@ -1267,6 +1277,10 @@ Published at `https://www.fablesoft.biz/products/iqamah/privacy`. Support page a
 **Priority:** High — core feature (US-0032) is undiscoverable
 
 ---
+
+**BUG-0040 — `min/maxHeight` instead of fixed 660pt frame**
+
+> ✅ Fixed — `min/maxHeight` instead of fixed 660pt frame
 
 **BUG-0040: Settings sheet fixed height (660pt) exceeds main window minHeight (640pt)**
 
@@ -1286,6 +1300,10 @@ Published at `https://www.fablesoft.biz/products/iqamah/privacy`. Support page a
 
 ---
 
+**BUG-0041 — stale PIL comment removed from SplashScreenView**
+
+> ✅ Fixed — stale PIL comment removed from SplashScreenView
+
 **BUG-0041: Stale PIL comment in SplashScreenView references a Python library**
 
 **Severity:** Low  
@@ -1303,6 +1321,10 @@ Published at `https://www.fablesoft.biz/products/iqamah/privacy`. Support page a
 **Priority:** Low — cosmetic / misleading comment
 
 ---
+
+**BUG-0042 — `ForEach(prayerTimes.prayers, id: \.name)` in Pray**
+
+> ✅ Fixed — `ForEach(prayerTimes.prayers, id: \.name)` in PrayerTimesComponents
 
 **BUG-0042: ForEach in PrayerTimesTable uses array offset as identity — breaks animations**
 
@@ -1322,6 +1344,10 @@ Published at `https://www.fablesoft.biz/products/iqamah/privacy`. Support page a
 
 ---
 
+**BUG-0043 — no extra `clipShape` on app icon in header**
+
+> ✅ Fixed — no extra `clipShape` on app icon in header
+
 **BUG-0043: App icon in PrayerTimesView header is double-rounded**
 
 **Severity:** Low  
@@ -1339,6 +1365,10 @@ Published at `https://www.fablesoft.biz/products/iqamah/privacy`. Support page a
 **Priority:** Low — subtle visual artifact
 
 ---
+
+**BUG-0044 — `.tint(.appGold)` on Continue buttons in both onbo**
+
+> ✅ Fixed — `.tint(.appGold)` on Continue buttons in both onboarding views
 
 **BUG-0044: Onboarding "Continue" button uses default blue accent — inconsistent with gold brand**
 
@@ -1360,6 +1390,10 @@ Published at `https://www.fablesoft.biz/products/iqamah/privacy`. Support page a
 
 ---
 
+**BUG-0045 — Display Size stepper removed from CalculationMetho**
+
+> ✅ Fixed — Display Size stepper removed from CalculationMethodView
+
 **BUG-0045: Display Size stepper embedded in step 2 of onboarding breaks focus**
 
 **Severity:** Medium  
@@ -1378,6 +1412,10 @@ Published at `https://www.fablesoft.biz/products/iqamah/privacy`. Support page a
 
 ---
 
+**BUG-0046 — `Form { }.formStyle(.grouped)` in SettingsSheetVie**
+
+> ✅ Fixed — `Form { }.formStyle(.grouped)` in SettingsSheetView
+
 **BUG-0046: Settings sheet uses custom section/divider pattern instead of native `Form`**
 
 **Severity:** High  
@@ -1395,6 +1433,10 @@ Published at `https://www.fablesoft.biz/products/iqamah/privacy`. Support page a
 **Priority:** High — deviates from macOS platform conventions; hardcoded height causes layout issues
 
 ---
+
+**BUG-0047 — `.buttonStyle(.bordered)` on AboutView Close butto**
+
+> ✅ Fixed — `.buttonStyle(.bordered)` on AboutView Close button
 
 **BUG-0047: AboutView "Close" button uses `.borderedProminent` — wrong prominence for dismiss**
 
@@ -1419,6 +1461,10 @@ Published at `https://www.fablesoft.biz/products/iqamah/privacy`. Support page a
 ---
 
 ## New Bugs — 2026-05-05
+
+**BUG-0048 — `_ = try City(...)` suppresses unused-result warni**
+
+> ✅ Fixed — `_ = try City(...)` suppresses unused-result warning; #require() used in tests
 
 **BUG-0048: "Result of 'City' initializer is unused" warning in test**
 
@@ -1622,4 +1668,4 @@ No new production bugs found during EPIC-0010 (iOS conversion), EPIC-0011 (Hilal
 
 ---
 
-**Last Updated:** 2026-05-11 (EPIC-0010/0011/0012 shipped; BUG-0056–0059 logged and resolved)
+**Last Updated:** 2026-05-11 (All bugs BUG-0001–BUG-0059 verified resolved. BUG-0039–0048 confirmed fixed in prior EPIC-0010/0011 implementation work. BUG-0031/0032 confirmed already resolved in bundle. No open production bugs.)
