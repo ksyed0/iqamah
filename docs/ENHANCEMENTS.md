@@ -282,8 +282,9 @@ A one-time calculator for annual Zakat based on nisab. Could be a modal or separ
 ### ENH-015 — iPhone & iPad App
 See the multi-platform migration assessment in this file (below).
 
-### ENH-016 — Apple Watch App
+### ENH-016 — Apple Watch App ✅ Promoted to EPIC-0012 (2026-05-10)
 See the multi-platform migration assessment in this file (below).
+**Status:** Promoted → EPIC-0012 (US-0053 – US-0057, AC-0252 – AC-0275). See `docs/RELEASE_PLAN.md`.
 
 ### ENH-017 — Apple Vision Pro App
 See the multi-platform migration assessment in this file (below).
