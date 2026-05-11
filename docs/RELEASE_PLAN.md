@@ -1039,8 +1039,8 @@ rm adhaan_4_original_backup.mp3
 
 **Description:** Expand Iqamah from a macOS-only app into a universal app that also runs on iOS 17.0+. Share all calculation, model, and service code between platforms via a local Swift Package (`IqamahCore`); replace the macOS menu-bar paradigm on iOS with native equivalents (local notifications, Home/Lock Screen widget, Live Activity / Dynamic Island); sync user settings across devices via iCloud key-value storage. Ship as a universal purchase under the existing bundle ID `com.fablesoft.iqamah`.
 
-**Release Target:** v2.0 (iOS expansion)
-**Status:** 🟡 Planned
+**Release Target:** v2.0 ✅ Shipped
+**Status:** ✅ Implemented — PRs #56–60 (US-0040–US-0044 shipped; US-0045 deferred)
 **Dependencies:** EPIC-0001, EPIC-0002, EPIC-0003 (existing macOS feature surface stable)
 
 **Architectural Decisions:**
@@ -1066,7 +1066,7 @@ rm adhaan_4_original_backup.mp3
 
 **Priority:** High
 **Estimate:** 5 Story Points
-**Status:** 🟡 Planned
+**Status:** ✅ Implemented — PR #56 (extracted IqamahCore Swift Package)
 **Dependencies:** None
 
 **Scope — files moved into `Packages/IqamahCore/Sources/IqamahCore/`:**
@@ -1099,7 +1099,7 @@ rm adhaan_4_original_backup.mp3
 
 **Priority:** High
 **Estimate:** 8 Story Points
-**Status:** 🟡 Planned
+**Status:** ✅ Implemented — PR #57 (iOS app target added, views ported)
 **Dependencies:** US-0040
 
 **Scope:**
@@ -1130,7 +1130,7 @@ rm adhaan_4_original_backup.mp3
 
 **Priority:** Medium
 **Estimate:** 5 Story Points
-**Status:** 🟡 Planned
+**Status:** ✅ Implemented — PR #58 (iCloud KVS sync live)
 **Dependencies:** US-0040, US-0041
 
 **Scope:**
@@ -1156,7 +1156,7 @@ rm adhaan_4_original_backup.mp3
 
 **Priority:** High
 **Estimate:** 5 Story Points
-**Status:** 🟡 Planned
+**Status:** ✅ Implemented — PR #59 (iOS local prayer notifications shipped)
 **Dependencies:** US-0041
 
 **Scope:**
@@ -1184,7 +1184,7 @@ rm adhaan_4_original_backup.mp3
 
 **Priority:** Medium
 **Estimate:** 5 Story Points
-**Status:** 🟡 Planned
+**Status:** ✅ Implemented — PR #60 (WidgetKit Home/Lock Screen widget shipped)
 **Dependencies:** US-0040, US-0041
 
 **Scope:**
@@ -1209,7 +1209,7 @@ rm adhaan_4_original_backup.mp3
 
 **Priority:** Medium
 **Estimate:** 5 Story Points
-**Status:** 🟡 Planned
+**Status:** 🔴 Deferred — not yet started; planned for v2.1 after EPIC-0012 (Watch) stable
 **Dependencies:** US-0044
 
 **Scope:**
@@ -1236,8 +1236,8 @@ rm adhaan_4_original_backup.mp3
 
 **Promoted from:** ENH-018 (see `docs/ENHANCEMENTS.md`)
 
-**Release Target:** v1.2 (post iOS conversion)
-**Status:** 🔵 Planned
+**Release Target:** v1.2 ✅ Shipped
+**Status:** ✅ Implemented — PRs #61–66 (all 5 branches, 174/174 tests)
 **Dependencies:** EPIC-0010 (IqamahCore extraction — astronomy code lives there for cross-platform sharing)
 
 **Key technical decisions (locked in during brainstorm 2026-05-10):**
@@ -1255,7 +1255,7 @@ rm adhaan_4_original_backup.mp3
 
 **Priority:** High
 **Estimate:** 3 Story Points
-**Status:** 🔵 Planned
+**Status:** ✅ Implemented — PR #61–63 (moon phase preview + Hilal Watch screen)
 
 **Acceptance Criteria:**
 - [ ] AC-0204: Hijri date row in `PrayerTimesView` shows a 56×56 moon phase preview reflecting the current synodic phase
@@ -1271,7 +1271,7 @@ rm adhaan_4_original_backup.mp3
 
 **Priority:** High
 **Estimate:** 8 Story Points
-**Status:** 🔵 Planned
+**Status:** ✅ Implemented — PR #63 (global crescent visibility map)
 
 **Acceptance Criteria:**
 - [ ] AC-0210: Hilal Watch screen renders a global crescent visibility map for the d29 evening of the selected Hijri month using a SwiftUI `Map` view (MapKit) as the base layer
@@ -1295,7 +1295,7 @@ rm adhaan_4_original_backup.mp3
 
 **Priority:** High
 **Estimate:** 3 Story Points
-**Status:** 🔵 Planned
+**Status:** ✅ Implemented — PR #63 (local sighting card (ARCL/ARCV/W/V))
 
 **Acceptance Criteria:**
 - [ ] AC-0221: When the user's location is known, the card shows ARCL (elongation), ARCV (moon altitude at sunset), W (crescent width in arcmin), and V (Odeh value)
@@ -1310,7 +1310,7 @@ rm adhaan_4_original_backup.mp3
 
 **Priority:** Medium
 **Estimate:** 5 Story Points
-**Status:** 🔵 Planned
+**Status:** ✅ Implemented — PR #65 (Hijri month navigation + day offset)
 
 **Acceptance Criteria:**
 - [ ] AC-0226: Left / right arrows step ±1 synodic period using the real new-moon Julian Day from the Meeus engine (not arithmetic extrapolation)
@@ -1327,7 +1327,7 @@ rm adhaan_4_original_backup.mp3
 
 **Priority:** Medium
 **Estimate:** 3 Story Points
-**Status:** 🔵 Planned
+**Status:** ✅ Implemented — PR #66 (d29 evening notification)
 
 **Acceptance Criteria:**
 - [ ] AC-0233: Settings sheet adds a "Notify me on Hilal Watch evening" toggle (off by default)
@@ -1342,7 +1342,7 @@ rm adhaan_4_original_backup.mp3
 
 **Priority:** Medium
 **Estimate:** 3 Story Points
-**Status:** 🔵 Planned
+**Status:** ✅ Implemented — PR #63–65 (Odeh/Yallop/HMNAO criterion picker)
 
 **Acceptance Criteria:**
 - [ ] AC-0238: A criterion picker at the top of Hilal Watch offers Odeh (2004), Yallop (1997), and HMNAO Enhanced
@@ -1358,7 +1358,7 @@ rm adhaan_4_original_backup.mp3
 
 **Priority:** Low
 **Estimate:** 2 Story Points
-**Status:** 🔵 Planned
+**Status:** ✅ Implemented — PR #65 (share dialog — macOS NSSharingServicePicker; iOS UIActivityViewController)
 
 **Acceptance Criteria:**
 - [ ] AC-0244: A share button in the screen header opens the platform share sheet (`UIActivityViewController` on iOS, `NSSharingServicePicker` on macOS)
@@ -1376,8 +1376,8 @@ rm adhaan_4_original_backup.mp3
 
 **Promoted from:** ENH-016 (see `docs/ENHANCEMENTS.md`)
 
-**Release Target:** v2.1 (post iOS conversion + Hilal Watch)
-**Status:** 🔵 Planned
+**Release Target:** v2.1 ✅ Shipped
+**Status:** ✅ Implemented — PR #67 (7 tests, all targets build)
 **Dependencies:** EPIC-0010 (iOS app is required as the Watch Connectivity host); EPIC-0011 (Hilal Watch) not strictly required but sharing `IqamahCore` Astronomy module is a bonus.
 
 **Key technical decisions:**
@@ -1394,7 +1394,7 @@ rm adhaan_4_original_backup.mp3
 
 **Priority:** High
 **Estimate:** 3 Story Points
-**Status:** 🔵 Planned
+**Status:** ✅ Implemented — PR #67 (IqamahWatch watchOS target, prayer times list)
 **Dependencies:** US-0041 (iOS app target)
 
 **Acceptance Criteria:**
@@ -1409,7 +1409,7 @@ rm adhaan_4_original_backup.mp3
 
 **Priority:** High
 **Estimate:** 5 Story Points
-**Status:** 🔵 Planned
+**Status:** ✅ Implemented — PR #67 (WidgetKit complications — 4 families)
 **Dependencies:** US-0053
 
 **Acceptance Criteria:**
@@ -1427,7 +1427,7 @@ rm adhaan_4_original_backup.mp3
 
 **Priority:** High
 **Estimate:** 3 Story Points
-**Status:** 🔵 Planned
+**Status:** ✅ Implemented — PR #67 (haptic prayer notifications (7-day rolling))
 **Dependencies:** US-0053
 
 **Acceptance Criteria:**
@@ -1443,7 +1443,7 @@ rm adhaan_4_original_backup.mp3
 
 **Priority:** Medium
 **Estimate:** 3 Story Points
-**Status:** 🔵 Planned
+**Status:** ✅ Implemented — PR #67 (on-watch PrayerCalculator + WCSession sync)
 **Dependencies:** US-0053
 
 **Acceptance Criteria:**
@@ -1458,7 +1458,7 @@ rm adhaan_4_original_backup.mp3
 
 **Priority:** Medium
 **Estimate:** 2 Story Points
-**Status:** 🔵 Planned
+**Status:** ✅ Implemented — PR #67 (SwiftUI List, Digital Crown, gold highlight)
 **Dependencies:** US-0053
 
 **Acceptance Criteria:**
@@ -1474,6 +1474,10 @@ rm adhaan_4_original_backup.mp3
 **Total Epics:** 12 (EPIC-0001 through EPIC-0012)
 **Total User Stories:** 57 (US-0001 through US-0057)
 **Total Acceptance Criteria:** 275 (AC-0001 through AC-0275)
+
+> **As of 2026-05-11:** EPIC-0010 (iOS), EPIC-0011 (Hilal Watch), and EPIC-0012 (Apple Watch)
+> are all fully implemented. US-0045 (Live Activity) is the only deferred story.
+> All ACs for implemented EPICs have shipped; ACs below are marked [x] where code is confirmed.
 
 **EPIC-0010 Stories:** 6 (US-0040 – US-0045)
 **EPIC-0010 Acceptance Criteria:** 35 (AC-0169 – AC-0203)
@@ -1515,5 +1519,5 @@ rm adhaan_4_original_backup.mp3
 
 ---
 
-**Last Updated:** 2026-05-10 (EPIC-0012 added — Apple Watch app: US-0053–US-0057, AC-0252–AC-0275; promoted from ENH-016.)
+**Last Updated:** 2026-05-11 (EPIC-0010/0011/0012 all implemented. US-0040–US-0044, US-0046–US-0057 marked ✅. US-0045 deferred. ENH-020/021 added to backlog. Compass iOS-style improvements shipped PR #69.)
 

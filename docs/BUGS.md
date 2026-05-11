@@ -1561,4 +1561,65 @@ Trimmed 8 seconds via ffmpeg (`-ss 4` applied twice); 213s→205s.
 
 ---
 
-**Last Updated:** 2026-05-06 (Build 6 submitted to App Store)
+---
+
+## Session — 2026-05-10 to 2026-05-11 (EPIC-0010/0011/0012 implementation)
+
+No new production bugs found during EPIC-0010 (iOS conversion), EPIC-0011 (Hilal Watch), or EPIC-0012 (Apple Watch) implementation. All three EPICs shipped without regressions.
+
+### Resolved during implementation
+
+**BUG-0056 (iOS build): `CLAuthorizationStatus.authorized` unavailable on watchOS**
+
+**Severity:** Low (watchOS-only)  
+**Discovered:** 2026-05-11 during EPIC-0012 Branch 1 (IqamahCore watchOS target)  
+**Status:** ✅ Fixed — PR feat/compass-ios-style-ticks (commit 35b3348)
+
+**Description:** `LocationService.swift` used `.authorized` (deprecated alias for `.authorizedAlways`) which is absent on watchOS, breaking the `IqamahWatch` target build.
+
+**Fix:** Wrapped the `case .authorized:` branch in `#if os(iOS)` so it compiles conditionally. `case .authorizedWhenInUse, .authorizedAlways:` handles both platforms without the deprecated alias.
+
+---
+
+**BUG-0057 (CI): macOS `iqamahTests` crashed silently with exit code 65 on CI**
+
+**Severity:** Low (intermittent CI flake)  
+**Discovered:** 2026-05-11 during PR #67 CI run  
+**Status:** ✅ Resolved — re-trigger caused clean pass; confirmed as transient runner crash
+
+**Description:** The `Test & Coverage` job failed with exit code 65 (`TEST FAILED`) but printed no individual test failure — the xcodebuild test runner itself crashed after 12s. All 174 tests pass locally and on re-run.
+
+**Root cause:** Transient GitHub Actions macOS runner instability (no reproducibility on second run). No code change required.
+
+---
+
+**BUG-0058 (iOS): `IqamahWatchWidget` test target needed `TEST_HOST` removed**
+
+**Severity:** Low (CI test configuration)  
+**Discovered:** 2026-05-11 during PR #67 CI run  
+**Status:** ✅ Fixed — `TEST_HOST` removed from `IqamahWatchTests` build config
+
+**Description:** `IqamahWatchTests` was configured as a *hosted* test bundle (`TEST_HOST = .../IqamahWatch.app/IqamahWatch`). This requires the watch app binary to be pre-built for the exact same simulator destination. CI used `generic/platform=watchOS` for the build step but a specific simulator for tests, causing a linker error: `library 'IqamahWatch' not found`.
+
+**Fix:** Removed `TEST_HOST` — unit tests (`TimelineTests`, `QiblaTests`) are standalone and don't need to be hosted inside the watch app.
+
+---
+
+**BUG-0059 (Compass): iOS-style compass improvements identified during mockup review**
+
+**Severity:** Low (visual polish)  
+**Discovered:** 2026-05-11 during interactive mockup session  
+**Status:** ✅ Fixed — PR #69
+
+**Description:** The macOS Qiblah compass had coarse 15°-interval tick marks (24 total), no degree labels, a green gradient direction line, and no N-triangle marker — diverging from iOS compass conventions.
+
+**Fix:** PR #69 (`feat/compass-ios-style-ticks`) updated `QiblahView.swift`:
+- 72 tick marks every 5° with 4-level sizing (cardinal/semi-cardinal/medium/minor)
+- Degree labels at 45/135/225/315 in 9pt monospaced
+- N red triangle marker on ring
+- Dashed gold Canvas line with arrowhead replacing green gradient
+- Prayer mat enlarged to 72×108pt
+
+---
+
+**Last Updated:** 2026-05-11 (EPIC-0010/0011/0012 shipped; BUG-0056–0059 logged and resolved)
