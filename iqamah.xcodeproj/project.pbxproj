@@ -96,6 +96,8 @@
 		WV000000000000000000002 /* CircularWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WV000000000000000000002R; };
 		WV000000000000000000003 /* InlineWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WV000000000000000000003R; };
 		WV000000000000000000004 /* macOSLargeWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WV000000000000000000004R; };
+		LA000000000000000000009 /* IqamahCore in Frameworks (LA) */ = {isa = PBXBuildFile; productRef = LA000000000000000000030; };
+		LA000000000000000000021 /* IqamahLiveActivity.appex in Embed */ = {isa = PBXBuildFile; fileRef = LA000000000000000000005; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -239,6 +241,7 @@
 		WV000000000000000000002R /* CircularWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircularWidgetView.swift; sourceTree = "<group>"; };
 		WV000000000000000000003R /* InlineWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InlineWidgetView.swift; sourceTree = "<group>"; };
 		WV000000000000000000004R /* macOSLargeWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = macOSLargeWidgetView.swift; sourceTree = "<group>"; };
+		LA000000000000000000005 /* IqamahLiveActivity.appex */ = {isa = PBXFileReference; explicitFileType = "plug-in"; includeInIndex = 0; path = IqamahLiveActivity.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -332,6 +335,7 @@
 				AA0000000000000000000010 /* iqamah.app */,
 				EE0000000000000000001001 /* iqamahTests.xctest */,
 				iOS0000000000000000000015 /* iqamah-iOS.app */,
+				LA000000000000000000005 /* IqamahLiveActivity.appex */,
 				WG000000000000000000042 /* IqamahWidget.appex */,
 			);
 			name = Products;
@@ -623,6 +627,17 @@
 			productReference = WT000000000000000000006 /* IqamahWatchTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		LA000000000000000000001 /* IqamahLiveActivity */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = LA000000000000000000008;
+			buildPhases = (LA000000000000000000002,LA000000000000000000004,LA000000000000000000003,);
+			buildRules = (); dependencies = ();
+			name = IqamahLiveActivity;
+			packageProductDependencies = (LA000000000000000000030,);
+			productName = IqamahLiveActivity;
+			productReference = LA000000000000000000005;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -661,6 +676,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+				LA000000000000000000001 /* IqamahLiveActivity */,
 				WT000000000000000000001 /* IqamahWatchTests */,
 				WW000000000000000000001 /* IqamahWatchWidget */,
 				WA000000000000000000001 /* IqamahWatch */,
@@ -858,6 +874,18 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		LA000000000000000000002 /* Sources (LA) */ = {
+			isa = PBXSourcesBuildPhase; buildActionMask = 2147483647;
+			files = (); runOnlyForDeploymentPostprocessing = 0;
+		};
+		LA000000000000000000003 /* Resources (LA) */ = {
+			isa = PBXResourcesBuildPhase; buildActionMask = 2147483647;
+			files = (); runOnlyForDeploymentPostprocessing = 0;
+		};
+		LA000000000000000000004 /* Frameworks (LA) */ = {
+			isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647;
+			files = (LA000000000000000000009,); runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 /* Begin PBXFrameworksBuildPhase section (WatchTests) */
 		WT000000000000000000004F /* Frameworks (WatchTests) */ = {
@@ -878,6 +906,7 @@
 			dstSubfolderSpec = 13;
 			files = (
 				WG000000000000000000041 /* IqamahWidget.appex in PlugIns */,
+				LA000000000000000000021 /* IqamahLiveActivity.appex in Embed */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1366,6 +1395,35 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		LA000000000000000000006 /* Debug (LA) */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "IqamahLiveActivity/IqamahLiveActivity.entitlements";
+				CODE_SIGN_STYLE = Automatic; DEVELOPMENT_TEAM = 96Y29SP9JR;
+				INFOPLIST_FILE = "IqamahLiveActivity/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.fablesoft.iqamah.liveactivity";
+				PRODUCT_NAME = IqamahLiveActivity;
+				SDKROOT = iphoneos; SKIP_INSTALL = YES; SWIFT_VERSION = 5.10;
+			}; name = Debug;
+		};
+		LA000000000000000000007 /* Release (LA) */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "IqamahLiveActivity/IqamahLiveActivity.entitlements";
+				CODE_SIGN_STYLE = Automatic; DEVELOPMENT_TEAM = 96Y29SP9JR;
+				INFOPLIST_FILE = "IqamahLiveActivity/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.fablesoft.iqamah.liveactivity";
+				PRODUCT_NAME = IqamahLiveActivity;
+				SDKROOT = iphoneos; SKIP_INSTALL = YES; SWIFT_VERSION = 5.10;
+			}; name = Release;
+		};
+		LA000000000000000000008 = {
+			isa = XCConfigurationList;
+			buildConfigurations = (LA000000000000000000006,LA000000000000000000007,);
+			defaultConfigurationIsVisible = 0; defaultConfigurationName = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCLocalSwiftPackageReference section */
@@ -1382,6 +1440,7 @@
 		WW000000000000000000030 /* IqamahCore */ = {isa = XCSwiftPackageProductDependency; package = IC0000000000000000000001 /* XCLocalSwiftPackageReference "Packages/IqamahCore" */; productName = IqamahCore; };
 
 		WT000000000000000000030 /* IqamahCore */ = {isa = XCSwiftPackageProductDependency; package = IC0000000000000000000001 /* XCLocalSwiftPackageReference "Packages/IqamahCore" */; productName = IqamahCore; };
+		LA000000000000000000030 /* IqamahCore */ = {isa = XCSwiftPackageProductDependency; package = IC0000000000000000000001 /* XCLocalSwiftPackageReference "Packages/IqamahCore" */; productName = IqamahCore; };
 /* End XCSwiftPackageProductDependency section */
 
 /* Begin XCConfigurationList section */
