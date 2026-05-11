@@ -1,5 +1,6 @@
 import IqamahCore
 import SwiftUI
+import WatchConnectivity
 import WidgetKit
 
 @main
@@ -11,10 +12,14 @@ struct IqamahiOSApp: App {
         WindowGroup {
             IOSRootView()
                 .environmentObject(settings)
+                .onAppear {
+                    activateWCSession()
+                }
                 // Reschedule when settings that affect prayer times change
-                .onChange(of: settings.calculationMethod) { _, _ in reschedule(); reloadWidget() }
-                .onChange(of: settings.asrMethod) { _, _ in reschedule(); reloadWidget() }
+                .onChange(of: settings.calculationMethod) { _, _ in reschedule(); reloadWidget(); pushSettingsToWatch() }
+                .onChange(of: settings.asrMethod) { _, _ in reschedule(); reloadWidget(); pushSettingsToWatch() }
                 .onChange(of: settings.enabledPrayers) { _, _ in reschedule() }
+                .onChange(of: settings.use24HourTime) { _, _ in pushSettingsToWatch() }
                 // Reschedule on each app-active to advance the 7-day window
                 .onChange(of: scenePhase) { _, phase in
                     if phase == .active { reschedule() }
@@ -32,6 +37,9 @@ struct IqamahiOSApp: App {
                         }
                     }
                 }
+                .onReceive(NotificationCenter.default.publisher(for: .settingsDidChange)) { _ in
+                    pushSettingsToWatch()
+                }
         }
     }
 
@@ -41,5 +49,29 @@ struct IqamahiOSApp: App {
 
     private func reloadWidget() {
         WidgetCenter.shared.reloadAllTimelines()
+    }
+
+    private func activateWCSession() {
+        guard WCSession.isSupported() else { return }
+        WCSession.default.activate()
+    }
+
+    private func pushSettingsToWatch() {
+        guard WCSession.isSupported(),
+              WCSession.default.activationState == .activated,
+              WCSession.default.isWatchAppInstalled else { return }
+        var info: [String: Any] = [
+            "calculationMethod": settings.calculationMethod.rawValue,
+            "asrMethod": settings.asrMethod.rawValue,
+            "use24HourTime": settings.use24HourTime,
+        ]
+        if let city = settings.loadCity() {
+            info["selectedCityName"] = city.name
+            info["selectedCityCountryCode"] = city.countryCode
+            info["selectedCityLatitude"] = city.latitude
+            info["selectedCityLongitude"] = city.longitude
+            info["selectedCityTimezone"] = city.timezone
+        }
+        WCSession.default.transferUserInfo(info)
     }
 }

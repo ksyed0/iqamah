@@ -99,11 +99,18 @@ extension LocationService: CLLocationManagerDelegate {
             authorizationStatus = status
 
             switch status {
-            case .authorizedWhenInUse, .authorizedAlways, .authorized:
+            case .authorizedWhenInUse, .authorizedAlways:
                 if pendingLocationRequest || locationContinuation != nil {
                     pendingLocationRequest = false
                     locationManager.requestLocation()
                 }
+#if os(iOS)
+            case .authorized:
+                if pendingLocationRequest || locationContinuation != nil {
+                    pendingLocationRequest = false
+                    locationManager.requestLocation()
+                }
+#endif
             case .denied, .restricted:
                 isLoading = false
                 pendingLocationRequest = false
