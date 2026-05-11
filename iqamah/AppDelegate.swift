@@ -293,6 +293,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         windowItem.target = self
         menu.addItem(windowItem)
 
+        let moonItem = NSMenuItem(title: "Moon Sighting…", action: #selector(openHilalWatch), keyEquivalent: "")
+        moonItem.target = self
+        menu.addItem(moonItem)
+
         let settingsItem = NSMenuItem(title: "Settings", action: #selector(openSettingsFromMenu), keyEquivalent: ",")
         settingsItem.keyEquivalentModifierMask = .command
         settingsItem.target = self
@@ -342,6 +346,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         window.orderOut(nil)
         // Return to accessory policy: remove from Cmd+Tab and Dock
         NSApplication.shared.setActivationPolicy(.accessory)
+    }
+
+    @objc func openHilalWatch() {
+        NotificationCenter.default.post(name: .openHilalWatch, object: nil)
     }
 
     @objc func openSupport() {
