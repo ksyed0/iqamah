@@ -9,6 +9,17 @@ struct PrayerEntry: TimelineEntry {
     let nextPrayerName: String
     let nextPrayerTime: Date
     let cityName: String
+    let methodName: String // "" in stub entries
+    let todaysPrayers: [(name: String, time: Date)] // [] in stub entries
+    let hijriDateString: String // "" in stub entries
+
+    var countdown: String {
+        let interval = nextPrayerTime.timeIntervalSince(date)
+        guard interval > 0 else { return "Now" }
+        let hours = Int(interval) / 3600
+        let minutes = (Int(interval) % 3600) / 60
+        return hours > 0 ? "\(hours)h \(minutes)m" : "\(minutes)m"
+    }
 }
 
 // MARK: - Timeline provider
@@ -19,7 +30,16 @@ struct PrayerTimelineProvider: TimelineProvider {
             date: Date(),
             nextPrayerName: "Dhuhr",
             nextPrayerTime: Date().addingTimeInterval(3600),
-            cityName: "Makkah"
+            cityName: "Makkah",
+            methodName: "MWL",
+            todaysPrayers: [
+                ("Fajr", Date().addingTimeInterval(-7200)),
+                ("Dhuhr", Date().addingTimeInterval(3600)),
+                ("Asr", Date().addingTimeInterval(10800)),
+                ("Maghrib", Date().addingTimeInterval(18000)),
+                ("Isha", Date().addingTimeInterval(25200)),
+            ],
+            hijriDateString: "9 Dhu al-Hijjah 1447"
         )
     }
 
@@ -40,7 +60,8 @@ struct PrayerTimelineProvider: TimelineProvider {
         guard let coord = settings.activeCoordinate,
               let timezone = TimeZone(identifier: settings.activeTimezoneIdentifier)
         else {
-            return PrayerEntry(date: date, nextPrayerName: "—", nextPrayerTime: date, cityName: "—")
+            return PrayerEntry(date: date, nextPrayerName: "—", nextPrayerTime: date,
+                               cityName: "—", methodName: "", todaysPrayers: [], hijriDateString: "")
         }
 
         let calc = PrayerCalculator(
@@ -49,6 +70,17 @@ struct PrayerTimelineProvider: TimelineProvider {
             method: settings.calculationMethod,
             asrMethod: settings.asrMethod
         )
+
+        let cityName = settings.activeCityName.isEmpty ? "—" : settings.activeCityName
+        let methodName = settings.calculationMethod.shortName
+        let hijri = hijriDateString(for: date, offset: settings.hijriDayOffset)
+
+        // Full day prayer list for Large widget
+        let todaysPrayers: [(name: String, time: Date)] = if let times = try? calc.calculate(for: date) {
+            times.prayers.filter { $0.name != "Sunrise" }
+        } else {
+            []
+        }
 
         // Find next upcoming prayer (today or tomorrow if all past)
         for dayOffset in 0 ... 1 {
@@ -60,12 +92,17 @@ struct PrayerTimelineProvider: TimelineProvider {
                     date: date,
                     nextPrayerName: next.name,
                     nextPrayerTime: next.time,
-                    cityName: settings.activeCityName
+                    cityName: cityName,
+                    methodName: methodName,
+                    todaysPrayers: todaysPrayers,
+                    hijriDateString: hijri
                 )
             }
         }
 
-        return PrayerEntry(date: date, nextPrayerName: "—", nextPrayerTime: date, cityName: "—")
+        return PrayerEntry(date: date, nextPrayerName: "—", nextPrayerTime: date,
+                           cityName: cityName, methodName: methodName,
+                           todaysPrayers: todaysPrayers, hijriDateString: hijri)
     }
 }
 
@@ -81,8 +118,18 @@ struct IqamahWidgetView: View {
             smallView
         case .systemMedium:
             mediumView
+        case .systemLarge, .systemExtraLarge:
+            #if os(macOS)
+                macOSLargeWidgetView(entry: entry)
+            #else
+                LargeWidgetView(entry: entry)
+            #endif
         case .accessoryRectangular:
             lockScreenView
+        case .accessoryCircular:
+            CircularWidgetView(entry: entry)
+        case .accessoryInline:
+            InlineWidgetView(entry: entry)
         default:
             smallView
         }
@@ -153,7 +200,15 @@ struct IqamahWidget: Widget {
         }
         .configurationDisplayName("Iqamah")
         .description("Next prayer countdown for your location.")
-        .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular])
+        .supportedFamilies([
+            .systemSmall,
+            .systemMedium,
+            .systemLarge,
+            .systemExtraLarge,
+            .accessoryRectangular,
+            .accessoryCircular,
+            .accessoryInline,
+        ])
     }
 }
 

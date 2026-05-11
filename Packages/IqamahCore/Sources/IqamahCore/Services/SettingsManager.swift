@@ -70,6 +70,7 @@ public class SettingsManager: ObservableObject {
         static let hijriDayOffset = "hijriDayOffset"
         static let selectedCriterion = "selectedCriterion"
         static let hilalNotificationEnabled = "hilalNotificationEnabled"
+        static let liveActivityEnabled = "liveActivityEnabled"
     }
 
     // MARK: - Keys synced via iCloud KVS
@@ -97,6 +98,7 @@ public class SettingsManager: ObservableObject {
         Keys.hijriDayOffset,
         Keys.selectedCriterion,
         Keys.hilalNotificationEnabled,
+        Keys.liveActivityEnabled,
     ]
 
     @Published public var hasCompletedSetup: Bool {
@@ -200,6 +202,16 @@ public class SettingsManager: ObservableObject {
             defaults.set(hilalNotificationEnabled, forKey: Keys.hilalNotificationEnabled)
             guard !isApplyingRemote else { return }
             kvs.set(hilalNotificationEnabled, forKey: Keys.hilalNotificationEnabled)
+        }
+    }
+
+    /// Controls whether the Live Activity / Dynamic Island prayer countdown is active.
+    /// Independent of `hilalNotificationEnabled` — users may want one without the other.
+    @Published public var liveActivityEnabled: Bool {
+        didSet {
+            defaults.set(liveActivityEnabled, forKey: Keys.liveActivityEnabled)
+            guard !isApplyingRemote else { return }
+            kvs.set(liveActivityEnabled, forKey: Keys.liveActivityEnabled)
         }
     }
 
@@ -328,6 +340,7 @@ public class SettingsManager: ObservableObject {
         hijriDayOffset = userDefaults.integer(forKey: Keys.hijriDayOffset) // defaults to 0
         selectedCriterion = userDefaults.string(forKey: Keys.selectedCriterion) ?? "odeh"
         hilalNotificationEnabled = userDefaults.bool(forKey: Keys.hilalNotificationEnabled)
+        liveActivityEnabled = userDefaults.bool(forKey: Keys.liveActivityEnabled)
 
         // Start KVS sync: subscribe to remote changes and trigger an initial pull.
         NotificationCenter.default.addObserver(
@@ -452,6 +465,8 @@ public class SettingsManager: ObservableObject {
             if let v = kvs.string(forKey: key) { selectedCriterion = v }
         case Keys.hilalNotificationEnabled:
             hilalNotificationEnabled = kvs.bool(forKey: key)
+        case Keys.liveActivityEnabled:
+            liveActivityEnabled = kvs.bool(forKey: key)
         default:
             break
         }
@@ -615,7 +630,7 @@ public class SettingsManager: ObservableObject {
 }
 
 public extension Double {
-    public func rounded(toPlaces places: Int) -> Double {
+    func rounded(toPlaces places: Int) -> Double {
         let factor = pow(10.0, Double(places))
         return (self * factor).rounded() / factor
     }

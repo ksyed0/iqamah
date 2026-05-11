@@ -22,7 +22,12 @@ struct IqamahiOSApp: App {
                 .onChange(of: settings.use24HourTime) { _, _ in pushSettingsToWatch() }
                 // Reschedule on each app-active to advance the 7-day window
                 .onChange(of: scenePhase) { _, phase in
-                    if phase == .active { reschedule() }
+                    if phase == .active {
+                        reschedule()
+                        if settings.liveActivityEnabled {
+                            Task { await PrayerActivityManager.shared.startOrUpdateActivity(settings: settings) }
+                        }
+                    }
                 }
                 .onChange(of: settings.hilalNotificationEnabled) { _, enabled in
                     Task {
@@ -37,8 +42,22 @@ struct IqamahiOSApp: App {
                         }
                     }
                 }
+                // Live Activity: refresh on every app-active and on settings changes
+                .onChange(of: settings.liveActivityEnabled) { _, enabled in
+                    Task {
+                        if enabled {
+                            await PrayerActivityManager.shared.startOrUpdateActivity(settings: settings)
+                        } else {
+                            await PrayerActivityManager.shared.endActivity()
+                        }
+                    }
+                }
                 .onReceive(NotificationCenter.default.publisher(for: .settingsDidChange)) { _ in
                     pushSettingsToWatch()
+                    guard settings.liveActivityEnabled else { return }
+                    Task {
+                        await PrayerActivityManager.shared.startOrUpdateActivity(settings: settings)
+                    }
                 }
         }
     }
