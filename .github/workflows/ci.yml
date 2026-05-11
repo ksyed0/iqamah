@@ -81,6 +81,17 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             | xcpretty --color && exit ${PIPESTATUS[0]}
 
+      - name: Build IqamahWatch (Debug)
+        run: |
+          xcodebuild \
+            -project ${{ env.PROJECT }} \
+            -scheme IqamahWatch \
+            -configuration Debug \
+            -destination 'platform=watchOS Simulator,OS=latest,name=Apple Watch Series 9 (45mm)' \
+            build \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcpretty --color && exit ${PIPESTATUS[0]}
+
   # ──────────────────────────────────────────────────────────────────────────
   # 4. TEST + COVERAGE — run tests, enforce ≥80% code coverage
   # ──────────────────────────────────────────────────────────────────────────
@@ -113,6 +124,17 @@ jobs:
         run: |
           cd Packages/IqamahCore
           swift test 2>&1 | tail -5
+
+      - name: Run IqamahWatch tests
+        run: |
+          xcodebuild \
+            -project ${{ env.PROJECT }} \
+            -scheme IqamahWatch \
+            -configuration Debug \
+            -destination 'platform=watchOS Simulator,OS=latest,name=Apple Watch Series 9 (45mm)' \
+            test \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcpretty --color && exit ${PIPESTATUS[0]}
 
       - name: Enforce ≥75% domain coverage
         run: |
