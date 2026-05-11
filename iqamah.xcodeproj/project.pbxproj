@@ -91,6 +91,11 @@
 
 		WT000000000000000000041 /* PrayerEntry.swift in Sources (WatchTests) */ = {isa = PBXBuildFile; fileRef = WW000000000000000000040R /* PrayerEntry.swift */; };
 		WT000000000000000000042 /* PrayerTimelineProvider.swift in Sources (WatchTests) */ = {isa = PBXBuildFile; fileRef = WW000000000000000000041R /* PrayerTimelineProvider.swift */; };
+
+		WV000000000000000000001 /* LargeWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WV000000000000000000001R; };
+		WV000000000000000000002 /* CircularWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WV000000000000000000002R; };
+		WV000000000000000000003 /* InlineWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WV000000000000000000003R; };
+		WV000000000000000000004 /* macOSLargeWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WV000000000000000000004R; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -229,6 +234,11 @@
 		WA000000000000000000016R /* WatchSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSessionManager.swift; sourceTree = "<group>"; };
 		WW000000000000000000032R /* IqamahWatchWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IqamahWatchWidget.swift; sourceTree = "<group>"; };
 		WT000000000000000000020R /* QiblaTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QiblaTests.swift; sourceTree = "<group>"; };
+
+		WV000000000000000000001R /* LargeWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LargeWidgetView.swift; sourceTree = "<group>"; };
+		WV000000000000000000002R /* CircularWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircularWidgetView.swift; sourceTree = "<group>"; };
+		WV000000000000000000003R /* InlineWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InlineWidgetView.swift; sourceTree = "<group>"; };
+		WV000000000000000000004R /* macOSLargeWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = macOSLargeWidgetView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -405,6 +415,10 @@
 			isa = PBXGroup;
 			children = (
 				WG000000000000000000011 /* IqamahWidget.swift */,
+				WV000000000000000000001R /* LargeWidgetView.swift */,
+				WV000000000000000000002R /* CircularWidgetView.swift */,
+				WV000000000000000000003R /* InlineWidgetView.swift */,
+				WV000000000000000000004R /* macOSLargeWidgetView.swift */,
 				WG000000000000000000012 /* Info.plist */,
 				WG000000000000000000013 /* IqamahWidget.entitlements */,
 			);
@@ -770,6 +784,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				WG000000000000000000021 /* IqamahWidget.swift in Sources */,
+				WV000000000000000000001 /* LargeWidgetView.swift in Sources */,
+				WV000000000000000000002 /* CircularWidgetView.swift in Sources */,
+				WV000000000000000000003 /* InlineWidgetView.swift in Sources */,
+				WV000000000000000000004 /* macOSLargeWidgetView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
