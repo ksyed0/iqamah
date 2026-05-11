@@ -100,12 +100,12 @@ struct QiblahView: View {
                 // Medium = every 10°, Minor = every 5°
                 ForEach(0 ..< 72, id: \.self) { i in
                     let angle = Double(i) * 5
-                    let isCardinal  = i % 18 == 0          // 0 90 180 270
-                    let isSemiCard  = i % 9 == 0 && !isCardinal  // 45 135 225 315
-                    let isMedium    = i % 2 == 0 && !isCardinal && !isSemiCard // every 10°
+                    let isCardinal = i % 18 == 0 // 0 90 180 270
+                    let isSemiCard = i % 9 == 0 && !isCardinal // 45 135 225 315
+                    let isMedium = i % 2 == 0 && !isCardinal && !isSemiCard // every 10°
                     let tickLen: CGFloat = isCardinal ? 22 : isSemiCard ? 14 : isMedium ? 9 : 5
-                    let tickW: CGFloat   = isCardinal ? 2.5 : isSemiCard ? 1.5 : 1
-                    let opacity: Double  = isCardinal ? 0.90 : isSemiCard ? 0.60 : isMedium ? 0.35 : 0.20
+                    let tickW: CGFloat = isCardinal ? 2.5 : isSemiCard ? 1.5 : 1
+                    let opacity: Double = isCardinal ? 0.90 : isSemiCard ? 0.60 : isMedium ? 0.35 : 0.20
                     Rectangle()
                         .fill(Color.primary.opacity(opacity))
                         .frame(width: tickW, height: tickLen)
@@ -155,8 +155,8 @@ struct QiblahView: View {
                     let cx = size.width / 2
                     let cy = size.height / 2
                     let rad = qiblahBearing * .pi / 180
-                    let matEdge: Double = 52        // half mat height
-                    let ringEdge: Double = 134      // inner edge of tick ring
+                    let matEdge: Double = 52 // half mat height
+                    let ringEdge: Double = 134 // inner edge of tick ring
                     let x1 = cx + CGFloat(sin(rad) * matEdge)
                     let y1 = cy - CGFloat(cos(rad) * matEdge)
                     let x2 = cx + CGFloat(sin(rad) * ringEdge)
@@ -175,7 +175,7 @@ struct QiblahView: View {
                     let tipX = x2, tipY = y2
                     let baseX = x2 - CGFloat(sin(rad) * backLen)
                     let baseY = y2 + CGFloat(cos(rad) * backLen)
-                    let left  = CGPoint(x: baseX + CGFloat(cos(perpAngle) * 5), y: baseY + CGFloat(sin(perpAngle) * 5))
+                    let left = CGPoint(x: baseX + CGFloat(cos(perpAngle) * 5), y: baseY + CGFloat(sin(perpAngle) * 5))
                     let right = CGPoint(x: baseX - CGFloat(cos(perpAngle) * 5), y: baseY - CGFloat(sin(perpAngle) * 5))
                     var arrow = Path()
                     arrow.move(to: CGPoint(x: tipX, y: tipY))
