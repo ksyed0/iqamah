@@ -102,13 +102,34 @@ struct PrayerTimesView: View {
                 .accessibilityLabel("About Iqamah")
 
                 Spacer()
-
-                // Hijri date lives here — frees the date block below for Gregorian only
-                Text(currentDate.formattedHijriDate())
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .padding(.trailing, 16)
             }
+            .background {
+                Rectangle().fill(.ultraThinMaterial)
+            }
+
+            // Moon phase preview + Hilal Watch entry
+            HStack(spacing: 12) {
+                MoonPhaseView(phase: currentMoonPhase, size: 56)
+                    .accessibilityLabel(moonPhaseAccessibilityLabel)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(hijriDateLabel)
+                        .font(.subheadline)
+                    Text(isHilalWatchEvening ? "Hilal Watch tonight" : moonPhaseSubtitle)
+                        .font(.caption)
+                        .foregroundStyle(isHilalWatchEvening ? .orange : .secondary)
+                }
+
+                Spacer()
+
+                Button("Details") {
+                    openHilalWatch()
+                }
+                .buttonStyle(.borderless)
+                .font(.caption)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
             .background {
                 Rectangle().fill(.ultraThinMaterial)
             }
@@ -172,6 +193,62 @@ struct PrayerTimesView: View {
         }
     }
 
+    // MARK: - Moon phase + Hijri computed properties
+
+    private var currentMoonPhase: Double {
+        // Synodic phase fraction 0–1
+        let now = Date()
+        let prev = NewMoon.previous(before: now)
+        let elapsed = now.timeIntervalSince(prev)
+        let synodicMonth = 29.530588 * 86400.0
+        return (elapsed / synodicMonth).truncatingRemainder(dividingBy: 1.0)
+    }
+
+    private var isHilalWatchEvening: Bool {
+        // True on the 29th or 30th day of the current Hijri month
+        let cal = Calendar(identifier: .islamicUmmAlQura)
+        let day = cal.component(.day, from: Date())
+        return day == 29 || day == 30
+    }
+
+    private var moonPhaseSubtitle: String {
+        let phase = currentMoonPhase
+        switch phase {
+        case 0 ..< 0.03: return "New Moon"
+        case 0.03 ..< 0.25: return "Waxing Crescent"
+        case 0.25 ..< 0.27: return "First Quarter"
+        case 0.27 ..< 0.48: return "Waxing Gibbous"
+        case 0.48 ..< 0.52: return "Full Moon"
+        case 0.52 ..< 0.73: return "Waning Gibbous"
+        case 0.73 ..< 0.75: return "Last Quarter"
+        case 0.75 ..< 0.97: return "Waning Crescent"
+        default: return "New Moon"
+        }
+    }
+
+    private var moonPhaseAccessibilityLabel: String {
+        "\(moonPhaseSubtitle), \(Int(currentMoonPhase * 29.5)) days old"
+    }
+
+    private var hijriDateLabel: String {
+        let date = Date()
+        let cal = Calendar(identifier: .islamicUmmAlQura)
+        var comps = cal.dateComponents([.day, .month, .year], from: date)
+        if let day = comps.day {
+            comps.day = day + settingsStore.hijriDayOffset
+        }
+        let monthNames = ["Muharram", "Safar", "Rabi' al-Awwal", "Rabi' al-Thani",
+                          "Jumada al-Awwal", "Jumada al-Thani", "Rajab", "Sha'ban",
+                          "Ramadan", "Shawwal", "Dhu al-Qi'dah", "Dhu al-Hijjah"]
+        let m = (comps.month ?? 1) - 1
+        let monthName = m >= 0 && m < 12 ? monthNames[m] : ""
+        return "\(comps.day ?? 1) \(monthName) \(comps.year ?? 1446) AH"
+    }
+
+    private func openHilalWatch() {
+        NotificationCenter.default.post(name: .openHilalWatch, object: nil)
+    }
+
     private func calculatePrayerTimes() {
         let timezone = TimeZone(identifier: city.timezone) ?? .current
         let calculator = PrayerCalculator(
@@ -201,119 +278,6 @@ struct PrayerTimesView: View {
         } else {
             currentDate = newDate
         }
-    }
-}
-
-struct PrayerTimesTable: View {
-    let prayerTimes: PrayerTimes
-    let timezone: TimeZone
-
-    @State private var adjustments: [String: Int] = [:]
-    @State private var adhaanSelections: [String: Adhaan] = [:]
-    @State private var prayerMuted: [String: Bool] = [:]
-    @State private var expandedPrayerName: String? = nil
-    @ObservedObject private var settingsManager = SettingsManager.shared
-    @ObservedObject private var player = AdhaaanPlayer.shared
-
-    private var timeFormatter: DateFormatter {
-        PrayerTimes.timeFormatter(for: timezone, use24Hour: settingsManager.use24HourTime)
-    }
-
-    var body: some View {
-        VStack(spacing: 1) {
-            ForEach(prayerTimes.prayers, id: \.name) { prayer in
-                let isSunrise = prayer.name == "Sunrise"
-                let adjusted = adjustedTime(for: prayer)
-                if isSunrise {
-                    SunriseRow(time: adjusted, formatter: timeFormatter)
-                } else {
-                    PrayerTimeRow(
-                        name: prayer.name,
-                        time: adjusted,
-                        formatter: timeFormatter,
-                        adjustment: adjustments[prayer.name] ?? 0,
-                        selectedAdhaan: Binding(
-                            get: { adhaanSelections[prayer.name] ?? .silent },
-                            set: { newAdhaan in
-                                adhaanSelections[prayer.name] = newAdhaan
-                                settingsManager.setAdhaan(newAdhaan, for: prayer.name)
-                            }
-                        ),
-                        isPrayerMuted: Binding(
-                            get: { prayerMuted[prayer.name] ?? false },
-                            set: { muted in
-                                prayerMuted[prayer.name] = muted
-                                settingsManager.setPrayerMuted(muted, for: prayer.name)
-                            }
-                        ),
-                        isHighlighted: isNextPrayer(adjustedTime: adjusted),
-                        isPickerExpanded: expandedPrayerName == prayer.name,
-                        onTogglePicker: {
-                            withAnimation(.easeInOut(duration: 0.18)) {
-                                expandedPrayerName = expandedPrayerName == prayer.name ? nil : prayer.name
-                            }
-                        },
-                        onAdjust: { delta in adjustPrayerTime(for: prayer.name, delta: delta) }
-                    )
-                }
-            }
-        }
-        .onAppear { loadAdjustments() }
-
-        // Reset button — only shown when at least one adjustment is non-zero
-        if adjustments.values.contains(where: { $0 != 0 }) {
-            HStack {
-                Spacer()
-                Button(action: resetAllAdjustments) {
-                    Label("Reset adjustments", systemImage: "arrow.counterclockwise")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                .buttonStyle(.plain)
-                .help("Clear all ± minute adjustments and return to calculated times")
-            }
-            .padding(.horizontal, 4)
-            .padding(.top, 6)
-        }
-    }
-
-    private func loadAdjustments() {
-        for prayer in prayerTimes.prayers {
-            adjustments[prayer.name] = settingsManager.getAdjustment(for: prayer.name)
-            adhaanSelections[prayer.name] = settingsManager.getAdhaan(for: prayer.name)
-            prayerMuted[prayer.name] = settingsManager.isPrayerMuted(prayer.name)
-        }
-    }
-
-    private func adjustedTime(for prayer: (name: String, time: Date)) -> Date {
-        let adjustmentMinutes = adjustments[prayer.name] ?? 0
-        return Calendar.current.date(byAdding: .minute, value: adjustmentMinutes, to: prayer.time) ?? prayer.time
-    }
-
-    private func resetAllAdjustments() {
-        settingsManager.resetAdjustments()
-        for prayer in prayerTimes.prayers {
-            adjustments[prayer.name] = 0
-        }
-    }
-
-    private func adjustPrayerTime(for prayerName: String, delta: Int) {
-        let currentAdjustment = adjustments[prayerName] ?? 0
-        let newAdjustment = currentAdjustment + delta
-        adjustments[prayerName] = newAdjustment
-        settingsManager.setAdjustment(newAdjustment, for: prayerName)
-    }
-
-    // BUG-0015: compare adjusted times so this matches the status bar highlight
-    private func isNextPrayer(adjustedTime: Date) -> Bool {
-        let now = Date()
-        for prayer in prayerTimes.prayers {
-            let adj = self.adjustedTime(for: prayer)
-            if adj > now {
-                return adj == adjustedTime
-            }
-        }
-        return adjustedTime == self.adjustedTime(for: (name: "Fajr", time: prayerTimes.fajr))
     }
 }
 

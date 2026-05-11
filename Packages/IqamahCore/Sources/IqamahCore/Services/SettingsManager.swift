@@ -65,6 +65,10 @@ public class SettingsManager: ObservableObject {
         static let gpsCoordinateCached = "gpsCoordinateCached"
         static let gpsDetectedCity = "gpsDetectedCity" // JSON-encoded City
         static let enabledPrayers = "enabledPrayers"
+        static let hijriCalendarIdentifier = "hijriCalendarIdentifier"
+        static let hijriDayOffset = "hijriDayOffset"
+        static let selectedCriterion = "selectedCriterion"
+        static let hilalNotificationEnabled = "hilalNotificationEnabled"
     }
 
     // MARK: - Keys synced via iCloud KVS
@@ -88,6 +92,10 @@ public class SettingsManager: ObservableObject {
         Keys.prayerAdhaanIds,
         Keys.mutedPrayers,
         Keys.enabledPrayers,
+        Keys.hijriCalendarIdentifier,
+        Keys.hijriDayOffset,
+        Keys.selectedCriterion,
+        Keys.hilalNotificationEnabled,
     ]
 
     @Published public var hasCompletedSetup: Bool {
@@ -160,6 +168,38 @@ public class SettingsManager: ObservableObject {
     /// Returns true if local notifications are enabled for the given prayer name.
     public func isPrayerEnabled(_ name: String) -> Bool {
         enabledPrayers.contains(name)
+    }
+
+    @Published public var hijriCalendarIdentifier: String {
+        didSet {
+            defaults.set(hijriCalendarIdentifier, forKey: Keys.hijriCalendarIdentifier)
+            guard !isApplyingRemote else { return }
+            kvs.set(hijriCalendarIdentifier, forKey: Keys.hijriCalendarIdentifier)
+        }
+    }
+
+    @Published public var hijriDayOffset: Int {
+        didSet {
+            defaults.set(hijriDayOffset, forKey: Keys.hijriDayOffset)
+            guard !isApplyingRemote else { return }
+            kvs.set(hijriDayOffset, forKey: Keys.hijriDayOffset)
+        }
+    }
+
+    @Published public var selectedCriterion: String {
+        didSet {
+            defaults.set(selectedCriterion, forKey: Keys.selectedCriterion)
+            guard !isApplyingRemote else { return }
+            kvs.set(selectedCriterion, forKey: Keys.selectedCriterion)
+        }
+    }
+
+    @Published public var hilalNotificationEnabled: Bool {
+        didSet {
+            defaults.set(hilalNotificationEnabled, forKey: Keys.hilalNotificationEnabled)
+            guard !isApplyingRemote else { return }
+            kvs.set(hilalNotificationEnabled, forKey: Keys.hilalNotificationEnabled)
+        }
     }
 
     // MARK: - Active location accessors (single source of truth for notifications + widget)
@@ -283,6 +323,11 @@ public class SettingsManager: ObservableObject {
             enabledPrayers = Self.defaultEnabledPrayers
         }
 
+        hijriCalendarIdentifier = userDefaults.string(forKey: Keys.hijriCalendarIdentifier) ?? "islamic-umalqura"
+        hijriDayOffset = userDefaults.integer(forKey: Keys.hijriDayOffset) // defaults to 0
+        selectedCriterion = userDefaults.string(forKey: Keys.selectedCriterion) ?? "odeh"
+        hilalNotificationEnabled = userDefaults.bool(forKey: Keys.hilalNotificationEnabled)
+
         // Start KVS sync: subscribe to remote changes and trigger an initial pull.
         NotificationCenter.default.addObserver(
             self,
@@ -398,6 +443,14 @@ public class SettingsManager: ObservableObject {
             if let arr = kvs.array(forKey: key) as? [String] {
                 enabledPrayers = Set(arr)
             }
+        case Keys.hijriCalendarIdentifier:
+            if let v = kvs.string(forKey: key) { hijriCalendarIdentifier = v }
+        case Keys.hijriDayOffset:
+            hijriDayOffset = Int(kvs.longLong(forKey: key))
+        case Keys.selectedCriterion:
+            if let v = kvs.string(forKey: key) { selectedCriterion = v }
+        case Keys.hilalNotificationEnabled:
+            hilalNotificationEnabled = kvs.bool(forKey: key)
         default:
             break
         }

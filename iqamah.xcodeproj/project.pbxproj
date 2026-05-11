@@ -60,6 +60,7 @@
 		HW000000000000000000017 /* AboutHilalWatchCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000007 /* AboutHilalWatchCard.swift */; };
 		HW000000000000000000018 /* HilalWatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000008 /* HilalWatchView.swift */; };
 		HW000000000000000000019 /* HilalWatchWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000009 /* HilalWatchWindow.swift */; };
+		SH00000000000000000001A /* HilalShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = SH00000000000000000000A /* HilalShareSheet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -151,6 +152,7 @@
 		HW000000000000000000007 /* AboutHilalWatchCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutHilalWatchCard.swift; sourceTree = "<group>"; };
 		HW000000000000000000008 /* HilalWatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HilalWatchView.swift; sourceTree = "<group>"; };
 		HW000000000000000000009 /* HilalWatchWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HilalWatchWindow.swift; sourceTree = "<group>"; };
+		SH00000000000000000000A /* HilalShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HilalShareSheet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -340,6 +342,7 @@
 				HW000000000000000000006 /* HilalCriterionPicker.swift */,
 				HW000000000000000000007 /* AboutHilalWatchCard.swift */,
 				HW000000000000000000008 /* HilalWatchView.swift */,
+				SH00000000000000000000A /* HilalShareSheet.swift */,
 			);
 			path = HilalWatch;
 			sourceTree = "<group>";
@@ -543,6 +546,7 @@
 				HW000000000000000000017 /* AboutHilalWatchCard.swift in Sources */,
 				HW000000000000000000018 /* HilalWatchView.swift in Sources */,
 				HW000000000000000000019 /* HilalWatchWindow.swift in Sources */,
+				SH00000000000000000001A /* HilalShareSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
