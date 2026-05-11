@@ -22,7 +22,7 @@
 | File | Purpose |
 |------|---------|
 | `IqamahWidget/LargeWidgetView.swift` | `.systemLarge` — full prayer schedule, gold highlight |
-| `IqamahWidget/ExtraLargeWidgetView.swift` | `.systemExtraLarge` — iPad two-column today/tomorrow |
+| _ExtraLargeWidgetView_ | **Not a separate file** — `.systemExtraLarge` reuses `LargeWidgetView` unchanged; SwiftUI adapts geometry automatically |
 | `IqamahWidget/CircularWidgetView.swift` | `.accessoryCircular` — arc + initial + countdown |
 | `IqamahWidget/InlineWidgetView.swift` | `.accessoryInline` — `"🕐 Asr at 3:42 PM"` text |
 | `IqamahWidget/macOSLargeWidgetView.swift` | macOS-specific full schedule view |
@@ -257,6 +257,8 @@ git commit -m "feat: add liveActivityEnabled to SettingsManager (KVS-synced, ind
 
 ## Task 3 — iOS Widget: new families
 
+> ⚠️ **Ordering:** Execute Steps 5–6 (extend `PrayerEntry` + update provider) BEFORE Steps 1–4 (create view files). Views reference new `PrayerEntry` fields.
+
 **Files:**
 - Create: `IqamahWidget/LargeWidgetView.swift`
 - Create: `IqamahWidget/CircularWidgetView.swift`
@@ -471,8 +473,9 @@ struct PrayerEntry: TimelineEntry {
     let nextPrayerTime: Date
     let cityName: String
     let methodName: String      // ← add this (was missing)
-    let todaysPrayers: [(name: String, time: Date)]  // ← add this
-    let hijriDateString: String  // ← add this
+    let methodName: String         // ← add; default "" in stubs
+    let todaysPrayers: [(name: String, time: Date)]  // ← add; default [] in stubs
+    let hijriDateString: String    // ← add; default "" in stubs
 
     /// Formatted relative countdown, e.g. "2h 14m"
     var countdown: String {
@@ -827,6 +830,41 @@ xcodebuild -project iqamah.xcodeproj -list 2>&1 | grep IqamahLiveActivity
 ```
 Expected: `IqamahLiveActivity` listed.
 
+
+- [ ] **Step 5b: Embed `IqamahLiveActivity` in iOS app target**
+
+Without this, the extension won't ship inside the app bundle. Add a CopyFiles (Embed App Extensions) build phase to the iOS target. Run this Python snippet:
+
+```python
+import re, sys
+path = "iqamah.xcodeproj/project.pbxproj"
+with open(path) as f: c = f.read()
+EMBED_PHASE = "LA000000000000000000020"
+EMBED_BF    = "LA000000000000000000021"
+LA_PROD_REF = "LA000000000000000000005"
+new_bf = f"\t\t{EMBED_BF} /* IqamahLiveActivity.appex in Embed */ = {{isa = PBXBuildFile; fileRef = {LA_PROD_REF}; settings = {{ATTRIBUTES = (RemoveHeadersOnCopy, ); }}; }};\n"
+new_phase = f"""\t\t{EMBED_PHASE} /* Embed App Extensions */ = {{
+\t\t\tisa = PBXCopyFilesBuildPhase; buildActionMask = 2147483647;
+\t\t\tdstPath = ""; dstSubfolderSpec = 13;
+\t\t\tfiles = ({EMBED_BF} /* IqamahLiveActivity.appex in Embed */,);
+\t\t\tname = "Embed App Extensions"; runOnlyForDeploymentPostprocessing = 0;
+\t\t}};\n"""
+if "/* End PBXCopyFilesBuildPhase section */" not in c:
+    c = c.replace("/* End PBXBuildFile section */", new_bf + "/* End PBXBuildFile section */")
+    # Insert before first PBXNativeTarget section as a new section
+    c = c.replace("/* Begin PBXNativeTarget section */",
+                  "/* Begin PBXCopyFilesBuildPhase section */\n" + new_phase + "/* End PBXCopyFilesBuildPhase section */\n\n/* Begin PBXNativeTarget section */")
+else:
+    c = c.replace("/* End PBXBuildFile section */", new_bf + "/* End PBXBuildFile section */")
+    c = c.replace("/* End PBXCopyFilesBuildPhase section */", new_phase + "/* End PBXCopyFilesBuildPhase section */")
+# Add embed phase to iOS target's buildPhases list (find iOS native target)
+ios_target = re.search(r"(iOS0000000000000000000040[^{]*\{[^}]*buildPhases = \()([^)]+)(\))", c, re.DOTALL)
+if ios_target:
+    c = c[:ios_target.start(2)] + ios_target.group(2) + f"\n\t\t\t\t{EMBED_PHASE} /* Embed App Extensions */," + c[ios_target.end(2):]
+with open(path, "w") as f: f.write(c)
+print("Embed phase added")
+```
+
 - [ ] **Step 6: Commit**
 
 ```bash
@@ -1071,11 +1109,42 @@ private struct LockScreenLiveActivityView: View {
 }
 ```
 
-Note: `MoonPhaseView` is defined in `iqamah/Views/HilalWatch/MoonPhaseView.swift` (macOS target only currently). For the Live Activity extension, either:
-- Move `MoonPhaseView` to `IqamahCore` so it's available to the extension, OR
-- Inline the crescent SVG Canvas rendering inside `PrayerLiveActivityView.swift`
+**Important:** `MoonPhaseView` is macOS-app-only and inaccessible from `IqamahLiveActivity`. Use this inline `CrescentView` instead:
 
-**Recommended:** Inline the Canvas rendering in the Live Activity (copy the parametric crescent code from `MoonPhaseView.swift` into a private `CrescentView` struct in `PrayerLiveActivityView.swift`) to avoid moving UI code into IqamahCore.
+```swift
+private struct CrescentView: View {
+    let phase: Double  // 0-1 synodic fraction
+    let size: CGFloat
+    private let gold = Color(red: 1.0, green: 0.839, blue: 0.039)
+
+    var body: some View {
+        Canvas { ctx, sz in
+            let r = min(sz.width, sz.height) / 2 - 1
+            let cx = sz.width / 2, cy = sz.height / 2
+            // Dark disc
+            let disc = Path(ellipseIn: CGRect(x: cx-r, y: cy-r, width: r*2, height: r*2))
+            ctx.fill(disc, with: .color(Color(red: 0.04, green: 0.04, blue: 0.13)))
+            guard phase > 0.02 else { return }
+            if phase > 0.48 && phase < 0.52 {
+                ctx.fill(disc, with: .color(gold.opacity(0.92))); return
+            }
+            let waxing = phase < 0.5
+            let innerRx = abs(r * (waxing ? 1 - phase * 2 : phase * 2 - 1))
+            var path = Path()
+            path.move(to: CGPoint(x: cx, y: cy - r))
+            path.addArc(center: CGPoint(x: cx, y: cy), radius: r,
+                        startAngle: .degrees(-90), endAngle: .degrees(90), clockwise: !waxing)
+            path.addArc(center: CGPoint(x: cx, y: cy), radius: innerRx,
+                        startAngle: .degrees(90), endAngle: .degrees(-90), clockwise: waxing)
+            path.closeSubpath()
+            ctx.fill(path, with: .color(gold.opacity(0.90)))
+        }
+        .frame(width: size, height: size)
+    }
+}
+```
+
+Replace all `MoonPhaseView(size: X, phase: Y)` calls in this file with `CrescentView(phase: Y, size: X)`.
 
 - [ ] **Step 3: Register files in pbxproj**
 
@@ -1402,4 +1471,6 @@ gh pr create --base develop \
 - `moonPhase(for:)` defined Task 1, called in `PrayerTimelineProvider` (Task 3) and `PrayerActivityManager` (Task 6) ✅
 - `hijriDateString(for:offset:)` defined Task 1, called in both providers ✅
 
-**Last Updated:** 2026-05-11
+**Review fixes applied 2026-05-11:** Task 3 ordering warning added; PrayerEntry new fields get empty defaults; CrescentView inline code replaces MoonPhaseView note; embed step added to Task 4; ExtraLargeWidgetView clarified as not needed.
+
+**Last Updated:** 2026-05-11 (post-review)
