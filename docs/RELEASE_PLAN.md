@@ -1368,16 +1368,119 @@ rm adhaan_4_original_backup.mp3
 - [ ] AC-0248: Hi-res snapshot + composite completes in under 2.5 s on iPhone 12+ / Apple Silicon Mac
 ---
 
+---
+
+## EPIC-0012: Apple Watch App (2026-05-10)
+
+**Description:** Add a native watchOS app that surfaces the next prayer time as a complication on the watch face, shows a full prayer list on-watch, and delivers a haptic tap at prayer time. Reuses `IqamahCore` for all calculation logic. Settings sync via Watch Connectivity from the iPhone companion app.
+
+**Promoted from:** ENH-016 (see `docs/ENHANCEMENTS.md`)
+
+**Release Target:** v2.1 (post iOS conversion + Hilal Watch)
+**Status:** 🔵 Planned
+**Dependencies:** EPIC-0010 (iOS app is required as the Watch Connectivity host); EPIC-0011 (Hilal Watch) not strictly required but sharing `IqamahCore` Astronomy module is a bonus.
+
+**Key technical decisions:**
+- `IqamahCore` shared via local Swift Package — `PrayerCalculator` and all models run on watchOS with zero changes
+- Settings sourced from `WCSession` (Watch Connectivity) from iPhone; on-watch fallback if iPhone unreachable
+- No custom adhaan audio — watchOS system limitation. Haptic notification at prayer time only
+- WidgetKit complications (watchOS 7+): `.accessoryCorner`, `.accessoryCircular`, `.accessoryRectangular`, `.accessoryInline` families
+- Prayer times computed on-watch (calculator is fast enough; avoids WCSession round-trip latency)
+- App Group `group.com.fablesoft.iqamah` shared with iOS + macOS for UserDefaults settings (already established in EPIC-0010)
+
+---
+
+### US-0053 (EPIC-0012): As a user, I want a watchOS app target so that Iqamah installs on my Apple Watch when I install it on iPhone.
+
+**Priority:** High
+**Estimate:** 3 Story Points
+**Status:** 🔵 Planned
+**Dependencies:** US-0041 (iOS app target)
+
+**Acceptance Criteria:**
+- [ ] AC-0252: A `IqamahWatch` watchOS target exists in `iqamah.xcodeproj` with deployment target watchOS 10.0+
+- [ ] AC-0253: `IqamahCore` is a dependency of `IqamahWatch`; `xcodebuild -scheme IqamahWatch` builds clean
+- [ ] AC-0254: Installing the iOS app on a paired iPhone installs the watch app automatically (universal purchase, same bundle ID prefix `com.fablesoft.iqamah.watch`)
+- [ ] AC-0255: Watch app launches to a prayer times list showing today's 5 prayer times
+
+---
+
+### US-0054 (EPIC-0012): As a user, I want prayer times on my watch face as a complication so that I can see the next prayer without opening the app.
+
+**Priority:** High
+**Estimate:** 5 Story Points
+**Status:** 🔵 Planned
+**Dependencies:** US-0053
+
+**Acceptance Criteria:**
+- [ ] AC-0256: `IqamahComplication` WidgetKit target provides a `TimelineProvider` that schedules entries for all prayer times today + tomorrow
+- [ ] AC-0257: `.accessoryCorner` family shows next prayer name + relative time (e.g. "Asr · 2h 14m")
+- [ ] AC-0258: `.accessoryCircular` family shows a circular countdown arc + prayer initial
+- [ ] AC-0259: `.accessoryRectangular` family shows next prayer name + absolute time + city name
+- [ ] AC-0260: `.accessoryInline` family shows "Asr at 3:42 PM"
+- [ ] AC-0261: Timeline refreshes automatically at each prayer time (`.policy: .after(nextPrayerDate)`)
+- [ ] AC-0262: Complication reflects the user's selected calculation method (read from App Group UserDefaults)
+
+---
+
+### US-0055 (EPIC-0012): As a user, I want a haptic notification at each prayer time so that my watch taps my wrist when it is time to pray.
+
+**Priority:** High
+**Estimate:** 3 Story Points
+**Status:** 🔵 Planned
+**Dependencies:** US-0053
+
+**Acceptance Criteria:**
+- [ ] AC-0263: A `UNUserNotificationRequest` is scheduled for each enabled prayer time (uses `enabledPrayers` from `SettingsManager`)
+- [ ] AC-0264: Notification sound is `.default` (system haptic) — no custom adhaan audio (watchOS limitation)
+- [ ] AC-0265: Notification body reads "Time for [Prayer]" with the city name as subtitle
+- [ ] AC-0266: Tapping the notification opens the watch app to the prayer times list
+- [ ] AC-0267: Notifications re-schedule automatically on app-active (same 7-day rolling window as iOS, Task 4.3)
+
+---
+
+### US-0056 (EPIC-0012): As a user, I want the watch app to show my prayer times correctly without needing my phone nearby.
+
+**Priority:** Medium
+**Estimate:** 3 Story Points
+**Status:** 🔵 Planned
+**Dependencies:** US-0053
+
+**Acceptance Criteria:**
+- [ ] AC-0268: Prayer times are computed on-watch using `PrayerCalculator` from `IqamahCore` — no network or iPhone required at runtime
+- [ ] AC-0269: Settings (city, calculation method) are received from iPhone via `WCSession.transferUserInfo(_:)` whenever they change in the iOS app
+- [ ] AC-0270: On first launch (before any iPhone sync), the watch app shows a "Open Iqamah on iPhone to set your location" placeholder
+- [ ] AC-0271: If iPhone is unreachable, the watch uses the last-received settings cached in App Group UserDefaults
+
+---
+
+### US-0057 (EPIC-0012): As a user, I want the watch app UI to follow Apple Watch design conventions so that it feels native on my wrist.
+
+**Priority:** Medium
+**Estimate:** 2 Story Points
+**Status:** 🔵 Planned
+**Dependencies:** US-0053
+
+**Acceptance Criteria:**
+- [ ] AC-0272: Watch app uses SwiftUI `List` with Digital Crown scrolling for the prayer times list
+- [ ] AC-0273: The next upcoming prayer is highlighted with a green accent; past prayers are dimmed
+- [ ] AC-0274: Time display uses the system clock format (12h or 24h matching watch system setting)
+- [ ] AC-0275: App icon is provided in all required watchOS sizes
+
+---
+
 ## Updated Summary Statistics (2026-05-10)
 
-**Total Epics:** 11 (EPIC-0001 through EPIC-0011)
-**Total User Stories:** 52 (US-0001 through US-0052)
-**Total Acceptance Criteria:** 251 (AC-0001 through AC-0251)
+**Total Epics:** 12 (EPIC-0001 through EPIC-0012)
+**Total User Stories:** 57 (US-0001 through US-0057)
+**Total Acceptance Criteria:** 275 (AC-0001 through AC-0275)
 
 **EPIC-0010 Stories:** 6 (US-0040 – US-0045)
 **EPIC-0010 Acceptance Criteria:** 35 (AC-0169 – AC-0203)
 **EPIC-0011 Stories:** 7 (US-0046 – US-0052)
 **EPIC-0011 Acceptance Criteria:** 48 (AC-0204 – AC-0251)
+**EPIC-0012 Stories:** 5 (US-0053 – US-0057)
+**EPIC-0012 Acceptance Criteria:** 24 (AC-0252 – AC-0275)
 
 **Open for resubmission (EPIC-0009):**
 - ✅ US-0035 — Entitlement fix (done, merged PR #47)
@@ -1403,7 +1506,14 @@ rm adhaan_4_original_backup.mp3
 - 🔵 US-0051 — Visibility criterion picker
 - 🔵 US-0052 — Share global Hilal map
 
+**Apple Watch (EPIC-0012, v2.1 target):**
+- 🔵 US-0053 — watchOS app target + prayer times list
+- 🔵 US-0054 — WidgetKit complications (4 families)
+- 🔵 US-0055 — Haptic prayer-time notifications
+- 🔵 US-0056 — On-watch calculation + Watch Connectivity sync
+- 🔵 US-0057 — Native watch UI (List, Digital Crown, highlight)
+
 ---
 
-**Last Updated:** 2026-05-10 (PR #54 merged — EPIC-0010 iOS universal app conversion: US-0040–US-0045, AC-0169–AC-0203, TC-0001–TC-0035. PR #55 merged — EPIC-0011 Hilal Watch: US-0046–US-0052, AC-0204–AC-0251, ENH-019 added.)
+**Last Updated:** 2026-05-10 (EPIC-0012 added — Apple Watch app: US-0053–US-0057, AC-0252–AC-0275; promoted from ENH-016.)
 
