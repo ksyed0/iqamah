@@ -98,6 +98,9 @@
 		WV000000000000000000004 /* macOSLargeWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WV000000000000000000004R; };
 		LA000000000000000000009 /* IqamahCore in Frameworks (LA) */ = {isa = PBXBuildFile; productRef = LA000000000000000000030; };
 		LA000000000000000000021 /* IqamahLiveActivity.appex in Embed */ = {isa = PBXBuildFile; fileRef = LA000000000000000000005; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+
+		LA000000000000000000010 /* PrayerActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = LA000000000000000000010R; };
+		LA000000000000000000011 /* PrayerLiveActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = LA000000000000000000011R; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -242,6 +245,9 @@
 		WV000000000000000000003R /* InlineWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InlineWidgetView.swift; sourceTree = "<group>"; };
 		WV000000000000000000004R /* macOSLargeWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = macOSLargeWidgetView.swift; sourceTree = "<group>"; };
 		LA000000000000000000005 /* IqamahLiveActivity.appex */ = {isa = PBXFileReference; explicitFileType = "plug-in"; includeInIndex = 0; path = IqamahLiveActivity.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+
+		LA000000000000000000010R /* PrayerActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerActivityAttributes.swift; sourceTree = "<group>"; };
+		LA000000000000000000011R /* PrayerLiveActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerLiveActivityView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -289,6 +295,7 @@
 				944B0D7D2F6340DD00EC6A01 /* AGENTS.md */,
 				AA0000000000000000000031 /* iqamah */,
 				WG000000000000000000070 /* IqamahWidget */,
+				LA000000000000000000050 /* IqamahLiveActivity */,
 				WA000000000000000000070 /* IqamahWatch */,
 				WW000000000000000000070 /* IqamahWatchWidget */,
 				WT000000000000000000070 /* IqamahWatchTests */,
@@ -479,6 +486,15 @@
 			path = IqamahWatch;
 			sourceTree = "<group>";
 		};
+		LA000000000000000000050 /* IqamahLiveActivity */ = {
+			isa = PBXGroup;
+			children = (
+				LA000000000000000000010R /* PrayerActivityAttributes.swift */,
+				LA000000000000000000011R /* PrayerLiveActivityView.swift */,
+			);
+			path = IqamahLiveActivity;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -633,7 +649,6 @@
 			buildPhases = (LA000000000000000000002,LA000000000000000000004,LA000000000000000000003,);
 			buildRules = (); dependencies = ();
 			name = IqamahLiveActivity;
-			packageProductDependencies = (LA000000000000000000030,);
 			productName = IqamahLiveActivity;
 			productReference = LA000000000000000000005;
 			productType = "com.apple.product-type.app-extension";
@@ -876,7 +891,10 @@
 		};
 		LA000000000000000000002 /* Sources (LA) */ = {
 			isa = PBXSourcesBuildPhase; buildActionMask = 2147483647;
-			files = (); runOnlyForDeploymentPostprocessing = 0;
+			files = (
+				LA000000000000000000010 /* PrayerActivityAttributes.swift in Sources */,
+				LA000000000000000000011 /* PrayerLiveActivityView.swift in Sources */,
+			); runOnlyForDeploymentPostprocessing = 0;
 		};
 		LA000000000000000000003 /* Resources (LA) */ = {
 			isa = PBXResourcesBuildPhase; buildActionMask = 2147483647;
@@ -884,7 +902,7 @@
 		};
 		LA000000000000000000004 /* Frameworks (LA) */ = {
 			isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647;
-			files = (LA000000000000000000009,); runOnlyForDeploymentPostprocessing = 0;
+			files = (); runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 /* Begin PBXFrameworksBuildPhase section (WatchTests) */
