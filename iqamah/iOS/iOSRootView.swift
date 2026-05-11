@@ -5,12 +5,20 @@ struct IOSRootView: View {
     @EnvironmentObject private var settings: SettingsManager
     /// Drives switching to the Times tab when a prayer notification is tapped.
     @State private var selectedTab: Int = 0
+    @State private var showHilalWatch = false
 
     var body: some View {
         if settings.hasCompletedSetup {
             MainTabView(selectedTab: $selectedTab)
                 .onReceive(NotificationCenter.default.publisher(for: .openPrayerTimesTab)) { _ in
                     selectedTab = 0
+                }
+                .sheet(isPresented: $showHilalWatch) {
+                    HilalWatchSheet()
+                        .environmentObject(settings)
+                }
+                .onReceive(NotificationCenter.default.publisher(for: .openHilalWatch)) { _ in
+                    showHilalWatch = true
                 }
         } else {
             OnboardingFlow()
