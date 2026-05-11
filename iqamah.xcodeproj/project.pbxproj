@@ -1322,7 +1322,6 @@
 				PRODUCT_NAME = IqamahWatchTests;
 				SDKROOT = watchos;
 				SWIFT_VERSION = 5.10;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/IqamahWatch.app/IqamahWatch";
 				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Debug;
