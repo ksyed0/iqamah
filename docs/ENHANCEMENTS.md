@@ -2,6 +2,14 @@
 
 Logged from competitive analysis (May 2026) and product research. Items are grouped by theme, not priority. See competitive-analysis.md for the feature gap matrix these derive from.
 
+**Implementation status as of 2026-05-11:**
+- ENH-015 (iPhone/iPad) → ✅ Implemented as EPIC-0010 (PRs #56–60)
+- ENH-016 (Apple Watch) → ✅ Implemented as EPIC-0012 (PR #67)
+- ENH-018 (Hilal Watch) → ✅ Implemented as EPIC-0011 (PRs #61–66)
+- ENH-019 (i18n) → 🔵 Planned — not yet started
+- ENH-020 (Apple TV) → 🔵 Backlog — see Platform Expansion section
+- ENH-021 (visionOS) → 🔵 Backlog — see Platform Expansion section
+
 ---
 
 ## Location Accuracy
@@ -111,8 +119,8 @@ Per-language acceptance criterion: **a native speaker has reviewed every string 
 
 ## Astronomy & Calendar
 
-### ENH-018 — Hilal Watch: Global Crescent Sighting Map
-**Status:** ✅ Promoted to EPIC-0011 on 2026-05-10 — see `RELEASE_PLAN.md` (US-0046 – US-0052, AC-0204 – AC-0248). Map rendering approach changed during brainstorm: MapKit `MKPolygonRenderer` overlays chosen over the original Canvas + bundled-PNG approach for native pan / zoom and built-in geographic context.
+### ENH-018 — Hilal Watch: Global Crescent Sighting Map ✅ Implemented (2026-05-11)
+**Status:** ✅ Fully implemented — EPIC-0011 shipped in PRs #61–66. All 5 branches landed: astronomy port (Meeus/Odeh/Yallop/HMNAO), 16,200-cell grid calculator, macOS MapKit UI, iOS sheet, d29 notification. 174/174 tests passing.
 **Source:** Internal product exploration via Claude conversation (May 2026); cross-checked against moonsighting.com / OmegaHilalSighting
 **Priority:** Medium — distinctive feature; 0/10 surveyed competitors offer this
 
@@ -279,15 +287,16 @@ A one-time calculator for annual Zakat based on nisab. Could be a modal or separ
 
 ## Platform Expansion
 
-### ENH-015 — iPhone & iPad App
+### ENH-015 — iPhone & iPad App ✅ Implemented via EPIC-0010 (2026-05-10)
 See the multi-platform migration assessment in this file (below).
+**Status:** Implemented → EPIC-0010 (US-0040–US-0044 shipped in PRs #56–60). IqamahCore extracted, iOS target live, iCloud KVS sync, notifications, widget. US-0045 (Live Activity) deferred to v2.1.
 
-### ENH-016 — Apple Watch App ✅ Promoted to EPIC-0012 (2026-05-10)
+### ENH-016 — Apple Watch App ✅ Implemented via EPIC-0012 (2026-05-11)
 See the multi-platform migration assessment in this file (below).
-**Status:** Promoted → EPIC-0012 (US-0053 – US-0057, AC-0252 – AC-0275). See `docs/RELEASE_PLAN.md`.
+**Status:** Implemented → EPIC-0012 (US-0053–US-0057, AC-0252–AC-0275, PR #67). Prayer times list, Qibla, settings on-watch, 4 WidgetKit complications, haptic notifications, WCSession sync.
 
 ### ENH-017 — Apple Vision Pro App
-See the multi-platform migration assessment in this file (below).
+See ENH-021 below (expanded from this placeholder).
 
 ---
 
