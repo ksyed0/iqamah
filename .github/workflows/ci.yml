@@ -87,7 +87,7 @@ jobs:
             -project ${{ env.PROJECT }} \
             -scheme IqamahWatch \
             -configuration Debug \
-            -destination 'platform=watchOS Simulator,OS=latest,name=Apple Watch Series 9 (45mm)' \
+            -destination 'generic/platform=watchOS' \
             build \
             CODE_SIGNING_ALLOWED=NO \
             | xcpretty --color && exit ${PIPESTATUS[0]}
@@ -127,11 +127,17 @@ jobs:
 
       - name: Run IqamahWatch tests
         run: |
+          # Pick the first available watchOS simulator
+          SIM=$(xcrun simctl list devices available --json \
+            | python3 -c "import sys,json; d=json.load(sys.stdin); \
+              sims=[v for k,vs in d['devices'].items() if 'watchOS' in k for v in vs if v['isAvailable']]; \
+              print(sims[0]['udid'] if sims else '')")
+          if [ -z "$SIM" ]; then echo "No watchOS simulator found; skipping"; exit 0; fi
           xcodebuild \
             -project ${{ env.PROJECT }} \
             -scheme IqamahWatch \
             -configuration Debug \
-            -destination 'platform=watchOS Simulator,OS=latest,name=Apple Watch Series 9 (45mm)' \
+            -destination "platform=watchOS Simulator,id=$SIM" \
             test \
             CODE_SIGNING_ALLOWED=NO \
             | xcpretty --color && exit ${PIPESTATUS[0]}
