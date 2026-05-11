@@ -86,96 +86,136 @@ struct QiblahView: View {
 
             // Compass
             ZStack {
-                // ── Compass face: subtle dark disc gives depth ──────────
+                // ── Bezel ring ──────────────────────────────────────────
                 Circle()
-                    .fill(Color.primary.opacity(0.04))
-                    .frame(width: 310, height: 310)
+                    .fill(Color.primary.opacity(0.05))
+                    .frame(width: 320, height: 320)
 
-                // ── Outer ring: thick + prominent ───────────────────────
                 Circle()
-                    .stroke(Color.primary.opacity(0.35), lineWidth: 3)
-                    .frame(width: 310, height: 310)
+                    .stroke(Color.primary.opacity(0.18), lineWidth: 2)
+                    .frame(width: 320, height: 320)
 
-                // ── Inner gold decorative ring ───────────────────────────
-                Circle()
-                    .stroke(
-                        Color.appGold.opacity(0.40),
-                        lineWidth: 1
-                    )
-                    .frame(width: 294, height: 294)
-
-                // ── Tick marks: 24 total (every 15°), cardinals prominent ─
-                ForEach(0 ..< 24, id: \.self) { i in
-                    let angle = Double(i) * 15
-                    let isCardinal = i % 6 == 0 // N/E/S/W
-                    let isMinorCard = i % 3 == 0 // NE/SE/SW/NW
+                // ── iOS-style tick marks: every 5° (72 ticks) ───────────
+                // Major = 0/90/180/270, Semi = 45/135/225/315,
+                // Medium = every 10°, Minor = every 5°
+                ForEach(0 ..< 72, id: \.self) { i in
+                    let angle = Double(i) * 5
+                    let isCardinal = i % 18 == 0 // 0 90 180 270
+                    let isSemiCard = i % 9 == 0 && !isCardinal // 45 135 225 315
+                    let isMedium = i % 2 == 0 && !isCardinal && !isSemiCard // every 10°
+                    let tickLen: CGFloat = isCardinal ? 22 : isSemiCard ? 14 : isMedium ? 9 : 5
+                    let tickW: CGFloat = isCardinal ? 2.5 : isSemiCard ? 1.5 : 1
+                    let opacity: Double = isCardinal ? 0.90 : isSemiCard ? 0.60 : isMedium ? 0.35 : 0.20
                     Rectangle()
-                        .fill(isCardinal
-                            ? Color.primary.opacity(0.85)
-                            : isMinorCard
-                            ? Color.primary.opacity(0.50)
-                            : Color.secondary.opacity(0.30))
-                        .frame(width: isCardinal ? 2.5 : isMinorCard ? 1.5 : 1,
-                               height: isCardinal ? 18 : isMinorCard ? 12 : 6)
-                        .offset(y: -148)
+                        .fill(Color.primary.opacity(opacity))
+                        .frame(width: tickW, height: tickLen)
+                        .offset(y: -(160 - tickLen / 2))
                         .rotationEffect(.degrees(angle))
+                        .accessibilityHidden(true)
+                }
+
+                // ── Degree labels at 45 / 135 / 225 / 315 ───────────────
+                ForEach([(45.0, "45"), (135.0, "135"), (225.0, "225"), (315.0, "315")], id: \.1) { angle, label in
+                    Text(label)
+                        .font(.system(size: 9, weight: .regular, design: .monospaced))
+                        .foregroundColor(.secondary.opacity(0.50))
+                        .offset(
+                            x: 138 * CGFloat(sin(angle * .pi / 180)),
+                            y: -138 * CGFloat(cos(angle * .pi / 180))
+                        )
                         .accessibilityHidden(true)
                 }
 
                 // ── Cardinal labels ─────────────────────────────────────
                 ForEach([("N", 0.0), ("E", 90.0), ("S", 180.0), ("W", 270.0)], id: \.0) { label, angle in
                     Text(label)
-                        .font(.footnote.bold())
-                        .foregroundColor(label == "N" ? Color(red: 0.95, green: 0.30, blue: 0.25) : .primary.opacity(0.7))
-                        .offset(x: 170 * sin(angle * .pi / 180),
-                                y: -170 * cos(angle * .pi / 180))
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(
+                            label == "N"
+                                ? Color(red: 0.95, green: 0.28, blue: 0.22)
+                                : .primary.opacity(0.70)
+                        )
+                        .offset(
+                            x: 138 * CGFloat(sin(angle * .pi / 180)),
+                            y: -138 * CGFloat(cos(angle * .pi / 180))
+                        )
                         .accessibilityHidden(true)
                 }
 
-                // ── Centre dot ──────────────────────────────────────────
-                Circle()
-                    .fill(Color.appGold)
-                    .frame(width: 8, height: 8)
+                // ── N triangle marker on ring ────────────────────────────
+                Triangle()
+                    .fill(Color(red: 0.95, green: 0.28, blue: 0.22))
+                    .frame(width: 10, height: 10)
+                    .offset(y: -154)
                     .accessibilityHidden(true)
 
-                // ── Direction line: graduated green, prominent ───────────
-                LinearGradient(
-                    colors: [Color.clear, Color(red: 0.15, green: 0.80, blue: 0.35)],
-                    startPoint: .bottom, endPoint: .top
-                )
-                .frame(width: 3, height: 155)
-                .offset(y: -77)
-                .rotationEffect(.degrees(qiblahBearing))
+                // ── Dashed gold line from mat edge to ring ───────────────
+                // Drawn as a Canvas shape from matEdge to ringEdge
+                Canvas { ctx, size in
+                    let cx = size.width / 2
+                    let cy = size.height / 2
+                    let rad = qiblahBearing * .pi / 180
+                    let matEdge: Double = 52 // half mat height
+                    let ringEdge: Double = 134 // inner edge of tick ring
+                    let x1 = cx + CGFloat(sin(rad) * matEdge)
+                    let y1 = cy - CGFloat(cos(rad) * matEdge)
+                    let x2 = cx + CGFloat(sin(rad) * ringEdge)
+                    let y2 = cy - CGFloat(cos(rad) * ringEdge)
+                    var path = Path()
+                    path.move(to: CGPoint(x: x1, y: y1))
+                    path.addLine(to: CGPoint(x: x2, y: y2))
+                    ctx.stroke(
+                        path,
+                        with: .color(Color.appGold.opacity(0.80)),
+                        style: StrokeStyle(lineWidth: 2, dash: [6, 4], dashPhase: 0)
+                    )
+                    // Arrowhead at ring edge
+                    let backLen: Double = 10
+                    let perpAngle = rad + .pi / 2
+                    let tipX = x2, tipY = y2
+                    let baseX = x2 - CGFloat(sin(rad) * backLen)
+                    let baseY = y2 + CGFloat(cos(rad) * backLen)
+                    let left = CGPoint(x: baseX + CGFloat(cos(perpAngle) * 5), y: baseY + CGFloat(sin(perpAngle) * 5))
+                    let right = CGPoint(x: baseX - CGFloat(cos(perpAngle) * 5), y: baseY - CGFloat(sin(perpAngle) * 5))
+                    var arrow = Path()
+                    arrow.move(to: CGPoint(x: tipX, y: tipY))
+                    arrow.addLine(to: left)
+                    arrow.addLine(to: right)
+                    arrow.closeSubpath()
+                    ctx.fill(arrow, with: .color(Color.appGold.opacity(0.90)))
+                }
+                .frame(width: 320, height: 320)
                 .accessibilityHidden(true)
 
-                // ── Prayer mat: enlarged from 40×60 → 64×96 ─────────────
+                // ── Prayer mat (rotates toward Qibla) ───────────────────
                 Image("PrayerMat")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(width: 64, height: 96)
+                    .frame(width: 72, height: 108)
                     .drawingGroup()
                     .rotationEffect(.degrees(qiblahBearing))
                     .accessibilityLabel("Prayer mat facing Qiblah direction")
-                    .accessibilityHidden(false)
 
-                // ── Ka'bah icon on ring ──────────────────────────────────
+                // ── Ka'bah icon on ring edge ─────────────────────────────
                 Image("KaabahIcon")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(width: 32, height: 32)
+                    .frame(width: 30, height: 30)
                     .drawingGroup()
                     .clipShape(Circle())
-                    .overlay(Circle().stroke(
-                        Color.appGold, lineWidth: 2
-                    ))
-                    .shadow(color: Color.appGold.opacity(0.5),
-                            radius: 4, x: 0, y: 0)
+                    .overlay(Circle().stroke(Color.appGold, lineWidth: 2))
+                    .shadow(color: Color.appGold.opacity(0.45), radius: 4)
                     .offset(
-                        x: 155 * CGFloat(sin(qiblahBearing * .pi / 180)),
-                        y: -155 * CGFloat(cos(qiblahBearing * .pi / 180))
+                        x: 148 * CGFloat(sin(qiblahBearing * .pi / 180)),
+                        y: -148 * CGFloat(cos(qiblahBearing * .pi / 180))
                     )
                     .accessibilityLabel("Ka'bah direction marker")
-                    .accessibilityHidden(false)
+
+                // ── Centre pivot dot ─────────────────────────────────────
+                Circle()
+                    .fill(Color.secondary.opacity(0.45))
+                    .frame(width: 6, height: 6)
+                    .accessibilityHidden(true)
             }
             .frame(width: 380, height: 380)
             .padding(.top, 12)
@@ -196,6 +236,19 @@ struct QiblahView: View {
         .background {
             Rectangle().fill(.regularMaterial)
         }
+    }
+}
+
+// MARK: - Triangle (N marker)
+
+private struct Triangle: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.midX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        path.closeSubpath()
+        return path
     }
 }
 
