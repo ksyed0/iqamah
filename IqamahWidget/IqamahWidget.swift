@@ -194,21 +194,26 @@ struct IqamahWidgetView: View {
 struct IqamahWidget: Widget {
     let kind = "IqamahWidget"
 
+    // macOS Notification Center supports systemSmall/Medium/Large only.
+    // iOS/iPadOS also support ExtraLarge and lock-screen accessory families.
+    private static var supportedFamilies: [WidgetFamily] {
+        #if os(macOS)
+        return [.systemSmall, .systemMedium, .systemLarge]
+        #else
+        return [
+            .systemSmall, .systemMedium, .systemLarge, .systemExtraLarge,
+            .accessoryRectangular, .accessoryCircular, .accessoryInline,
+        ]
+        #endif
+    }
+
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: PrayerTimelineProvider()) { entry in
             IqamahWidgetView(entry: entry)
         }
         .configurationDisplayName("Iqamah")
         .description("Next prayer countdown for your location.")
-        .supportedFamilies([
-            .systemSmall,
-            .systemMedium,
-            .systemLarge,
-            .systemExtraLarge,
-            .accessoryRectangular,
-            .accessoryCircular,
-            .accessoryInline,
-        ])
+        .supportedFamilies(Self.supportedFamilies)
     }
 }
 

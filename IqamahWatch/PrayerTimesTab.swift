@@ -49,7 +49,7 @@ struct PrayerTimesTab: View {
         let monthIdx = (c.month ?? 1) - 1
         let monthName = monthIdx >= 0 && monthIdx < 12 ? months[monthIdx] : ""
         let dayName = Date().formatted(.dateTime.weekday(.abbreviated)).uppercased()
-        return "\(c.day ?? 1) \(monthName.uppercased()) · \(dayName)"
+        return "\(c.day ?? 1) \(monthName.uppercased()) \(c.year ?? 1447) · \(dayName)"
     }
 
     private func loadPrayers() {
@@ -83,6 +83,7 @@ private struct PrayerRow: View {
         }
         .foregroundStyle(isNext ? gold : .primary)
         .opacity(prayer.time < Date() ? 0.28 : 1.0)
+        .listRowInsets(rowInsets)
         .listRowBackground(rowBackground)
     }
 
@@ -94,4 +95,7 @@ private struct PrayerRow: View {
             Color.clear
         }
     }
+
+    // Compact insets keep all 5 prayers visible without scrolling on 41mm+
+    private var rowInsets: EdgeInsets { EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0) }
 }
