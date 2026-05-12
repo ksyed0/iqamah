@@ -9,24 +9,26 @@ struct PrayerTimesTab: View {
     private let gold = Color(red: 1.0, green: 0.839, blue: 0.039)
 
     var body: some View {
-        VStack(spacing: 0) {
-            Text(hijriHeader)
-                .font(.system(size: 9, weight: .semibold))
-                .foregroundStyle(.secondary)
-                .textCase(.uppercase)
-                .padding(.bottom, 4)
+        ScrollView {
+            VStack(spacing: 0) {
+                Text(hijriHeader)
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .textCase(.uppercase)
+                    .padding(.bottom, 8)
 
-            List {
-                ForEach(prayers, id: \.name) { prayer in
-                    PrayerRow(
-                        prayer: prayer,
-                        isNext: prayer.name == nextPrayerName,
-                        gold: gold,
-                        timeString: formattedTime(prayer.time)
-                    )
+                VStack(spacing: 2) {
+                    ForEach(prayers, id: \.name) { prayer in
+                        PrayerRow(
+                            prayer: prayer,
+                            isNext: prayer.name == nextPrayerName,
+                            gold: gold,
+                            timeString: formattedTime(prayer.time)
+                        )
+                    }
                 }
             }
-            .listStyle(.plain)
+            .padding(.horizontal, 4)
         }
         .onAppear { loadPrayers() }
         .onChange(of: settings.calculationMethod) { _, _ in loadPrayers() }
@@ -83,19 +85,16 @@ private struct PrayerRow: View {
         }
         .foregroundStyle(isNext ? gold : .primary)
         .opacity(prayer.time < Date() ? 0.28 : 1.0)
-        .listRowInsets(rowInsets)
-        .listRowBackground(rowBackground)
+        .padding(.vertical, 6)
+        .padding(.horizontal, 6)
+        .background(rowBackground)
     }
 
     @ViewBuilder
     private var rowBackground: some View {
         if isNext {
-            gold.opacity(0.12).clipShape(RoundedRectangle(cornerRadius: 5))
-        } else {
-            Color.clear
+            gold.opacity(0.12)
+                .clipShape(RoundedRectangle(cornerRadius: 6))
         }
     }
-
-    // Compact insets keep all 5 prayers visible without scrolling on 41mm+
-    private var rowInsets: EdgeInsets { EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0) }
 }
