@@ -164,6 +164,15 @@ struct LocationSetupView: View {
         .onAppear {
             loadDatabase()
             locationService.requestLocation()
+            // Simulator / denied permission can silently stall. After 15s synthesise a
+            // "Location unavailable" error so the user can fall back to manual city selection.
+            Task {
+                try? await Task.sleep(for: .seconds(15))
+                await MainActor.run {
+                    guard locationService.isLoading else { return }
+                    locationService.simulateTimeout()
+                }
+            }
         }
         .onChange(of: locationService.currentLocation) { _, newLocation in
             if let coordinate = newLocation, !hasDetectedLocation {

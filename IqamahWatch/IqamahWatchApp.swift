@@ -61,6 +61,16 @@ final class WatchLocationSetup: NSObject, ObservableObject, CLLocationManagerDel
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyKilometer
         manager.requestWhenInUseAuthorization()
+        // Watchdog: if GPS hasn't resolved after 20 s (simulator or denied), mark ready
+        // so the user lands on prayer times with a "select location in Settings" prompt.
+        Task {
+            try? await Task.sleep(for: .seconds(20))
+            await MainActor.run {
+                guard !isReady else { return }
+                statusMessage = "Couldn't detect location — open Settings to choose a city."
+                isReady = true
+            }
+        }
     }
 
     nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {

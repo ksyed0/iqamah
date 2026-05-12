@@ -365,6 +365,29 @@ struct SettingsSheetView: View {
     }
 
     var body: some View {
+        #if os(iOS)
+        // On iOS the Form is its own scroll container. Wrapping it in a ScrollView collapses
+        // it to zero height. Render the Form directly as the navigation content instead.
+        settingsForm
+            .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") { save() }
+                        .disabled(!canSave)
+                        .bold()
+                }
+            }
+            .onAppear { loadInitialState() }
+            .onChange(of: selectedCountry) { _, newCountry in
+                guard let country = newCountry else { return }
+                if selectedCity?.countryCode != country.code { selectedCity = nil }
+                if !userOverrodeMethod {
+                    selectedMethod = CalculationMethod.suggested(forCountryCode: country.code)
+                }
+                recommendationLabel = CalculationMethod.recommendationLabel(forCountryCode: country.code)
+            }
+        #else
         VStack(alignment: .leading, spacing: 0) {
             // ── Header ──────────────────────────────────────────────
             HStack {
@@ -401,11 +424,7 @@ struct SettingsSheetView: View {
             .padding(.horizontal, 28)
             .padding(.vertical, 20)
         }
-        #if os(macOS)
         .frame(width: 480, height: min((NSScreen.main?.visibleFrame.height ?? 900) - 80, 820))
-        #else
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        #endif
         .background {
             Rectangle().fill(.regularMaterial)
         }
@@ -422,6 +441,7 @@ struct SettingsSheetView: View {
             }
             recommendationLabel = CalculationMethod.recommendationLabel(forCountryCode: country.code)
         }
+        #endif
     }
 
     // MARK: - Helpers

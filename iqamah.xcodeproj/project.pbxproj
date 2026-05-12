@@ -95,7 +95,9 @@
 		iOS000000000000000000000F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001C /* Assets.xcassets */; };
 		iOS0000000000000000000010 /* IqamahCore in Frameworks */ = {isa = PBXBuildFile; productRef = iOS0000000000000000000020 /* IqamahCore */; };
 		iOS000000000000000000002F /* NotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = iOS000000000000000000001F /* NotificationScheduler.swift */; };
-/* End PBXBuildFile section */
+
+		iOS000000000000000000002A /* splash.jpg in Resources (iOS) */ = {isa = PBXBuildFile; fileRef = 94CAD5682F23D23800E1689F /* splash.jpg */; };
+		/* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
 		EE0000000000000000007001 /* PBXContainerItemProxy */ = {
@@ -832,6 +834,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				iOS000000000000000000000F /* Assets.xcassets in Resources */,
+				iOS000000000000000000002A /* splash.jpg in Resources (iOS) */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

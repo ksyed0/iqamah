@@ -30,6 +30,12 @@ public class LocationService: NSObject, ObservableObject {
         locationManager.requestWhenInUseAuthorization()
     }
 
+    /// Called by the UI after a timeout so the user can fall back to manual selection.
+    public func simulateTimeout() {
+        isLoading = false
+        locationError = "Location timed out — select your city manually."
+    }
+
     public func requestLocation() {
         isLoading = true
         locationError = nil
