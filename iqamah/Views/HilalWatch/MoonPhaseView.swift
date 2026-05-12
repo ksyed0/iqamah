@@ -25,13 +25,12 @@ struct MoonPhaseView: View {
             let shadowRect = CGRect(x: cx - r + xOffset, y: cy - r, width: r * 2, height: r * 2)
             let shadow = Path(ellipseIn: shadowRect)
 
-            let crescentPath: Path
-            if phase < 0.5 {
+            let crescentPath: Path = if phase < 0.5 {
                 // Waxing — lit on right: disc minus shadow leaves right crescent
-                crescentPath = disc.subtracting(shadow)
+                disc.subtracting(shadow)
             } else {
                 // Waning — lit on left: shadow minus disc leaves left crescent
-                crescentPath = shadow.subtracting(disc)
+                shadow.subtracting(disc)
             }
             ctx.fill(crescentPath, with: .color(.yellow.opacity(0.9)))
         }

@@ -4,6 +4,7 @@
 --swiftversion 5.9
 --indent 4
 --indentcase false
+--ifdef indent
 --trimwhitespace always
 --insertlines enabled
 --removelines enabled
