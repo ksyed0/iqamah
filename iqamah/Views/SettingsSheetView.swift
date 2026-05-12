@@ -365,68 +365,90 @@ struct SettingsSheetView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // ── Header ──────────────────────────────────────────────
-            HStack {
-                Text("Settings")
-                    .font(.title3.bold())
-                Spacer()
-            }
-            .padding(.horizontal, 28)
-            .padding(.top, 28)
-            .padding(.bottom, 20)
-
-            ScrollView {
-                settingsForm
-            }
-
-            // ── Action buttons ───────────────────────────────────────
-            HStack(spacing: 12) {
-                Button("Cancel") {
-                    SettingsManager.shared.uiScale = originalUiScale
-                    onCancel()
+        #if os(iOS)
+            // On iOS the Form is its own scroll container. Wrapping it in a ScrollView collapses
+            // it to zero height. Render the Form directly as the navigation content instead.
+            settingsForm
+                .navigationTitle("Settings")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Save") { save() }
+                            .disabled(!canSave)
+                            .bold()
+                    }
                 }
-                .buttonStyle(.bordered)
-                .controlSize(.large)
-                .keyboardShortcut(.escape, modifiers: [])
-
-                Spacer()
-
-                Button("Save") { save() }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                    .disabled(!canSave)
-                    .keyboardShortcut(.return, modifiers: [])
-            }
-            .padding(.horizontal, 28)
-            .padding(.vertical, 20)
-        }
-        #if os(macOS)
-        .frame(width: 480, height: min((NSScreen.main?.visibleFrame.height ?? 900) - 80, 820))
+                .onAppear { loadInitialState() }
+                .onChange(of: selectedCountry) { _, newCountry in
+                    guard let country = newCountry else { return }
+                    if selectedCity?.countryCode != country.code { selectedCity = nil }
+                    if !userOverrodeMethod {
+                        selectedMethod = CalculationMethod.suggested(forCountryCode: country.code)
+                    }
+                    recommendationLabel = CalculationMethod.recommendationLabel(forCountryCode: country.code)
+                }
         #else
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+            VStack(alignment: .leading, spacing: 0) {
+                // ── Header ──────────────────────────────────────────────
+                HStack {
+                    Text("Settings")
+                        .font(.title3.bold())
+                    Spacer()
+                }
+                .padding(.horizontal, 28)
+                .padding(.top, 28)
+                .padding(.bottom, 20)
+
+                ScrollView {
+                    settingsForm
+                }
+
+                // ── Action buttons ───────────────────────────────────────
+                HStack(spacing: 12) {
+                    Button("Cancel") {
+                        SettingsManager.shared.uiScale = originalUiScale
+                        onCancel()
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.large)
+                    .keyboardShortcut(.escape, modifiers: [])
+
+                    Spacer()
+
+                    Button("Save") { save() }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.large)
+                        .disabled(!canSave)
+                        .keyboardShortcut(.return, modifiers: [])
+                }
+                .padding(.horizontal, 28)
+                .padding(.vertical, 20)
+            }
+            .frame(width: 480, height: min((NSScreen.main?.visibleFrame.height ?? 900) - 80, 820))
+            .background {
+                Rectangle().fill(.regularMaterial)
+            }
+            .onAppear { loadInitialState() }
+            .onChange(of: selectedCountry) { _, newCountry in
+                guard let country = newCountry else { return }
+                // Reset city when country changes
+                if selectedCity?.countryCode != country.code {
+                    selectedCity = nil
+                }
+                // US-0031: suggest method for new country (only if user hasn't overridden)
+                if !userOverrodeMethod {
+                    selectedMethod = CalculationMethod.suggested(forCountryCode: country.code)
+                }
+                recommendationLabel = CalculationMethod.recommendationLabel(forCountryCode: country.code)
+            }
         #endif
-        .background {
-            Rectangle().fill(.regularMaterial)
-        }
-        .onAppear { loadInitialState() }
-        .onChange(of: selectedCountry) { _, newCountry in
-            guard let country = newCountry else { return }
-            // Reset city when country changes
-            if selectedCity?.countryCode != country.code {
-                selectedCity = nil
-            }
-            // US-0031: suggest method for new country (only if user hasn't overridden)
-            if !userOverrodeMethod {
-                selectedMethod = CalculationMethod.suggested(forCountryCode: country.code)
-            }
-            recommendationLabel = CalculationMethod.recommendationLabel(forCountryCode: country.code)
-        }
     }
+}
 
-    // MARK: - Helpers
+// MARK: - SettingsSheetView helpers (extracted to stay within type body length limit)
 
-    private func loadInitialState() {
+private extension SettingsSheetView {
+    func loadInitialState() {
         #if os(macOS)
             launchAtLogin = SMAppService.mainApp.status == .enabled
         #endif
@@ -462,7 +484,7 @@ struct SettingsSheetView: View {
         userOverrodeMethod = (currentMethod != suggested)
     }
 
-    private func save() {
+    func save() {
         guard let city = selectedCity else { return }
         SettingsManager.shared.use24HourTime = use24Hour
         SettingsManager.shared.appearance = selectedAppearance

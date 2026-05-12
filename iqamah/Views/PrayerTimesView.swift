@@ -78,21 +78,24 @@ struct PrayerTimesView: View {
             }
 
             // ── Secondary toolbar: navigation actions + Hijri date ───
+            // On iOS, Qiblah and Settings are in the tab bar — only About is unique here.
             HStack(spacing: 0) {
-                SecondaryToolbarButton(
-                    label: "Qiblah",
-                    systemImage: "location.north.line.fill",
-                    action: { showQiblah = true }
-                )
-                .accessibilityLabel("Show Qiblah direction")
+                #if os(macOS)
+                    SecondaryToolbarButton(
+                        label: "Qiblah",
+                        systemImage: "location.north.line.fill",
+                        action: { showQiblah = true }
+                    )
+                    .accessibilityLabel("Show Qiblah direction")
 
-                SecondaryToolbarButton(
-                    label: "Settings",
-                    systemImage: "gearshape",
-                    action: { showSettings = true }
-                )
-                .accessibilityLabel("Open settings")
-                .keyboardShortcut(",", modifiers: .command)
+                    SecondaryToolbarButton(
+                        label: "Settings",
+                        systemImage: "gearshape",
+                        action: { showSettings = true }
+                    )
+                    .accessibilityLabel("Open settings")
+                    .keyboardShortcut(",", modifiers: .command)
+                #endif
 
                 SecondaryToolbarButton(
                     label: "About",

@@ -54,9 +54,11 @@ struct QiblahView: View {
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
-            Button("Done") { dismiss() }
-                .buttonStyle(.borderedProminent)
-                .padding(.top, 8)
+            #if os(macOS)
+                Button("Done") { dismiss() }
+                    .buttonStyle(.borderedProminent)
+                    .padding(.top, 8)
+            #endif
         }
         .frame(width: 420, height: 520)
         .accessibilityElement(children: .contain)
@@ -225,12 +227,15 @@ struct QiblahView: View {
 
             Spacer()
 
-            // BUG-0027: gold tint matches app brand instead of default system accent
-            Button("Done") { dismiss() }
-                .buttonStyle(.borderedProminent)
-                .tint(Color.appGold)
-                .controlSize(.regular)
-                .padding(.bottom, 24)
+            // Done button only needed on macOS where Qiblah is a modal sheet.
+            // On iOS it lives in a tab — no dismiss needed.
+            #if os(macOS)
+                Button("Done") { dismiss() }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Color.appGold)
+                    .controlSize(.regular)
+                    .padding(.bottom, 24)
+            #endif
         }
         .frame(width: 440, height: 560)
         .background {
