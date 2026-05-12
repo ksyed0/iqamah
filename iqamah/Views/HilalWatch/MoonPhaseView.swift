@@ -27,16 +27,20 @@ struct MoonPhaseView: View {
             var shadow = Path()
             shadow.addEllipse(in: CGRect(x: cx - r + xOffset, y: cy - r, width: r * 2, height: r * 2))
 
-            if phase < 0.5 {
-                // Waxing — lit on right
-                ctx.fill(crescentMask, with: .color(.yellow.opacity(0.9)))
-                ctx.blendMode = .destinationOut
-                ctx.fill(shadow, with: .color(.black))
-            } else {
-                // Waning — lit on left
-                ctx.fill(shadow, with: .color(.yellow.opacity(0.9)))
-                ctx.blendMode = .destinationOut
-                ctx.fill(crescentMask, with: .color(.black))
+            // drawLayer isolates the compositing to an offscreen buffer so that
+            // destinationOut only erases pixels within this layer, not outside the disc.
+            ctx.drawLayer { layerCtx in
+                if phase < 0.5 {
+                    // Waxing — lit on right: fill disc gold, punch out shadow on left
+                    layerCtx.fill(crescentMask, with: .color(.yellow.opacity(0.9)))
+                    layerCtx.blendMode = .destinationOut
+                    layerCtx.fill(shadow, with: .color(.black))
+                } else {
+                    // Waning — lit on left: fill shadow gold, punch out disc overlap on right
+                    layerCtx.fill(shadow, with: .color(.yellow.opacity(0.9)))
+                    layerCtx.blendMode = .destinationOut
+                    layerCtx.fill(crescentMask, with: .color(.black))
+                }
             }
         }
         .frame(width: size, height: size)
