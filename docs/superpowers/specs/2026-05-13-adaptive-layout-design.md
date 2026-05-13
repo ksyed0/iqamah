@@ -123,9 +123,17 @@ Detection in SwiftUI:
 
 **Full-width header (landscape-only):** single `HStack` containing brand, city/method, moon circle, Hijri date string, countdown, mute button. Replaces the stacked header + hero card.
 
-**Columns:** 50/50 split via `HStack`. Tomorrow column: `PrayerTimelineProvider` fetches `+1 day`; all rows shown at 55% opacity with no highlight, no adhaan pill, no expand. A hairline divider separates the columns.
+**Columns:** 50/50 split via `HStack`. A hairline divider separates the columns.
 
-**"Hilal Watch ›"** button lives in the bottom of the Today column.
+**Tomorrow column** renders the same `PrayerRowView` as Today, including:
+- Adhaan pill (always visible between name and time)
+- Expand-on-tap chip tray (full adhaan + alert options, same as Today)
+- No "NEXT" highlight (no prayer is highlighted in Tomorrow)
+- 55% opacity on rows whose time has not yet passed; past rows at 28% (same dimming rule as Today, evaluated against tomorrow's dates)
+
+`expandedPrayerName` is shared across both columns so only one row across both columns is open at a time. The expand state identifies a row by `(date, name)` tuple, not just `name`, to distinguish today's Fajr from tomorrow's Fajr.
+
+**"Hilal Watch ›"** button lives at the bottom of the Today column.
 
 ### 4.4 Acceptance criteria (US-0061)
 
@@ -134,9 +142,10 @@ Detection in SwiftUI:
 - AC-0278: Countdown in hero card updates every minute
 - AC-0279: "Hilal Watch ›" in hero card opens HilalWatchSheet on iOS
 - AC-0280: iPad landscape shows today + tomorrow columns side by side
-- AC-0281: Tomorrow column is 55% opacity, no interaction controls
-- AC-0282: iPad landscape header spans full width with moon + countdown inline
-- AC-0283: macOS layout unchanged
+- AC-0281: Tomorrow column rows have adhaan pills and expand-on-tap chip trays
+- AC-0282: Only one row across both columns is expanded at a time
+- AC-0283: iPad landscape header spans full width with moon + countdown inline
+- AC-0284: macOS layout unchanged
 
 ---
 
@@ -213,16 +222,16 @@ On macOS, prayer rows keep the existing inline layout: ±buttons, 100pt adhaan p
 
 ### 5.7 Acceptance criteria (US-0062)
 
-- AC-0284: Prayer row shows `icon · name · pill · time` on iPhone without overflow
-- AC-0285: Tapping a row expands adhaan chip tray inline below it
-- AC-0286: Only one row expanded at a time; tapping another row collapses the previous
-- AC-0287: Tapping a chip saves the selection and collapses the tray
-- AC-0288: Gold pill shows selected adhaan name; grey "No adhaan" when silent
-- AC-0289: Sunrise row shows amber "No alert" pill
-- AC-0290: Sunrise chip tray shows only alert tones (no adhaan recordings, no Mute chip)
-- AC-0291: Amber pill shows selected alert tone name when set
-- AC-0292: Fajr chip tray shows Fajr-specific adhaan recordings
-- AC-0293: macOS prayer row layout unchanged
+- AC-0285: Prayer row shows `icon · name · pill · time` on iPhone without overflow
+- AC-0286: Tapping a row expands adhaan chip tray inline below it
+- AC-0287: Only one row expanded at a time; tapping another row collapses the previous
+- AC-0288: Tapping a chip saves the selection and collapses the tray
+- AC-0289: Gold pill shows selected adhaan name; grey "No adhaan" when silent
+- AC-0290: Sunrise row shows amber "No alert" pill
+- AC-0291: Sunrise chip tray shows only alert tones (no adhaan recordings, no Mute chip)
+- AC-0292: Amber pill shows selected alert tone name when set
+- AC-0293: Fajr chip tray shows Fajr-specific adhaan recordings
+- AC-0294: macOS prayer row layout unchanged
 
 ---
 
@@ -278,12 +287,12 @@ Info panel width: `min(200, geo.size.width * 0.28)`. Compass gets the remaining 
 
 ### 6.4 Acceptance criteria (US-0063)
 
-- AC-0294: Compass diameter = `min(available.width, available.height) × 0.85` on all platforms
-- AC-0295: Prayer mat is centered in the compass and rotated to qibla bearing
-- AC-0296: Mat arch points toward Makkah; needle radiates from center to ring
-- AC-0297: Mat proportions scale with radius (no fixed pixel sizes)
-- AC-0298: iPad landscape shows info panel alongside compass
-- AC-0299: macOS compass scales with window resize
+- AC-0295: Compass diameter = `min(available.width, available.height) × 0.85` on all platforms
+- AC-0296: Prayer mat is centered in the compass and rotated to qibla bearing
+- AC-0297: Mat arch points toward Makkah; needle radiates from center to ring
+- AC-0298: Mat proportions scale with radius (no fixed pixel sizes)
+- AC-0299: iPad landscape shows info panel alongside compass
+- AC-0300: macOS compass scales with window resize
 
 ---
 
@@ -309,7 +318,7 @@ No new data sources. Existing `SettingsManager`, `PrayerCalculator`, and `Adhaaa
 - iPhone 17 sim: tap Sunrise → amber tray with only alert tones visible
 - iPhone 17 sim: select adhaan chip → pill updates, tray closes
 - iPad Pro 11" sim portrait: hero card + single column layout
-- iPad Pro 11" sim landscape: today/tomorrow split; header inline
+- iPad Pro 11" sim landscape: today/tomorrow split; header inline; adhaan chips work in both columns; tapping tomorrow's Fajr while today's Fajr is open collapses today's
 - iPad Pro 11" sim: Qibla compass fills available space; mat centered
 - macOS: prayer times layout unchanged; Qibla compass scales with window resize
 
@@ -339,8 +348,8 @@ No new data sources. Existing `SettingsManager`, `PrayerCalculator`, and `Adhaaa
 | US-0061 | Adaptive prayer times view |
 | US-0062 | Adaptive prayer row on iOS |
 | US-0063 | Adaptive Qibla compass |
-| AC-0276–AC-0283 | US-0061 acceptance criteria |
-| AC-0284–AC-0293 | US-0062 acceptance criteria |
-| AC-0294–AC-0299 | US-0063 acceptance criteria |
+| AC-0276–AC-0284 | US-0061 acceptance criteria (9 ACs) |
+| AC-0285–AC-0294 | US-0062 acceptance criteria (10 ACs) |
+| AC-0295–AC-0300 | US-0063 acceptance criteria (6 ACs) |
 
-**Last Updated:** 2026-05-13
+**Last Updated:** 2026-05-13 (rev 2: tomorrow column gets full adhaan controls; expand state keyed on date+name tuple; implementation snag confirmed non-issue — prayer list is VStack not List)
