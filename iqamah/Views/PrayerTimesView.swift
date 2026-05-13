@@ -151,21 +151,35 @@ struct PrayerTimesView: View {
                 Image("AppIcon").resizable().frame(width: 36, height: 36)
                     .shadow(color: Color.primary.opacity(0.10), radius: 2)
                 Text("Iqamah")
-                    .font(.system(size: 20, weight: .bold, design: .serif))
+                    .font(.system(size: min(titleFontSize, 20), weight: .bold, design: .serif))
                     .foregroundStyle(LinearGradient(
                         colors: [Color.appGoldDim, Color(red: 0.85, green: 0.65, blue: 0.13)],
                         startPoint: .topLeading, endPoint: .bottomTrailing))
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(city.name).font(.callout.weight(.semibold)).lineLimit(1)
-                    Text(calculationMethod.shortName).font(.caption).foregroundColor(.secondary)
+                    Text(city.name)
+                        .font(.callout.weight(.semibold))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
+                    Text(calculationMethod.shortName)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
                 }
+                .frame(maxWidth: 150)
                 Spacer()
                 MoonPhaseView(phase: currentMoonPhase, size: 32)
                     .accessibilityHidden(true)
                 VStack(alignment: .trailing, spacing: 1) {
-                    Text(hijriDateLabel).font(.caption.weight(.medium))
-                    Text(moonPhaseSubtitle).font(.caption2).foregroundStyle(.secondary)
+                    Text(hijriDateLabel)
+                        .font(.caption.weight(.medium))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
+                    Text(moonPhaseSubtitle)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
                 }
+                .frame(maxWidth: 140)
                 if let nextTime = nextPrayerTime {
                     VStack(alignment: .trailing, spacing: 1) {
                         Text(nextTime, style: .timer)
@@ -238,7 +252,9 @@ struct PrayerTimesView: View {
                 }
                 .frame(maxWidth: .infinity)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private func sectionHeader(_ text: String) -> some View {
