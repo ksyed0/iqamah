@@ -9,12 +9,15 @@ struct PrayerTimesView: View {
     let asrMethod: AsrJuristicMethod
     let onSettingsSaved: (City, CalculationMethod, AsrJuristicMethod) -> Void
 
+    @Environment(\.horizontalSizeClass) private var hSizeClass
     @State private var currentDate = Date()
     @State private var prayerTimes: PrayerTimes?
+    @State private var tomorrowPrayerTimes: PrayerTimes? = nil
     @State private var showQiblah = false
     @State private var showSettings = false
     @State private var showAbout = false
     @State private var timerSubscription: Cancellable?
+    @State private var expandedRowID: PrayerRowID? = nil
     @ObservedObject private var settingsStore = SettingsManager.shared
     @ObservedObject private var player = AdhaaanPlayer.shared
 
@@ -23,7 +26,127 @@ struct PrayerTimesView: View {
 
     private let timer = Timer.publish(every: 60, on: .main, in: .common)
 
+    // MARK: - Body
+
     var body: some View {
+        #if os(iOS)
+        GeometryReader { geo in
+            let isLandscape = geo.size.width > geo.size.height
+            let isRegular = hSizeClass == .regular
+            if isRegular && isLandscape {
+                portraitBody // Task 6 will replace this with iPadLandscapeBody
+            } else {
+                portraitBody
+            }
+        }
+        .sheet(isPresented: $showAbout) {
+            AboutView()
+        }
+        .onAppear {
+            calculatePrayerTimes()
+            calculateTomorrowPrayerTimes()
+            timerSubscription = timer.connect()
+        }
+        .onDisappear { timerSubscription?.cancel(); timerSubscription = nil }
+        .onReceive(timer) { _ in updateDate() }
+        #else
+        macOSBody
+        #endif
+    }
+
+    // MARK: - iOS Portrait Layout
+
+    #if os(iOS)
+    @ViewBuilder
+    private var portraitBody: some View {
+        ScrollView {
+            VStack(spacing: 0) {
+                primaryHeader
+                secondaryToolbarAboutOnly
+                if let times = prayerTimes {
+                    let tz = TimeZone(identifier: city.timezone) ?? .current
+                    PrayerHeroCard(
+                        moonPhase: currentMoonPhase,
+                        hijriDateLabel: hijriDateLabel,
+                        moonPhaseSubtitle: moonPhaseSubtitle,
+                        isHilalWatchEvening: isHilalWatchEvening,
+                        nextPrayerTime: nextPrayerTime,
+                        onHilalWatch: openHilalWatch
+                    )
+                    Text(currentDate.formattedGregorianDate())
+                        .font(.subheadline.bold())
+                        .padding(.vertical, 8)
+                        .frame(maxWidth: .infinity)
+                        .background(Color.secondary.opacity(0.06))
+                    PrayerTimesTable(
+                        prayerTimes: times,
+                        timezone: tz,
+                        dayOffset: 0,
+                        expandedRowID: $expandedRowID
+                    )
+                    .padding(.horizontal, 12)
+                    .padding(.bottom, 16)
+                } else {
+                    ProgressView().padding(.vertical, 40)
+                }
+            }
+        }
+        .background(Color(.systemGroupedBackground))
+    }
+
+    @ViewBuilder private var primaryHeader: some View {
+        HStack(spacing: 12) {
+            Image("AppIcon")
+                .resizable()
+                .frame(width: 48, height: 48)
+                .shadow(color: Color.primary.opacity(0.10), radius: 3, x: 0, y: 1)
+            Text("Iqamah")
+                .font(.system(size: titleFontSize, weight: .bold, design: .serif))
+                .foregroundStyle(LinearGradient(
+                    colors: [Color.appGoldDim, Color(red: 0.85, green: 0.65, blue: 0.13)],
+                    startPoint: .topLeading, endPoint: .bottomTrailing))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(city.name)
+                    .font(.title3.weight(.semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+                Text(calculationMethod.shortName)
+                    .font(.caption.weight(.medium))
+                    .foregroundColor(.secondary)
+            }
+            Spacer()
+            Button(action: { AdhaaanPlayer.shared.toggleMute() }) {
+                Image(systemName: AdhaaanPlayer.shared.isMuted
+                      ? "speaker.slash.fill" : "speaker.wave.2.fill")
+                    .font(.title3)
+                    .foregroundColor(AdhaaanPlayer.shared.isMuted ? .secondary : .accentColor)
+                    .symbolRenderingMode(.hierarchical)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 12)
+        .padding(.bottom, 8)
+        .background { Rectangle().fill(.ultraThinMaterial) }
+    }
+
+    @ViewBuilder private var secondaryToolbarAboutOnly: some View {
+        HStack(spacing: 0) {
+            SecondaryToolbarButton(
+                label: "About",
+                systemImage: "info.circle",
+                action: { showAbout = true }
+            )
+            Spacer()
+        }
+        .background { Rectangle().fill(.ultraThinMaterial) }
+    }
+    #endif
+
+    // MARK: - macOS Layout
+
+    @ViewBuilder
+    private var macOSBody: some View {
         VStack(spacing: 0) {
             // ── Primary header: brand + location + mute only ─────────
             HStack(spacing: 12) {
@@ -196,6 +319,21 @@ struct PrayerTimesView: View {
         }
     }
 
+    // MARK: - Next Prayer Helpers (iOS)
+
+    #if os(iOS)
+    private var nextPrayerTime: Date? {
+        prayerTimes?.prayers
+            .first(where: { adjustedPrayerTime($0) > Date() && $0.name != "Sunrise" })
+            .map { adjustedPrayerTime($0) }
+    }
+
+    private func adjustedPrayerTime(_ prayer: (name: String, time: Date)) -> Date {
+        let adj = settingsStore.getAdjustment(for: prayer.name)
+        return Calendar.current.date(byAdding: .minute, value: adj, to: prayer.time) ?? prayer.time
+    }
+    #endif
+
     // MARK: - Moon phase + Hijri computed properties
 
     private var currentMoonPhase: Double {
@@ -250,6 +388,18 @@ struct PrayerTimesView: View {
 
     private func openHilalWatch() {
         NotificationCenter.default.post(name: .openHilalWatch, object: nil)
+    }
+
+    private func calculateTomorrowPrayerTimes() {
+        let timezone = TimeZone(identifier: city.timezone) ?? .current
+        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: currentDate) ?? currentDate
+        let calculator = PrayerCalculator(
+            coordinate: city.coordinate,
+            timezone: timezone,
+            method: calculationMethod,
+            asrMethod: asrMethod
+        )
+        tomorrowPrayerTimes = try? calculator.calculate(for: tomorrow)
     }
 
     private func calculatePrayerTimes() {
