@@ -1,3 +1,4 @@
+#if os(iOS)
 import IqamahCore
 import SwiftUI
 
@@ -46,13 +47,12 @@ struct PrayerHeroCard: View {
                         .font(.title2.bold().monospacedDigit())
                         .foregroundStyle(gold)
                         .multilineTextAlignment(.trailing)
+                        .accessibilityLabel("Time until next prayer")
                     Text("until next prayer")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
+                        .accessibilityHidden(true)
                 }
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel("Time until next prayer")
-                .accessibilityValue(Text(nextTime, style: .relative))
             }
         }
         .padding(12)
@@ -61,3 +61,4 @@ struct PrayerHeroCard: View {
         .padding(.vertical, 8)
     }
 }
+#endif
