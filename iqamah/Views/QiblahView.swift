@@ -34,6 +34,9 @@ struct QiblahView: View {
     }
 
     @Environment(\.dismiss) private var dismiss
+    #if os(iOS)
+        @Environment(\.horizontalSizeClass) private var hSizeClass
+    #endif
 
     var body: some View {
         guard isValidCoordinate else {
@@ -65,45 +68,134 @@ struct QiblahView: View {
     }
 
     private var compassView: some View {
-        VStack(spacing: 0) {
-            Text("Qiblah Direction")
-                .font(.title2.bold())
-                .padding(.top, 20)
-                .accessibilityAddTraits(.isHeader)
-            Text(String(format: "%.1f° %@", qiblahBearing, cardinalDirection))
-                .font(.subheadline.weight(.medium))
-                .foregroundColor(.secondary)
-                .padding(.top, 4)
-                .accessibilityLabel("Qiblah: \(Int(qiblahBearing)) degrees \(cardinalDirection)")
-            if !cityName.isEmpty {
-                Text("from \(cityName)")
-                    .font(.caption).foregroundColor(.secondary).padding(.top, 2)
-            }
-
+        #if os(iOS)
             GeometryReader { geo in
-                let diameter = min(geo.size.width, geo.size.height) * 0.85
-                QiblahCompassView(diameter: diameter, bearing: qiblahBearing)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                let isLandscape = geo.size.width > geo.size.height
+                let isRegular = hSizeClass == .regular
+                if isRegular, isLandscape {
+                    iPadLandscapeQibla(geo: geo)
+                } else {
+                    portraitQibla
+                }
+            }
+            .background { Rectangle().fill(.regularMaterial) }
+        #else
+            macOSQibla
+        #endif
+    }
+
+    #if os(iOS)
+        private var compassHeader: some View {
+            VStack(spacing: 3) {
+                Text("Qiblah Direction")
+                    .font(.title2.bold())
+                    .padding(.top, 16)
+                    .accessibilityAddTraits(.isHeader)
+                Text(String(format: "%.1f° %@", qiblahBearing, cardinalDirection))
+                    .font(.subheadline.weight(.medium))
+                    .foregroundColor(.secondary)
+                if !cityName.isEmpty {
+                    Text("from \(cityName)")
+                        .font(.caption).foregroundColor(.secondary)
+                }
+            }
+            .padding(.bottom, 8)
+        }
+
+        private var portraitQibla: some View {
+            VStack(spacing: 0) {
+                compassHeader
+                GeometryReader { geo in
+                    let diameter = min(geo.size.width, geo.size.height) * 0.85
+                    QiblahCompassView(diameter: diameter, bearing: qiblahBearing)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .accessibilityLabel("Qiblah direction: \(Int(qiblahBearing)) degrees \(cardinalDirection(for: qiblahBearing))")
-            .accessibilityValue("Face \(cardinalDirection(for: qiblahBearing)) to face Mecca")
-
-            #if os(macOS)
-            Button("Done") { dismiss() }
-                .buttonStyle(.borderedProminent)
-                .tint(Color.appGold)
-                .controlSize(.regular)
-                .padding(.bottom, 24)
-                .padding(.top, 8)
-            #endif
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        #if os(macOS)
-        .frame(minWidth: 380, minHeight: 480)
-        #endif
-        .background { Rectangle().fill(.regularMaterial) }
-    }
+
+        private func iPadLandscapeQibla(geo: GeometryProxy) -> some View {
+            let panelWidth = min(220, geo.size.width * 0.28)
+            return HStack(alignment: .center, spacing: 0) {
+                // Compass fills left portion
+                GeometryReader { inner in
+                    let diameter = min(inner.size.width, inner.size.height) * 0.88
+                    QiblahCompassView(diameter: diameter, bearing: qiblahBearing)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                // Info panel
+                VStack(alignment: .leading, spacing: 20) {
+                    Spacer()
+                    infoPanelRow(label: "Bearing",
+                                 value: String(format: "%.1f°", qiblahBearing),
+                                 detail: cardinalDirection)
+                    infoPanelRow(label: "From",
+                                 value: cityName.isEmpty ? "—" : cityName,
+                                 detail: String(format: "%.4f°N · %.4f°E", latitude, longitude))
+                    infoPanelRow(label: "To",
+                                 value: "Makkah al-Mukarramah",
+                                 detail: "21.4225°N · 39.8262°E")
+                    Spacer()
+                }
+                .padding(.horizontal, 20)
+                .frame(width: panelWidth)
+                .background(.regularMaterial)
+            }
+        }
+
+        private func infoPanelRow(label: String, value: String, detail: String) -> some View {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(label.uppercased())
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .tracking(0.5)
+                Text(value)
+                    .font(.title3.bold())
+                    .foregroundStyle(Color.appGoldDim)
+                Text(detail)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .accessibilityElement(children: .combine)
+        }
+    #endif
+
+    #if os(macOS)
+        private var macOSQibla: some View {
+            VStack(spacing: 0) {
+                Text("Qiblah Direction")
+                    .font(.title2.bold())
+                    .padding(.top, 20)
+                    .accessibilityAddTraits(.isHeader)
+                Text(String(format: "%.1f° %@", qiblahBearing, cardinalDirection))
+                    .font(.subheadline.weight(.medium))
+                    .foregroundColor(.secondary)
+                    .padding(.top, 4)
+                if !cityName.isEmpty {
+                    Text("from \(cityName)")
+                        .font(.caption).foregroundColor(.secondary).padding(.top, 2)
+                }
+                GeometryReader { geo in
+                    let diameter = min(geo.size.width, geo.size.height) * 0.85
+                    QiblahCompassView(diameter: diameter, bearing: qiblahBearing)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                Button("Done") { dismiss() }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Color.appGold)
+                    .controlSize(.regular)
+                    .padding(.bottom, 24)
+                    .padding(.top, 8)
+            }
+            .frame(minWidth: 380, minHeight: 480)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background { Rectangle().fill(.regularMaterial) }
+        }
+    #endif
 }
 
 // MARK: - Triangle (N marker)
@@ -144,10 +236,10 @@ private struct QiblahCompassView: View {
                 let angle = Double(i) * 5
                 let isCardinal = i % 18 == 0
                 let isSemiCard = i % 9 == 0 && !isCardinal
-                let isMedium   = i % 2 == 0 && !isCardinal && !isSemiCard
+                let isMedium = i % 2 == 0 && !isCardinal && !isSemiCard
                 let tickLen: CGFloat = isCardinal ? r * 0.14
                     : isSemiCard ? r * 0.09
-                    : isMedium   ? r * 0.06
+                    : isMedium ? r * 0.06
                     : r * 0.032
                 let tickW: CGFloat = isCardinal ? 2.5 : isSemiCard ? 1.5 : 1.0
                 let opacity: Double = isCardinal ? 0.90 : isSemiCard ? 0.60
@@ -212,8 +304,8 @@ private struct QiblahCompassView: View {
                 let perpAngle = rad + .pi / 2
                 let baseX = x2 - CGFloat(sin(rad) * backLen)
                 let baseY = y2 + CGFloat(cos(rad) * backLen)
-                let left  = CGPoint(x: baseX + CGFloat(cos(perpAngle) * backLen * 0.4),
-                                    y: baseY + CGFloat(sin(perpAngle) * backLen * 0.4))
+                let left = CGPoint(x: baseX + CGFloat(cos(perpAngle) * backLen * 0.4),
+                                   y: baseY + CGFloat(sin(perpAngle) * backLen * 0.4))
                 let right = CGPoint(x: baseX - CGFloat(cos(perpAngle) * backLen * 0.4),
                                     y: baseY - CGFloat(sin(perpAngle) * backLen * 0.4))
                 var arrow = Path()
@@ -240,7 +332,7 @@ private struct QiblahCompassView: View {
 
             // ── Ka'bah icon at ring edge ─────────────────────────────
             let kaabahSize = r * 0.18
-            let kaabahR    = r * 0.925
+            let kaabahR = r * 0.925
             Image("KaabahIcon")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
