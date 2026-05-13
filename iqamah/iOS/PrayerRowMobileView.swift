@@ -12,6 +12,7 @@ struct PrayerRowMobileView: View {
     let isPast: Bool
     let isNext: Bool
     let selectedAdhaan: Adhaan
+    let isMuted: Bool
     let isExpanded: Bool
     let onTap: () -> Void
     let onSelectAdhaan: (Adhaan) -> Void
@@ -28,12 +29,14 @@ struct PrayerRowMobileView: View {
                 AdhaanChipTray(
                     prayerName: name,
                     selectedAdhaan: selectedAdhaan,
+                    isMuted: isMuted,
                     onSelectAdhaan: onSelectAdhaan,
                     onToggleMute: onToggleMute
                 )
                 .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
+        .animation(.easeInOut(duration: 0.2), value: isExpanded)
     }
 
     private var rowContent: some View {
@@ -148,6 +151,7 @@ struct PrayerRowMobileView: View {
 struct AdhaanChipTray: View {
     let prayerName: String
     let selectedAdhaan: Adhaan
+    let isMuted: Bool
     let onSelectAdhaan: (Adhaan) -> Void
     let onToggleMute: () -> Void
 
@@ -160,7 +164,7 @@ struct AdhaanChipTray: View {
     private var alertTones: [Adhaan] { Adhaan.alertTones }
     private var adhaanRecordings: [Adhaan] {
         if isSunrise { return [] }
-        if isFajr { return Adhaan.adhaanFajrRecordings + Adhaan.adhaanRecordings }
+        if isFajr { return Adhaan.adhaanRecordings + Adhaan.adhaanFajrRecordings }
         return Adhaan.adhaanRecordings
     }
 
@@ -185,16 +189,17 @@ struct AdhaanChipTray: View {
 
                 // Mute chip
                 Button(action: onToggleMute) {
-                    Label("Mute", systemImage: "speaker.slash.fill")
+                    Label(isMuted ? "Unmute" : "Mute",
+                          systemImage: isMuted ? "speaker.slash.fill" : "speaker.slash")
                         .font(.caption.weight(.medium))
-                        .foregroundStyle(Color.red.opacity(0.8))
+                        .foregroundStyle(isMuted ? .white : Color.red.opacity(0.8))
                         .padding(.horizontal, 10)
                         .padding(.vertical, 5)
-                        .background(Capsule().fill(Color.red.opacity(0.08)))
-                        .overlay(Capsule().strokeBorder(Color.red.opacity(0.2), lineWidth: 0.5))
+                        .background(Capsule().fill(isMuted ? Color.red.opacity(0.8) : Color.red.opacity(0.08)))
+                        .overlay(Capsule().strokeBorder(Color.red.opacity(isMuted ? 0 : 0.2), lineWidth: 0.5))
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Mute this prayer")
+                .accessibilityLabel(isMuted ? "Unmute this prayer" : "Mute this prayer")
             }
         }
         .padding(.horizontal, 12)
