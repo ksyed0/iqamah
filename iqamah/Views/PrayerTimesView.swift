@@ -91,7 +91,7 @@ struct PrayerTimesView: View {
                 }
             }
         }
-        .background(Color(.systemGroupedBackground))
+        .background(.regularMaterial)
     }
 
     @ViewBuilder private var primaryHeader: some View {
@@ -428,6 +428,7 @@ struct PrayerTimesView: View {
         if !calendar.isDate(newDate, inSameDayAs: currentDate) {
             currentDate = newDate
             calculatePrayerTimes()
+            calculateTomorrowPrayerTimes()
         } else {
             currentDate = newDate
         }
