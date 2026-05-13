@@ -8,10 +8,10 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 | **Sequence** | **Next Available ID** | **Last Assigned** |
 |--------------|-----------------------|-------------------|
-| EPIC         | EPIC-0013             | EPIC-0012         |
-| US           | US-0058               | US-0057           |
+| EPIC         | EPIC-0015             | EPIC-0014         |
+| US           | US-0064               | US-0063           |
 | TASK         | TASK-0001             | None              |
-| AC           | AC-0276               | AC-0275           |
+| AC           | AC-0300               | AC-0299           |
 | TC           | TC-0036               | TC-0035           |
 | BUG          | BUG-0056              | BUG-0055          |
 | ENH          | ENH-020               | ENH-019           |
@@ -28,4 +28,4 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 ---
 
-**Last Updated:** 2026-05-10 (EPIC-0012 added — Apple Watch app: EPIC-0012, US-0053–US-0057, AC-0252–AC-0275; promoted from ENH-016.)
+**Last Updated:** 2026-05-13 (EPIC-0013 Widget Platform consumed US-0058–US-0060, AC-0276–AC-0275 range was reserved; EPIC-0014 Adaptive Layout added — US-0061–US-0063, AC-0276–AC-0299.)
