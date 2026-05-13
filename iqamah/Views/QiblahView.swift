@@ -66,181 +66,42 @@ struct QiblahView: View {
 
     private var compassView: some View {
         VStack(spacing: 0) {
-            // Title
             Text("Qiblah Direction")
                 .font(.title2.bold())
-                .padding(.top, 28)
+                .padding(.top, 20)
                 .accessibilityAddTraits(.isHeader)
-
             Text(String(format: "%.1f° %@", qiblahBearing, cardinalDirection))
                 .font(.subheadline.weight(.medium))
                 .foregroundColor(.secondary)
-                .padding(.top, 6)
+                .padding(.top, 4)
                 .accessibilityLabel("Qiblah: \(Int(qiblahBearing)) degrees \(cardinalDirection)")
-
-            // AC-0134: city context — use .secondary (no manual opacity, meets contrast floor)
             if !cityName.isEmpty {
                 Text("from \(cityName)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .padding(.top, 2)
+                    .font(.caption).foregroundColor(.secondary).padding(.top, 2)
             }
 
-            // Compass
-            ZStack {
-                // ── Bezel ring ──────────────────────────────────────────
-                Circle()
-                    .fill(Color.primary.opacity(0.05))
-                    .frame(width: 320, height: 320)
-
-                Circle()
-                    .stroke(Color.primary.opacity(0.18), lineWidth: 2)
-                    .frame(width: 320, height: 320)
-
-                // ── iOS-style tick marks: every 5° (72 ticks) ───────────
-                // Major = 0/90/180/270, Semi = 45/135/225/315,
-                // Medium = every 10°, Minor = every 5°
-                ForEach(0 ..< 72, id: \.self) { i in
-                    let angle = Double(i) * 5
-                    let isCardinal = i % 18 == 0 // 0 90 180 270
-                    let isSemiCard = i % 9 == 0 && !isCardinal // 45 135 225 315
-                    let isMedium = i % 2 == 0 && !isCardinal && !isSemiCard // every 10°
-                    let tickLen: CGFloat = isCardinal ? 22 : isSemiCard ? 14 : isMedium ? 9 : 5
-                    let tickW: CGFloat = isCardinal ? 2.5 : isSemiCard ? 1.5 : 1
-                    let opacity: Double = isCardinal ? 0.90 : isSemiCard ? 0.60 : isMedium ? 0.35 : 0.20
-                    Rectangle()
-                        .fill(Color.primary.opacity(opacity))
-                        .frame(width: tickW, height: tickLen)
-                        .offset(y: -(160 - tickLen / 2))
-                        .rotationEffect(.degrees(angle))
-                        .accessibilityHidden(true)
-                }
-
-                // ── Degree labels at 45 / 135 / 225 / 315 ───────────────
-                ForEach([(45.0, "45"), (135.0, "135"), (225.0, "225"), (315.0, "315")], id: \.1) { angle, label in
-                    Text(label)
-                        .font(.system(size: 9, weight: .regular, design: .monospaced))
-                        .foregroundColor(.secondary.opacity(0.50))
-                        .offset(
-                            x: 138 * CGFloat(sin(angle * .pi / 180)),
-                            y: -138 * CGFloat(cos(angle * .pi / 180))
-                        )
-                        .accessibilityHidden(true)
-                }
-
-                // ── Cardinal labels ─────────────────────────────────────
-                ForEach([("N", 0.0), ("E", 90.0), ("S", 180.0), ("W", 270.0)], id: \.0) { label, angle in
-                    Text(label)
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(
-                            label == "N"
-                                ? Color(red: 0.95, green: 0.28, blue: 0.22)
-                                : .primary.opacity(0.70)
-                        )
-                        .offset(
-                            x: 138 * CGFloat(sin(angle * .pi / 180)),
-                            y: -138 * CGFloat(cos(angle * .pi / 180))
-                        )
-                        .accessibilityHidden(true)
-                }
-
-                // ── N triangle marker on ring ────────────────────────────
-                Triangle()
-                    .fill(Color(red: 0.95, green: 0.28, blue: 0.22))
-                    .frame(width: 10, height: 10)
-                    .offset(y: -154)
-                    .accessibilityHidden(true)
-
-                // ── Dashed gold line from mat edge to ring ───────────────
-                // Drawn as a Canvas shape from matEdge to ringEdge
-                Canvas { ctx, size in
-                    let cx = size.width / 2
-                    let cy = size.height / 2
-                    let rad = qiblahBearing * .pi / 180
-                    let matEdge: Double = 52 // half mat height
-                    let ringEdge: Double = 134 // inner edge of tick ring
-                    let x1 = cx + CGFloat(sin(rad) * matEdge)
-                    let y1 = cy - CGFloat(cos(rad) * matEdge)
-                    let x2 = cx + CGFloat(sin(rad) * ringEdge)
-                    let y2 = cy - CGFloat(cos(rad) * ringEdge)
-                    var path = Path()
-                    path.move(to: CGPoint(x: x1, y: y1))
-                    path.addLine(to: CGPoint(x: x2, y: y2))
-                    ctx.stroke(
-                        path,
-                        with: .color(Color.appGold.opacity(0.80)),
-                        style: StrokeStyle(lineWidth: 2, dash: [6, 4], dashPhase: 0)
-                    )
-                    // Arrowhead at ring edge
-                    let backLen: Double = 10
-                    let perpAngle = rad + .pi / 2
-                    let tipX = x2, tipY = y2
-                    let baseX = x2 - CGFloat(sin(rad) * backLen)
-                    let baseY = y2 + CGFloat(cos(rad) * backLen)
-                    let left = CGPoint(x: baseX + CGFloat(cos(perpAngle) * 5), y: baseY + CGFloat(sin(perpAngle) * 5))
-                    let right = CGPoint(x: baseX - CGFloat(cos(perpAngle) * 5), y: baseY - CGFloat(sin(perpAngle) * 5))
-                    var arrow = Path()
-                    arrow.move(to: CGPoint(x: tipX, y: tipY))
-                    arrow.addLine(to: left)
-                    arrow.addLine(to: right)
-                    arrow.closeSubpath()
-                    ctx.fill(arrow, with: .color(Color.appGold.opacity(0.90)))
-                }
-                .frame(width: 320, height: 320)
-                .accessibilityHidden(true)
-
-                // ── Prayer mat (rotates toward Qibla) ───────────────────
-                Image("PrayerMat")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 72, height: 108)
-                    .drawingGroup()
-                    .rotationEffect(.degrees(qiblahBearing))
-                    .accessibilityLabel("Prayer mat facing Qiblah direction")
-
-                // ── Ka'bah icon on ring edge ─────────────────────────────
-                Image("KaabahIcon")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 30, height: 30)
-                    .drawingGroup()
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(Color.appGold, lineWidth: 2))
-                    .shadow(color: Color.appGold.opacity(0.45), radius: 4)
-                    .offset(
-                        x: 148 * CGFloat(sin(qiblahBearing * .pi / 180)),
-                        y: -148 * CGFloat(cos(qiblahBearing * .pi / 180))
-                    )
-                    .accessibilityLabel("Ka'bah direction marker")
-
-                // ── Centre pivot dot ─────────────────────────────────────
-                Circle()
-                    .fill(Color.secondary.opacity(0.45))
-                    .frame(width: 6, height: 6)
-                    .accessibilityHidden(true)
+            GeometryReader { geo in
+                let diameter = min(geo.size.width, geo.size.height) * 0.85
+                QiblahCompassView(diameter: diameter, bearing: qiblahBearing)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .frame(width: 380, height: 380)
-            .padding(.top, 12)
-            .accessibilityElement(children: .ignore)
             .accessibilityLabel("Qiblah direction: \(Int(qiblahBearing)) degrees \(cardinalDirection(for: qiblahBearing))")
             .accessibilityValue("Face \(cardinalDirection(for: qiblahBearing)) to face Mecca")
 
-            Spacer()
-
-            // Done button only needed on macOS where Qiblah is a modal sheet.
-            // On iOS it lives in a tab — no dismiss needed.
             #if os(macOS)
-                Button("Done") { dismiss() }
-                    .buttonStyle(.borderedProminent)
-                    .tint(Color.appGold)
-                    .controlSize(.regular)
-                    .padding(.bottom, 24)
+            Button("Done") { dismiss() }
+                .buttonStyle(.borderedProminent)
+                .tint(Color.appGold)
+                .controlSize(.regular)
+                .padding(.bottom, 24)
+                .padding(.top, 8)
             #endif
         }
-        .frame(width: 440, height: 560)
-        .background {
-            Rectangle().fill(.regularMaterial)
-        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        #if os(macOS)
+        .frame(minWidth: 380, minHeight: 480)
+        #endif
+        .background { Rectangle().fill(.regularMaterial) }
     }
 }
 
@@ -254,6 +115,154 @@ private struct Triangle: Shape {
         path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
         path.closeSubpath()
         return path
+    }
+}
+
+// MARK: - Scalable Compass
+
+/// Self-contained compass that scales to any diameter.
+/// All element sizes are proportional to the radius (diameter / 2).
+private struct QiblahCompassView: View {
+    let diameter: CGFloat
+    let bearing: Double
+
+    private var r: CGFloat { diameter / 2 }
+
+    var body: some View {
+        ZStack {
+            // ── Bezel ring ──────────────────────────────────────────
+            Circle()
+                .fill(Color.primary.opacity(0.05))
+                .frame(width: diameter, height: diameter)
+            Circle()
+                .stroke(Color.primary.opacity(0.18), lineWidth: 2)
+                .frame(width: diameter, height: diameter)
+
+            // ── Tick marks (72 × 5° = 360°) ─────────────────────────
+            ForEach(0 ..< 72, id: \.self) { i in
+                let angle = Double(i) * 5
+                let isCardinal = i % 18 == 0
+                let isSemiCard = i % 9 == 0 && !isCardinal
+                let isMedium   = i % 2 == 0 && !isCardinal && !isSemiCard
+                let tickLen: CGFloat = isCardinal ? r * 0.14
+                    : isSemiCard ? r * 0.09
+                    : isMedium   ? r * 0.06
+                    : r * 0.032
+                let tickW: CGFloat = isCardinal ? 2.5 : isSemiCard ? 1.5 : 1.0
+                let opacity: Double = isCardinal ? 0.90 : isSemiCard ? 0.60
+                    : isMedium ? 0.35 : 0.20
+                Rectangle()
+                    .fill(Color.primary.opacity(opacity))
+                    .frame(width: tickW, height: tickLen)
+                    .offset(y: -(r - tickLen / 2))
+                    .rotationEffect(.degrees(angle))
+                    .accessibilityHidden(true)
+            }
+
+            // ── Degree labels at 45 / 135 / 225 / 315 ───────────────
+            ForEach([(45.0, "45"), (135.0, "135"), (225.0, "225"), (315.0, "315")], id: \.1) { angle, label in
+                Text(label)
+                    .font(.system(size: max(7, r * 0.056), weight: .regular, design: .monospaced))
+                    .foregroundColor(.secondary.opacity(0.50))
+                    .offset(
+                        x: r * 0.86 * CGFloat(sin(angle * .pi / 180)),
+                        y: -r * 0.86 * CGFloat(cos(angle * .pi / 180))
+                    )
+                    .accessibilityHidden(true)
+            }
+
+            // ── Cardinal labels ─────────────────────────────────────
+            ForEach([("N", 0.0), ("E", 90.0), ("S", 180.0), ("W", 270.0)], id: \.0) { label, angle in
+                Text(label)
+                    .font(.system(size: max(10, r * 0.088), weight: .bold))
+                    .foregroundColor(
+                        label == "N"
+                            ? Color(red: 0.95, green: 0.28, blue: 0.22)
+                            : .primary.opacity(0.70)
+                    )
+                    .offset(
+                        x: r * 0.86 * CGFloat(sin(angle * .pi / 180)),
+                        y: -r * 0.86 * CGFloat(cos(angle * .pi / 180))
+                    )
+                    .accessibilityHidden(true)
+            }
+
+            // ── N triangle marker ────────────────────────────────────
+            Triangle()
+                .fill(Color(red: 0.95, green: 0.28, blue: 0.22))
+                .frame(width: r * 0.063, height: r * 0.063)
+                .offset(y: -(r * 0.963))
+                .accessibilityHidden(true)
+
+            // ── Dashed gold needle from center to ring ───────────────
+            Canvas { ctx, size in
+                let cx = size.width / 2, cy = size.height / 2
+                let rad = bearing * .pi / 180
+                let needleR = Double(r) - 20
+                let x2 = cx + CGFloat(sin(rad) * needleR)
+                let y2 = cy - CGFloat(cos(rad) * needleR)
+                var path = Path()
+                path.move(to: CGPoint(x: cx, y: cy))
+                path.addLine(to: CGPoint(x: x2, y: y2))
+                ctx.stroke(path, with: .color(Color.appGold.opacity(0.80)),
+                           style: StrokeStyle(lineWidth: 2, dash: [6, 4], dashPhase: 0))
+                // Arrowhead
+                let backLen: Double = Double(r) * 0.065
+                let perpAngle = rad + .pi / 2
+                let baseX = x2 - CGFloat(sin(rad) * backLen)
+                let baseY = y2 + CGFloat(cos(rad) * backLen)
+                let left  = CGPoint(x: baseX + CGFloat(cos(perpAngle) * backLen * 0.4),
+                                    y: baseY + CGFloat(sin(perpAngle) * backLen * 0.4))
+                let right = CGPoint(x: baseX - CGFloat(cos(perpAngle) * backLen * 0.4),
+                                    y: baseY - CGFloat(sin(perpAngle) * backLen * 0.4))
+                var arrow = Path()
+                arrow.move(to: CGPoint(x: x2, y: y2))
+                arrow.addLine(to: left)
+                arrow.addLine(to: right)
+                arrow.closeSubpath()
+                ctx.fill(arrow, with: .color(Color.appGold.opacity(0.90)))
+            }
+            .frame(width: diameter, height: diameter)
+            .accessibilityHidden(true)
+
+            // ── Prayer mat — CENTERED, rotated to Qibla ─────────────
+            // Mat is the centerpiece: the needle points from it toward Makkah.
+            let matW = r * 0.24
+            let matH = r * 0.32
+            Image("PrayerMat")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: matW, height: matH)
+                .drawingGroup()
+                .rotationEffect(.degrees(bearing))
+                .accessibilityLabel("Prayer mat facing Qiblah direction")
+
+            // ── Ka'bah icon at ring edge ─────────────────────────────
+            let kaabahSize = r * 0.18
+            let kaabahR    = r * 0.925
+            Image("KaabahIcon")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: kaabahSize, height: kaabahSize)
+                .drawingGroup()
+                .clipShape(Circle())
+                .overlay(Circle().stroke(Color.appGold, lineWidth: 2))
+                .shadow(color: Color.appGold.opacity(0.45), radius: 4)
+                .offset(
+                    x: kaabahR * CGFloat(sin(bearing * .pi / 180)),
+                    y: -kaabahR * CGFloat(cos(bearing * .pi / 180))
+                )
+                .accessibilityLabel("Ka'bah direction marker")
+
+            // ── Centre pivot dot ─────────────────────────────────────
+            Circle()
+                .fill(Color.secondary.opacity(0.45))
+                .frame(width: 6, height: 6)
+                .accessibilityHidden(true)
+        }
+        .frame(width: diameter, height: diameter)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Qibla compass")
     }
 }
 
