@@ -1,18 +1,39 @@
 import IqamahCore
 import SwiftUI
 
+// MARK: - Prayer Row Identifier
+
+/// Identifies a unique row across two columns (today/tomorrow).
+/// `dayOffset` = 0 for today, 1 for tomorrow — used in iPad landscape.
+struct PrayerRowID: Hashable {
+    let dayOffset: Int
+    let name: String
+}
+
 // MARK: - Prayer Times Table
 
 struct PrayerTimesTable: View {
     let prayerTimes: PrayerTimes
     let timezone: TimeZone
+    /// 0 = today, 1 = tomorrow. Used in iPad landscape two-column layout.
+    var dayOffset: Int = 0
+    /// Shared across columns in iPad landscape so only one row is open at a time.
+    @Binding var expandedRowID: PrayerRowID?
 
     @State private var adjustments: [String: Int] = [:]
     @State private var adhaanSelections: [String: Adhaan] = [:]
     @State private var prayerMuted: [String: Bool] = [:]
-    @State private var expandedPrayerName: String?
     @ObservedObject private var settingsManager = SettingsManager.shared
     @ObservedObject private var player = AdhaaanPlayer.shared
+
+    /// Convenience initialiser for call sites that don't need shared expand state (macOS single-column).
+    init(prayerTimes: PrayerTimes, timezone: TimeZone, dayOffset: Int = 0,
+         expandedRowID: Binding<PrayerRowID?> = .constant(nil)) {
+        self.prayerTimes = prayerTimes
+        self.timezone = timezone
+        self.dayOffset = dayOffset
+        self._expandedRowID = expandedRowID
+    }
 
     private var timeFormatter: DateFormatter {
         PrayerTimes.timeFormatter(for: timezone, use24Hour: settingsManager.use24HourTime)
@@ -21,8 +42,38 @@ struct PrayerTimesTable: View {
     var body: some View {
         VStack(spacing: 1) {
             ForEach(prayerTimes.prayers, id: \.name) { prayer in
-                let isSunrise = prayer.name == "Sunrise"
                 let adjusted = adjustedTime(for: prayer)
+                let rowID = PrayerRowID(dayOffset: dayOffset, name: prayer.name)
+
+                #if os(iOS)
+                PrayerRowMobileView(
+                    name: prayer.name,
+                    time: adjusted,
+                    formatter: timeFormatter,
+                    isPast: adjusted < Date(),
+                    isNext: isNextPrayer(adjustedTime: adjusted),
+                    selectedAdhaan: adhaanSelections[prayer.name] ?? .silent,
+                    isMuted: prayerMuted[prayer.name] ?? false,
+                    isExpanded: expandedRowID == rowID,
+                    onTap: {
+                        withAnimation(.spring(duration: 0.25)) {
+                            expandedRowID = expandedRowID == rowID ? nil : rowID
+                        }
+                    },
+                    onSelectAdhaan: { adhaan in
+                        adhaanSelections[prayer.name] = adhaan
+                        settingsManager.setAdhaan(adhaan, for: prayer.name)
+                        withAnimation(.spring(duration: 0.2)) { expandedRowID = nil }
+                    },
+                    onToggleMute: {
+                        let muted = !(prayerMuted[prayer.name] ?? false)
+                        prayerMuted[prayer.name] = muted
+                        settingsManager.setPrayerMuted(muted, for: prayer.name)
+                        withAnimation(.spring(duration: 0.2)) { expandedRowID = nil }
+                    }
+                )
+                #else
+                let isSunrise = prayer.name == "Sunrise"
                 if isSunrise {
                     SunriseRow(time: adjusted, formatter: timeFormatter)
                 } else {
@@ -46,15 +97,16 @@ struct PrayerTimesTable: View {
                             }
                         ),
                         isHighlighted: isNextPrayer(adjustedTime: adjusted),
-                        isPickerExpanded: expandedPrayerName == prayer.name,
+                        isPickerExpanded: expandedRowID?.name == prayer.name,
                         onTogglePicker: {
                             withAnimation(.easeInOut(duration: 0.18)) {
-                                expandedPrayerName = expandedPrayerName == prayer.name ? nil : prayer.name
+                                expandedRowID = expandedRowID == rowID ? nil : rowID
                             }
                         },
                         onAdjust: { delta in adjustPrayerTime(for: prayer.name, delta: delta) }
                     )
                 }
+                #endif
             }
         }
         .onAppear { loadAdjustments() }
