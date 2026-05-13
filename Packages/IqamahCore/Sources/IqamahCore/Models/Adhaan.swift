@@ -40,6 +40,14 @@ public struct Adhaan: Identifiable, Codable, Hashable {
         return options
     }
 
+    /// Alert tones only — suitable for Sunrise which is not a prayer.
+    /// No adhaan recordings; silence is the default ("No alert").
+    public static var availableForSunrise: [Adhaan] {
+        var options: [Adhaan] = [.silent]
+        options += alertTones
+        return options
+    }
+
     /// Bundled gentle alert tones (tone_*.aiff / tone_*.mp3)
     public static var alertTones: [Adhaan] {
         let known: [(id: String, name: String, exts: [String])] = [

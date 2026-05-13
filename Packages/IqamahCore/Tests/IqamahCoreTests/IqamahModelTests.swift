@@ -998,3 +998,30 @@ struct CoordinateEquatableTests {
         #expect(a.longitude != b.longitude)
     }
 }
+
+// MARK: - Sunrise adhaan options (AC-0290, AC-0291)
+
+@Suite("Sunrise Adhaan Options Tests")
+struct SunriseAdhaanTests {
+
+    @Test("availableForSunrise contains Silent and Alert Tones")
+    func availableForSunriseContainsSilentAndAlertTones() {
+        let options = Adhaan.availableForSunrise
+        #expect(options.contains(where: { $0.id == "silent" }),
+                "availableForSunrise must include .silent")
+        for tone in Adhaan.alertTones {
+            #expect(options.contains(where: { $0.id == tone.id }),
+                    "availableForSunrise must include alert tone \(tone.id)")
+        }
+    }
+
+    @Test("availableForSunrise contains no Adhaan recordings")
+    func availableForSunriseContainsNoAdhaanRecordings() {
+        let options = Adhaan.availableForSunrise
+        let forbidden = options.filter {
+            $0.id.hasPrefix("adhaan_")
+        }
+        #expect(forbidden.isEmpty,
+                "availableForSunrise must not contain adhaan recordings: \(forbidden.map { $0.id })")
+    }
+}
