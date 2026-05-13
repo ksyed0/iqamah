@@ -34,7 +34,7 @@ struct PrayerTimesView: View {
             let isLandscape = geo.size.width > geo.size.height
             let isRegular = hSizeClass == .regular
             if isRegular && isLandscape {
-                portraitBody // Task 6 will replace this with iPadLandscapeBody
+                iPadLandscapeBody
             } else {
                 portraitBody
             }
@@ -140,6 +140,114 @@ struct PrayerTimesView: View {
             Spacer()
         }
         .background { Rectangle().fill(.ultraThinMaterial) }
+    }
+
+    @ViewBuilder
+    private var iPadLandscapeBody: some View {
+        let tz = TimeZone(identifier: city.timezone) ?? .current
+        VStack(spacing: 0) {
+            // Full-width landscape header
+            HStack(spacing: 16) {
+                Image("AppIcon").resizable().frame(width: 36, height: 36)
+                    .shadow(color: Color.primary.opacity(0.10), radius: 2)
+                Text("Iqamah")
+                    .font(.system(size: 20, weight: .bold, design: .serif))
+                    .foregroundStyle(LinearGradient(
+                        colors: [Color.appGoldDim, Color(red: 0.85, green: 0.65, blue: 0.13)],
+                        startPoint: .topLeading, endPoint: .bottomTrailing))
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(city.name).font(.callout.weight(.semibold)).lineLimit(1)
+                    Text(calculationMethod.shortName).font(.caption).foregroundColor(.secondary)
+                }
+                Spacer()
+                MoonPhaseView(phase: currentMoonPhase, size: 32)
+                    .accessibilityHidden(true)
+                VStack(alignment: .trailing, spacing: 1) {
+                    Text(hijriDateLabel).font(.caption.weight(.medium))
+                    Text(moonPhaseSubtitle).font(.caption2).foregroundStyle(.secondary)
+                }
+                if let nextTime = nextPrayerTime {
+                    VStack(alignment: .trailing, spacing: 1) {
+                        Text(nextTime, style: .timer)
+                            .font(.title3.bold().monospacedDigit())
+                            .foregroundStyle(Color.appGoldDim)
+                            .accessibilityLabel("Time until next prayer")
+                        Text("until next").font(.caption2).foregroundStyle(.secondary)
+                            .accessibilityHidden(true)
+                    }
+                }
+                Button(action: { AdhaaanPlayer.shared.toggleMute() }) {
+                    Image(systemName: AdhaaanPlayer.shared.isMuted
+                          ? "speaker.slash.fill" : "speaker.wave.2.fill")
+                        .font(.body)
+                        .foregroundColor(AdhaaanPlayer.shared.isMuted ? .secondary : .accentColor)
+                        .symbolRenderingMode(.hierarchical)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 10)
+            .background { Rectangle().fill(.ultraThinMaterial) }
+
+            // Two columns: today | tomorrow
+            HStack(alignment: .top, spacing: 0) {
+                // Today
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 0) {
+                        sectionHeader("Today · \(currentDate.formattedGregorianDate())")
+                        if let times = prayerTimes {
+                            PrayerTimesTable(
+                                prayerTimes: times,
+                                timezone: tz,
+                                dayOffset: 0,
+                                expandedRowID: $expandedRowID
+                            )
+                            .padding(.horizontal, 12).padding(.bottom, 12)
+                        }
+                        Button(action: openHilalWatch) {
+                            Label("Hilal Watch", systemImage: "moon.haze.fill")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(Color.appGoldDim)
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.horizontal, 16).padding(.bottom, 12)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+
+                Divider()
+
+                // Tomorrow
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 0) {
+                        let tomorrow = Calendar.current.date(
+                            byAdding: .day, value: 1, to: currentDate) ?? currentDate
+                        sectionHeader("Tomorrow · \(tomorrow.formattedGregorianDate())")
+                        if let times = tomorrowPrayerTimes {
+                            PrayerTimesTable(
+                                prayerTimes: times,
+                                timezone: tz,
+                                dayOffset: 1,
+                                expandedRowID: $expandedRowID
+                            )
+                            .padding(.horizontal, 12).padding(.bottom, 12)
+                        } else {
+                            ProgressView().padding(.vertical, 20)
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity)
+            }
+        }
+    }
+
+    private func sectionHeader(_ text: String) -> some View {
+        Text(text)
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 16)
+            .padding(.top, 10)
+            .padding(.bottom, 4)
     }
     #endif
 
