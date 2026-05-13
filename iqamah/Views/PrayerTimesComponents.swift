@@ -97,7 +97,7 @@ struct PrayerTimesTable: View {
                             }
                         ),
                         isHighlighted: isNextPrayer(adjustedTime: adjusted),
-                        isPickerExpanded: expandedRowID?.name == prayer.name,
+                        isPickerExpanded: expandedRowID == rowID,
                         onTogglePicker: {
                             withAnimation(.easeInOut(duration: 0.18)) {
                                 expandedRowID = expandedRowID == rowID ? nil : rowID
