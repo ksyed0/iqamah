@@ -142,7 +142,7 @@ struct QiblahView: View {
                 }
                 .padding(.horizontal, 20)
                 .frame(width: panelWidth)
-                .background(.regularMaterial)
+                .background(Color.primary.opacity(0.05))
             }
         }
 
@@ -160,6 +160,7 @@ struct QiblahView: View {
                     .foregroundStyle(.secondary)
             }
             .accessibilityElement(children: .combine)
+            .accessibilityLabel("\(label): \(value), \(detail)")
         }
     #endif
 
