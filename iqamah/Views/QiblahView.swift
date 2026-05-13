@@ -85,6 +85,7 @@ struct QiblahView: View {
                 QiblahCompassView(diameter: diameter, bearing: qiblahBearing)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .accessibilityLabel("Qiblah direction: \(Int(qiblahBearing)) degrees \(cardinalDirection(for: qiblahBearing))")
             .accessibilityValue("Face \(cardinalDirection(for: qiblahBearing)) to face Mecca")
 
@@ -198,7 +199,7 @@ private struct QiblahCompassView: View {
             Canvas { ctx, size in
                 let cx = size.width / 2, cy = size.height / 2
                 let rad = bearing * .pi / 180
-                let needleR = Double(r) - 20
+                let needleR = Double(r) * 0.875
                 let x2 = cx + CGFloat(sin(rad) * needleR)
                 let y2 = cy - CGFloat(cos(rad) * needleR)
                 var path = Path()
@@ -231,7 +232,7 @@ private struct QiblahCompassView: View {
             let matH = r * 0.32
             Image("PrayerMat")
                 .resizable()
-                .aspectRatio(contentMode: .fit)
+                .scaledToFit()
                 .frame(width: matW, height: matH)
                 .drawingGroup()
                 .rotationEffect(.degrees(bearing))
