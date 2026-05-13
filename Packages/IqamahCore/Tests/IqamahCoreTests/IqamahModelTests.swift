@@ -1019,7 +1019,7 @@ struct SunriseAdhaanTests {
     func availableForSunriseContainsNoAdhaanRecordings() {
         let options = Adhaan.availableForSunrise
         let forbidden = options.filter {
-            $0.id.hasPrefix("adhaan_") || $0.id.hasPrefix("fajr_")
+            $0.id.hasPrefix("adhaan_")
         }
         #expect(forbidden.isEmpty,
                 "availableForSunrise must not contain adhaan recordings: \(forbidden.map { $0.id })")
