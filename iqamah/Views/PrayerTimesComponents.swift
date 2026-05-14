@@ -75,7 +75,17 @@ struct PrayerTimesTable: View {
                 #else
                     let isSunrise = prayer.name == "Sunrise"
                     if isSunrise {
-                        SunriseRow(time: adjusted, formatter: timeFormatter)
+                        SunriseRow(
+                            time: adjusted,
+                            formatter: timeFormatter,
+                            selectedAlert: Binding(
+                                get: { adhaanSelections["Sunrise"] ?? .silent },
+                                set: { alert in
+                                    adhaanSelections["Sunrise"] = alert
+                                    settingsManager.setAdhaan(alert, for: "Sunrise")
+                                }
+                            )
+                        )
                     } else {
                         PrayerTimeRow(
                             name: prayer.name,
@@ -171,32 +181,112 @@ struct PrayerTimesTable: View {
 
 // MARK: - Sunrise Row (US-0028)
 
-/// Muted info row for Sunrise — not a prayer, no adjustment controls.
+/// Sunrise row — shows time and an alert-tone picker (no adhaan, no adjustments).
 struct SunriseRow: View {
     let time: Date
     let formatter: DateFormatter
+    @Binding var selectedAlert: Adhaan
+
+    @State private var isPickerExpanded = false
+    @Environment(\.colorScheme) private var colorScheme
+    private var gold: Color { colorScheme == .dark ? .appGold : .appGoldDark }
 
     var body: some View {
-        HStack(spacing: 16) {
-            HStack(spacing: 14) {
-                Image(systemName: "sunrise.fill")
-                    .font(.body)
-                    .foregroundColor(.secondary) // AC-0063: no opacity reduction on semantic colour
-                    .frame(width: 44, height: 36)
-                Text("Sunrise")
-                    .font(.body)
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 16) {
+                HStack(spacing: 14) {
+                    Image(systemName: "sunrise.fill")
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                        .frame(width: 44, height: 36)
+                    Text("Sunrise")
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                }
+                Spacer()
+                Text(formatter.string(from: time))
+                    .font(.title3.weight(.medium))
                     .foregroundColor(.secondary)
+                    .monospacedDigit()
+                    .frame(minWidth: 72, alignment: .trailing)
+
+                // Divider matching prayer rows
+                Rectangle()
+                    .fill(Color.primary.opacity(0.08))
+                    .frame(width: 1, height: 28)
+                    .padding(.horizontal, 10)
+
+                // Alert tone pill button
+                Button(action: { isPickerExpanded.toggle() }) {
+                    HStack(spacing: 3) {
+                        Text(selectedAlert.id == "silent" ? "No alert" : selectedAlert.shortName)
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(selectedAlert.id == "silent"
+                                ? Color.orange.opacity(0.55)
+                                : Color.orange)
+                            .lineLimit(1)
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 8, weight: .semibold))
+                            .foregroundStyle(.tertiary)
+                    }
+                    .padding(.horizontal, 8).padding(.vertical, 4)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20, style: .continuous)
+                            .fill(Color.orange.opacity(selectedAlert.id == "silent" ? 0.07 : 0.12))
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20, style: .continuous)
+                            .strokeBorder(Color.orange.opacity(0.22), lineWidth: 0.5)
+                    )
+                }
+                .buttonStyle(.plain)
+                .frame(width: 100)
+                .accessibilityLabel(selectedAlert.id == "silent"
+                    ? "No alert for Sunrise. Tap to set."
+                    : "Alert for Sunrise: \(selectedAlert.displayName). Tap to change.")
+
+                // Mute placeholder (keeps alignment with prayer rows)
+                Color.clear.frame(width: 36)
             }
-            Spacer()
-            Text(formatter.string(from: time))
-                .font(.title3.weight(.medium))
-                .foregroundColor(.secondary)
-                .monospacedDigit()
-                .frame(minWidth: 100, alignment: .trailing)
-            Color.clear.frame(width: 76)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 10)
+
+            if isPickerExpanded {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Alert tone")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
+                        .tracking(0.4)
+                        .padding(.leading, 80)
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 6) {
+                            ForEach(Adhaan.availableForSunrise) { alert in
+                                let isSel = selectedAlert.id == alert.id
+                                Button(action: {
+                                    selectedAlert = alert
+                                    isPickerExpanded = false
+                                }) {
+                                    Text(alert.id == "silent" ? "No alert" : alert.shortName)
+                                        .font(.caption.weight(.medium))
+                                        .foregroundStyle(isSel ? .white : Color.orange)
+                                        .padding(.horizontal, 10).padding(.vertical, 5)
+                                        .background(Capsule().fill(isSel
+                                                ? Color.orange : Color.orange.opacity(0.08)))
+                                        .overlay(Capsule().strokeBorder(
+                                            Color.orange.opacity(isSel ? 0 : 0.25), lineWidth: 0.5
+                                        ))
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding(.leading, 80)
+                        .padding(.trailing, 20)
+                    }
+                }
+                .padding(.bottom, 8)
+            }
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 10)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Sunrise at \(formatter.string(from: time))")
     }

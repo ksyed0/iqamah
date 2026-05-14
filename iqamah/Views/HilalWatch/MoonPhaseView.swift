@@ -18,20 +18,24 @@ struct MoonPhaseView: View {
             let disc = Path(ellipseIn: rect)
             ctx.fill(disc, with: .color(.white.opacity(0.15)))
 
-            // Crescent via Path boolean subtraction (iOS 17+ / macOS 14+).
-            // No blend modes needed — geometrically correct on all display scales.
-            let illumination = abs(phase - 0.5) * 2 // 0 = full moon, 1 = new moon
-            let xOffset = (1.0 - illumination * 2) * r
-            let shadowRect = CGRect(x: cx - r + xOffset, y: cy - r, width: r * 2, height: r * 2)
-            let shadow = Path(ellipseIn: shadowRect)
-
-            let crescentPath: Path = if phase < 0.5 {
-                // Waxing — lit on right: disc minus shadow leaves right crescent
-                disc.subtracting(shadow)
+            // Crescent via Path.subtracting (iOS 17+ / macOS 14+).
+            //
+            // The shadow circle starts perfectly centered on the disc (new moon = 0 % lit)
+            // and moves sideways until it no longer overlaps (full moon = 100 % lit).
+            // disc.subtracting(shadow) = the lit portion inside the disc.
+            //
+            //   Waxing (phase 0 → 0.5): shadow moves LEFT → exposes right crescent
+            //   Waning (phase 0.5 → 1): shadow moves RIGHT → exposes left crescent
+            let shadowX: CGFloat = if phase < 0.5 {
+                -2 * r * CGFloat(2 * phase) // 0 at new → -2r at full
             } else {
-                // Waning — lit on left: shadow minus disc leaves left crescent
-                shadow.subtracting(disc)
+                2 * r * CGFloat(2 - 2 * phase) // +2r at full → 0 at new
             }
+
+            let shadowRect = CGRect(x: cx - r + shadowX, y: cy - r, width: r * 2, height: r * 2)
+            let shadow = Path(ellipseIn: shadowRect)
+            let crescentPath = disc.subtracting(shadow)
+
             ctx.fill(crescentPath, with: .color(.yellow.opacity(0.9)))
         }
         .frame(width: size, height: size)
