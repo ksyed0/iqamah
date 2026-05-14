@@ -151,10 +151,10 @@ struct PrayerTimesView: View {
             // ── Primary header: brand + location + mute only ─────────
             HStack(spacing: 12) {
                 #if os(macOS)
-                Image(nsImage: NSApplication.shared.applicationIconImage)
-                    .resizable()
-                    .frame(width: 64, height: 64)
-                    .shadow(color: Color.primary.opacity(0.10), radius: 3, x: 0, y: 1)
+                    Image(nsImage: NSApplication.shared.applicationIconImage)
+                        .resizable()
+                        .frame(width: 64, height: 64)
+                        .shadow(color: Color.primary.opacity(0.10), radius: 3, x: 0, y: 1)
                 #endif
 
                 Text("Iqamah")
