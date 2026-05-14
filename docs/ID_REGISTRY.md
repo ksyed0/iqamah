@@ -14,7 +14,7 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 | AC           | AC-0300               | AC-0299           |
 | TC           | TC-0036               | TC-0035           |
 | BUG          | BUG-0056              | BUG-0055          |
-| ENH          | ENH-020               | ENH-019           |
+| ENH          | ENH-022               | ENH-021           |
 
 ---
 
@@ -28,4 +28,4 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 ---
 
-**Last Updated:** 2026-05-13 (EPIC-0013 Widget Platform consumed US-0058–US-0060, AC-0276–AC-0275 range was reserved; EPIC-0014 Adaptive Layout added — US-0061–US-0063, AC-0276–AC-0299.)
+**Last Updated:** 2026-05-13 (ENH-020 Apple TV + ENH-021 visionOS added to backlog; EPIC-0013 Widget Platform — US-0058–US-0060; EPIC-0014 Adaptive Layout — US-0061–US-0063, AC-0276–AC-0299.)
