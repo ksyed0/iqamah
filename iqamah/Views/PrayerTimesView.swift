@@ -150,7 +150,7 @@ struct PrayerTimesView: View {
         VStack(spacing: 0) {
             // ── Primary header: brand + location + mute only ─────────
             HStack(spacing: 12) {
-                Image("AppIcon")
+                Image(nsImage: NSApplication.shared.applicationIconImage)
                     .resizable()
                     .frame(width: 64, height: 64)
                     .shadow(color: Color.primary.opacity(0.10), radius: 3, x: 0, y: 1)
@@ -248,11 +248,12 @@ struct PrayerTimesView: View {
 
                 Spacer()
 
-                Button("Details") {
+                Button("Hilal Watch ›") {
                     openHilalWatch()
                 }
                 .buttonStyle(.borderless)
-                .font(.caption)
+                .font(.caption.weight(.medium))
+                .foregroundStyle(Color.appGold)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 8)
