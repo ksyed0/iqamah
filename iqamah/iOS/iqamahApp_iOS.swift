@@ -25,6 +25,8 @@ struct IqamahiOSApp: App {
                 .onChange(of: scenePhase) { _, phase in
                     if phase == .active {
                         reschedule()
+                        // Pre-compute Hilal grid in background so sheet opens instantly
+                        HilalWatchPreloader.shared.prefetch(settings: settings)
                         if settings.liveActivityEnabled {
                             Task { await PrayerActivityManager.shared.startOrUpdateActivity(settings: settings) }
                         }

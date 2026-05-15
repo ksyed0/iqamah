@@ -47,24 +47,40 @@ import IqamahCore
 // MARK: - Shared map update logic
 
 private extension HilalMapView {
+    /// Display step in bands: 2 = 4°×4° display cells (4,050 polygons vs 16,200).
+    /// The data grid stays full-resolution; we just merge 2×2 blocks for rendering
+    /// to stay well under MapKit's 50,000 Metal buffer threshold.
+    static let displayStep = 2
+
     func updateMap(_ map: MKMapView) {
         map.removeOverlays(map.overlays)
+        let step = Self.displayStep
         var overlays = [HilalCellOverlay]()
-        overlays.reserveCapacity(HilalCalculator.cellCount)
-        for latBand in 0 ..< HilalCalculator.latitudeBands {
+        overlays.reserveCapacity(HilalCalculator.cellCount / (step * step))
+        for latBand in stride(from: 0, to: HilalCalculator.latitudeBands, by: step) {
             let lat = Double(latBand) * 2.0 - 88.0
-            for lonBand in 0 ..< HilalCalculator.longitudeBands {
+            for lonBand in stride(from: 0, to: HilalCalculator.longitudeBands, by: step) {
                 let lon = Double(lonBand) * 2.0 - 178.0
-                let idx = latBand * HilalCalculator.longitudeBands + lonBand
-                let rawCategory = grid[idx]
+                // Merge step×step cells: take the most-favourable category
+                var best = Int8(VisibilityCategory.D.rawValue)
+                for dl in 0 ..< step {
+                    for dm in 0 ..< step {
+                        let r = latBand + dl, c = lonBand + dm
+                        guard r < HilalCalculator.latitudeBands,
+                              c < HilalCalculator.longitudeBands else { continue }
+                        let v = grid[r * HilalCalculator.longitudeBands + c]
+                        if v > best { best = v }
+                    }
+                }
+                let size = Double(step) * 2.0
                 var coords = [
                     CLLocationCoordinate2D(latitude: lat, longitude: lon),
-                    CLLocationCoordinate2D(latitude: lat, longitude: lon + 2.0),
-                    CLLocationCoordinate2D(latitude: lat + 2.0, longitude: lon + 2.0),
-                    CLLocationCoordinate2D(latitude: lat + 2.0, longitude: lon),
+                    CLLocationCoordinate2D(latitude: lat, longitude: lon + size),
+                    CLLocationCoordinate2D(latitude: lat + size, longitude: lon + size),
+                    CLLocationCoordinate2D(latitude: lat + size, longitude: lon),
                 ]
                 let overlay = HilalCellOverlay(coordinates: &coords, count: 4)
-                overlay.category = VisibilityCategory(rawValue: Int(rawCategory)) ?? .D
+                overlay.category = VisibilityCategory(rawValue: Int(best)) ?? .D
                 overlays.append(overlay)
             }
         }
