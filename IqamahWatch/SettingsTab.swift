@@ -29,16 +29,16 @@ struct SettingsTab: View {
                 }
 
                 // Manual city selection — drill-down Country → City
+                // Uses .task on the Form (not .onAppear on the Section) for reliable
+                // loading on watchOS where Section.onAppear can silently not fire.
                 if let db = database {
                     NavigationLink("Set City Manually") {
                         WatchCountryPicker(database: db, settings: settings)
                     }
-                }
-            }
-            .onAppear {
-                if database == nil,
-                   case let .success(db) = CitiesLoader.shared.load() {
-                    database = db
+                } else {
+                    Text("Loading cities…")
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
                 }
             }
 
@@ -76,6 +76,13 @@ struct SettingsTab: View {
 
             Section("Display") {
                 Toggle("24-hour time", isOn: $settings.use24HourTime)
+            }
+        }
+        .task {
+            // .task on the Form fires reliably on watchOS; Section.onAppear can be missed.
+            guard database == nil else { return }
+            if case let .success(db) = CitiesLoader.shared.load() {
+                database = db
             }
         }
     }
