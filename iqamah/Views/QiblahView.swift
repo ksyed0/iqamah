@@ -298,8 +298,8 @@ private struct QiblahCompassView: View {
                 var path = Path()
                 path.move(to: CGPoint(x: cx, y: cy))
                 path.addLine(to: CGPoint(x: x2, y: y2))
-                ctx.stroke(path, with: .color(Color.appGold.opacity(0.80)),
-                           style: StrokeStyle(lineWidth: 2, dash: [6, 4], dashPhase: 0))
+                ctx.stroke(path, with: .color(Color.appGold.opacity(0.50)),
+                           style: StrokeStyle(lineWidth: 3.5, dash: [8, 5], dashPhase: 0))
                 // Arrowhead
                 let backLen: Double = Double(r) * 0.065
                 let perpAngle = rad + .pi / 2

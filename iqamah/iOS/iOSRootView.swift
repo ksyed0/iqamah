@@ -13,7 +13,7 @@ struct IOSRootView: View {
                 .onReceive(NotificationCenter.default.publisher(for: .openPrayerTimesTab)) { _ in
                     selectedTab = 0
                 }
-                .sheet(isPresented: $showHilalWatch) {
+                .fullScreenCover(isPresented: $showHilalWatch) {
                     HilalWatchSheet()
                         .environmentObject(settings)
                 }

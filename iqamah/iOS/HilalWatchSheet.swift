@@ -8,6 +8,7 @@
     struct HilalWatchSheet: View {
         @EnvironmentObject private var settings: SettingsManager
         @Environment(\.dismiss) private var dismiss
+        @ObservedObject private var preloader = HilalWatchPreloader.shared
         @State private var selectedEvening: Evening = .d29
         @State private var selectedCriterion: HilalCriterionPicker.CriterionChoice = .odeh
         @State private var grid: ContiguousArray<Int8> = ContiguousArray(
@@ -22,7 +23,16 @@
             NavigationStack {
                 ZStack {
                     iOSVisibilityContent
-                        .task { await loadGrid() }
+                        .task {
+                            // Use pre-computed data if available; otherwise compute now
+                            if preloader.isReady {
+                                grid = preloader.grid
+                                localCard = preloader.localCard
+                                newMoonDate = preloader.newMoonDate
+                            } else {
+                                await loadGrid()
+                            }
+                        }
 
                     if isLoading {
                         ProgressView("Computing\u{2026}")

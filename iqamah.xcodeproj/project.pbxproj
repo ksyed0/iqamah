@@ -105,6 +105,8 @@
 		HW00000000000000000021A /* HilalMapView.swift in Sources (iOS) */ = {isa = PBXBuildFile; fileRef = HW000000000000000000003 /* HilalMapView.swift */; };
 		
 		HW00000000000000000022B /* HilalCellOverlay.swift in Sources (iOS) */ = {isa = PBXBuildFile; fileRef = HW000000000000000000002 /* HilalCellOverlay.swift */; };
+		
+		HL000000000000000000002 /* HilalWatchPreloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = HL000000000000000000001 /* HilalWatchPreloader.swift */; };
 		/* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -276,6 +278,8 @@
 		HC000000000000000000001 /* PrayerHeroCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerHeroCard.swift; sourceTree = "<group>"; };
 		
 		HC000000000000000000003 /* PrayerRowMobileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerRowMobileView.swift; sourceTree = "<group>"; };
+		
+		HL000000000000000000001 /* HilalWatchPreloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HilalWatchPreloader.swift; sourceTree = "<group>"; };
 		/* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -555,6 +559,7 @@
 				AM000000000000000000001R /* PrayerActivityManager.swift */,
 				AM000000000000000000002R /* PrayerActivityAttributes.swift */,
 				HC000000000000000000001 /* PrayerHeroCard.swift */,
+				HL000000000000000000001 /* HilalWatchPreloader.swift */,
 				HC000000000000000000003 /* PrayerRowMobileView.swift */,
 				iOS0000000000000000000013 /* Info.plist */,
 				iOS0000000000000000000014 /* iqamah-iOS.entitlements */,
@@ -983,6 +988,7 @@
 				B5000000000000000000004 /* HilalPalette.swift in Sources */,
 				B5000000000000000000005 /* AboutHilalWatchCard.swift in Sources */,
 				B5000000000000000000010 /* HilalWatchSheet.swift in Sources */,
+				HL000000000000000000002 /* HilalWatchPreloader.swift in Sources */,
 				HW00000000000000000021A /* HilalMapView.swift in Sources (iOS) */,
 				HW00000000000000000022B /* HilalCellOverlay.swift in Sources (iOS) */,
 			);
