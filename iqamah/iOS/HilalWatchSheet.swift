@@ -21,7 +21,6 @@
         var body: some View {
             NavigationStack {
                 ZStack {
-                    // iOS v1: show a list summary instead of an interactive map
                     iOSVisibilityContent
                         .task { await loadGrid() }
 
@@ -85,6 +84,14 @@
                         )
                         .listRowInsets(EdgeInsets())
                     }
+                }
+
+                // Global crescent visibility map
+                Section("Global Visibility") {
+                    HilalMapView(grid: grid)
+                        .frame(height: 220)
+                        .listRowInsets(EdgeInsets())
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                 }
 
                 // Summary statistics from grid

@@ -321,8 +321,8 @@ private struct QiblahCompassView: View {
 
             // ── Prayer mat — CENTERED, rotated to Qibla ─────────────
             // Mat is the centerpiece: the needle points from it toward Makkah.
-            let matW = r * 0.24
-            let matH = r * 0.32
+            let matW = r * 0.48
+            let matH = r * 0.64
             Image("PrayerMat")
                 .resizable()
                 .scaledToFit()

@@ -12,6 +12,7 @@ struct IqamahiOSApp: App {
         WindowGroup {
             IOSRootView()
                 .environmentObject(settings)
+                .preferredColorScheme(settings.appearance.colorScheme)
                 .onAppear {
                     activateWCSession()
                 }
