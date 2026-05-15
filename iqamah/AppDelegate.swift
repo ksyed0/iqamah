@@ -314,24 +314,36 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         statusItem?.menu = nil
     }
 
+    /// The Hilal Watch window title — used to exclude it when searching for the main window.
+    private static let hilalWatchWindowTitle = "Hilal Watch"
+
+    /// Returns the prayer-times main window, explicitly excluding the Hilal Watch window.
+    /// Falls back to searching all windows so we never confuse the two.
+    private var resolvedMainWindow: NSWindow? {
+        // 1. Use the cached reference if it's still the right window.
+        if let w = mainWindow, w.title != Self.hilalWatchWindowTitle { return w }
+        // 2. Search for the first non-Hilal-Watch, non-panel window.
+        let candidate = NSApplication.shared.windows.first {
+            !($0 is NSPanel) && $0.title != Self.hilalWatchWindowTitle
+        }
+        if let w = candidate {
+            mainWindow = w
+            w.delegate = self
+        }
+        return candidate
+    }
+
     @objc func showWindow() {
         // Switch to .regular so the app appears in Cmd+Tab while the window is open.
         // The Dock icon temporarily appears — this is expected macOS behaviour for
         // hybrid menu-bar/window apps (same pattern used by Bartender, Fantastical, etc.).
         NSApplication.shared.setActivationPolicy(.regular)
-
-        if let window = mainWindow {
-            window.makeKeyAndOrderFront(nil)
-        } else if let window = NSApplication.shared.windows.first {
-            mainWindow = window
-            window.delegate = self
-            window.makeKeyAndOrderFront(nil)
-        }
+        resolvedMainWindow?.makeKeyAndOrderFront(nil)
         NSApplication.shared.activate(ignoringOtherApps: true)
     }
 
     @objc func toggleWindow() {
-        if let window = mainWindow {
+        if let window = resolvedMainWindow {
             if window.isVisible {
                 hideWindow(window)
             } else {
@@ -350,6 +362,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     @objc func openHilalWatch() {
         NotificationCenter.default.post(name: .openHilalWatch, object: nil)
+        // openWindow(id:) is async — activate after a brief run-loop turn so the
+        // Hilal Watch window has been created and is ready to receive focus.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            NSApplication.shared.activate(ignoringOtherApps: true)
+        }
     }
 
     @objc func openSupport() {
