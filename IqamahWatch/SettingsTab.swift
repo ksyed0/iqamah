@@ -104,10 +104,16 @@ struct SettingsTab: View {
 struct WatchCountryPicker: View {
     let database: CitiesDatabase
     let settings: SettingsManager
+    @State private var query = ""
+
+    private var filtered: [Country] {
+        let all = database.countries.sorted { $0.name < $1.name }
+        return query.isEmpty ? all : all.filter { $0.name.localizedCaseInsensitiveContains(query) }
+    }
 
     var body: some View {
         List {
-            ForEach(database.countries.sorted { $0.name < $1.name }) { country in
+            ForEach(filtered) { country in
                 NavigationLink(country.name) {
                     WatchCityPicker(
                         cities: database.cities(forCountryCode: country.code),
@@ -116,6 +122,7 @@ struct WatchCountryPicker: View {
                 }
             }
         }
+        .searchable(text: $query, prompt: "Country")
         .navigationTitle("Country")
     }
 }
@@ -126,10 +133,15 @@ struct WatchCityPicker: View {
     let cities: [City]
     let settings: SettingsManager
     @Environment(\.dismiss) private var dismiss
+    @State private var query = ""
+
+    private var filtered: [City] {
+        query.isEmpty ? cities : cities.filter { $0.name.localizedCaseInsensitiveContains(query) }
+    }
 
     var body: some View {
         List {
-            ForEach(cities) { city in
+            ForEach(filtered) { city in
                 Button(city.name) {
                     settings.saveCity(city)
                     settings.locationSource = "manual"
@@ -138,6 +150,7 @@ struct WatchCityPicker: View {
                 }
             }
         }
+        .searchable(text: $query, prompt: "City")
         .navigationTitle("City")
     }
 }
