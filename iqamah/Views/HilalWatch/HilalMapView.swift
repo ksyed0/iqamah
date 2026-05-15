@@ -2,18 +2,52 @@ import MapKit
 import SwiftUI
 import IqamahCore
 
-struct HilalMapView: NSViewRepresentable {
-    let grid: ContiguousArray<Int8>
-    @Environment(\.colorScheme) var colorScheme
+#if os(macOS)
+    struct HilalMapView: NSViewRepresentable {
+        let grid: ContiguousArray<Int8>
+        @Environment(\.colorScheme) var colorScheme
 
-    func makeNSView(context: Context) -> MKMapView {
-        let map = MKMapView()
-        map.mapType = .mutedStandard
-        map.delegate = context.coordinator
-        return map
+        func makeNSView(context: Context) -> MKMapView {
+            let map = MKMapView()
+            map.mapType = .mutedStandard
+            map.delegate = context.coordinator
+            return map
+        }
+
+        func updateNSView(_ map: MKMapView, context _: Context) {
+            updateMap(map)
+        }
+
+        func makeCoordinator() -> HilalMapCoordinator {
+            HilalMapCoordinator(colorScheme: colorScheme)
+        }
     }
+#else
+    struct HilalMapView: UIViewRepresentable {
+        let grid: ContiguousArray<Int8>
+        @Environment(\.colorScheme) var colorScheme
 
-    func updateNSView(_ map: MKMapView, context _: Context) {
+        func makeUIView(context: Context) -> MKMapView {
+            let map = MKMapView()
+            map.mapType = .mutedStandard
+            map.delegate = context.coordinator
+            return map
+        }
+
+        func updateUIView(_ map: MKMapView, context _: Context) {
+            updateMap(map)
+        }
+
+        func makeCoordinator() -> HilalMapCoordinator {
+            HilalMapCoordinator(colorScheme: colorScheme)
+        }
+    }
+#endif
+
+// MARK: - Shared map update logic
+
+private extension HilalMapView {
+    func updateMap(_ map: MKMapView) {
         map.removeOverlays(map.overlays)
         var overlays = [HilalCellOverlay]()
         overlays.reserveCapacity(HilalCalculator.cellCount)
@@ -36,27 +70,29 @@ struct HilalMapView: NSViewRepresentable {
         }
         map.addOverlays(overlays, level: .aboveRoads)
     }
+}
 
-    func makeCoordinator() -> Coordinator {
-        Coordinator(colorScheme: colorScheme)
+// MARK: - Shared coordinator
+
+final class HilalMapCoordinator: NSObject, MKMapViewDelegate {
+    var colorScheme: ColorScheme
+    init(colorScheme: ColorScheme) {
+        self.colorScheme = colorScheme
     }
 
-    class Coordinator: NSObject, MKMapViewDelegate {
-        var colorScheme: ColorScheme
-        init(colorScheme: ColorScheme) {
-            self.colorScheme = colorScheme
+    func mapView(_: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+        guard let cell = overlay as? HilalCellOverlay else {
+            return MKOverlayRenderer(overlay: overlay)
         }
-
-        func mapView(_: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
-            guard let cell = overlay as? HilalCellOverlay else {
-                return MKOverlayRenderer(overlay: overlay)
-            }
-            let renderer = MKPolygonRenderer(polygon: cell)
-            let color = HilalPalette.fill(for: cell.category, colorScheme: colorScheme)
-            let alpha = HilalPalette.alpha(for: cell.category, colorScheme: colorScheme)
+        let renderer = MKPolygonRenderer(polygon: cell)
+        let color = HilalPalette.fill(for: cell.category, colorScheme: colorScheme)
+        let alpha = HilalPalette.alpha(for: cell.category, colorScheme: colorScheme)
+        #if os(macOS)
             renderer.fillColor = NSColor(color).withAlphaComponent(alpha)
-            renderer.strokeColor = .clear
-            return renderer
-        }
+        #else
+            renderer.fillColor = UIColor(color).withAlphaComponent(alpha)
+        #endif
+        renderer.strokeColor = .clear
+        return renderer
     }
 }

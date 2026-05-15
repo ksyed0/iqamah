@@ -95,10 +95,13 @@ struct PrayerTimesView: View {
 
         private var primaryHeader: some View {
             HStack(spacing: 12) {
-                Image("AppIcon")
-                    .resizable()
-                    .frame(width: 48, height: 48)
-                    .shadow(color: Color.primary.opacity(0.10), radius: 3, x: 0, y: 1)
+                if let uiImg = UIImage(named: "AppIcon") {
+                    Image(uiImage: uiImg)
+                        .resizable()
+                        .frame(width: 48, height: 48)
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        .shadow(color: Color.primary.opacity(0.10), radius: 3, x: 0, y: 1)
+                }
                 Text("Iqamah")
                     .font(.system(size: titleFontSize, weight: .bold, design: .serif))
                     .foregroundStyle(LinearGradient(

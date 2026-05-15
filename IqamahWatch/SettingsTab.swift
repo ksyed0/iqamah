@@ -6,6 +6,7 @@ struct SettingsTab: View {
     @EnvironmentObject private var settings: SettingsManager
     @StateObject private var locationUpdater = WatchLocationSetup()
     @State private var isUpdatingLocation = false
+    @State private var database: CitiesDatabase?
 
     var body: some View {
         Form {
@@ -13,7 +14,9 @@ struct SettingsTab: View {
                 Text(locationLabel)
                     .font(.caption2)
                     .foregroundStyle(.secondary)
-                Button(isUpdatingLocation ? "Updating…" : "Update Location") {
+
+                // GPS update
+                Button(isUpdatingLocation ? "Updating…" : "Update via GPS") {
                     isUpdatingLocation = true
                     locationUpdater.start(settings: settings)
                 }
@@ -23,6 +26,19 @@ struct SettingsTab: View {
                         isUpdatingLocation = false
                         WidgetCenter.shared.reloadAllTimelines()
                     }
+                }
+
+                // Manual city selection — drill-down Country → City
+                if let db = database {
+                    NavigationLink("Set City Manually") {
+                        WatchCountryPicker(database: db, settings: settings)
+                    }
+                }
+            }
+            .onAppear {
+                if database == nil,
+                   case let .success(db) = CitiesLoader.shared.load() {
+                    database = db
                 }
             }
 
@@ -80,5 +96,48 @@ struct SettingsTab: View {
                 WidgetCenter.shared.reloadAllTimelines()
             }
         )
+    }
+}
+
+// MARK: - Country picker (watch drill-down level 1)
+
+struct WatchCountryPicker: View {
+    let database: CitiesDatabase
+    let settings: SettingsManager
+
+    var body: some View {
+        List {
+            ForEach(database.countries.sorted { $0.name < $1.name }) { country in
+                NavigationLink(country.name) {
+                    WatchCityPicker(
+                        cities: database.cities(forCountryCode: country.code),
+                        settings: settings
+                    )
+                }
+            }
+        }
+        .navigationTitle("Country")
+    }
+}
+
+// MARK: - City picker (watch drill-down level 2)
+
+struct WatchCityPicker: View {
+    let cities: [City]
+    let settings: SettingsManager
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        List {
+            ForEach(cities) { city in
+                Button(city.name) {
+                    settings.saveCity(city)
+                    settings.locationSource = "manual"
+                    WidgetCenter.shared.reloadAllTimelines()
+                    dismiss()
+                }
+            }
+        }
+        .navigationTitle("City")
     }
 }
