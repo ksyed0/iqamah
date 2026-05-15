@@ -21,6 +21,14 @@ import IqamahCore
         func makeCoordinator() -> HilalMapCoordinator {
             HilalMapCoordinator(colorScheme: colorScheme)
         }
+
+        /// Remove all overlays and nil the delegate before the view leaves the hierarchy.
+        /// Prevents the MTLDebugDevice "Metal object destroyed while required by command buffer"
+        /// assertion that fires when MapKit's GPU render is still in flight at window close.
+        static func dismantleNSView(_ nsView: MKMapView, coordinator _: HilalMapCoordinator) {
+            nsView.removeOverlays(nsView.overlays)
+            nsView.delegate = nil
+        }
     }
 #else
     struct HilalMapView: UIViewRepresentable {
@@ -40,6 +48,13 @@ import IqamahCore
 
         func makeCoordinator() -> HilalMapCoordinator {
             HilalMapCoordinator(colorScheme: colorScheme)
+        }
+
+        /// Same teardown as macOS — clears overlays and breaks the delegate reference
+        /// before SwiftUI removes the UIView, avoiding Metal command buffer lifecycle errors.
+        static func dismantleUIView(_ uiView: MKMapView, coordinator _: HilalMapCoordinator) {
+            uiView.removeOverlays(uiView.overlays)
+            uiView.delegate = nil
         }
     }
 #endif
