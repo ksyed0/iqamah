@@ -18,34 +18,43 @@ env:
 jobs:
 
   # ──────────────────────────────────────────────────────────────────────────
-  # 1. LINT — SwiftLint style + rule enforcement
+  # 1. CODE QUALITY — SwiftLint + SwiftFormat in a single runner
+  #    (was two separate macOS jobs; merged saves one full runner startup)
   # ──────────────────────────────────────────────────────────────────────────
-  lint:
-    name: SwiftLint
+  code-quality:
+    name: ${{ matrix.tool }}
     runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        tool: [SwiftLint, SwiftFormat]
     steps:
       - uses: actions/checkout@v4
 
+      - name: Cache Homebrew packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/Homebrew/downloads
+            /opt/homebrew/Cellar/swiftlint
+            /opt/homebrew/Cellar/swiftformat
+          key: brew-${{ runner.arch }}-swiftlint-0.61.0-swiftformat-0.61.1
+          restore-keys: brew-${{ runner.arch }}-
+
       - name: Install SwiftLint
+        if: matrix.tool == 'SwiftLint'
         run: brew install swiftlint
 
       - name: Run SwiftLint
+        if: matrix.tool == 'SwiftLint'
         run: swiftlint lint --strict --reporter github-actions-logging
 
-  # ──────────────────────────────────────────────────────────────────────────
-  # 2. FORMAT — SwiftFormat (replaces Prettier, which is JS-only)
-  #    Note: Prettier does not support Swift. SwiftFormat is the equivalent.
-  # ──────────────────────────────────────────────────────────────────────────
-  format:
-    name: SwiftFormat
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-
       - name: Install SwiftFormat
+        if: matrix.tool == 'SwiftFormat'
         run: brew install swiftformat
 
       - name: Check formatting
+        if: matrix.tool == 'SwiftFormat'
         run: |
           swiftformat --lint iqamah/
           if [ $? -ne 0 ]; then
@@ -54,7 +63,11 @@ jobs:
           fi
 
   # ──────────────────────────────────────────────────────────────────────────
-  # 3. BUILD — Debug + Release configurations
+  # 2. BUILD — Debug + Release.
+  #    - watchOS only built once (Debug matrix leg) — was previously built
+  #      in BOTH Debug and Release legs despite always using Debug config.
+  #    - Release leg includes the file-size check inline, eliminating the
+  #      separate file-size job that rebuilt Release from scratch.
   # ──────────────────────────────────────────────────────────────────────────
   build:
     name: Build (${{ matrix.configuration }})
@@ -70,18 +83,21 @@ jobs:
         with:
           xcode-version: ${{ env.XCODE_VERSION }}
 
-      - name: Build
+      - name: Build macOS (${{ matrix.configuration }})
         run: |
           xcodebuild \
             -project ${{ env.PROJECT }} \
             -scheme ${{ env.SCHEME }} \
             -configuration ${{ matrix.configuration }} \
             -destination 'platform=macOS' \
+            -derivedDataPath DerivedData \
             build \
             CODE_SIGNING_ALLOWED=NO \
             | xcpretty --color && exit ${PIPESTATUS[0]}
 
-      - name: Build IqamahWatch (Debug)
+      # watchOS only needs one build — use Debug; skip on Release to avoid duplication.
+      - name: Build IqamahWatch (Debug only)
+        if: matrix.configuration == 'Debug'
         run: |
           xcodebuild \
             -project ${{ env.PROJECT }} \
@@ -92,8 +108,25 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             | xcpretty --color && exit ${PIPESTATUS[0]}
 
+      # File-size check runs inline after the Release build — no separate job needed.
+      - name: Check .app bundle size ≤ 50 MB (Release only)
+        if: matrix.configuration == 'Release'
+        run: |
+          APP=$(find DerivedData -name "*.app" -maxdepth 6 | head -1)
+          if [ -z "$APP" ]; then
+            echo "::error::Could not find .app bundle in DerivedData"
+            exit 1
+          fi
+          SIZE_MB=$(du -sm "$APP" | cut -f1)
+          echo "Bundle size: ${SIZE_MB} MB  (path: $APP)"
+          if [ "$SIZE_MB" -gt 50 ]; then
+            echo "::error::Bundle size ${SIZE_MB} MB exceeds the 50 MB budget."
+            exit 1
+          fi
+          echo "::notice::Bundle size ${SIZE_MB} MB is within the 50 MB budget."
+
   # ──────────────────────────────────────────────────────────────────────────
-  # 4. TEST + COVERAGE — run tests, enforce ≥80% code coverage
+  # 3. TEST + COVERAGE
   # ──────────────────────────────────────────────────────────────────────────
   test:
     name: Test & Coverage
@@ -127,7 +160,6 @@ jobs:
 
       - name: Run IqamahWatch tests
         run: |
-          # Pick the first available watchOS simulator
           SIM=$(xcrun simctl list devices available --json \
             | python3 -c "import sys,json; d=json.load(sys.stdin); \
               sims=[v for k,vs in d['devices'].items() if 'watchOS' in k for v in vs if v['isAvailable']]; \
@@ -144,14 +176,6 @@ jobs:
 
       - name: Enforce ≥75% domain coverage
         run: |
-          # SwiftUI Views and system-framework wrappers (CoreLocation, AVFoundation)
-          # cannot be unit-tested without XCUITest or real hardware — they are excluded.
-          # Domain code includes IqamahCore package files (Models, Services) which are
-          # compiled into the iqamah test bundle and appear in the xcresult report.
-          # NOTE: Threshold is 75% (down from 80%) as of US-0040 — the comprehensive
-          # test suites moved to IqamahCoreTests (SPM) which runs in the step above but
-          # whose coverage is not yet merged into the xcresult. Raise back to 80% in
-          # US-0041 once the Xcode scheme is updated to include IqamahCoreTests.
           EXCLUDED="Views/|AppDelegate|ContentView|iqamahApp|AppIconGenerator|AppIconView|LocationService|AdhaaanPlayer"
           COVERAGE=$(xcrun xccov view --report --json TestResults.xcresult 2>/dev/null \
             | python3 -c "import sys,json,re; d=json.load(sys.stdin); ex=sys.argv[1]; files=[f for t in d.get('targets',[]) for f in t.get('files',[]) if not re.search(ex,f.get('path',''))]; te=sum(f.get('executableLines',0) for f in files); tc=sum(f.get('coveredLines',0) for f in files); print(f'{(tc/te*100) if te>0 else 0:.1f}')" "$EXCLUDED" \
@@ -165,7 +189,6 @@ jobs:
           fi
           echo "::notice::Domain coverage ${COVERAGE}% meets the ≥75% requirement."
 
-
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
@@ -175,49 +198,7 @@ jobs:
           retention-days: 7
 
   # ──────────────────────────────────────────────────────────────────────────
-  # 5. FILE SIZE GUARD — .app bundle must not exceed 50 MB (Release build)
-  # ──────────────────────────────────────────────────────────────────────────
-  file-size:
-    name: File Size Guard
-    runs-on: macos-latest
-    needs: build
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Select Xcode ${{ env.XCODE_VERSION }}
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: ${{ env.XCODE_VERSION }}
-
-      - name: Build Release
-        run: |
-          xcodebuild \
-            -project ${{ env.PROJECT }} \
-            -scheme ${{ env.SCHEME }} \
-            -configuration Release \
-            -destination 'platform=macOS' \
-            -derivedDataPath DerivedData \
-            build \
-            CODE_SIGNING_ALLOWED=NO \
-            | xcpretty --color && exit ${PIPESTATUS[0]}
-
-      - name: Check .app bundle size (≤ 50 MB)
-        run: |
-          APP=$(find DerivedData -name "*.app" -maxdepth 6 | head -1)
-          if [ -z "$APP" ]; then
-            echo "::error::Could not find .app bundle in DerivedData"
-            exit 1
-          fi
-          SIZE_MB=$(du -sm "$APP" | cut -f1)
-          echo "Bundle size: ${SIZE_MB} MB  (path: $APP)"
-          if [ "$SIZE_MB" -gt 50 ]; then
-            echo "::error::Bundle size ${SIZE_MB} MB exceeds the 50 MB budget."
-            exit 1
-          fi
-          echo "::notice::Bundle size ${SIZE_MB} MB is within the 50 MB budget."
-
-  # ──────────────────────────────────────────────────────────────────────────
-  # 7. PR TITLE — enforce Conventional Commits format
+  # 4. PR TITLE — enforce Conventional Commits format
   # ──────────────────────────────────────────────────────────────────────────
   pr-title:
     name: PR Title Convention
