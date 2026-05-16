@@ -19,6 +19,12 @@
         @State private var isLoading = false
         @State private var showAbout = false
         @State private var newMoonDate: Date = Date()
+        /// Hides the live MKMapView while the share sheet is visible to prevent the
+        /// Metal command-buffer lifetime assertion that fires when two rendering surfaces
+        /// interact during sheet animation.
+        @State private var isExporting = false
+        /// Rendered export image — set before showing the share sheet.
+        @State private var exportItems: [Any]?
 
         var body: some View {
             NavigationStack {
@@ -53,12 +59,12 @@
                         Button("Done") { dismiss() }
                     }
                     ToolbarItemGroup(placement: .topBarTrailing) {
-                        // ShareLink uses SwiftUI's own sheet presentation — no UIKit
-                        // VC traversal needed, works correctly inside a fullScreenCover.
-                        ShareLink(item: shareText) {
+                        Button {
+                            prepareAndExport()
+                        } label: {
                             Image(systemName: "square.and.arrow.up")
                         }
-                        .accessibilityLabel("Share Hilal Map")
+                        .accessibilityLabel("Export Hilal Map")
 
                         Button {
                             withAnimation { showAbout.toggle() }
@@ -66,6 +72,15 @@
                             Image(systemName: "info.circle")
                         }
                         .accessibilityLabel("About Hilal Watch")
+                    }
+                }
+                // ActivityController presented as a SwiftUI sheet — avoids UIKit VC traversal
+                .sheet(isPresented: Binding(
+                    get: { exportItems != nil },
+                    set: { if !$0 { exportItems = nil; isExporting = false } }
+                )) {
+                    if let items = exportItems {
+                        ActivityController(activityItems: items)
                     }
                 }
             }
@@ -97,12 +112,20 @@
                     }
                 }
 
-                // Global crescent visibility map — taller on iPad for better legibility
+                // Global crescent visibility map — hidden while exporting to prevent
+                // Metal command-buffer conflicts during share sheet animation.
                 Section("Global Visibility") {
-                    HilalMapView(grid: grid)
-                        .frame(height: hSizeClass == .regular ? 380 : 220)
-                        .listRowInsets(EdgeInsets())
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    if isExporting {
+                        Color.secondary.opacity(0.08)
+                            .frame(height: hSizeClass == .regular ? 380 : 220)
+                            .listRowInsets(EdgeInsets())
+                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    } else {
+                        HilalMapView(grid: grid)
+                            .frame(height: hSizeClass == .regular ? 380 : 220)
+                            .listRowInsets(EdgeInsets())
+                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    }
                 }
 
                 // Summary statistics from grid
@@ -170,12 +193,123 @@
             }
         }
 
-        /// Share text consumed by ShareLink — computed property so it always reflects current grid.
-        private var shareText: String {
+        // MARK: - Export
+
+        /// Renders a branded summary card to UIImage and presents the system share sheet.
+        /// The live MKMapView is hidden first to prevent Metal command-buffer conflicts
+        /// during the share sheet slide-in animation.
+        @MainActor
+        private func prepareAndExport() {
+            // 1. Hide the live map — prevents Metal drawable lifetime assertion
+            isExporting = true
+
+            // 2. Compute stats
             let total = grid.count
             let aCount = grid.filter { $0 == Int8(VisibilityCategory.A.rawValue) }.count
-            let pct = String(format: "%.0f%%", Double(aCount) / Double(total) * 100)
-            return "Hilal Watch \u{00B7} \(selectedEvening == .d29 ? "29th" : "30th") Evening \u{00B7} \(pct) of globe easily visible \u{00B7} via Iqamah"
+            let bCount = grid.filter { $0 == Int8(VisibilityCategory.B.rawValue) }.count
+            let cCount = grid.filter { $0 == Int8(VisibilityCategory.C.rawValue) }.count
+            let dCount = total - aCount - bCount - cCount
+            let evening = selectedEvening == .d29 ? "29th Evening" : "30th Evening"
+
+            // 3. Render summary card to UIImage using ImageRenderer (no Metal GPU involved)
+            let card = HilalExportCard(
+                evening: evening,
+                criterion: selectedCriterion.criterion.name,
+                aCount: aCount, bCount: bCount, cCount: cCount, dCount: dCount, total: total
+            )
+            let renderer = ImageRenderer(content: card)
+            renderer.scale = 3.0
+            let image = renderer.uiImage
+
+            // 4. Build share payload — image + text fallback
+            let text = "Hilal Watch · \(evening) · \(String(format: "%.0f%%", Double(aCount) / Double(total) * 100)) of globe easily visible · via Iqamah"
+            exportItems = [image, text].compactMap { $0 as AnyObject }
         }
+    }
+
+    // MARK: - Export card rendered by ImageRenderer
+
+    /// Branded summary card: rendered to UIImage for sharing, so it's always crisp
+    /// and avoids interacting with the live MKMapView's Metal rendering.
+    private struct HilalExportCard: View {
+        let evening: String
+        let criterion: String
+        let aCount: Int
+        let bCount: Int
+        let cCount: Int
+        let dCount: Int
+        let total: Int
+
+        private let gold = Color(red: 1.0, green: 0.839, blue: 0.039)
+
+        var body: some View {
+            VStack(alignment: .leading, spacing: 14) {
+                // Header
+                HStack {
+                    Text("Hilal Watch")
+                        .font(.system(size: 22, weight: .bold, design: .serif))
+                        .foregroundStyle(gold)
+                    Spacer()
+                    Text("Iqamah")
+                        .font(.system(size: 14, weight: .medium, design: .serif))
+                        .foregroundStyle(gold.opacity(0.7))
+                }
+
+                Text("\(evening) · \(criterion)")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(.secondary)
+
+                Divider().overlay(gold.opacity(0.25))
+
+                // Visibility bars
+                VStack(spacing: 8) {
+                    exportBar(label: "Easily visible", count: aCount, color: .green)
+                    exportBar(label: "Good conditions", count: bCount, color: .teal)
+                    exportBar(label: "Optical aid", count: cCount, color: Color(white: 0.6))
+                    exportBar(label: "Not visible", count: dCount, color: .red)
+                }
+
+                Text("Global crescent visibility · \(Date(), style: .date)")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(24)
+            .frame(width: 540)
+            .background(Color(white: 0.10), in: RoundedRectangle(cornerRadius: 16))
+        }
+
+        private func exportBar(label: String, count: Int, color: Color) -> some View {
+            let pct = total > 0 ? Double(count) / Double(total) : 0
+            return HStack(spacing: 10) {
+                Circle().fill(color).frame(width: 9, height: 9)
+                Text(label).font(.caption.weight(.medium)).frame(maxWidth: .infinity, alignment: .leading)
+                GeometryReader { geo in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(Color.white.opacity(0.08)).frame(height: 6)
+                        Capsule().fill(color).frame(width: geo.size.width * pct, height: 6)
+                    }
+                }
+                .frame(height: 6)
+                Text(String(format: "%.0f%%", pct * 100))
+                    .font(.caption.monospacedDigit())
+                    .frame(width: 36, alignment: .trailing)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    // MARK: - UIActivityViewController wrapper
+
+    /// Presents UIActivityViewController as a SwiftUI-managed sheet.
+    /// Because it's presented via SwiftUI's .sheet() rather than imperatively,
+    /// there is no UIKit VC-hierarchy traversal and no "already presenting" conflicts.
+    private struct ActivityController: UIViewControllerRepresentable {
+        let activityItems: [Any]
+
+        func makeUIViewController(context _: Context) -> UIActivityViewController {
+            UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
+        }
+
+        func updateUIViewController(_: UIActivityViewController, context _: Context) {}
     }
 #endif
