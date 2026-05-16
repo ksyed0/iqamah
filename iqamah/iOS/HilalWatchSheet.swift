@@ -52,9 +52,9 @@
                         Button("Done") { dismiss() }
                     }
                     ToolbarItemGroup(placement: .topBarTrailing) {
-                        Button {
-                            Task { await shareGrid() }
-                        } label: {
+                        // ShareLink uses SwiftUI's own sheet presentation — no UIKit
+                        // VC traversal needed, works correctly inside a fullScreenCover.
+                        ShareLink(item: shareText) {
                             Image(systemName: "square.and.arrow.up")
                         }
                         .accessibilityLabel("Share Hilal Map")
@@ -169,35 +169,12 @@
             }
         }
 
-        private func shareGrid() async {
+        /// Share text consumed by ShareLink — computed property so it always reflects current grid.
+        private var shareText: String {
             let total = grid.count
             let aCount = grid.filter { $0 == Int8(VisibilityCategory.A.rawValue) }.count
             let pct = String(format: "%.0f%%", Double(aCount) / Double(total) * 100)
-            let text = "Hilal Watch \u{00B7} \(selectedEvening == .d29 ? "29th" : "30th") Evening \u{00B7} \(pct) of globe easily visible \u{00B7} via Iqamah"
-
-            await MainActor.run {
-                let vc = UIActivityViewController(activityItems: [text], applicationActivities: nil)
-                // Must present from the *topmost* view controller — presenting from the window
-                // root fails silently when a fullScreenCover is already active.
-                guard let presenter = topMostViewController() else { return }
-                vc.popoverPresentationController?.sourceView = presenter.view
-                vc.popoverPresentationController?.sourceRect = CGRect(
-                    x: presenter.view.bounds.midX, y: presenter.view.bounds.midY, width: 0, height: 0
-                )
-                presenter.present(vc, animated: true)
-            }
-        }
-
-        private func topMostViewController() -> UIViewController? {
-            guard let scene = UIApplication.shared.connectedScenes
-                .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
-                let root = scene.windows.first(where: \.isKeyWindow)?.rootViewController
-            else { return nil }
-            var top: UIViewController = root
-            while let presented = top.presentedViewController {
-                top = presented
-            }
-            return top
+            return "Hilal Watch \u{00B7} \(selectedEvening == .d29 ? "29th" : "30th") Evening \u{00B7} \(pct) of globe easily visible \u{00B7} via Iqamah"
         }
     }
 #endif
