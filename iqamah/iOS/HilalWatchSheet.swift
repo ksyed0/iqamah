@@ -170,7 +170,6 @@
         }
 
         private func shareGrid() async {
-            // Build a simple text summary for iOS share (full image export is macOS-only in v1)
             let total = grid.count
             let aCount = grid.filter { $0 == Int8(VisibilityCategory.A.rawValue) }.count
             let pct = String(format: "%.0f%%", Double(aCount) / Double(total) * 100)
@@ -178,12 +177,27 @@
 
             await MainActor.run {
                 let vc = UIActivityViewController(activityItems: [text], applicationActivities: nil)
-                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                   let rootVC = windowScene.windows.first?.rootViewController {
-                    vc.popoverPresentationController?.sourceView = rootVC.view
-                    rootVC.present(vc, animated: true)
-                }
+                // Must present from the *topmost* view controller — presenting from the window
+                // root fails silently when a fullScreenCover is already active.
+                guard let presenter = topMostViewController() else { return }
+                vc.popoverPresentationController?.sourceView = presenter.view
+                vc.popoverPresentationController?.sourceRect = CGRect(
+                    x: presenter.view.bounds.midX, y: presenter.view.bounds.midY, width: 0, height: 0
+                )
+                presenter.present(vc, animated: true)
             }
+        }
+
+        private func topMostViewController() -> UIViewController? {
+            guard let scene = UIApplication.shared.connectedScenes
+                .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
+                let root = scene.windows.first(where: \.isKeyWindow)?.rootViewController
+            else { return nil }
+            var top: UIViewController = root
+            while let presented = top.presentedViewController {
+                top = presented
+            }
+            return top
         }
     }
 #endif

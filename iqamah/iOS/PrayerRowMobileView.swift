@@ -156,6 +156,7 @@
         let onToggleMute: () -> Void
 
         @Environment(\.colorScheme) private var colorScheme
+        @ObservedObject private var player = AdhaaanPlayer.shared
         private var gold: Color { colorScheme == .dark ? .appGold : .appGoldDark }
 
         private var isSunrise: Bool { prayerName == "Sunrise" }
@@ -178,6 +179,24 @@
 
         var body: some View {
             VStack(alignment: .leading, spacing: 8) {
+                // Stop preview button — shown while a sound is playing
+                if player.isPlaying {
+                    Button(action: { player.stop() }) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "stop.circle.fill")
+                                .font(.caption)
+                            Text("Stop preview")
+                                .font(.caption.weight(.semibold))
+                        }
+                        .foregroundStyle(gold)
+                        .padding(.horizontal, 10).padding(.vertical, 5)
+                        .background(Capsule().fill(gold.opacity(0.10)))
+                        .overlay(Capsule().strokeBorder(gold.opacity(0.25), lineWidth: 0.5))
+                    }
+                    .buttonStyle(.plain)
+                    .transition(.opacity.combined(with: .scale))
+                }
+
                 // Alert tones section
                 chipSection(
                     label: "🔔 Alert tones",
@@ -239,7 +258,12 @@
                             if adhaan.id == "silent" { return silentLabel ?? "No adhaan" }
                             return adhaan.shortName
                         }()
-                        Button(action: { onSelectAdhaan(adhaan) }) {
+                        Button(action: {
+                            // Play a preview so the user can hear before committing.
+                            // preview() ignores isMuted so it always sounds.
+                            AdhaaanPlayer.shared.preview(adhaan)
+                            onSelectAdhaan(adhaan)
+                        }) {
                             Text(displayName)
                                 .font(.caption.weight(.medium))
                                 .foregroundStyle(isSelected ? .white : accent)
