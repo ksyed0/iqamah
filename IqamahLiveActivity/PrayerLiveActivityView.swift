@@ -42,6 +42,10 @@ private struct CrescentView: View {
 
 // MARK: - Widget entry point
 
+/// `@main` designates this as the extension's binary entry point.
+/// Without it the OS cannot locate the widget on iOS 16.2+ and will
+/// immediately terminate the extension (and the host app) at load time.
+@main
 @available(iOS 16.2, *)
 struct PrayerLiveActivityView: Widget {
     var body: some WidgetConfiguration {
