@@ -92,7 +92,7 @@ struct QiblahView: View {
                     .padding(.top, 16)
                     .accessibilityAddTraits(.isHeader)
                 Text(String(format: "%.1f° %@", qiblahBearing, cardinalDirection))
-                    .font(.subheadline.weight(.medium))
+                    .font(.title3.weight(.semibold))
                     .foregroundColor(.secondary)
                 if !cityName.isEmpty {
                     Text("from \(cityName)")
@@ -172,7 +172,7 @@ struct QiblahView: View {
                     .padding(.top, 20)
                     .accessibilityAddTraits(.isHeader)
                 Text(String(format: "%.1f° %@", qiblahBearing, cardinalDirection))
-                    .font(.subheadline.weight(.medium))
+                    .font(.title3.weight(.semibold))
                     .foregroundColor(.secondary)
                     .padding(.top, 4)
                 if !cityName.isEmpty {
@@ -229,7 +229,7 @@ private struct QiblahCompassView: View {
                 .fill(Color.primary.opacity(0.05))
                 .frame(width: diameter, height: diameter)
             Circle()
-                .stroke(Color.primary.opacity(0.18), lineWidth: 2)
+                .stroke(Color.primary.opacity(0.28), lineWidth: 3.5)
                 .frame(width: diameter, height: diameter)
 
             // ── Tick marks (72 × 5° = 360°) ─────────────────────────
@@ -321,8 +321,8 @@ private struct QiblahCompassView: View {
 
             // ── Prayer mat — CENTERED, rotated to Qibla ─────────────
             // Mat is the centerpiece: the needle points from it toward Makkah.
-            let matW = r * 0.48
-            let matH = r * 0.64
+            let matW = r * 0.72
+            let matH = r * 0.96
             Image("PrayerMat")
                 .resizable()
                 .scaledToFit()
@@ -332,7 +332,7 @@ private struct QiblahCompassView: View {
                 .accessibilityLabel("Prayer mat facing Qiblah direction")
 
             // ── Ka'bah icon at ring edge ─────────────────────────────
-            let kaabahSize = r * 0.18
+            let kaabahSize = r * 0.36
             let kaabahR = r * 0.925
             Image("KaabahIcon")
                 .resizable()
