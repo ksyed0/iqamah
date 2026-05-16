@@ -439,8 +439,48 @@ struct PrayerTimesView: View {
         } else {
             currentDate = newDate
         }
+
+        #if os(iOS)
+            // Mirror macOS AppDelegate.triggerAdhaanIfNeeded: play the selected adhaan
+            // when a prayer time arrives while the app is in the foreground.
+            triggerAdhaanIfNeeded(now: newDate)
+        #endif
     }
 }
+
+// MARK: - PrayerTimesView+AdhaanTrigger (iOS only)
+
+#if os(iOS)
+    private extension PrayerTimesView {
+        /// Set of "PrayerName-yyyy-MM-dd" keys already played today; reset at midnight.
+        static var announcedPrayers: Set<String> = []
+        static var announcedDate: Date = Date()
+
+        func triggerAdhaanIfNeeded(now: Date) {
+            guard let times = prayerTimes else { return }
+            let calendar = Calendar.current
+            if !calendar.isDate(now, inSameDayAs: Self.announcedDate) {
+                Self.announcedPrayers.removeAll()
+                Self.announcedDate = now
+            }
+            let tz = TimeZone(identifier: city.timezone) ?? .current
+            let fmt = DateFormatter(); fmt.dateFormat = "yyyy-MM-dd"; fmt.timeZone = tz
+            for prayer in times.prayers where prayer.name != "Sunrise" {
+                let adj = settingsStore.getAdjustment(for: prayer.name)
+                let adjusted = calendar.date(byAdding: .minute, value: adj, to: prayer.time) ?? prayer.time
+                let elapsed = now.timeIntervalSince(adjusted)
+                guard elapsed >= 0, elapsed < 90 else { continue }
+                let key = "\(prayer.name)-\(fmt.string(from: now))"
+                guard !Self.announcedPrayers.contains(key) else { continue }
+                Self.announcedPrayers.insert(key)
+                guard !settingsStore.isPrayerMuted(prayer.name) else { continue }
+                let adhaan = settingsStore.getAdhaan(for: prayer.name)
+                guard adhaan.id != "silent" else { continue }
+                AdhaaanPlayer.shared.play(adhaan)
+            }
+        }
+    }
+#endif
 
 // MARK: - PrayerTimesView+iPad Landscape
 
