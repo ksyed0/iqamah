@@ -8,6 +8,7 @@
     struct HilalWatchSheet: View {
         @EnvironmentObject private var settings: SettingsManager
         @Environment(\.dismiss) private var dismiss
+        @Environment(\.horizontalSizeClass) private var hSizeClass
         @ObservedObject private var preloader = HilalWatchPreloader.shared
         @State private var selectedEvening: Evening = .d29
         @State private var selectedCriterion: HilalCriterionPicker.CriterionChoice = .odeh
@@ -96,10 +97,10 @@
                     }
                 }
 
-                // Global crescent visibility map
+                // Global crescent visibility map — taller on iPad for better legibility
                 Section("Global Visibility") {
                     HilalMapView(grid: grid)
-                        .frame(height: 220)
+                        .frame(height: hSizeClass == .regular ? 380 : 220)
                         .listRowInsets(EdgeInsets())
                         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                 }

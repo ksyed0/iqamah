@@ -512,19 +512,30 @@ struct PrayerTimesView: View {
                     }
                     .frame(maxWidth: 150)
                     Spacer()
-                    MoonPhaseView(phase: currentMoonPhase, size: 32)
-                        .accessibilityHidden(true)
-                    VStack(alignment: .trailing, spacing: 1) {
-                        Text(hijriDateLabel)
-                            .font(.caption.weight(.medium))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.75)
-                        Text(moonPhaseSubtitle)
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
+                    // Moon + Hijri + Hilal Watch button grouped together
+                    HStack(spacing: 8) {
+                        MoonPhaseView(phase: currentMoonPhase, size: 32)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(hijriDateLabel)
+                                .font(.caption.weight(.medium))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.75)
+                            Text(moonPhaseSubtitle)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                        .frame(maxWidth: 140)
+                        Button(action: openHilalWatch) {
+                            Text("Hilal Watch ›")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(Color.appGoldDim)
+                                .padding(.horizontal, 8).padding(.vertical, 4)
+                                .background(Capsule().fill(Color.appGoldDim.opacity(0.10)))
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .frame(maxWidth: 140)
                     if let nextTime = nextPrayerTime {
                         VStack(alignment: .trailing, spacing: 1) {
                             Text(nextTime, style: .timer)
@@ -563,13 +574,6 @@ struct PrayerTimesView: View {
                                 )
                                 .padding(.horizontal, 12).padding(.bottom, 12)
                             }
-                            Button(action: openHilalWatch) {
-                                Label("Hilal Watch", systemImage: "moon.haze.fill")
-                                    .font(.caption.weight(.semibold))
-                                    .foregroundStyle(Color.appGoldDim)
-                            }
-                            .buttonStyle(.plain)
-                            .padding(.horizontal, 16).padding(.bottom, 12)
                         }
                     }
                     .frame(maxWidth: .infinity)

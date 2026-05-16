@@ -3,8 +3,27 @@ import IqamahCore
 
 struct AboutHilalWatchCard: View {
     @Binding var isPresented: Bool
+    #if os(iOS)
+        @Environment(\.horizontalSizeClass) private var hSizeClass
+    #endif
 
     var body: some View {
+        // On iPad (.regular), expand to 640×740 so all three criteria fit without scrolling.
+        // On iPhone, keep the existing 400×500 to avoid overflowing the screen.
+        let cardWidth: CGFloat = {
+            #if os(iOS)
+                return hSizeClass == .regular ? 640 : 400
+            #else
+                return 400
+            #endif
+        }()
+        let cardHeight: CGFloat = {
+            #if os(iOS)
+                return hSizeClass == .regular ? 740 : 500
+            #else
+                return 500
+            #endif
+        }()
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 HStack {
@@ -50,7 +69,7 @@ struct AboutHilalWatchCard: View {
             }
             .padding(24)
         }
-        .frame(width: 400, height: 500)
+        .frame(width: cardWidth, height: cardHeight)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
     }
 
