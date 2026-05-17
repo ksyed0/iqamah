@@ -1521,3 +1521,151 @@ rm adhaan_4_original_backup.mp3
 
 **Last Updated:** 2026-05-11 (EPIC-0010/0011/0012 all implemented. US-0040–US-0044, US-0046–US-0057 marked ✅. US-0045 deferred. ENH-020/021 added to backlog. Compass iOS-style improvements shipped PR #69.)
 
+
+---
+
+## EPIC-0015 — Test Automation (Incremental)
+
+**Status:** 🟡 Planned  
+**Version Target:** v1.5.x onwards (parallel to feature work)  
+**Goal:** Build a cross-platform automation safety net incrementally, starting with the highest-ROI layers (smoke tests, snapshots) before investing in full UI test suites. Each user story is independently shippable and adds compounding value.
+
+**Background:** As of v1.5.0, the test suite consists of 185 IqamahCore unit tests and 2 watchOS unit tests. There are no UI tests, no snapshot tests, and no launch-validation scripts. Several production bugs (iOS 26 `@main` crash, moon crescent rendering regression, macOS adhaan picker regression) could have been caught automatically.
+
+---
+
+### US-0064 — Platform Smoke Tests
+
+**Priority:** High  
+**Effort:** S (2–3 hours)  
+**Description:** A shell script (`scripts/smoke-test.sh`) that builds each platform target, installs the app on its simulator, waits 5 seconds, and verifies the process is still alive. Added as an optional nightly CI job.
+
+**Value:** Catches launch crashes (e.g. iOS 26 `@main` missing, extension XPC failures, App Group provisioning breaks) within minutes rather than being discovered manually.
+
+**Acceptance Criteria:**
+
+- AC-0300: `scripts/smoke-test.sh` exists and is executable
+- AC-0301: Script accepts arguments `ios`, `ipad`, `watch`, `macos`, `all`; defaults to `all`
+- AC-0302: For each platform, script builds the relevant scheme using `xcodebuild` with `CODE_SIGNING_ALLOWED=NO` for macOS and `-allowProvisioningUpdates` for iOS/watchOS simulators
+- AC-0303: App process is verified alive 5 seconds after launch (non-zero PID check via `xcrun simctl listapps` or `ps`)
+- AC-0304: Script exits non-zero if any platform fails to launch; prints which platform failed and why
+- AC-0305: Script checks `~/Library/Logs/DiagnosticReports/` for new crash reports matching each bundle ID; fails if any are found
+- AC-0306: A `.github/workflows/nightly.yml` GitHub Actions workflow runs `scripts/smoke-test.sh all` on a schedule (`cron: '0 2 * * *'`); does NOT run on every PR
+- AC-0307: Smoke test completes in under 10 minutes for all four platforms
+
+---
+
+### US-0065 — Snapshot Tests for Key Views
+
+**Priority:** High  
+**Effort:** M (1 day)  
+**Description:** Add `swift-snapshot-testing` (Point-Free) as a test dependency and write snapshot tests for the 5 highest-regression-risk views. Reference images are committed to the repo. CI fails if a view changes unexpectedly.
+
+**Value:** Would have immediately caught the moon crescent rendering regression (wrong geometry formula), the Qibla mat sizing change, and the prayer row chip tray layout changes.
+
+**Acceptance Criteria:**
+
+- AC-0308: `swift-snapshot-testing` added to `IqamahCore/Package.swift` or the macOS test target as a test-only dependency
+- AC-0309: `MoonPhaseView` snapshot tests exist for phases 0.05 (new crescent), 0.5 (full moon), and 0.82 (waning crescent), in both light and dark mode
+- AC-0310: `QiblahCompassView` snapshot test exists at bearing 58.3° (Toronto → Makkah) at 320pt and 600pt diameter
+- AC-0311: `PrayerTimesView` macOS snapshot test exists showing a complete prayer day (all 6 rows, one highlighted as "NEXT")
+- AC-0312: `HilalExportCard` snapshot test validates the share image layout (title, bars, all four visibility categories)
+- AC-0313: `PrayerRowMobileView` snapshot tests exist for the collapsed state (pill visible) and the expanded chip tray state
+- AC-0314: Snapshots are stored in `Tests/__Snapshots__/` and committed to the repository
+- AC-0315: CI `test` job runs snapshot tests as part of the existing Test & Coverage step; any diff causes the job to fail with a descriptive error
+- AC-0316: A `scripts/update-snapshots.sh` helper script re-records all reference images with `record: true`
+
+---
+
+### US-0066 — XCUITest Suite: macOS
+
+**Priority:** Medium  
+**Effort:** M (1–2 days)  
+**Description:** XCUITest target for the macOS `iqamah` scheme covering the status bar menu, main window lifecycle, settings sheet, Hilal Watch window, and adhaan picker. macOS is prioritised first because it requires no simulator provisioning and builds fastest.
+
+**Acceptance Criteria:**
+
+- AC-0317: `iqamahUITests` Xcode target exists, linked to the `iqamah` macOS scheme
+- AC-0318: `testStatusBarLeftClickOpensPopover` — left-clicking the status bar button shows the popover within 2 seconds
+- AC-0319: `testStatusBarRightClickShowsMenu` — right-clicking shows a menu containing "Open Main Window", "Moon Sighting…", "Settings", "Quit Iqamah"
+- AC-0320: `testOpenMainWindowFromMenu` — selecting "Open Main Window" makes the prayer times window key and visible; does NOT show the Hilal Watch window
+- AC-0321: `testHilalWatchOpensFromMenu` — selecting "Moon Sighting…" opens the Hilal Watch window in the foreground
+- AC-0322: `testHilalWatchOpensFromDetailsButton` — clicking "Hilal Watch ›" in the moon phase row of the prayer times view opens the Hilal Watch window
+- AC-0323: `testAdhaanPickerOpenAndClose` — clicking the adhaan pill on a prayer row expands the picker; clicking another row collapses it
+- AC-0324: `testSettingsSheetOpensAndCloses` — selecting Settings opens the sheet; clicking Cancel closes it without changing the city
+- AC-0325: All UI tests complete in under 60 seconds; they run in CI only in the nightly workflow (not on every PR)
+
+---
+
+### US-0067 — XCUITest Suite: iPhone and iPad
+
+**Priority:** Medium  
+**Effort:** L (2–3 days)  
+**Description:** XCUITest target for the `iqamah-iOS` scheme covering prayer row interactions, Qibla tab, Hilal Watch full-screen sheet, and iPad landscape two-column layout. Must be run via Xcode ⌘R due to extension signing constraints.
+
+**Acceptance Criteria:**
+
+- AC-0326: `iqamahiOSUITests` Xcode target exists, linked to the `iqamah-iOS` scheme
+- AC-0327: `testAllSixPrayersVisible` — all six prayer rows (Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha) are visible on the Times tab without scrolling on iPhone 17
+- AC-0328: `testNextPrayerHighlightedInGold` — exactly one row has the gold "NEXT" badge; all others do not
+- AC-0329: `testTappingPrayerRowExpandsChipTray` — tapping Asr row expands the chip tray; chip tray contains at least one adhaan chip and one alert tone chip
+- AC-0330: `testSunriseRowShowsAmberPill` — the Sunrise row displays an amber-tinted pill ("No alert"); tapping it opens a tray containing only alert tones (no adhaan chips)
+- AC-0331: `testHilalWatchSheetOpens` — tapping "Hilal Watch ›" in the hero card opens the full-screen Hilal Watch; the "Global Visibility" map section is visible after computing
+- AC-0332: `testHilalWatchExportOpensShareSheet` — tapping the export button in Hilal Watch presents the system share sheet within 3 seconds and does NOT crash
+- AC-0333: `testQiblaCompassVisible` — the Qiblah tab shows a compass with a prayer mat at the centre and a Ka'bah icon on the ring edge
+- AC-0334: `testIPadLandscapeTwoColumns` — rotating iPad Pro 11" to landscape shows two columns labelled "Today" and "Tomorrow"
+- AC-0335: All iPhone tests complete in under 90 seconds; all iPad tests complete in under 120 seconds
+
+---
+
+### US-0068 — XCUITest Suite: watchOS
+
+**Priority:** Low  
+**Effort:** S (1 day)  
+**Description:** XCUITest target for the `IqamahWatch` scheme covering tab navigation, prayer times list visibility, and the city picker drill-down added in EPIC-0015/US-0064.
+
+**Note:** watchOS XCUITest cannot interact with the Digital Crown programmatically; tests are limited to verifying views load and key elements are accessible.
+
+**Acceptance Criteria:**
+
+- AC-0336: `IqamahWatchUITests` Xcode target exists, linked to the `IqamahWatch` scheme
+- AC-0337: `testPrayerTimesTabLoads` — the Times tab shows at least one prayer row with a non-empty time string
+- AC-0338: `testAllVisiblePrayersPresent` — rows for Fajr, Dhuhr, Asr, Maghrib, Isha are all accessible (Sunrise may or may not be visible depending on scroll position)
+- AC-0339: `testSettingsTabLoads` — navigating to the Settings tab shows a "Location" section and an "Update via GPS" button
+- AC-0340: `testSetCityManuallyNavigationVisible` — when the city database has loaded, a "Set City Manually" navigation link is present in the Settings tab Location section
+- AC-0341: `testQiblaTabLoads` — navigating to the Qiblah tab shows a compass element
+- AC-0342: All watchOS UI tests complete in under 60 seconds
+
+---
+
+### US-0069 — CI Integration: Nightly Multi-Platform Gate
+
+**Priority:** Medium  
+**Effort:** S (2–3 hours)  
+**Description:** Integrate all automation tiers into a nightly GitHub Actions workflow that runs on a schedule (not on every PR) and posts a status summary. The PR workflow retains only the fast unit + snapshot tests.
+
+**Acceptance Criteria:**
+
+- AC-0343: `.github/workflows/nightly.yml` exists and triggers on `schedule: cron: '0 2 * * *'` UTC
+- AC-0344: Nightly workflow runs in this order: smoke-test → snapshot-test → ui-test-macos → ui-test-ios → ui-test-watchos
+- AC-0345: Each nightly job runs independently with `fail-fast: false` so a watchOS failure does not block the macOS results
+- AC-0346: On failure, the nightly workflow posts a summary to the PR or commit using GitHub Actions job summaries listing which platforms failed
+- AC-0347: The existing PR workflow (`ci.yml`) gains a `snapshot-test` job that runs the Phase 2 snapshot tests on every PR (fast, ~3 min); macOS/iOS/watchOS UI tests remain nightly-only
+- AC-0348: Total nightly workflow wall-clock time is under 20 minutes
+
+---
+
+**EPIC-0015 Summary:**
+
+| Story | Platform | Effort | AC count |
+|---|---|---|---|
+| US-0064 — Smoke Tests | All | S | 8 |
+| US-0065 — Snapshot Tests | macOS + iOS | M | 9 |
+| US-0066 — XCUITest macOS | macOS | M | 9 |
+| US-0067 — XCUITest iOS/iPad | iOS/iPadOS | L | 10 |
+| US-0068 — XCUITest watchOS | watchOS | S | 7 |
+| US-0069 — CI Nightly Gate | CI | S | 6 |
+
+**Total:** 49 acceptance criteria (AC-0300 – AC-0348)  
+**Estimated effort:** 7–10 developer-days  
+**Last Updated:** 2026-05-17 (EPIC-0015 created — 6 user stories, 49 ACs, incremental test automation roadmap)
