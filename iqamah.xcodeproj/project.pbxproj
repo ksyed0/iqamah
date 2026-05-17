@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		UITESTS0000000000000005 /* IqamahUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = UITESTS0000000000000004 /* IqamahUITests.swift */; };
 		944B0D992F635A0500EC6A01 /* TestsAdditionalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 944B0D982F635A0500EC6A01 /* TestsAdditionalTests.swift */; };
 		94594CE62FB2C01D00D1AD1C /* IqamahCore in Frameworks */ = {isa = PBXBuildFile; productRef = IC0000000000000000000002 /* IqamahCore */; };
 		94CAD5652F23CBB800E1689F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CAD5642F23CBB800E1689F /* AppDelegate.swift */; };
@@ -110,6 +111,13 @@
 		/* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		UITESTS0000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA0000000000000000000050 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AA0000000000000000000040;
+			remoteInfo = iqamah;
+		};
 		EE0000000000000000007001 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = AA0000000000000000000050 /* Project object */;
@@ -174,6 +182,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		UITESTS0000000000000003 /* iqamahUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iqamahUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		UITESTS0000000000000004 /* IqamahUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IqamahUITests.swift; sourceTree = "<group>"; };
 		944B0D7D2F6340DD00EC6A01 /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
 		944B0D8C2F63423600EC6A01 /* .env.example */ = {isa = PBXFileReference; lastKnownFileType = text; path = .env.example; sourceTree = "<group>"; };
 		944B0D8D2F63424C00EC6A01 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
@@ -287,6 +297,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		UITESTS0000000000000007 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AA0000000000000000000020 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -363,6 +380,7 @@
 				WA000000000000000000070 /* IqamahWatch */,
 				WW000000000000000000070 /* IqamahWatchWidget */,
 				WT000000000000000000070 /* IqamahWatchTests */,
+				UITESTS0000000000000009 /* iqamahUITests */,
 				AA0000000000000000000032 /* Products */,
 				9457D7C42F2BDF2D00549E92 /* AppIconView.swift */,
 				9457D7C52F2BDF6400549E92 /* AppIconGenerator.swift */,
@@ -372,6 +390,14 @@
 				944B0DB92F63689C00EC6A01 /* docs */,
 				944B0DD42F646FFC00EC6A01 /* testsIqamahTests_FIXED.swift */,
 			);
+			sourceTree = "<group>";
+		};
+		UITESTS0000000000000009 /* iqamahUITests */ = {
+			isa = PBXGroup;
+			children = (
+				UITESTS0000000000000004 /* IqamahUITests.swift */,
+			);
+			path = iqamahUITests;
 			sourceTree = "<group>";
 		};
 		AA0000000000000000000031 /* iqamah */ = {
@@ -404,6 +430,7 @@
 			children = (
 				AA0000000000000000000010 /* iqamah.app */,
 				EE0000000000000000001001 /* iqamahTests.xctest */,
+				UITESTS0000000000000003 /* iqamahUITests.xctest */,
 				iOS0000000000000000000015 /* iqamah-iOS.app */,
 				LA000000000000000000005 /* IqamahLiveActivity.appex */,
 				WG000000000000000000042 /* IqamahWidget.appex */,
@@ -570,6 +597,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		UITESTS000000000000000A /* iqamahUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = UITESTS000000000000000D /* Build configuration list for PBXNativeTarget "iqamahUITests" */;
+			buildPhases = (
+				UITESTS0000000000000006 /* Sources */,
+				UITESTS0000000000000007 /* Frameworks */,
+				UITESTS0000000000000008 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				UITESTS0000000000000002 /* PBXTargetDependency */,
+			);
+			name = iqamahUITests;
+			productName = iqamahUITests;
+			productReference = UITESTS0000000000000003 /* iqamahUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		AA0000000000000000000040 /* iqamah */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = AA0000000000000000000060 /* Build configuration list for PBXNativeTarget "iqamah" */;
@@ -794,6 +839,7 @@
 				WA000000000000000000001 /* IqamahWatch */,
 				AA0000000000000000000040 /* iqamah */,
 				EE0000000000000000001000 /* iqamahTests */,
+				UITESTS000000000000000A /* iqamahUITests */,
 				iOS0000000000000000000040 /* iqamah-iOS */,
 				WG000000000000000000001 /* IqamahWidget */,
 				MW00000000000000000001 /* IqamahWidgetMac */,
@@ -802,6 +848,13 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		UITESTS0000000000000008 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AA0000000000000000000042 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -860,6 +913,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		UITESTS0000000000000006 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				UITESTS0000000000000005 /* IqamahUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AA0000000000000000000041 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -997,6 +1058,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		UITESTS0000000000000002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AA0000000000000000000040 /* iqamah */;
+			targetProxy = UITESTS0000000000000001 /* PBXContainerItemProxy */;
+		};
 		EE0000000000000000007002 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = AA0000000000000000000040 /* iqamah */;
@@ -1025,6 +1091,34 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		UITESTS000000000000000B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.fablesoft.iqamah.uitests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = iqamah;
+			};
+			name = Debug;
+		};
+		UITESTS000000000000000C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.fablesoft.iqamah.uitests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = iqamah;
+			};
+			name = Release;
+		};
 		AA0000000000000000000052 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1558,6 +1652,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		UITESTS000000000000000D /* Build configuration list for PBXNativeTarget "iqamahUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				UITESTS000000000000000B /* Debug */,
+				UITESTS000000000000000C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		AA0000000000000000000051 /* Build configuration list for PBXProject "iqamah" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

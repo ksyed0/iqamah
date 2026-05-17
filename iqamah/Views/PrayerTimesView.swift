@@ -259,6 +259,8 @@ struct PrayerTimesView: View {
                 .buttonStyle(.borderless)
                 .font(.caption.weight(.medium))
                 .foregroundStyle(Color.appGold)
+                // XCUITest identifier (AC-0322, US-0066)
+                .accessibilityIdentifier("hilalWatchButton")
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 8)
@@ -540,6 +542,7 @@ struct PrayerTimesView: View {
                                 .background(Capsule().fill(Color.appGoldDim.opacity(0.10)))
                         }
                         .buttonStyle(.plain)
+                        .accessibilityIdentifier("hilalWatchButton")
                     }
                     if let nextTime = nextPrayerTime {
                         VStack(alignment: .trailing, spacing: 1) {

@@ -412,6 +412,8 @@ struct SettingsSheetView: View {
                     .buttonStyle(.bordered)
                     .controlSize(.large)
                     .keyboardShortcut(.escape, modifiers: [])
+                    // XCUITest identifier (AC-0324, US-0066)
+                    .accessibilityIdentifier("settingsCancelButton")
 
                     Spacer()
 

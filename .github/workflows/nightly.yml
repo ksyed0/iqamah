@@ -119,6 +119,42 @@ jobs:
           path: /tmp/smoke-watch-build.log
           retention-days: 3
 
+  # ── macOS XCUITests (US-0066) ────────────────────────────────────────────────
+  # Runs only in nightly (AC-0325).  Uses --uitesting launch arg to seed Toronto
+  # settings; CODE_SIGN_IDENTITY="-" skips distribution signing in CI.
+  ui-tests-macos:
+    name: XCUITest · macOS
+    runs-on: macos-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode ${{ env.XCODE_VERSION }}
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+
+      - name: Run macOS XCUITests
+        run: |
+          xcodebuild test \
+            -project iqamah.xcodeproj \
+            -scheme iqamah \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            -only-testing:iqamahUITests \
+            CODE_SIGN_IDENTITY="-" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO \
+            ENABLE_HARDENED_RUNTIME=NO \
+            2>&1 | tee /tmp/uitests.log \
+            | grep -E "error:|Test (Case|Suite) '|passed|failed|BUILD" | tail -30
+
+      - name: Upload XCUITest log on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: xcuitest-macos-log
+          path: /tmp/uitests.log
+          retention-days: 3
+
   # ── Summary ─────────────────────────────────────────────────────────────────
   # This job always runs last and posts a Markdown summary to the Actions tab.
   # fail-fast: false on the matrix means individual platform failures are
@@ -126,7 +162,7 @@ jobs:
   summary:
     name: Nightly Summary
     runs-on: ubuntu-latest
-    needs: [smoke-macos, smoke-ios, smoke-ipad, smoke-watch]
+    needs: [smoke-macos, smoke-ios, smoke-ipad, smoke-watch, ui-tests-macos]
     if: always()
     steps:
       - name: Write summary
@@ -135,7 +171,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Platform | Result |" >> $GITHUB_STEP_SUMMARY
           echo "|---|---|" >> $GITHUB_STEP_SUMMARY
-          for platform_job in "macOS:smoke-macos" "iPhone:smoke-ios" "iPad:smoke-ipad" "watchOS:smoke-watch"; do
+          for platform_job in "macOS:smoke-macos" "iPhone:smoke-ios" "iPad:smoke-ipad" "watchOS:smoke-watch" "XCUITest macOS:ui-tests-macos"; do
             name="${platform_job%%:*}"
             result="${{ needs[platform_job##*:].result }}"
             icon="✅" && [[ "$result" != "success" ]] && icon="❌"
