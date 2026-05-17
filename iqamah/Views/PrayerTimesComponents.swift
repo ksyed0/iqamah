@@ -429,6 +429,8 @@ struct PrayerTimeRow: View {
         .accessibilityLabel(selectedAdhaan.id == "silent"
             ? "No adhaan set for \(name). Tap to set."
             : "Adhaan for \(name): \(selectedAdhaan.displayName). Tap to change.")
+        // XCUITest identifier (AC-0323, US-0066)
+        .accessibilityIdentifier("adhaanPill-\(name)")
     }
 
     private var mainRowContent: some View {
@@ -597,6 +599,8 @@ struct PrayerTimeRow: View {
                                         ? effectiveGold : .secondary)
                             }
                             .buttonStyle(.plain)
+                            // XCUITest identifier (AC-0323, US-0066)
+                            .accessibilityIdentifier("adhaanOption-\(option.id)")
                         }
                     }
                     .padding(.horizontal, 2)

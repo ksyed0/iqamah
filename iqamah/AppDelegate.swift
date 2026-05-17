@@ -18,6 +18,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var announcedDate = Date()
 
     func applicationDidFinishLaunching(_: Notification) {
+        // Bootstrap UI test state before any other setup so SettingsManager
+        // reads the seeded city when ContentView first renders.
+        if CommandLine.arguments.contains("--uitesting") {
+            bootstrapUITestSettings()
+        }
+
         // Start as a menu-bar-only agent (no dock icon, no Cmd+Tab).
         // We do this in code rather than via LSUIElement in the plist so that
         // setActivationPolicy(.regular) works fully when the window is shown.
@@ -75,6 +81,27 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
     }
 
+    // MARK: - UI Test bootstrap
+
+    /// Pre-seeds Toronto / ISNA settings so XCUITests start on the prayer times view.
+    /// Called only when launched with the `--uitesting` argument (AC-0317, US-0066).
+    private func bootstrapUITestSettings() {
+        let toronto = try? IqamahCore.City(
+            name: "Toronto",
+            countryCode: "CA",
+            latitude: 43.6534,
+            longitude: -79.3834,
+            timezone: "America/Toronto"
+        )
+        if let city = toronto {
+            SettingsManager.shared.completeSetup(
+                city: city,
+                calculationMethod: .isna,
+                asrMethod: .standard
+            )
+        }
+    }
+
     private func setupStatusBarItem() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
@@ -82,6 +109,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             button.action = #selector(statusBarButtonClicked)
             button.target = self
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+            // Accessibility identifier used by XCUITests (AC-0318 / AC-0319)
+            button.setAccessibilityIdentifier("iqamahStatusBarButton")
         }
 
         updateStatusBarDisplay()
