@@ -1,0 +1,145 @@
+name: Nightly Smoke Tests
+
+# ── Triggers ──────────────────────────────────────────────────────────────────
+# Runs every night at 02:00 UTC.  NOT triggered on PRs — kept separate from
+# the fast PR pipeline so flaky simulator issues don't block developer workflow.
+# Can also be triggered manually via workflow_dispatch.
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: 'Platforms to test (ios ipad watch macos or all)'
+        required: false
+        default: 'all'
+
+concurrency:
+  group: nightly-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  XCODE_VERSION: "26"
+
+jobs:
+
+  # ── macOS smoke test (fastest — no simulator provisioning) ──────────────────
+  smoke-macos:
+    name: Smoke · macOS
+    runs-on: macos-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode ${{ env.XCODE_VERSION }}
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+
+      - name: Run macOS smoke test
+        run: bash scripts/smoke-test.sh macos
+
+      - name: Upload build log on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: smoke-macos-build-log
+          path: /tmp/smoke-macos-build.log
+          retention-days: 3
+
+  # ── iOS (iPhone) smoke test ─────────────────────────────────────────────────
+  smoke-ios:
+    name: Smoke · iPhone
+    runs-on: macos-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode ${{ env.XCODE_VERSION }}
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+
+      - name: Run iPhone smoke test
+        run: bash scripts/smoke-test.sh ios
+
+      - name: Upload build log on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: smoke-ios-build-log
+          path: /tmp/smoke-ios-build.log
+          retention-days: 3
+
+  # ── iPad smoke test (reuses iOS binary, different simulator) ────────────────
+  smoke-ipad:
+    name: Smoke · iPad
+    runs-on: macos-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode ${{ env.XCODE_VERSION }}
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+
+      - name: Run iPad smoke test
+        run: bash scripts/smoke-test.sh ipad
+
+      - name: Upload build log on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: smoke-ipad-build-log
+          path: /tmp/smoke-ios-build.log
+          retention-days: 3
+
+  # ── watchOS smoke test ──────────────────────────────────────────────────────
+  smoke-watch:
+    name: Smoke · watchOS
+    runs-on: macos-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode ${{ env.XCODE_VERSION }}
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+
+      - name: Run watchOS smoke test
+        run: bash scripts/smoke-test.sh watch
+
+      - name: Upload build log on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: smoke-watch-build-log
+          path: /tmp/smoke-watch-build.log
+          retention-days: 3
+
+  # ── Summary ─────────────────────────────────────────────────────────────────
+  # This job always runs last and posts a Markdown summary to the Actions tab.
+  # fail-fast: false on the matrix means individual platform failures are
+  # reported without blocking other platforms.
+  summary:
+    name: Nightly Summary
+    runs-on: ubuntu-latest
+    needs: [smoke-macos, smoke-ios, smoke-ipad, smoke-watch]
+    if: always()
+    steps:
+      - name: Write summary
+        run: |
+          echo "## 🌙 Nightly Smoke Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Platform | Result |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          for platform_job in "macOS:smoke-macos" "iPhone:smoke-ios" "iPad:smoke-ipad" "watchOS:smoke-watch"; do
+            name="${platform_job%%:*}"
+            result="${{ needs[platform_job##*:].result }}"
+            icon="✅" && [[ "$result" != "success" ]] && icon="❌"
+            echo "| $name | $icon $result |" >> $GITHUB_STEP_SUMMARY
+          done
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "_Triggered: ${{ github.event_name }} · Branch: \`${{ github.ref_name }}\`_" >> $GITHUB_STEP_SUMMARY
