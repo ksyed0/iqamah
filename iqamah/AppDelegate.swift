@@ -338,7 +338,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         // The Dock icon temporarily appears — this is expected macOS behaviour for
         // hybrid menu-bar/window apps (same pattern used by Bartender, Fantastical, etc.).
         NSApplication.shared.setActivationPolicy(.regular)
-        resolvedMainWindow?.makeKeyAndOrderFront(nil)
+        if let window = resolvedMainWindow {
+            // Un-minimise if needed — makeKeyAndOrderFront alone doesn't restore from Dock
+            if window.isMiniaturized { window.deminiaturize(nil) }
+            window.makeKeyAndOrderFront(nil)
+        }
         NSApplication.shared.activate(ignoringOtherApps: true)
     }
 

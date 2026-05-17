@@ -277,11 +277,16 @@ struct PrayerTimesView: View {
                     Rectangle().fill(.ultraThinMaterial.opacity(0.6))
                 }
 
-            // Prayer times table
+            // Prayer times table — pass the shared expandedRowID so the adhaan
+            // picker can open/close on macOS (was using .constant(nil) default).
             if let prayerTimes {
-                PrayerTimesTable(prayerTimes: prayerTimes, timezone: TimeZone(identifier: city.timezone) ?? .current)
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 24)
+                PrayerTimesTable(
+                    prayerTimes: prayerTimes,
+                    timezone: TimeZone(identifier: city.timezone) ?? .current,
+                    expandedRowID: $expandedRowID
+                )
+                .padding(.horizontal, 24)
+                .padding(.bottom, 24)
             } else {
                 ProgressView()
                     .padding(.vertical, 40)
