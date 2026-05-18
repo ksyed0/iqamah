@@ -12,9 +12,10 @@ struct PrayerRowID: Hashable {
 
 // MARK: - Prayer Times Table
 
-struct PrayerTimesTable: View {
-    let prayerTimes: PrayerTimes
-    let timezone: TimeZone
+/// Public so snapshot tests can reference it directly without @testable import (AC-0311, US-0065).
+public struct PrayerTimesTable: View {
+    public let prayerTimes: PrayerTimes
+    public let timezone: TimeZone
     /// 0 = today, 1 = tomorrow. Used in iPad landscape two-column layout.
     var dayOffset: Int = 0
     /// Shared across columns in iPad landscape so only one row is open at a time.
@@ -25,6 +26,14 @@ struct PrayerTimesTable: View {
     @State private var prayerMuted: [String: Bool] = [:]
     @ObservedObject private var settingsManager = SettingsManager.shared
     @ObservedObject private var player = AdhaaanPlayer.shared
+
+    /// Public init for snapshot tests — no shared expand state (AC-0311, US-0065).
+    public init(prayerTimes: PrayerTimes, timezone: TimeZone) {
+        self.prayerTimes = prayerTimes
+        self.timezone = timezone
+        dayOffset = 0
+        _expandedRowID = .constant(nil)
+    }
 
     /// Convenience initialiser for call sites that don't need shared expand state (macOS single-column).
     init(prayerTimes: PrayerTimes, timezone: TimeZone, dayOffset: Int = 0,
@@ -39,7 +48,7 @@ struct PrayerTimesTable: View {
         PrayerTimes.timeFormatter(for: timezone, use24Hour: settingsManager.use24HourTime)
     }
 
-    var body: some View {
+    public var body: some View {
         VStack(spacing: 1) {
             ForEach(prayerTimes.prayers, id: \.name) { prayer in
                 let adjusted = adjustedTime(for: prayer)

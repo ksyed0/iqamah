@@ -3,11 +3,14 @@ import IqamahCore
 
 /// Renders a crescent moon using SwiftUI Canvas.
 /// `phase` is the synodic phase fraction [0=new, 0.5=full, 1=new again].
-struct MoonPhaseView: View {
-    let phase: Double // 0–1
-    let size: CGFloat
+public struct MoonPhaseView: View {
+    public let phase: Double // 0–1
+    public let size: CGFloat
+    public init(phase: Double, size: CGFloat) {
+        self.phase = phase; self.size = size
+    }
 
-    var body: some View {
+    public var body: some View {
         Canvas { ctx, canvasSize in
             let r = min(canvasSize.width, canvasSize.height) / 2 - 2
             let cx = canvasSize.width / 2
