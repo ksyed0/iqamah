@@ -85,6 +85,8 @@
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            // XCUITest identifier — buttons always create accessibility nodes (AC-0327/0329/0330, US-0067)
+            .accessibilityIdentifier("prayerRow-\(name)")
             .opacity(isPast ? 0.28 : 1.0)
             .background {
                 if isNext {
@@ -277,6 +279,8 @@
                         }
                         .buttonStyle(.plain)
                         .accessibilityLabel(isSelected ? "\(displayName), selected" : displayName)
+                        // XCUITest identifier (AC-0329/0330, US-0067)
+                        .accessibilityIdentifier("adhaanOption-\(adhaan.id)")
                     }
                 }
             }

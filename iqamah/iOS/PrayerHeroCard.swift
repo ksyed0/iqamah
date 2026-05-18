@@ -37,6 +37,8 @@
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("Open Hilal Watch")
+                    // XCUITest identifier (AC-0331, US-0067)
+                    .accessibilityIdentifier("hilalWatchButton")
                 }
 
                 Spacer()

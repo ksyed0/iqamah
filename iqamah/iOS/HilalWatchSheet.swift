@@ -65,6 +65,8 @@
                             Image(systemName: "square.and.arrow.up")
                         }
                         .accessibilityLabel("Export Hilal Map")
+                        // XCUITest identifier (AC-0332, US-0067)
+                        .accessibilityIdentifier("exportHilalButton")
 
                         Button {
                             withAnimation { showAbout.toggle() }
