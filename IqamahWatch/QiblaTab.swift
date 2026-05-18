@@ -31,6 +31,8 @@ struct QiblaTab: View {
                         )
                 }
                 .frame(width: 80, height: 80)
+                // XCUITest identifier (AC-0341, US-0068)
+                .accessibilityIdentifier("qiblahCompass")
 
                 Text(faceText(bearing: bearing))
                     .font(.system(size: 13, weight: .semibold))

@@ -7,6 +7,19 @@ struct IqamahWatchApp: App {
     @StateObject private var settings = SettingsManager.shared
     @StateObject private var locationSetup = WatchLocationSetup()
 
+    init() {
+        // Pre-seed Toronto / ISNA settings so XCUITests skip location setup (AC-0336, US-0068).
+        if ProcessInfo.processInfo.arguments.contains("--uitesting") {
+            if let toronto = try? City(name: "Toronto", countryCode: "CA",
+                                       latitude: 43.6534, longitude: -79.3834,
+                                       timezone: "America/Toronto") {
+                SettingsManager.shared.completeSetup(city: toronto,
+                                                     calculationMethod: .isna,
+                                                     asrMethod: .standard)
+            }
+        }
+    }
+
     var body: some Scene {
         WindowGroup {
             Group {
@@ -54,7 +67,8 @@ final class WatchLocationSetup: NSObject, ObservableObject, CLLocationManagerDel
 
     func start(settings: SettingsManager) {
         settingsRef = settings
-        if settings.activeCoordinate != nil {
+        // Skip location detection in XCUITests — coordinates already pre-seeded.
+        if ProcessInfo.processInfo.arguments.contains("--uitesting") || settings.activeCoordinate != nil {
             isReady = true
             return
         }

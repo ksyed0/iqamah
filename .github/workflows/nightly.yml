@@ -244,17 +244,48 @@ jobs:
             /tmp/uitests-ipad.log
           retention-days: 3
 
-  # ── Stage 5: watchOS XCUITests (placeholder — implemented in US-0068) ──────
+  # ── Stage 5: watchOS XCUITests (US-0068) ──────────────────────────────────
   # AC-0344: ui-test-watchos is the fifth stage.
 
   ui-tests-watchos:
-    name: XCUITest · watchOS (pending US-0068)
+    name: XCUITest · watchOS
     runs-on: macos-latest
     timeout-minutes: 15
     needs: [ui-tests-ios]
-    if: false # enabled when IqamahWatchUITests target is added in US-0068
+    if: always() # AC-0345 — run even when iOS UI tests fail
     steps:
-      - run: echo "watchOS XCUITests will be added in US-0068"
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode ${{ env.XCODE_VERSION }}
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+
+      - name: Run watchOS XCUITests
+        run: |
+          SIM=$(xcrun simctl list devices available --json \
+            | python3 -c "import sys,json; d=json.load(sys.stdin); \
+              sims=[v for k,vs in d['devices'].items() if 'watchOS' in k \
+                    for v in vs if v['isAvailable']]; \
+              print(sims[0]['udid'] if sims else '')")
+          if [ -z "$SIM" ]; then echo "No watchOS simulator — skipping"; exit 0; fi
+          xcodebuild test \
+            -project iqamah.xcodeproj \
+            -scheme IqamahWatch \
+            -configuration Debug \
+            -destination "platform=watchOS Simulator,id=$SIM" \
+            -only-testing:IqamahWatchUITests \
+            CODE_SIGN_IDENTITY="-" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO \
+            2>&1 | tee /tmp/uitests-watchos.log \
+            | grep -E "error:|Test (Case|Suite) '|passed|failed|BUILD" | tail -20
+
+      - name: Upload watchOS XCUITest log on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: xcuitest-watchos-log
+          path: /tmp/uitests-watchos.log
+          retention-days: 3
 
   # ── Summary ────────────────────────────────────────────────────────────────
   # Always runs last; posts a Markdown table to $GITHUB_STEP_SUMMARY so the
@@ -264,7 +295,7 @@ jobs:
   summary:
     name: Nightly Summary
     runs-on: ubuntu-latest
-    needs: [smoke-macos, smoke-ios, smoke-ipad, smoke-watch, snapshot-tests, ui-tests-macos, ui-tests-ios]
+    needs: [smoke-macos, smoke-ios, smoke-ipad, smoke-watch, snapshot-tests, ui-tests-macos, ui-tests-ios, ui-tests-watchos]
     if: always()
     steps:
       - name: Write summary
@@ -300,7 +331,9 @@ jobs:
           ios_result="${{ needs.ui-tests-ios.result }}"
           ios_icon="✅"; [[ "$ios_result" != "success" ]] && ios_icon="❌"
           echo "| iPhone + iPad | $ios_icon $ios_result |" >> $GITHUB_STEP_SUMMARY
-          echo "| watchOS | ⏳ pending US-0068 |" >> $GITHUB_STEP_SUMMARY
+          wos_result="${{ needs.ui-tests-watchos.result }}"
+          wos_icon="✅"; [[ "$wos_result" != "success" ]] && wos_icon="❌"
+          echo "| watchOS | $wos_icon $wos_result |" >> $GITHUB_STEP_SUMMARY
 
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "_Triggered: \`${{ github.event_name }}\` · Branch: \`${{ github.ref_name }}\` · $(date -u '+%Y-%m-%d %H:%M UTC')_" >> $GITHUB_STEP_SUMMARY
