@@ -43,72 +43,68 @@ private func fixedPrayerTimes() -> PrayerTimes {
 
 private let toronto = TimeZone(identifier: "America/Toronto")!
 
-/// Renders a SwiftUI view at scale 1.0 via ImageRenderer so the reference PNG
-/// is reproducible across Retina Macs and headless 1× CI runners alike.
-/// MUST be called from the main actor (use `await MainActor.run` in async tests).
-@MainActor
+/// Renders a SwiftUI view at exactly scale 1.0 so the reference PNG is
+/// identical across Retina Macs and CI's 1× virtual display.
+///
+/// Uses `MainActor.assumeIsolated` rather than `await MainActor.run` to avoid
+/// the deadlock that occurs inside BUNDLE_LOADER tests: those tests run on the
+/// NSApplication main run loop, which cannot be re-entered by an async
+/// continuation.  XCTest always calls synchronous test methods on the main
+/// thread, so `assumeIsolated` is safe here.
 private func renderAt1x(_ view: some View, width: CGFloat, height: CGFloat, dark: Bool) -> NSImage? {
-    let sized = view
-        .frame(width: width, height: height)
-        .environment(\.colorScheme, dark ? .dark : .light)
-        .background(dark ? Color(white: 0.12) : Color(white: 0.97))
-    let renderer = ImageRenderer(content: sized)
-    renderer.scale = 1.0
-    return renderer.nsImage
+    MainActor.assumeIsolated {
+        let sized = view
+            .frame(width: width, height: height)
+            .environment(\.colorScheme, dark ? .dark : .light)
+            .background(dark ? Color(white: 0.12) : Color(white: 0.97))
+        let renderer = ImageRenderer(content: sized)
+        renderer.scale = 1.0
+        return renderer.nsImage
+    }
 }
 
 // MARK: - AC-0309: MoonPhaseView
 
 final class MoonPhaseSnapshotTests: XCTestCase {
-    // New crescent (phase ≈ 0.05) — light + dark
-    func testNewCrescent_light() async throws {
-        let image = try await MainActor.run {
-            try XCTUnwrap(renderAt1x(MoonPhaseView(phase: 0.05, size: 80), width: 80, height: 80, dark: false))
+    private func snap(_ view: some View, width: CGFloat, height: CGFloat, dark: Bool,
+                      precision: Float, named: String,
+                      file: StaticString = #file, testName: String = #function) {
+        guard let image = renderAt1x(view, width: width, height: height, dark: dark) else {
+            XCTFail("renderAt1x returned nil", file: file)
+            return
         }
-        assertSnapshot(of: image, as: .image(precision: 0.95), named: "newCrescent-light",
-                       file: #file, testName: #function)
+        assertSnapshot(of: image, as: .image(precision: precision),
+                       named: named, file: file, testName: testName)
     }
 
-    func testNewCrescent_dark() async throws {
-        let image = try await MainActor.run {
-            try XCTUnwrap(renderAt1x(MoonPhaseView(phase: 0.05, size: 80), width: 80, height: 80, dark: true))
-        }
-        assertSnapshot(of: image, as: .image(precision: 0.95), named: "newCrescent-dark",
-                       file: #file, testName: #function)
+    func testNewCrescent_light() {
+        snap(MoonPhaseView(phase: 0.05, size: 80), width: 80, height: 80, dark: false,
+             precision: 0.95, named: "newCrescent-light")
     }
 
-    // Full moon (phase = 0.5) — light + dark
-    func testFullMoon_light() async throws {
-        let image = try await MainActor.run {
-            try XCTUnwrap(renderAt1x(MoonPhaseView(phase: 0.50, size: 80), width: 80, height: 80, dark: false))
-        }
-        assertSnapshot(of: image, as: .image(precision: 0.95), named: "fullMoon-light",
-                       file: #file, testName: #function)
+    func testNewCrescent_dark() {
+        snap(MoonPhaseView(phase: 0.05, size: 80), width: 80, height: 80, dark: true,
+             precision: 0.95, named: "newCrescent-dark")
     }
 
-    func testFullMoon_dark() async throws {
-        let image = try await MainActor.run {
-            try XCTUnwrap(renderAt1x(MoonPhaseView(phase: 0.50, size: 80), width: 80, height: 80, dark: true))
-        }
-        assertSnapshot(of: image, as: .image(precision: 0.95), named: "fullMoon-dark",
-                       file: #file, testName: #function)
+    func testFullMoon_light() {
+        snap(MoonPhaseView(phase: 0.50, size: 80), width: 80, height: 80, dark: false,
+             precision: 0.95, named: "fullMoon-light")
     }
 
-    // Waning crescent (phase ≈ 0.82) — light + dark
-    func testWaningCrescent_light() async throws {
-        let image = try await MainActor.run {
-            try XCTUnwrap(renderAt1x(MoonPhaseView(phase: 0.82, size: 80), width: 80, height: 80, dark: false))
-        }
-        assertSnapshot(of: image, as: .image(precision: 0.95), named: "waningCrescent-light",
-                       file: #file, testName: #function)
+    func testFullMoon_dark() {
+        snap(MoonPhaseView(phase: 0.50, size: 80), width: 80, height: 80, dark: true,
+             precision: 0.95, named: "fullMoon-dark")
     }
 
-    func testWaningCrescent_dark() async throws {
-        let image = try await MainActor.run {
-            try XCTUnwrap(renderAt1x(MoonPhaseView(phase: 0.82, size: 80), width: 80, height: 80, dark: true))
-        }
-        assertSnapshot(of: image, as: .image(precision: 0.95), named: "waningCrescent-dark",
-                       file: #file, testName: #function)
+    func testWaningCrescent_light() {
+        snap(MoonPhaseView(phase: 0.82, size: 80), width: 80, height: 80, dark: false,
+             precision: 0.95, named: "waningCrescent-light")
+    }
+
+    func testWaningCrescent_dark() {
+        snap(MoonPhaseView(phase: 0.82, size: 80), width: 80, height: 80, dark: true,
+             precision: 0.95, named: "waningCrescent-dark")
     }
 }
 
@@ -116,22 +112,20 @@ final class MoonPhaseSnapshotTests: XCTestCase {
 
 final class QiblahCompassSnapshotTests: XCTestCase {
     // Toronto → Makkah bearing 58.3° at two sizes
-    func testCompass_320pt() async throws {
-        let image = try await MainActor.run {
-            try XCTUnwrap(renderAt1x(QiblahCompassView(diameter: 320, bearing: 58.3),
-                                     width: 320, height: 320, dark: false))
+    func testCompass_320pt() {
+        guard let image = renderAt1x(QiblahCompassView(diameter: 320, bearing: 58.3),
+                                     width: 320, height: 320, dark: false) else {
+            XCTFail("renderAt1x returned nil"); return
         }
-        assertSnapshot(of: image, as: .image(precision: 0.92), named: "compass-320",
-                       file: #file, testName: #function)
+        assertSnapshot(of: image, as: .image(precision: 0.92), named: "compass-320")
     }
 
-    func testCompass_600pt() async throws {
-        let image = try await MainActor.run {
-            try XCTUnwrap(renderAt1x(QiblahCompassView(diameter: 600, bearing: 58.3),
-                                     width: 600, height: 600, dark: false))
+    func testCompass_600pt() {
+        guard let image = renderAt1x(QiblahCompassView(diameter: 600, bearing: 58.3),
+                                     width: 600, height: 600, dark: false) else {
+            XCTFail("renderAt1x returned nil"); return
         }
-        assertSnapshot(of: image, as: .image(precision: 0.92), named: "compass-600",
-                       file: #file, testName: #function)
+        assertSnapshot(of: image, as: .image(precision: 0.92), named: "compass-600")
     }
 }
 
@@ -142,15 +136,14 @@ final class PrayerTimesTableSnapshotTests: XCTestCase {
     /// Which prayer is highlighted as "NEXT" depends on the current clock;
     /// this test catches STRUCTURAL regressions (layout, fonts, spacing) rather
     /// than specific highlighted states.
-    func testPrayerTimesTable_dark() async throws {
+    func testPrayerTimesTable_dark() {
         let view = PrayerTimesTable(prayerTimes: fixedPrayerTimes(), timezone: toronto)
             .frame(width: 620, height: 380)
             .padding(10)
-        let image = try await MainActor.run {
-            try XCTUnwrap(renderAt1x(view, width: 640, height: 400, dark: true))
+        guard let image = renderAt1x(view, width: 640, height: 400, dark: true) else {
+            XCTFail("renderAt1x returned nil"); return
         }
-        assertSnapshot(of: image, as: .image(precision: 0.90), named: nil,
-                       file: #file, testName: #function)
+        assertSnapshot(of: image, as: .image(precision: 0.90))
     }
 }
 
