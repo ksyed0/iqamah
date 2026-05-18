@@ -27,21 +27,16 @@ public struct PrayerTimesTable: View {
     @ObservedObject private var settingsManager = SettingsManager.shared
     @ObservedObject private var player = AdhaaanPlayer.shared
 
-    /// Public init for snapshot tests — no shared expand state (AC-0311, US-0065).
+    /// Snapshot-test entry point (AC-0311, US-0065) — no shared expand state.
     public init(prayerTimes: PrayerTimes, timezone: TimeZone) {
-        self.prayerTimes = prayerTimes
-        self.timezone = timezone
-        dayOffset = 0
-        _expandedRowID = .constant(nil)
+        self.init(prayerTimes: prayerTimes, timezone: timezone, dayOffset: 0, expandedRowID: .constant(nil))
     }
 
-    /// Convenience initialiser for call sites that don't need shared expand state (macOS single-column).
+    /// Full initialiser used internally and in tests.
     init(prayerTimes: PrayerTimes, timezone: TimeZone, dayOffset: Int = 0,
          expandedRowID: Binding<PrayerRowID?> = .constant(nil)) {
-        self.prayerTimes = prayerTimes
-        self.timezone = timezone
-        self.dayOffset = dayOffset
-        _expandedRowID = expandedRowID
+        self.prayerTimes = prayerTimes; self.timezone = timezone
+        self.dayOffset = dayOffset; _expandedRowID = expandedRowID
     }
 
     private var timeFormatter: DateFormatter {
