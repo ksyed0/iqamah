@@ -1,9 +1,10 @@
-name: Nightly Smoke Tests
+name: Nightly Tests
 
 # ── Triggers ──────────────────────────────────────────────────────────────────
 # Runs every night at 02:00 UTC.  NOT triggered on PRs — kept separate from
 # the fast PR pipeline so flaky simulator issues don't block developer workflow.
 # Can also be triggered manually via workflow_dispatch.
+# AC-0343, AC-0344, AC-0345, AC-0346, AC-0348 (US-0069, EPIC-0015)
 on:
   schedule:
     - cron: '0 2 * * *'
@@ -21,24 +22,26 @@ concurrency:
 env:
   XCODE_VERSION: "26"
 
+# ── Stage 1: Smoke tests ───────────────────────────────────────────────────────
+# All four platform smoke tests run in parallel.  If any smoke test fails the
+# snapshot and UI jobs still run thanks to `if: always()`.
+# AC-0344: smoke-test is the first stage.
+# AC-0345: jobs within a stage are independent; no fail-fast propagation.
+
 jobs:
 
-  # ── macOS smoke test (fastest — no simulator provisioning) ──────────────────
   smoke-macos:
     name: Smoke · macOS
     runs-on: macos-latest
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
-
       - name: Select Xcode ${{ env.XCODE_VERSION }}
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: ${{ env.XCODE_VERSION }}
-
       - name: Run macOS smoke test
         run: bash scripts/smoke-test.sh macos
-
       - name: Upload build log on failure
         uses: actions/upload-artifact@v4
         if: failure()
@@ -47,22 +50,18 @@ jobs:
           path: /tmp/smoke-macos-build.log
           retention-days: 3
 
-  # ── iOS (iPhone) smoke test ─────────────────────────────────────────────────
   smoke-ios:
     name: Smoke · iPhone
     runs-on: macos-latest
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
-
       - name: Select Xcode ${{ env.XCODE_VERSION }}
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: ${{ env.XCODE_VERSION }}
-
       - name: Run iPhone smoke test
         run: bash scripts/smoke-test.sh ios
-
       - name: Upload build log on failure
         uses: actions/upload-artifact@v4
         if: failure()
@@ -71,22 +70,18 @@ jobs:
           path: /tmp/smoke-ios-build.log
           retention-days: 3
 
-  # ── iPad smoke test (reuses iOS binary, different simulator) ────────────────
   smoke-ipad:
     name: Smoke · iPad
     runs-on: macos-latest
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
-
       - name: Select Xcode ${{ env.XCODE_VERSION }}
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: ${{ env.XCODE_VERSION }}
-
       - name: Run iPad smoke test
         run: bash scripts/smoke-test.sh ipad
-
       - name: Upload build log on failure
         uses: actions/upload-artifact@v4
         if: failure()
@@ -95,22 +90,18 @@ jobs:
           path: /tmp/smoke-ios-build.log
           retention-days: 3
 
-  # ── watchOS smoke test ──────────────────────────────────────────────────────
   smoke-watch:
     name: Smoke · watchOS
     runs-on: macos-latest
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
-
       - name: Select Xcode ${{ env.XCODE_VERSION }}
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: ${{ env.XCODE_VERSION }}
-
       - name: Run watchOS smoke test
         run: bash scripts/smoke-test.sh watch
-
       - name: Upload build log on failure
         uses: actions/upload-artifact@v4
         if: failure()
@@ -119,13 +110,58 @@ jobs:
           path: /tmp/smoke-watch-build.log
           retention-days: 3
 
-  # ── macOS XCUITests (US-0066) ────────────────────────────────────────────────
-  # Runs only in nightly (AC-0325).  Uses --uitesting launch arg to seed Toronto
-  # settings; CODE_SIGN_IDENTITY="-" skips distribution signing in CI.
+  # ── Stage 2: Snapshot tests ────────────────────────────────────────────────
+  # Runs after all smoke tests complete (regardless of their outcome).
+  # AC-0344: snapshot-test is the second stage.
+
+  snapshot-tests:
+    name: Snapshot Tests · macOS
+    runs-on: macos-latest
+    timeout-minutes: 10
+    needs: [smoke-macos, smoke-ios, smoke-ipad, smoke-watch]
+    if: always() # run even when smoke tests fail — AC-0345
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode ${{ env.XCODE_VERSION }}
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+
+      - name: Run snapshot tests
+        run: |
+          xcodebuild test \
+            -project iqamah.xcodeproj \
+            -scheme iqamah \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            -only-testing:iqamahTests/MoonPhaseSnapshotTests \
+            -only-testing:iqamahTests/QiblahCompassSnapshotTests \
+            -only-testing:iqamahTests/PrayerTimesTableSnapshotTests \
+            CODE_SIGNING_ALLOWED=NO \
+            2>&1 | tee /tmp/snapshot-tests.log \
+            | grep -E "error:|Test Case|passed|failed|BUILD" | tail -20
+
+      - name: Upload snapshot log on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: snapshot-tests-log
+          path: /tmp/snapshot-tests.log
+          retention-days: 3
+
+  # ── Stage 3: macOS XCUITests ───────────────────────────────────────────────
+  # Runs after snapshot tests complete.  Uses --uitesting launch arg to seed
+  # Toronto settings; CODE_SIGN_IDENTITY="-" skips distribution signing in CI.
+  # AC-0344: ui-test-macos is the third stage.
+  # AC-0325: UI tests run nightly only, not on every PR.
+
   ui-tests-macos:
     name: XCUITest · macOS
     runs-on: macos-latest
     timeout-minutes: 15
+    needs: [snapshot-tests]
+    if: always() # run even when snapshot tests fail — AC-0345
     steps:
       - uses: actions/checkout@v4
 
@@ -144,7 +180,7 @@ jobs:
             -only-testing:iqamahUITests \
             CODE_SIGN_IDENTITY="-" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO \
             ENABLE_HARDENED_RUNTIME=NO \
-            2>&1 | tee /tmp/uitests.log \
+            2>&1 | tee /tmp/uitests-macos.log \
             | grep -E "error:|Test (Case|Suite) '|passed|failed|BUILD" | tail -30
 
       - name: Upload XCUITest log on failure
@@ -152,30 +188,76 @@ jobs:
         if: failure()
         with:
           name: xcuitest-macos-log
-          path: /tmp/uitests.log
+          path: /tmp/uitests-macos.log
           retention-days: 3
 
-  # ── Summary ─────────────────────────────────────────────────────────────────
-  # This job always runs last and posts a Markdown summary to the Actions tab.
-  # fail-fast: false on the matrix means individual platform failures are
-  # reported without blocking other platforms.
+  # ── Stage 4: iOS XCUITests (placeholder — implemented in US-0067) ──────────
+  # AC-0344: ui-test-ios is the fourth stage.
+
+  ui-tests-ios:
+    name: XCUITest · iOS (pending US-0067)
+    runs-on: macos-latest
+    timeout-minutes: 15
+    needs: [ui-tests-macos]
+    if: false # enabled when iqamah-iOSUITests target is added in US-0067
+    steps:
+      - run: echo "iOS XCUITests will be added in US-0067"
+
+  # ── Stage 5: watchOS XCUITests (placeholder — implemented in US-0068) ──────
+  # AC-0344: ui-test-watchos is the fifth stage.
+
+  ui-tests-watchos:
+    name: XCUITest · watchOS (pending US-0068)
+    runs-on: macos-latest
+    timeout-minutes: 15
+    needs: [ui-tests-ios]
+    if: false # enabled when IqamahWatchUITests target is added in US-0068
+    steps:
+      - run: echo "watchOS XCUITests will be added in US-0068"
+
+  # ── Summary ────────────────────────────────────────────────────────────────
+  # Always runs last; posts a Markdown table to $GITHUB_STEP_SUMMARY so the
+  # Actions tab shows a clean per-platform/per-stage result at a glance.
+  # AC-0346: failure summary posted via GitHub Actions job summaries.
+
   summary:
     name: Nightly Summary
     runs-on: ubuntu-latest
-    needs: [smoke-macos, smoke-ios, smoke-ipad, smoke-watch, ui-tests-macos]
+    needs: [smoke-macos, smoke-ios, smoke-ipad, smoke-watch, snapshot-tests, ui-tests-macos]
     if: always()
     steps:
       - name: Write summary
         run: |
-          echo "## 🌙 Nightly Smoke Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "## 🌙 Nightly Test Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### Stage 1 — Smoke Tests" >> $GITHUB_STEP_SUMMARY
           echo "| Platform | Result |" >> $GITHUB_STEP_SUMMARY
           echo "|---|---|" >> $GITHUB_STEP_SUMMARY
-          for platform_job in "macOS:smoke-macos" "iPhone:smoke-ios" "iPad:smoke-ipad" "watchOS:smoke-watch" "XCUITest macOS:ui-tests-macos"; do
-            name="${platform_job%%:*}"
-            result="${{ needs[platform_job##*:].result }}"
-            icon="✅" && [[ "$result" != "success" ]] && icon="❌"
+          for entry in "macOS:smoke-macos" "iPhone:smoke-ios" "iPad:smoke-ipad" "watchOS:smoke-watch"; do
+            name="${entry%%:*}"; job="${entry##*:}"
+            result="${{ needs[job].result }}"
+            icon="✅"; [[ "$result" != "success" ]] && icon="❌"
             echo "| $name | $icon $result |" >> $GITHUB_STEP_SUMMARY
           done
+
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "_Triggered: ${{ github.event_name }} · Branch: \`${{ github.ref_name }}\`_" >> $GITHUB_STEP_SUMMARY
+          echo "### Stage 2 — Snapshot Tests" >> $GITHUB_STEP_SUMMARY
+          echo "| Suite | Result |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          snap_result="${{ needs.snapshot-tests.result }}"
+          snap_icon="✅"; [[ "$snap_result" != "success" ]] && snap_icon="❌"
+          echo "| macOS snapshots | $snap_icon $snap_result |" >> $GITHUB_STEP_SUMMARY
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Stage 3 — XCUITests" >> $GITHUB_STEP_SUMMARY
+          echo "| Platform | Result |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          ui_result="${{ needs.ui-tests-macos.result }}"
+          ui_icon="✅"; [[ "$ui_result" != "success" ]] && ui_icon="❌"
+          echo "| macOS | $ui_icon $ui_result |" >> $GITHUB_STEP_SUMMARY
+          echo "| iOS | ⏳ pending US-0067 |" >> $GITHUB_STEP_SUMMARY
+          echo "| watchOS | ⏳ pending US-0068 |" >> $GITHUB_STEP_SUMMARY
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "_Triggered: \`${{ github.event_name }}\` · Branch: \`${{ github.ref_name }}\` · $(date -u '+%Y-%m-%d %H:%M UTC')_" >> $GITHUB_STEP_SUMMARY
