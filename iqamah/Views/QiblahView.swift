@@ -216,13 +216,17 @@ private struct Triangle: Shape {
 
 /// Self-contained compass that scales to any diameter.
 /// All element sizes are proportional to the radius (diameter / 2).
-private struct QiblahCompassView: View {
-    let diameter: CGFloat
-    let bearing: Double
+/// Public so snapshot tests can render it directly without @testable import (AC-0310, US-0065).
+public struct QiblahCompassView: View {
+    public let diameter: CGFloat
+    public let bearing: Double
+    public init(diameter: CGFloat, bearing: Double) {
+        self.diameter = diameter; self.bearing = bearing
+    }
 
     private var r: CGFloat { diameter / 2 }
 
-    var body: some View {
+    public var body: some View {
         ZStack {
             // ── Bezel ring ──────────────────────────────────────────
             Circle()
