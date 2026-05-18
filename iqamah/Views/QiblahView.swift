@@ -109,6 +109,8 @@ struct QiblahView: View {
                     let diameter = min(geo.size.width, geo.size.height) * 0.85
                     QiblahCompassView(diameter: diameter, bearing: qiblahBearing)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        // XCUITest identifier (AC-0333, US-0067)
+                        .accessibilityIdentifier("qiblahCompass")
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }

@@ -8,6 +8,31 @@ struct IqamahiOSApp: App {
     @StateObject private var settings = SettingsManager.shared
     @Environment(\.scenePhase) private var scenePhase
 
+    init() {
+        // Pre-seed Toronto / ISNA settings so XCUITests skip setup flow (AC-0326, US-0067).
+        if ProcessInfo.processInfo.arguments.contains("--uitesting") {
+            bootstrapUITestSettings()
+        }
+    }
+
+    /// Mirrors the macOS AppDelegate bootstrap — must run before body is first rendered.
+    private func bootstrapUITestSettings() {
+        let toronto = try? City(
+            name: "Toronto",
+            countryCode: "CA",
+            latitude: 43.6534,
+            longitude: -79.3834,
+            timezone: "America/Toronto"
+        )
+        if let city = toronto {
+            SettingsManager.shared.completeSetup(
+                city: city,
+                calculationMethod: .isna,
+                asrMethod: .standard
+            )
+        }
+    }
+
     var body: some Scene {
         WindowGroup {
             IOSRootView()
