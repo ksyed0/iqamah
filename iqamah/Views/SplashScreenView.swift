@@ -5,8 +5,8 @@ struct SplashScreenView: View {
         GeometryReader { geometry in
             ZStack {
                 // Background photo (mosque at golden hour, title baked in)
-                if let image = loadSplashImage() {
-                    Image(nsImage: image)
+                if let splashImage = loadSplashImage() {
+                    splashImage
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                         .frame(width: geometry.size.width, height: geometry.size.height)
@@ -43,10 +43,19 @@ struct SplashScreenView: View {
         .ignoresSafeArea()
     }
 
-    private func loadSplashImage() -> NSImage? {
-        if let url = Bundle.main.url(forResource: "splash", withExtension: "jpg") {
-            return NSImage(contentsOf: url)
-        }
-        return nil
+    private func loadSplashImage() -> Image? {
+        #if os(macOS)
+            if let url = Bundle.main.url(forResource: "splash", withExtension: "jpg"),
+               let nsImage = NSImage(contentsOf: url) {
+                return Image(nsImage: nsImage)
+            }
+            return nil
+        #else
+            if let url = Bundle.main.url(forResource: "splash", withExtension: "jpg"),
+               let uiImage = UIImage(contentsOfFile: url.path) {
+                return Image(uiImage: uiImage)
+            }
+            return nil
+        #endif
     }
 }

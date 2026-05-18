@@ -1,4 +1,5 @@
 import SwiftUI
+import IqamahCore
 
 struct CalculationMethodView: View {
     @Binding var selectedMethod: CalculationMethod
@@ -54,13 +55,21 @@ struct CalculationMethodView: View {
                             }
                         }
                         .labelsHidden()
-                        .pickerStyle(.radioGroup)
+                        #if os(macOS)
+                            .pickerStyle(.radioGroup)
+                        #else
+                            .pickerStyle(.segmented)
+                        #endif
                     }
                 }
                 .frame(maxWidth: 400)
                 .padding()
-                .background(Color(nsColor: .controlBackgroundColor))
-                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                #if os(macOS)
+                    .background(Color(nsColor: .controlBackgroundColor))
+                #else
+                    .background(Color(.secondarySystemBackground))
+                #endif
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
             }
             .padding(.horizontal, 32)
             .padding(.top, 16)

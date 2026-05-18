@@ -7,71 +7,210 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		944B0D972F63596200EC6A01 /* ModelsIqamahError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 944B0D962F63596200EC6A01 /* ModelsIqamahError.swift */; };
+		wOSUITests00000000000005 /* IqamahWatchUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = wOSUITests00000000000004 /* IqamahWatchUITests.swift */; };
+		iOSUITests00000000000005 /* IqamahiOSUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = iOSUITests00000000000004 /* IqamahiOSUITests.swift */; };
+		SNAP000000000000000003 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = SNAP000000000000000002 /* SnapshotTesting */; };
+		SNAP000000000000000005 /* SnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = SNAP000000000000000004 /* SnapshotTests.swift */; };
+		UITESTS0000000000000005 /* IqamahUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = UITESTS0000000000000004 /* IqamahUITests.swift */; };
 		944B0D992F635A0500EC6A01 /* TestsAdditionalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 944B0D982F635A0500EC6A01 /* TestsAdditionalTests.swift */; };
+		94594CE62FB2C01D00D1AD1C /* IqamahCore in Frameworks */ = {isa = PBXBuildFile; productRef = IC0000000000000000000002 /* IqamahCore */; };
 		94CAD5652F23CBB800E1689F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CAD5642F23CBB800E1689F /* AppDelegate.swift */; };
-		94CAD5672F23CBD100E1689F /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CAD5662F23CBD100E1689F /* SettingsManager.swift */; };
 		94CAD5692F23D23800E1689F /* splash.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 94CAD5682F23D23800E1689F /* splash.jpg */; };
 		94CAD56B2F23D3C800E1689F /* SplashScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CAD56A2F23D3C800E1689F /* SplashScreenView.swift */; };
 		AA0000000000000000000001 /* iqamahApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000011 /* iqamahApp.swift */; };
 		AA0000000000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000012 /* ContentView.swift */; };
-		AA0000000000000000000003 /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000013 /* Location.swift */; };
-		AA0000000000000000000004 /* CalculationMethod.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000014 /* CalculationMethod.swift */; };
-		AA0000000000000000000005 /* PrayerTimes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000015 /* PrayerTimes.swift */; };
-		AA0000000000000000000006 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000016 /* LocationService.swift */; };
-		AA0000000000000000000007 /* PrayerCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000017 /* PrayerCalculator.swift */; };
 		AA0000000000000000000008 /* LocationSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000018 /* LocationSetupView.swift */; };
 		AA0000000000000000000009 /* CalculationMethodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000019 /* CalculationMethodView.swift */; };
 		AA000000000000000000000A /* PrayerTimesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001A /* PrayerTimesView.swift */; };
-		AA000000000000000000000B /* cities.json in Resources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001B /* cities.json */; };
 		AA000000000000000000000C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001C /* Assets.xcassets */; };
 		AA000000000000000000000D /* QiblahView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001E /* QiblahView.swift */; };
 		AB000000000000000000BB01 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000000000000000000AA01 /* AboutView.swift */; };
-		MB000000000000000000BB02 /* MenuBarPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = MB000000000000000000BB01 /* MenuBarPopoverView.swift */; };
-		AD000000000000000000BB01 /* adhaan_1.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = AD000000000000000000AA01 /* adhaan_1.mp3 */; };
-		AD000000000000000000BB02 /* adhaan_2.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = AD000000000000000000AA02 /* adhaan_2.mp3 */; };
-		AD000000000000000000BB03 /* adhaan_3.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = AD000000000000000000AA03 /* adhaan_3.mp3 */; };
-		AD000000000000000000BB04 /* adhaan_4.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = AD000000000000000000AA04 /* adhaan_4.mp3 */; };
-		AD000000000000000000BB05 /* adhaan_5.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = AD000000000000000000AA05 /* adhaan_5.mp3 */; };
-		AD000000000000000000BB06 /* adhaan_fajr_1.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = AD000000000000000000AA06 /* adhaan_fajr_1.mp3 */; };
-		AD000000000000000000BB07 /* adhaan_fajr_2.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = AD000000000000000000AA07 /* adhaan_fajr_2.mp3 */; };
-		AD000000000000000000BB08 /* adhaan_fajr_3.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = AD000000000000000000AA08 /* adhaan_fajr_3.mp3 */; };
+		AM000000000000000000001 /* PrayerActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AM000000000000000000001R /* PrayerActivityManager.swift */; };
+		AM000000000000000000002 /* PrayerActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AM000000000000000000002R /* PrayerActivityAttributes.swift */; };
+		B5000000000000000000001 /* MoonPhaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000004 /* MoonPhaseView.swift */; };
+		B5000000000000000000002 /* HilalCriterionPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000006 /* HilalCriterionPicker.swift */; };
+		B5000000000000000000003 /* LocalSightingCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000005 /* LocalSightingCardView.swift */; };
+		B5000000000000000000004 /* HilalPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000001 /* HilalPalette.swift */; };
+		B5000000000000000000005 /* AboutHilalWatchCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000007 /* AboutHilalWatchCard.swift */; };
+		B5000000000000000000010 /* HilalWatchSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5000000000000000000020 /* HilalWatchSheet.swift */; };
 		BB000000000000000000000A /* SettingsSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB000000000000000000001A /* SettingsSheetView.swift */; };
 		BN000000000000000000BB01 /* AdhaanBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BN000000000000000000AA01 /* AdhaanBannerView.swift */; };
 		BN000000000000000000BB02 /* AdhaanBannerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BN000000000000000000AA02 /* AdhaanBannerController.swift */; };
 		CC000000000000000000000B /* StepIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC000000000000000000001B /* StepIndicatorView.swift */; };
-		EE000000000000000000100C /* PrayerCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE000000000000000000100B /* PrayerCalculatorTests.swift */; };
-		EE000000000000000000100E /* IqamahModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE000000000000000000100D /* IqamahModelTests.swift */; };
-		EE0000000000000000001010 /* IntegrationAndEdgeCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE000000000000000000100F /* IntegrationAndEdgeCaseTests.swift */; };
-		EE0000000000000000001012 /* PrayerAccuracyRegressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000000000000000001011 /* PrayerAccuracyRegressionTests.swift */; };
-		EE0000000000000000001014 /* ENH001GPSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000000000000000001013 /* ENH001GPSTests.swift */; };
-		EE0000000000000000002000 /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000013 /* Location.swift */; };
-		EE0000000000000000002001 /* CalculationMethod.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000014 /* CalculationMethod.swift */; };
-		EE0000000000000000002002 /* PrayerTimes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000015 /* PrayerTimes.swift */; };
-		EE0000000000000000002003 /* PrayerCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000017 /* PrayerCalculator.swift */; };
-		EE0000000000000000002004 /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CAD5662F23CBD100E1689F /* SettingsManager.swift */; };
-		EE0000000000000000002005 /* ModelsIqamahError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 944B0D962F63596200EC6A01 /* ModelsIqamahError.swift */; };
-		EE0000000000000000002006 /* Adhaan.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000000000000000000AA01 /* Adhaan.swift */; };
-		EE0000000000000000003001 /* cities.json in Resources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001B /* cities.json */; };
 		EE0000000000000000003002 /* Color+App.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000000000000000003003 /* Color+App.swift */; };
 		EE0000000000000000004002 /* IqamahBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000000000000000004003 /* IqamahBackground.swift */; };
 		EE0000000000000000006001 /* PrayerTimesComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000000000000000006002 /* PrayerTimesComponents.swift */; };
-		FF000000000000000000BB01 /* Adhaan.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000000000000000000AA01 /* Adhaan.swift */; };
-		FF000000000000000000BB02 /* AdhaaanPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000000000000000000AA02 /* AdhaaanPlayer.swift */; };
+		EE0000000000000000009001 /* testsIqamahTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 944B0D8E2F63478F00EC6A01 /* testsIqamahTests.swift */; };
+		HW000000000000000000011 /* HilalPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000001 /* HilalPalette.swift */; };
+		HW000000000000000000012 /* HilalCellOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000002 /* HilalCellOverlay.swift */; };
+		HW000000000000000000013 /* HilalMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000003 /* HilalMapView.swift */; };
+		HW000000000000000000014 /* MoonPhaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000004 /* MoonPhaseView.swift */; };
+		HW000000000000000000015 /* LocalSightingCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000005 /* LocalSightingCardView.swift */; };
+		HW000000000000000000016 /* HilalCriterionPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000006 /* HilalCriterionPicker.swift */; };
+		HW000000000000000000017 /* AboutHilalWatchCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000007 /* AboutHilalWatchCard.swift */; };
+		HW000000000000000000018 /* HilalWatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000008 /* HilalWatchView.swift */; };
+		HW000000000000000000019 /* HilalWatchWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000009 /* HilalWatchWindow.swift */; };
+		IC0000000000000000000005 /* IqamahCore in Frameworks */ = {isa = PBXBuildFile; productRef = IC0000000000000000000004 /* IqamahCore */; };
+		LA000000000000000000010 /* PrayerActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = LA000000000000000000010R /* PrayerActivityAttributes.swift */; };
+		LA000000000000000000011 /* PrayerLiveActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = LA000000000000000000011R /* PrayerLiveActivityView.swift */; };
+		LA000000000000000000021 /* IqamahLiveActivity.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = LA000000000000000000005 /* IqamahLiveActivity.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		MB000000000000000000BB02 /* MenuBarPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = MB000000000000000000BB01 /* MenuBarPopoverView.swift */; };
+		MW00000000000000000050 /* IqamahWidgetMac.appex in Embed Mac Widget Extension */ = {isa = PBXBuildFile; fileRef = MW00000000000000000002 /* IqamahWidgetMac.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		PI000000000000000000BB01 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = PI000000000000000000AA01 /* PrivacyInfo.xcprivacy */; };
-		TT000000000000000000BB01 /* tone_glass.aiff in Resources */ = {isa = PBXBuildFile; fileRef = TT000000000000000000AA01 /* tone_glass.aiff */; };
-		TT000000000000000000BB02 /* tone_ping.aiff in Resources */ = {isa = PBXBuildFile; fileRef = TT000000000000000000AA02 /* tone_ping.aiff */; };
-		TT000000000000000000BB03 /* tone_tink.aiff in Resources */ = {isa = PBXBuildFile; fileRef = TT000000000000000000AA03 /* tone_tink.aiff */; };
-		TT000000000000000000BB04 /* tone_hero.aiff in Resources */ = {isa = PBXBuildFile; fileRef = TT000000000000000000AA04 /* tone_hero.aiff */; };
-		TT000000000000000000BB05 /* tone_breeze.aiff in Resources */ = {isa = PBXBuildFile; fileRef = TT000000000000000000AA05 /* tone_breeze.aiff */; };
-/* End PBXBuildFile section */
+		SH00000000000000000001A /* HilalShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = SH00000000000000000000A /* HilalShareSheet.swift */; };
+		WA000000000000000000011 /* LocationSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000011R /* LocationSetupView.swift */; };
+		WA000000000000000000012 /* PrayerTimesTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000012R /* PrayerTimesTab.swift */; };
+		WA000000000000000000013 /* QiblaTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000013R /* QiblaTab.swift */; };
+		WA000000000000000000014 /* SettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000014R /* SettingsTab.swift */; };
+		WA000000000000000000015 /* WatchNotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000015R /* WatchNotificationScheduler.swift */; };
+		WA000000000000000000016 /* WatchSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000016R /* WatchSessionManager.swift */; };
+		WA000000000000000000020 /* IqamahCore in Frameworks */ = {isa = PBXBuildFile; productRef = WA000000000000000000030 /* IqamahCore */; };
+		WA000000000000000000050 /* IqamahWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000050R /* IqamahWatchApp.swift */; };
+		WA000000000000000000060 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000061 /* Assets.xcassets */; };
+		WG000000000000000000021 /* IqamahWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = WG000000000000000000011 /* IqamahWidget.swift */; };
+		WG000000000000000000031 /* IqamahCore in Frameworks */ = {isa = PBXBuildFile; productRef = WG000000000000000000032 /* IqamahCore */; };
+		WG000000000000000000041 /* IqamahWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = WG000000000000000000042 /* IqamahWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		WT000000000000000000010 /* TimelineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = WT000000000000000000010R /* TimelineTests.swift */; };
+		WT000000000000000000020 /* IqamahCore in Frameworks */ = {isa = PBXBuildFile; productRef = WT000000000000000000030 /* IqamahCore */; };
+		WT000000000000000000020A /* QiblaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = WT000000000000000000020R /* QiblaTests.swift */; };
+		WT000000000000000000041 /* PrayerEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = WW000000000000000000040R /* PrayerEntry.swift */; };
+		WT000000000000000000042 /* PrayerTimelineProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = WW000000000000000000041R /* PrayerTimelineProvider.swift */; };
+		WV000000000000000000001 /* LargeWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WV000000000000000000001R /* LargeWidgetView.swift */; };
+		WV000000000000000000002 /* CircularWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WV000000000000000000002R /* CircularWidgetView.swift */; };
+		WV000000000000000000003 /* InlineWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WV000000000000000000003R /* InlineWidgetView.swift */; };
+		WV000000000000000000004 /* macOSLargeWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WV000000000000000000004R /* macOSLargeWidgetView.swift */; };
+		WW000000000000000000020 /* IqamahCore in Frameworks */ = {isa = PBXBuildFile; productRef = WW000000000000000000030 /* IqamahCore */; };
+		WW000000000000000000032 /* IqamahWatchWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = WW000000000000000000032R /* IqamahWatchWidget.swift */; };
+		WW000000000000000000040 /* PrayerEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = WW000000000000000000040R /* PrayerEntry.swift */; };
+		WW000000000000000000041 /* PrayerTimelineProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = WW000000000000000000041R /* PrayerTimelineProvider.swift */; };
+		iOS0000000000000000000001 /* iqamahApp_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = iOS0000000000000000000011 /* iqamahApp_iOS.swift */; };
+		iOS0000000000000000000002 /* iOSRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = iOS0000000000000000000012 /* iOSRootView.swift */; };
+		iOS0000000000000000000003 /* PrayerTimesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001A /* PrayerTimesView.swift */; };
+		iOS0000000000000000000004 /* LocationSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000018 /* LocationSetupView.swift */; };
+		iOS0000000000000000000005 /* CalculationMethodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000019 /* CalculationMethodView.swift */; };
+		iOS0000000000000000000006 /* SettingsSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB000000000000000000001A /* SettingsSheetView.swift */; };
+		iOS0000000000000000000007 /* AdhaanBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BN000000000000000000AA01 /* AdhaanBannerView.swift */; };
+		iOS0000000000000000000008 /* QiblahView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001E /* QiblahView.swift */; };
+		iOS0000000000000000000009 /* StepIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC000000000000000000001B /* StepIndicatorView.swift */; };
+		iOS000000000000000000000A /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000000000000000000AA01 /* AboutView.swift */; };
+		iOS000000000000000000000B /* Color+App.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000000000000000003003 /* Color+App.swift */; };
+		iOS000000000000000000000C /* IqamahBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000000000000000004003 /* IqamahBackground.swift */; };
+		iOS000000000000000000000D /* PrayerTimesComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000000000000000006002 /* PrayerTimesComponents.swift */; };
+		iOS000000000000000000000E /* SplashScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CAD56A2F23D3C800E1689F /* SplashScreenView.swift */; };
+		iOS000000000000000000000F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001C /* Assets.xcassets */; };
+		iOS0000000000000000000010 /* IqamahCore in Frameworks */ = {isa = PBXBuildFile; productRef = iOS0000000000000000000020 /* IqamahCore */; };
+		iOS000000000000000000002F /* NotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = iOS000000000000000000001F /* NotificationScheduler.swift */; };
+
+		iOS000000000000000000002A /* splash.jpg in Resources (iOS) */ = {isa = PBXBuildFile; fileRef = 94CAD5682F23D23800E1689F /* splash.jpg */; };
+		
+		HC000000000000000000002 /* PrayerHeroCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = HC000000000000000000001 /* PrayerHeroCard.swift */; };
+		
+		HC000000000000000000004 /* PrayerRowMobileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = HC000000000000000000003 /* PrayerRowMobileView.swift */; };
+		
+		HW00000000000000000021A /* HilalMapView.swift in Sources (iOS) */ = {isa = PBXBuildFile; fileRef = HW000000000000000000003 /* HilalMapView.swift */; };
+		
+		HW00000000000000000022B /* HilalCellOverlay.swift in Sources (iOS) */ = {isa = PBXBuildFile; fileRef = HW000000000000000000002 /* HilalCellOverlay.swift */; };
+		
+		HL000000000000000000002 /* HilalWatchPreloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = HL000000000000000000001 /* HilalWatchPreloader.swift */; };
+		/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		wOSUITests00000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA0000000000000000000050 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = WA000000000000000000001;
+			remoteInfo = IqamahWatch;
+		};
+		iOSUITests00000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA0000000000000000000050 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = iOS0000000000000000000040;
+			remoteInfo = "iqamah-iOS";
+		};
+		UITESTS0000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA0000000000000000000050 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AA0000000000000000000040;
+			remoteInfo = iqamah;
+		};
+		EE0000000000000000007001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA0000000000000000000050 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AA0000000000000000000040;
+			remoteInfo = iqamah;
+		};
+		MW00000000000000000071 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA0000000000000000000050 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = MW00000000000000000001;
+			remoteInfo = IqamahWidgetMac;
+		};
+		WG000000000000000000051 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA0000000000000000000050 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = WG000000000000000000001;
+			remoteInfo = IqamahWidget;
+		};
+		WT000000000000000000008 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA0000000000000000000050 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = WW000000000000000000001;
+			remoteInfo = IqamahWatchWidget;
+		};
+		WW000000000000000000009 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA0000000000000000000050 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = WW000000000000000000001;
+			remoteInfo = IqamahWatchWidget;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		MW00000000000000000060 /* Embed Mac Widget Extension */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				MW00000000000000000050 /* IqamahWidgetMac.appex in Embed Mac Widget Extension */,
+			);
+			name = "Embed Mac Widget Extension";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		WG000000000000000000090 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				WG000000000000000000041 /* IqamahWidget.appex in Embed Foundation Extensions */,
+				LA000000000000000000021 /* IqamahLiveActivity.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		wOSUITests00000000000003 /* IqamahWatchUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IqamahWatchUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		wOSUITests00000000000004 /* IqamahWatchUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IqamahWatchUITests.swift; sourceTree = "<group>"; };
+		iOSUITests00000000000003 /* iqamahiOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iqamahiOSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		iOSUITests00000000000004 /* IqamahiOSUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IqamahiOSUITests.swift; sourceTree = "<group>"; };
+		SNAP000000000000000004 /* SnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotTests.swift; sourceTree = "<group>"; };
+		UITESTS0000000000000003 /* iqamahUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iqamahUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		UITESTS0000000000000004 /* IqamahUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IqamahUITests.swift; sourceTree = "<group>"; };
 		944B0D7D2F6340DD00EC6A01 /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
 		944B0D8C2F63423600EC6A01 /* .env.example */ = {isa = PBXFileReference; lastKnownFileType = text; path = .env.example; sourceTree = "<group>"; };
 		944B0D8D2F63424C00EC6A01 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		944B0D8E2F63478F00EC6A01 /* testsIqamahTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = testsIqamahTests.swift; sourceTree = "<group>"; };
-		944B0D962F63596200EC6A01 /* ModelsIqamahError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelsIqamahError.swift; sourceTree = "<group>"; };
 		944B0D982F635A0500EC6A01 /* TestsAdditionalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestsAdditionalTests.swift; sourceTree = "<group>"; };
 		944B0D9A2F635AC100EC6A01 /* DocsFINAL_SESSION_SUMMARY.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = DocsFINAL_SESSION_SUMMARY.md; sourceTree = "<group>"; };
 		944B0D9D2F635F8900EC6A01 /* DocsMANUAL_TEST_CHECKLIST.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = DocsMANUAL_TEST_CHECKLIST.md; sourceTree = "<group>"; };
@@ -84,27 +223,22 @@
 		944B0DD42F646FFC00EC6A01 /* testsIqamahTests_FIXED.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = testsIqamahTests_FIXED.swift; sourceTree = "<group>"; };
 		9457D7C42F2BDF2D00549E92 /* AppIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconView.swift; sourceTree = "<group>"; };
 		9457D7C52F2BDF6400549E92 /* AppIconGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconGenerator.swift; sourceTree = "<group>"; };
+		94594CE72FB2C01D00D1AD1C /* IqamahWatchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IqamahWatchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		94594CE82FB2C01D00D1AD1C /* IqamahWatchWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = IqamahWatchWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		94594CE92FB2C01D00D1AD1C /* IqamahWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IqamahWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		94CAD5642F23CBB800E1689F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		94CAD5662F23CBD100E1689F /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
 		94CAD5682F23D23800E1689F /* splash.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = splash.jpg; sourceTree = "<group>"; };
 		94CAD56A2F23D3C800E1689F /* SplashScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashScreenView.swift; sourceTree = "<group>"; };
 		AA0000000000000000000010 /* iqamah.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iqamah.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0000000000000000000011 /* iqamahApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iqamahApp.swift; sourceTree = "<group>"; };
 		AA0000000000000000000012 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		AA0000000000000000000013 /* Location.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
-		AA0000000000000000000014 /* CalculationMethod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculationMethod.swift; sourceTree = "<group>"; };
-		AA0000000000000000000015 /* PrayerTimes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerTimes.swift; sourceTree = "<group>"; };
-		AA0000000000000000000016 /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
-		AA0000000000000000000017 /* PrayerCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerCalculator.swift; sourceTree = "<group>"; };
 		AA0000000000000000000018 /* LocationSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationSetupView.swift; sourceTree = "<group>"; };
 		AA0000000000000000000019 /* CalculationMethodView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculationMethodView.swift; sourceTree = "<group>"; };
 		AA000000000000000000001A /* PrayerTimesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerTimesView.swift; sourceTree = "<group>"; };
-		AA000000000000000000001B /* cities.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = cities.json; sourceTree = "<group>"; };
 		AA000000000000000000001C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA000000000000000000001D /* iqamah.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iqamah.entitlements; sourceTree = "<group>"; };
 		AA000000000000000000001E /* QiblahView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QiblahView.swift; sourceTree = "<group>"; };
 		AB000000000000000000AA01 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
-		MB000000000000000000BB01 /* MenuBarPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarPopoverView.swift; sourceTree = "<group>"; };
 		AD000000000000000000AA01 /* adhaan_1.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = adhaan_1.mp3; sourceTree = "<group>"; };
 		AD000000000000000000AA02 /* adhaan_2.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = adhaan_2.mp3; sourceTree = "<group>"; };
 		AD000000000000000000AA03 /* adhaan_3.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = adhaan_3.mp3; sourceTree = "<group>"; };
@@ -113,38 +247,105 @@
 		AD000000000000000000AA06 /* adhaan_fajr_1.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = adhaan_fajr_1.mp3; sourceTree = "<group>"; };
 		AD000000000000000000AA07 /* adhaan_fajr_2.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = adhaan_fajr_2.mp3; sourceTree = "<group>"; };
 		AD000000000000000000AA08 /* adhaan_fajr_3.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = adhaan_fajr_3.mp3; sourceTree = "<group>"; };
+		AM000000000000000000001R /* PrayerActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerActivityManager.swift; sourceTree = "<group>"; };
+		AM000000000000000000002R /* PrayerActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerActivityAttributes.swift; sourceTree = "<group>"; };
+		B5000000000000000000020 /* HilalWatchSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HilalWatchSheet.swift; sourceTree = "<group>"; };
 		BB000000000000000000001A /* SettingsSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSheetView.swift; sourceTree = "<group>"; };
 		BN000000000000000000AA01 /* AdhaanBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdhaanBannerView.swift; sourceTree = "<group>"; };
 		BN000000000000000000AA02 /* AdhaanBannerController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdhaanBannerController.swift; sourceTree = "<group>"; };
 		CC000000000000000000001B /* StepIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepIndicatorView.swift; sourceTree = "<group>"; };
 		EE0000000000000000001001 /* iqamahTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iqamahTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		EE000000000000000000100B /* PrayerCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerCalculatorTests.swift; sourceTree = "<group>"; };
-		EE000000000000000000100D /* IqamahModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IqamahModelTests.swift; sourceTree = "<group>"; };
-		EE000000000000000000100F /* IntegrationAndEdgeCaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationAndEdgeCaseTests.swift; sourceTree = "<group>"; };
-		EE0000000000000000001011 /* PrayerAccuracyRegressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerAccuracyRegressionTests.swift; sourceTree = "<group>"; };
-		EE0000000000000000001013 /* ENH001GPSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ENH001GPSTests.swift; sourceTree = "<group>"; };
 		EE0000000000000000003003 /* Color+App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+App.swift"; sourceTree = "<group>"; };
 		EE0000000000000000004003 /* IqamahBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IqamahBackground.swift; sourceTree = "<group>"; };
 		EE0000000000000000006002 /* PrayerTimesComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerTimesComponents.swift; sourceTree = "<group>"; };
-		FF000000000000000000AA01 /* Adhaan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Adhaan.swift; sourceTree = "<group>"; };
-		FF000000000000000000AA02 /* AdhaaanPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdhaaanPlayer.swift; sourceTree = "<group>"; };
+		HW000000000000000000001 /* HilalPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HilalPalette.swift; sourceTree = "<group>"; };
+		HW000000000000000000002 /* HilalCellOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HilalCellOverlay.swift; sourceTree = "<group>"; };
+		HW000000000000000000003 /* HilalMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HilalMapView.swift; sourceTree = "<group>"; };
+		HW000000000000000000004 /* MoonPhaseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoonPhaseView.swift; sourceTree = "<group>"; };
+		HW000000000000000000005 /* LocalSightingCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalSightingCardView.swift; sourceTree = "<group>"; };
+		HW000000000000000000006 /* HilalCriterionPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HilalCriterionPicker.swift; sourceTree = "<group>"; };
+		HW000000000000000000007 /* AboutHilalWatchCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutHilalWatchCard.swift; sourceTree = "<group>"; };
+		HW000000000000000000008 /* HilalWatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HilalWatchView.swift; sourceTree = "<group>"; };
+		HW000000000000000000009 /* HilalWatchWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HilalWatchWindow.swift; sourceTree = "<group>"; };
+		LA000000000000000000005 /* IqamahLiveActivity.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.extensionkit-extension"; path = IqamahLiveActivity.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		LA000000000000000000010R /* PrayerActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerActivityAttributes.swift; sourceTree = "<group>"; };
+		LA000000000000000000011R /* PrayerLiveActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerLiveActivityView.swift; sourceTree = "<group>"; };
+		MB000000000000000000BB01 /* MenuBarPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarPopoverView.swift; sourceTree = "<group>"; };
+		MW00000000000000000002 /* IqamahWidgetMac.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = IqamahWidgetMac.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		MW00000000000000000003 /* InfoMac.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = InfoMac.plist; sourceTree = "<group>"; };
 		PI000000000000000000AA01 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		SH00000000000000000000A /* HilalShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HilalShareSheet.swift; sourceTree = "<group>"; };
 		TT000000000000000000AA01 /* tone_glass.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; path = tone_glass.aiff; sourceTree = "<group>"; };
 		TT000000000000000000AA02 /* tone_ping.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; path = tone_ping.aiff; sourceTree = "<group>"; };
 		TT000000000000000000AA03 /* tone_tink.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; path = tone_tink.aiff; sourceTree = "<group>"; };
 		TT000000000000000000AA04 /* tone_hero.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; path = tone_hero.aiff; sourceTree = "<group>"; };
 		TT000000000000000000AA05 /* tone_breeze.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; path = tone_breeze.aiff; sourceTree = "<group>"; };
-/* End PBXFileReference section */
+		WA000000000000000000011R /* LocationSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationSetupView.swift; sourceTree = "<group>"; };
+		WA000000000000000000012R /* PrayerTimesTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerTimesTab.swift; sourceTree = "<group>"; };
+		WA000000000000000000013R /* QiblaTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QiblaTab.swift; sourceTree = "<group>"; };
+		WA000000000000000000014R /* SettingsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsTab.swift; sourceTree = "<group>"; };
+		WA000000000000000000015R /* WatchNotificationScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchNotificationScheduler.swift; sourceTree = "<group>"; };
+		WA000000000000000000016R /* WatchSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSessionManager.swift; sourceTree = "<group>"; };
+		WA000000000000000000050R /* IqamahWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IqamahWatchApp.swift; sourceTree = "<group>"; };
+		WA000000000000000000061 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		WG000000000000000000011 /* IqamahWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IqamahWidget.swift; sourceTree = "<group>"; };
+		WG000000000000000000012 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		WG000000000000000000013 /* IqamahWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = IqamahWidget.entitlements; sourceTree = "<group>"; };
+		WG000000000000000000042 /* IqamahWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = IqamahWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		WT000000000000000000010R /* TimelineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineTests.swift; sourceTree = "<group>"; };
+		WT000000000000000000020R /* QiblaTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QiblaTests.swift; sourceTree = "<group>"; };
+		WV000000000000000000001R /* LargeWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LargeWidgetView.swift; sourceTree = "<group>"; };
+		WV000000000000000000002R /* CircularWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircularWidgetView.swift; sourceTree = "<group>"; };
+		WV000000000000000000003R /* InlineWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InlineWidgetView.swift; sourceTree = "<group>"; };
+		WV000000000000000000004R /* macOSLargeWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = macOSLargeWidgetView.swift; sourceTree = "<group>"; };
+		WW000000000000000000032R /* IqamahWatchWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IqamahWatchWidget.swift; sourceTree = "<group>"; };
+		WW000000000000000000040R /* PrayerEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerEntry.swift; sourceTree = "<group>"; };
+		WW000000000000000000041R /* PrayerTimelineProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerTimelineProvider.swift; sourceTree = "<group>"; };
+		iOS0000000000000000000011 /* iqamahApp_iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iqamahApp_iOS.swift; sourceTree = "<group>"; };
+		iOS0000000000000000000012 /* iOSRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSRootView.swift; sourceTree = "<group>"; };
+		iOS0000000000000000000013 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		iOS0000000000000000000014 /* iqamah-iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "iqamah-iOS.entitlements"; sourceTree = "<group>"; };
+		iOS0000000000000000000015 /* iqamah-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "iqamah-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		iOS000000000000000000001F /* NotificationScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationScheduler.swift; sourceTree = "<group>"; };
+
+		HC000000000000000000001 /* PrayerHeroCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerHeroCard.swift; sourceTree = "<group>"; };
+		
+		HC000000000000000000003 /* PrayerRowMobileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerRowMobileView.swift; sourceTree = "<group>"; };
+		
+		HL000000000000000000001 /* HilalWatchPreloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HilalWatchPreloader.swift; sourceTree = "<group>"; };
+		/* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		944B0DB92F63689C00EC6A01 /* docs */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = docs; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		wOSUITests00000000000007 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		iOSUITests00000000000007 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		UITESTS0000000000000007 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AA0000000000000000000020 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				94594CE62FB2C01D00D1AD1C /* IqamahCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -152,6 +353,55 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				IC0000000000000000000005 /* IqamahCore in Frameworks */,
+				SNAP000000000000000003 /* SnapshotTesting in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		LA000000000000000000004 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		WA000000000000000000004 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				WA000000000000000000020 /* IqamahCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		WG000000000000000000062 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				WG000000000000000000031 /* IqamahCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		WT000000000000000000004F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				WT000000000000000000020 /* IqamahCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		WW000000000000000000004 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				WW000000000000000000020 /* IqamahCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		iOS0000000000000000000041 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				iOS0000000000000000000010 /* IqamahCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -163,8 +413,16 @@
 			children = (
 				944B0D7D2F6340DD00EC6A01 /* AGENTS.md */,
 				AA0000000000000000000031 /* iqamah */,
+				WG000000000000000000070 /* IqamahWidget */,
+				LA000000000000000000050 /* IqamahLiveActivity */,
+				WA000000000000000000070 /* IqamahWatch */,
+				WW000000000000000000070 /* IqamahWatchWidget */,
+				WT000000000000000000070 /* IqamahWatchTests */,
+				UITESTS0000000000000009 /* iqamahUITests */,
+				iOSUITests00000000000009 /* iqamahiOSUITests */,
+				wOSUITests00000000000009 /* IqamahWatchUITests */,
+				SNAP000000000000000006 /* Tests */,
 				AA0000000000000000000032 /* Products */,
-				EE000000000000000000100A /* Tests */,
 				9457D7C42F2BDF2D00549E92 /* AppIconView.swift */,
 				9457D7C52F2BDF6400549E92 /* AppIconGenerator.swift */,
 				944B0D8C2F63423600EC6A01 /* .env.example */,
@@ -175,17 +433,50 @@
 			);
 			sourceTree = "<group>";
 		};
+		wOSUITests00000000000009 /* IqamahWatchUITests */ = {
+			isa = PBXGroup;
+			children = (
+				wOSUITests00000000000004 /* IqamahWatchUITests.swift */,
+			);
+			path = IqamahWatchUITests;
+			sourceTree = "<group>";
+		};
+		iOSUITests00000000000009 /* iqamahiOSUITests */ = {
+			isa = PBXGroup;
+			children = (
+				iOSUITests00000000000004 /* IqamahiOSUITests.swift */,
+			);
+			path = iqamahiOSUITests;
+			sourceTree = "<group>";
+		};
+		SNAP000000000000000006 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				SNAP000000000000000004 /* SnapshotTests.swift */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		UITESTS0000000000000009 /* iqamahUITests */ = {
+			isa = PBXGroup;
+			children = (
+				UITESTS0000000000000004 /* IqamahUITests.swift */,
+			);
+			path = iqamahUITests;
+			sourceTree = "<group>";
+		};
 		AA0000000000000000000031 /* iqamah */ = {
 			isa = PBXGroup;
 			children = (
 				94CAD5642F23CBB800E1689F /* AppDelegate.swift */,
 				AA0000000000000000000011 /* iqamahApp.swift */,
 				AA0000000000000000000012 /* ContentView.swift */,
-				AA0000000000000000000033 /* Models */,
-				AA0000000000000000000034 /* Services */,
+				HW000000000000000000009 /* HilalWatchWindow.swift */,
 				EE0000000000000000005001 /* Extensions */,
+				AA0000000000000000000034 /* Services */,
 				AA0000000000000000000035 /* Views */,
 				AA0000000000000000000036 /* Resources */,
+				iOS0000000000000000000030 /* iOS */,
 				AA000000000000000000001C /* Assets.xcassets */,
 				AA000000000000000000001D /* iqamah.entitlements */,
 				944B0D9D2F635F8900EC6A01 /* DocsMANUAL_TEST_CHECKLIST.md */,
@@ -204,30 +495,24 @@
 			children = (
 				AA0000000000000000000010 /* iqamah.app */,
 				EE0000000000000000001001 /* iqamahTests.xctest */,
+				UITESTS0000000000000003 /* iqamahUITests.xctest */,
+				iOSUITests00000000000003 /* iqamahiOSUITests.xctest */,
+				wOSUITests00000000000003 /* IqamahWatchUITests.xctest */,
+				iOS0000000000000000000015 /* iqamah-iOS.app */,
+				LA000000000000000000005 /* IqamahLiveActivity.appex */,
+				WG000000000000000000042 /* IqamahWidget.appex */,
+				MW00000000000000000002 /* IqamahWidgetMac.appex */,
+				94594CE72FB2C01D00D1AD1C /* IqamahWatchTests.xctest */,
+				94594CE82FB2C01D00D1AD1C /* IqamahWatchWidget.appex */,
+				94594CE92FB2C01D00D1AD1C /* IqamahWatch.app */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		AA0000000000000000000033 /* Models */ = {
-			isa = PBXGroup;
-			children = (
-				AA0000000000000000000013 /* Location.swift */,
-				FF000000000000000000AA01 /* Adhaan.swift */,
-				AA0000000000000000000014 /* CalculationMethod.swift */,
-				AA0000000000000000000015 /* PrayerTimes.swift */,
-			);
-			path = Models;
 			sourceTree = "<group>";
 		};
 		AA0000000000000000000034 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				94CAD5662F23CBD100E1689F /* SettingsManager.swift */,
-				FF000000000000000000AA02 /* AdhaaanPlayer.swift */,
 				BN000000000000000000AA02 /* AdhaanBannerController.swift */,
-				AA0000000000000000000016 /* LocationService.swift */,
-				AA0000000000000000000017 /* PrayerCalculator.swift */,
-				944B0D962F63596200EC6A01 /* ModelsIqamahError.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -247,6 +532,7 @@
 				BB000000000000000000001A /* SettingsSheetView.swift */,
 				EE0000000000000000004003 /* IqamahBackground.swift */,
 				EE0000000000000000006002 /* PrayerTimesComponents.swift */,
+				HW000000000000000000020 /* HilalWatch */,
 				944B0D982F635A0500EC6A01 /* TestsAdditionalTests.swift */,
 				944B0D9A2F635AC100EC6A01 /* DocsFINAL_SESSION_SUMMARY.md */,
 			);
@@ -271,21 +557,8 @@
 				AD000000000000000000AA06 /* adhaan_fajr_1.mp3 */,
 				AD000000000000000000AA07 /* adhaan_fajr_2.mp3 */,
 				AD000000000000000000AA08 /* adhaan_fajr_3.mp3 */,
-				AA000000000000000000001B /* cities.json */,
 			);
 			path = Resources;
-			sourceTree = "<group>";
-		};
-		EE000000000000000000100A /* Tests */ = {
-			isa = PBXGroup;
-			children = (
-				EE000000000000000000100B /* PrayerCalculatorTests.swift */,
-				EE000000000000000000100D /* IqamahModelTests.swift */,
-				EE000000000000000000100F /* IntegrationAndEdgeCaseTests.swift */,
-				EE0000000000000000001011 /* PrayerAccuracyRegressionTests.swift */,
-				EE0000000000000000001013 /* ENH001GPSTests.swift */,
-			);
-			path = Tests;
 			sourceTree = "<group>";
 		};
 		EE0000000000000000005001 /* Extensions */ = {
@@ -296,9 +569,155 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
+		HW000000000000000000020 /* HilalWatch */ = {
+			isa = PBXGroup;
+			children = (
+				HW000000000000000000001 /* HilalPalette.swift */,
+				HW000000000000000000002 /* HilalCellOverlay.swift */,
+				HW000000000000000000003 /* HilalMapView.swift */,
+				HW000000000000000000004 /* MoonPhaseView.swift */,
+				HW000000000000000000005 /* LocalSightingCardView.swift */,
+				HW000000000000000000006 /* HilalCriterionPicker.swift */,
+				HW000000000000000000007 /* AboutHilalWatchCard.swift */,
+				HW000000000000000000008 /* HilalWatchView.swift */,
+				SH00000000000000000000A /* HilalShareSheet.swift */,
+			);
+			path = HilalWatch;
+			sourceTree = "<group>";
+		};
+		LA000000000000000000050 /* IqamahLiveActivity */ = {
+			isa = PBXGroup;
+			children = (
+				LA000000000000000000010R /* PrayerActivityAttributes.swift */,
+				LA000000000000000000011R /* PrayerLiveActivityView.swift */,
+			);
+			path = IqamahLiveActivity;
+			sourceTree = "<group>";
+		};
+		WA000000000000000000070 /* IqamahWatch */ = {
+			isa = PBXGroup;
+			children = (
+				WA000000000000000000061 /* Assets.xcassets */,
+				WA000000000000000000050R /* IqamahWatchApp.swift */,
+				WA000000000000000000011R /* LocationSetupView.swift */,
+				WA000000000000000000012R /* PrayerTimesTab.swift */,
+				WA000000000000000000013R /* QiblaTab.swift */,
+				WA000000000000000000014R /* SettingsTab.swift */,
+				WA000000000000000000015R /* WatchNotificationScheduler.swift */,
+				WA000000000000000000016R /* WatchSessionManager.swift */,
+			);
+			path = IqamahWatch;
+			sourceTree = "<group>";
+		};
+		WG000000000000000000070 /* IqamahWidget */ = {
+			isa = PBXGroup;
+			children = (
+				WG000000000000000000011 /* IqamahWidget.swift */,
+				WV000000000000000000001R /* LargeWidgetView.swift */,
+				WV000000000000000000002R /* CircularWidgetView.swift */,
+				WV000000000000000000003R /* InlineWidgetView.swift */,
+				WV000000000000000000004R /* macOSLargeWidgetView.swift */,
+				MW00000000000000000003 /* InfoMac.plist */,
+				WG000000000000000000012 /* Info.plist */,
+				WG000000000000000000013 /* IqamahWidget.entitlements */,
+			);
+			path = IqamahWidget;
+			sourceTree = "<group>";
+		};
+		WT000000000000000000070 /* IqamahWatchTests */ = {
+			isa = PBXGroup;
+			children = (
+				WT000000000000000000010R /* TimelineTests.swift */,
+				WT000000000000000000020R /* QiblaTests.swift */,
+			);
+			path = IqamahWatchTests;
+			sourceTree = "<group>";
+		};
+		WW000000000000000000070 /* IqamahWatchWidget */ = {
+			isa = PBXGroup;
+			children = (
+				WW000000000000000000040R /* PrayerEntry.swift */,
+				WW000000000000000000041R /* PrayerTimelineProvider.swift */,
+				WW000000000000000000032R /* IqamahWatchWidget.swift */,
+			);
+			path = IqamahWatchWidget;
+			sourceTree = "<group>";
+		};
+		iOS0000000000000000000030 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				iOS0000000000000000000011 /* iqamahApp_iOS.swift */,
+				iOS0000000000000000000012 /* iOSRootView.swift */,
+				iOS000000000000000000001F /* NotificationScheduler.swift */,
+				B5000000000000000000020 /* HilalWatchSheet.swift */,
+				AM000000000000000000001R /* PrayerActivityManager.swift */,
+				AM000000000000000000002R /* PrayerActivityAttributes.swift */,
+				HC000000000000000000001 /* PrayerHeroCard.swift */,
+				HL000000000000000000001 /* HilalWatchPreloader.swift */,
+				HC000000000000000000003 /* PrayerRowMobileView.swift */,
+				iOS0000000000000000000013 /* Info.plist */,
+				iOS0000000000000000000014 /* iqamah-iOS.entitlements */,
+			);
+			path = iOS;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		wOSUITests0000000000000A /* IqamahWatchUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = wOSUITests0000000000000D /* Build configuration list for PBXNativeTarget "IqamahWatchUITests" */;
+			buildPhases = (
+				wOSUITests00000000000006 /* Sources */,
+				wOSUITests00000000000007 /* Frameworks */,
+				wOSUITests00000000000008 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				wOSUITests00000000000002 /* PBXTargetDependency */,
+			);
+			name = IqamahWatchUITests;
+			productName = IqamahWatchUITests;
+			productReference = wOSUITests00000000000003 /* IqamahWatchUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		iOSUITests0000000000000A /* iqamahiOSUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = iOSUITests0000000000000D /* Build configuration list for PBXNativeTarget "iqamahiOSUITests" */;
+			buildPhases = (
+				iOSUITests00000000000006 /* Sources */,
+				iOSUITests00000000000007 /* Frameworks */,
+				iOSUITests00000000000008 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				iOSUITests00000000000002 /* PBXTargetDependency */,
+			);
+			name = iqamahiOSUITests;
+			productName = iqamahiOSUITests;
+			productReference = iOSUITests00000000000003 /* iqamahiOSUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		UITESTS000000000000000A /* iqamahUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = UITESTS000000000000000D /* Build configuration list for PBXNativeTarget "iqamahUITests" */;
+			buildPhases = (
+				UITESTS0000000000000006 /* Sources */,
+				UITESTS0000000000000007 /* Frameworks */,
+				UITESTS0000000000000008 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				UITESTS0000000000000002 /* PBXTargetDependency */,
+			);
+			name = iqamahUITests;
+			productName = iqamahUITests;
+			productReference = UITESTS0000000000000003 /* iqamahUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		AA0000000000000000000040 /* iqamah */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = AA0000000000000000000060 /* Build configuration list for PBXNativeTarget "iqamah" */;
@@ -306,12 +725,17 @@
 				AA0000000000000000000041 /* Sources */,
 				AA0000000000000000000020 /* Frameworks */,
 				AA0000000000000000000042 /* Resources */,
+				MW00000000000000000060 /* Embed Mac Widget Extension */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				MW00000000000000000070 /* PBXTargetDependency */,
 			);
 			name = iqamah;
+			packageProductDependencies = (
+				IC0000000000000000000002 /* IqamahCore */,
+			);
 			productName = iqamah;
 			productReference = AA0000000000000000000010 /* iqamah.app */;
 			productType = "com.apple.product-type.application";
@@ -327,11 +751,153 @@
 			buildRules = (
 			);
 			dependencies = (
+				EE0000000000000000007002 /* PBXTargetDependency */,
 			);
 			name = iqamahTests;
+			packageProductDependencies = (
+				IC0000000000000000000004 /* IqamahCore */,
+				SNAP000000000000000002 /* SnapshotTesting */,
+			);
 			productName = iqamahTests;
 			productReference = EE0000000000000000001001 /* iqamahTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		LA000000000000000000001 /* IqamahLiveActivity */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = LA000000000000000000008 /* Build configuration list for PBXNativeTarget "IqamahLiveActivity" */;
+			buildPhases = (
+				LA000000000000000000002 /* Sources */,
+				LA000000000000000000004 /* Frameworks */,
+				LA000000000000000000003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = IqamahLiveActivity;
+			productName = IqamahLiveActivity;
+			productReference = LA000000000000000000005 /* IqamahLiveActivity.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		MW00000000000000000001 /* IqamahWidgetMac */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = MW00000000000000000022 /* Build configuration list for PBXNativeTarget "IqamahWidgetMac" */;
+			buildPhases = (
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = IqamahWidgetMac;
+			packageProductDependencies = (
+				MW00000000000000000030 /* IqamahCore */,
+			);
+			productName = IqamahWidgetMac;
+			productReference = MW00000000000000000002 /* IqamahWidgetMac.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		WA000000000000000000001 /* IqamahWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = WA000000000000000000009 /* Build configuration list for PBXNativeTarget "IqamahWatch" */;
+			buildPhases = (
+				WA000000000000000000002 /* Sources */,
+				WA000000000000000000004 /* Frameworks */,
+				WA000000000000000000003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				WW000000000000000000010 /* PBXTargetDependency */,
+			);
+			name = IqamahWatch;
+			packageProductDependencies = (
+				WA000000000000000000030 /* IqamahCore */,
+			);
+			productName = IqamahWatch;
+			productReference = 94594CE92FB2C01D00D1AD1C /* IqamahWatch.app */;
+			productType = "com.apple.product-type.application";
+		};
+		WG000000000000000000001 /* IqamahWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = WG000000000000000000080 /* Build configuration list for PBXNativeTarget "IqamahWidget" */;
+			buildPhases = (
+				WG000000000000000000060 /* Sources */,
+				WG000000000000000000062 /* Frameworks */,
+				WG000000000000000000061 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = IqamahWidget;
+			packageProductDependencies = (
+				WG000000000000000000032 /* IqamahCore */,
+			);
+			productName = IqamahWidget;
+			productReference = WG000000000000000000042 /* IqamahWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		WT000000000000000000001 /* IqamahWatchTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = WT000000000000000000005 /* Build configuration list for PBXNativeTarget "IqamahWatchTests" */;
+			buildPhases = (
+				WT000000000000000000002 /* Sources */,
+				WT000000000000000000004F /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				WT000000000000000000009 /* PBXTargetDependency */,
+			);
+			name = IqamahWatchTests;
+			packageProductDependencies = (
+				WT000000000000000000030 /* IqamahCore */,
+			);
+			productName = IqamahWatchTests;
+			productReference = 94594CE72FB2C01D00D1AD1C /* IqamahWatchTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		WW000000000000000000001 /* IqamahWatchWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = WW000000000000000000008 /* Build configuration list for PBXNativeTarget "IqamahWatchWidget" */;
+			buildPhases = (
+				WW000000000000000000002 /* Sources */,
+				WW000000000000000000004 /* Frameworks */,
+				WW000000000000000000003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = IqamahWatchWidget;
+			packageProductDependencies = (
+				WW000000000000000000030 /* IqamahCore */,
+			);
+			productName = IqamahWatchWidget;
+			productReference = 94594CE82FB2C01D00D1AD1C /* IqamahWatchWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		iOS0000000000000000000040 /* iqamah-iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = iOS0000000000000000000060 /* Build configuration list for PBXNativeTarget "iqamah-iOS" */;
+			buildPhases = (
+				iOS0000000000000000000042 /* Sources */,
+				iOS0000000000000000000041 /* Frameworks */,
+				iOS0000000000000000000043 /* Resources */,
+				WG000000000000000000090 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				WG000000000000000000052 /* PBXTargetDependency */,
+			);
+			name = "iqamah-iOS";
+			packageProductDependencies = (
+				iOS0000000000000000000020 /* IqamahCore */,
+			);
+			productName = "iqamah-iOS";
+			productReference = iOS0000000000000000000015 /* iqamah-iOS.app */;
+			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
@@ -346,6 +912,13 @@
 					AA0000000000000000000040 = {
 						CreatedOnToolsVersion = 15.0;
 					};
+					EE0000000000000000001000 = {
+						CreatedOnToolsVersion = 15.0;
+						TestTargetID = AA0000000000000000000040;
+					};
+					iOS0000000000000000000040 = {
+						CreatedOnToolsVersion = 15.0;
+					};
 				};
 			};
 			buildConfigurationList = AA0000000000000000000051 /* Build configuration list for PBXProject "iqamah" */;
@@ -357,37 +930,58 @@
 				Base,
 			);
 			mainGroup = AA0000000000000000000030;
+			packageReferences = (
+				IC0000000000000000000001 /* XCLocalSwiftPackageReference "Packages/IqamahCore" */,
+				SNAP000000000000000001 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
+			);
 			productRefGroup = AA0000000000000000000032 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+				LA000000000000000000001 /* IqamahLiveActivity */,
+				WT000000000000000000001 /* IqamahWatchTests */,
+				WW000000000000000000001 /* IqamahWatchWidget */,
+				WA000000000000000000001 /* IqamahWatch */,
 				AA0000000000000000000040 /* iqamah */,
 				EE0000000000000000001000 /* iqamahTests */,
+				UITESTS000000000000000A /* iqamahUITests */,
+				iOSUITests0000000000000A /* iqamahiOSUITests */,
+				wOSUITests0000000000000A /* IqamahWatchUITests */,
+				iOS0000000000000000000040 /* iqamah-iOS */,
+				WG000000000000000000001 /* IqamahWidget */,
+				MW00000000000000000001 /* IqamahWidgetMac */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		wOSUITests00000000000008 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		iOSUITests00000000000008 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		UITESTS0000000000000008 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AA0000000000000000000042 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				94CAD5692F23D23800E1689F /* splash.jpg in Resources */,
-				TT000000000000000000BB01 /* tone_glass.aiff in Resources */,
-				TT000000000000000000BB02 /* tone_ping.aiff in Resources */,
-				TT000000000000000000BB03 /* tone_tink.aiff in Resources */,
-				TT000000000000000000BB04 /* tone_hero.aiff in Resources */,
-				TT000000000000000000BB05 /* tone_breeze.aiff in Resources */,
-				AD000000000000000000BB01 /* adhaan_1.mp3 in Resources */,
-				AD000000000000000000BB02 /* adhaan_2.mp3 in Resources */,
-				AD000000000000000000BB03 /* adhaan_3.mp3 in Resources */,
-				AD000000000000000000BB04 /* adhaan_4.mp3 in Resources */,
-				AD000000000000000000BB05 /* adhaan_5.mp3 in Resources */,
-				AD000000000000000000BB06 /* adhaan_fajr_1.mp3 in Resources */,
-				AD000000000000000000BB07 /* adhaan_fajr_2.mp3 in Resources */,
-				AD000000000000000000BB08 /* adhaan_fajr_3.mp3 in Resources */,
 				PI000000000000000000BB01 /* PrivacyInfo.xcprivacy in Resources */,
-				AA000000000000000000000B /* cities.json in Resources */,
 				AA000000000000000000000C /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -396,32 +990,84 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EE0000000000000000003001 /* cities.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		LA000000000000000000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		WA000000000000000000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				WA000000000000000000060 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		WG000000000000000000061 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		WW000000000000000000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		iOS0000000000000000000043 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				iOS000000000000000000000F /* Assets.xcassets in Resources */,
+				iOS000000000000000000002A /* splash.jpg in Resources (iOS) */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		wOSUITests00000000000006 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				wOSUITests00000000000005 /* IqamahWatchUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		iOSUITests00000000000006 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				iOSUITests00000000000005 /* IqamahiOSUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		UITESTS0000000000000006 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				UITESTS0000000000000005 /* IqamahUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AA0000000000000000000041 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				94CAD5652F23CBB800E1689F /* AppDelegate.swift in Sources */,
-				944B0D972F63596200EC6A01 /* ModelsIqamahError.swift in Sources */,
 				94CAD56B2F23D3C800E1689F /* SplashScreenView.swift in Sources */,
 				AA0000000000000000000001 /* iqamahApp.swift in Sources */,
 				944B0D992F635A0500EC6A01 /* TestsAdditionalTests.swift in Sources */,
 				AA0000000000000000000002 /* ContentView.swift in Sources */,
-				AA0000000000000000000003 /* Location.swift in Sources */,
-				AA0000000000000000000004 /* CalculationMethod.swift in Sources */,
-				AA0000000000000000000005 /* PrayerTimes.swift in Sources */,
-				AA0000000000000000000006 /* LocationService.swift in Sources */,
-				AA0000000000000000000007 /* PrayerCalculator.swift in Sources */,
-				94CAD5672F23CBD100E1689F /* SettingsManager.swift in Sources */,
 				EE0000000000000000003002 /* Color+App.swift in Sources */,
-				FF000000000000000000BB01 /* Adhaan.swift in Sources */,
-				FF000000000000000000BB02 /* AdhaaanPlayer.swift in Sources */,
 				BN000000000000000000BB01 /* AdhaanBannerView.swift in Sources */,
 				AB000000000000000000BB01 /* AboutView.swift in Sources */,
 				MB000000000000000000BB02 /* MenuBarPopoverView.swift in Sources */,
@@ -434,6 +1080,16 @@
 				BB000000000000000000000A /* SettingsSheetView.swift in Sources */,
 				EE0000000000000000004002 /* IqamahBackground.swift in Sources */,
 				EE0000000000000000006001 /* PrayerTimesComponents.swift in Sources */,
+				HW000000000000000000011 /* HilalPalette.swift in Sources */,
+				HW000000000000000000012 /* HilalCellOverlay.swift in Sources */,
+				HW000000000000000000013 /* HilalMapView.swift in Sources */,
+				HW000000000000000000014 /* MoonPhaseView.swift in Sources */,
+				HW000000000000000000015 /* LocalSightingCardView.swift in Sources */,
+				HW000000000000000000016 /* HilalCriterionPicker.swift in Sources */,
+				HW000000000000000000017 /* AboutHilalWatchCard.swift in Sources */,
+				HW000000000000000000018 /* HilalWatchView.swift in Sources */,
+				HW000000000000000000019 /* HilalWatchWindow.swift in Sources */,
+				SH00000000000000000001A /* HilalShareSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -441,24 +1097,234 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EE0000000000000000002000 /* Location.swift in Sources */,
-				EE0000000000000000002001 /* CalculationMethod.swift in Sources */,
-				EE0000000000000000002002 /* PrayerTimes.swift in Sources */,
-				EE0000000000000000002003 /* PrayerCalculator.swift in Sources */,
-				EE0000000000000000002004 /* SettingsManager.swift in Sources */,
-				EE0000000000000000002005 /* ModelsIqamahError.swift in Sources */,
-				EE0000000000000000002006 /* Adhaan.swift in Sources */,
-				EE000000000000000000100C /* PrayerCalculatorTests.swift in Sources */,
-				EE000000000000000000100E /* IqamahModelTests.swift in Sources */,
-				EE0000000000000000001010 /* IntegrationAndEdgeCaseTests.swift in Sources */,
-				EE0000000000000000001012 /* PrayerAccuracyRegressionTests.swift in Sources */,
-				EE0000000000000000001014 /* ENH001GPSTests.swift in Sources */,
+				EE0000000000000000009001 /* testsIqamahTests.swift in Sources */,
+				SNAP000000000000000005 /* SnapshotTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		LA000000000000000000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				LA000000000000000000010 /* PrayerActivityAttributes.swift in Sources */,
+				LA000000000000000000011 /* PrayerLiveActivityView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		WA000000000000000000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				WA000000000000000000050 /* IqamahWatchApp.swift in Sources */,
+				WA000000000000000000011 /* LocationSetupView.swift in Sources */,
+				WA000000000000000000012 /* PrayerTimesTab.swift in Sources */,
+				WA000000000000000000013 /* QiblaTab.swift in Sources */,
+				WA000000000000000000014 /* SettingsTab.swift in Sources */,
+				WA000000000000000000015 /* WatchNotificationScheduler.swift in Sources */,
+				WA000000000000000000016 /* WatchSessionManager.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		WG000000000000000000060 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				WG000000000000000000021 /* IqamahWidget.swift in Sources */,
+				WV000000000000000000001 /* LargeWidgetView.swift in Sources */,
+				WV000000000000000000002 /* CircularWidgetView.swift in Sources */,
+				WV000000000000000000003 /* InlineWidgetView.swift in Sources */,
+				WV000000000000000000004 /* macOSLargeWidgetView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		WT000000000000000000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				WT000000000000000000010 /* TimelineTests.swift in Sources */,
+				WT000000000000000000041 /* PrayerEntry.swift in Sources */,
+				WT000000000000000000042 /* PrayerTimelineProvider.swift in Sources */,
+				WT000000000000000000020A /* QiblaTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		WW000000000000000000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				WW000000000000000000040 /* PrayerEntry.swift in Sources */,
+				WW000000000000000000041 /* PrayerTimelineProvider.swift in Sources */,
+				WW000000000000000000032 /* IqamahWatchWidget.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		iOS0000000000000000000042 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				iOS0000000000000000000001 /* iqamahApp_iOS.swift in Sources */,
+				AM000000000000000000001 /* PrayerActivityManager.swift in Sources */,
+				AM000000000000000000002 /* PrayerActivityAttributes.swift in Sources */,
+				HC000000000000000000002 /* PrayerHeroCard.swift in Sources */,
+				HC000000000000000000004 /* PrayerRowMobileView.swift in Sources */,
+				iOS0000000000000000000002 /* iOSRootView.swift in Sources */,
+				iOS0000000000000000000003 /* PrayerTimesView.swift in Sources */,
+				iOS0000000000000000000004 /* LocationSetupView.swift in Sources */,
+				iOS0000000000000000000005 /* CalculationMethodView.swift in Sources */,
+				iOS0000000000000000000006 /* SettingsSheetView.swift in Sources */,
+				iOS0000000000000000000007 /* AdhaanBannerView.swift in Sources */,
+				iOS0000000000000000000008 /* QiblahView.swift in Sources */,
+				iOS0000000000000000000009 /* StepIndicatorView.swift in Sources */,
+				iOS000000000000000000000A /* AboutView.swift in Sources */,
+				iOS000000000000000000000B /* Color+App.swift in Sources */,
+				iOS000000000000000000000C /* IqamahBackground.swift in Sources */,
+				iOS000000000000000000000D /* PrayerTimesComponents.swift in Sources */,
+				iOS000000000000000000000E /* SplashScreenView.swift in Sources */,
+				iOS000000000000000000002F /* NotificationScheduler.swift in Sources */,
+				B5000000000000000000001 /* MoonPhaseView.swift in Sources */,
+				B5000000000000000000002 /* HilalCriterionPicker.swift in Sources */,
+				B5000000000000000000003 /* LocalSightingCardView.swift in Sources */,
+				B5000000000000000000004 /* HilalPalette.swift in Sources */,
+				B5000000000000000000005 /* AboutHilalWatchCard.swift in Sources */,
+				B5000000000000000000010 /* HilalWatchSheet.swift in Sources */,
+				HL000000000000000000002 /* HilalWatchPreloader.swift in Sources */,
+				HW00000000000000000021A /* HilalMapView.swift in Sources (iOS) */,
+				HW00000000000000000022B /* HilalCellOverlay.swift in Sources (iOS) */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		wOSUITests00000000000002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = WA000000000000000000001 /* IqamahWatch */;
+			targetProxy = wOSUITests00000000000001 /* PBXContainerItemProxy */;
+		};
+		iOSUITests00000000000002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = iOS0000000000000000000040 /* iqamah-iOS */;
+			targetProxy = iOSUITests00000000000001 /* PBXContainerItemProxy */;
+		};
+		UITESTS0000000000000002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AA0000000000000000000040 /* iqamah */;
+			targetProxy = UITESTS0000000000000001 /* PBXContainerItemProxy */;
+		};
+		EE0000000000000000007002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AA0000000000000000000040 /* iqamah */;
+			targetProxy = EE0000000000000000007001 /* PBXContainerItemProxy */;
+		};
+		MW00000000000000000070 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = MW00000000000000000001 /* IqamahWidgetMac */;
+			targetProxy = MW00000000000000000071 /* PBXContainerItemProxy */;
+		};
+		WG000000000000000000052 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = WG000000000000000000001 /* IqamahWidget */;
+			targetProxy = WG000000000000000000051 /* PBXContainerItemProxy */;
+		};
+		WT000000000000000000009 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = WW000000000000000000001 /* IqamahWatchWidget */;
+			targetProxy = WT000000000000000000008 /* PBXContainerItemProxy */;
+		};
+		WW000000000000000000010 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = WW000000000000000000001 /* IqamahWatchWidget */;
+			targetProxy = WW000000000000000000009 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		wOSUITests0000000000000B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.fablesoft.iqamah.watchUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = IqamahWatch;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		wOSUITests0000000000000C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.fablesoft.iqamah.watchUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = IqamahWatch;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+		iOSUITests0000000000000B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.fablesoft.iqamah.iOSUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "iqamah-iOS";
+			};
+			name = Debug;
+		};
+		iOSUITests0000000000000C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.fablesoft.iqamah.iOSUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "iqamah-iOS";
+			};
+			name = Release;
+		};
+		UITESTS000000000000000B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.fablesoft.iqamah.uitests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = iqamah;
+			};
+			name = Debug;
+		};
+		UITESTS000000000000000C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.fablesoft.iqamah.uitests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = iqamah;
+			};
+			name = Release;
+		};
 		AA0000000000000000000052 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -592,7 +1458,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 9;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "";
 				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = YES;
@@ -609,10 +1475,11 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.3.0;
+				MARKETING_VERSION = 1.5.0;
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.fablesoft.iqamah;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -628,7 +1495,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 9;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "";
 				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = YES;
@@ -645,10 +1512,11 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.3.0;
+				MARKETING_VERSION = 1.5.0;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.fablesoft.iqamah;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -658,6 +1526,7 @@
 		EE0000000000000000001006 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				FRAMEWORK_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)";
 				GENERATE_INFOPLIST_FILE = YES;
@@ -667,12 +1536,14 @@
 				SDKROOT = macosx;
 				SWIFT_INCLUDE_PATHS = "$(BUILT_PRODUCTS_DIR)";
 				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/iqamah.app/Contents/MacOS/iqamah";
 			};
 			name = Debug;
 		};
 		EE0000000000000000001007 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				FRAMEWORK_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)";
 				GENERATE_INFOPLIST_FILE = YES;
@@ -682,12 +1553,338 @@
 				SDKROOT = macosx;
 				SWIFT_INCLUDE_PATHS = "$(BUILT_PRODUCTS_DIR)";
 				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/iqamah.app/Contents/MacOS/iqamah";
+			};
+			name = Release;
+		};
+		LA000000000000000000006 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = IqamahLiveActivity/IqamahLiveActivity.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 9;
+				DEVELOPMENT_TEAM = 96Y29SP9JR;
+				INFOPLIST_FILE = IqamahLiveActivity/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.5.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fablesoft.iqamah.liveactivity;
+				PRODUCT_NAME = IqamahLiveActivity;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.10;
+			};
+			name = Debug;
+		};
+		LA000000000000000000007 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = IqamahLiveActivity/IqamahLiveActivity.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 9;
+				DEVELOPMENT_TEAM = 96Y29SP9JR;
+				INFOPLIST_FILE = IqamahLiveActivity/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.5.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fablesoft.iqamah.liveactivity;
+				PRODUCT_NAME = IqamahLiveActivity;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.10;
+			};
+			name = Release;
+		};
+		MW00000000000000000020 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 9;
+				DEAD_CODE_STRIPPING = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = IqamahWidget/InfoMac.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.5.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.fablesoft.iqamah.mac-widget";
+				PRODUCT_NAME = IqamahWidgetMac;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.10;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Debug;
+		};
+		MW00000000000000000021 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 9;
+				DEAD_CODE_STRIPPING = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = IqamahWidget/InfoMac.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.5.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.fablesoft.iqamah.mac-widget";
+				PRODUCT_NAME = IqamahWidgetMac;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.10;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Release;
+		};
+		WA000000000000000000007 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_SKIP_APP_STORE_DEPLOYMENT = YES;
+				ASYNCTESTTIMEOUT = 60;
+				CODE_SIGN_ENTITLEMENTS = IqamahWatch/IqamahWatch.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 96Y29SP9JR;
+				INFOPLIST_FILE = IqamahWatch/Info.plist;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fablesoft.iqamah.watch;
+				PRODUCT_NAME = IqamahWatch;
+				SDKROOT = watchos;
+				SWIFT_VERSION = 5.10;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		WA000000000000000000008 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_SKIP_APP_STORE_DEPLOYMENT = YES;
+				CODE_SIGN_ENTITLEMENTS = IqamahWatch/IqamahWatch.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 96Y29SP9JR;
+				INFOPLIST_FILE = IqamahWatch/Info.plist;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fablesoft.iqamah.watch;
+				PRODUCT_NAME = IqamahWatch;
+				SDKROOT = watchos;
+				SWIFT_VERSION = 5.10;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+		WG000000000000000000081 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = IqamahWidget/IqamahWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 9;
+				DEAD_CODE_STRIPPING = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = IqamahWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.5.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fablesoft.iqamah.widget;
+				PRODUCT_NAME = IqamahWidget;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.10;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Debug;
+		};
+		WG000000000000000000082 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = IqamahWidget/IqamahWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 9;
+				DEAD_CODE_STRIPPING = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = IqamahWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.5.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fablesoft.iqamah.widget;
+				PRODUCT_NAME = IqamahWidget;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.10;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Release;
+		};
+		WT000000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 96Y29SP9JR;
+				ENABLE_TESTING_SEARCH_PATHS = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.fablesoft.iqamah.watch.tests;
+				PRODUCT_NAME = IqamahWatchTests;
+				SDKROOT = watchos;
+				SWIFT_VERSION = 5.10;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		WT000000000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 96Y29SP9JR;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fablesoft.iqamah.watch.tests;
+				PRODUCT_NAME = IqamahWatchTests;
+				SDKROOT = watchos;
+				SWIFT_VERSION = 5.10;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+		WW000000000000000000006 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = IqamahWatchWidget/IqamahWatchWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 96Y29SP9JR;
+				INFOPLIST_FILE = IqamahWatchWidget/Info.plist;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fablesoft.iqamah.watch.widget;
+				PRODUCT_NAME = IqamahWatchWidget;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.10;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		WW000000000000000000007 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = IqamahWatchWidget/IqamahWatchWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 96Y29SP9JR;
+				INFOPLIST_FILE = IqamahWatchWidget/Info.plist;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fablesoft.iqamah.watch.widget;
+				PRODUCT_NAME = IqamahWatchWidget;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.10;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+		iOS0000000000000000000061 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "iqamah/iOS/iqamah-iOS.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 9;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = iqamah/iOS/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.5.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fablesoft.iqamah;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.10;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Debug;
+		};
+		iOS0000000000000000000062 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "iqamah/iOS/iqamah-iOS.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 9;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = iqamah/iOS/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.5.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fablesoft.iqamah;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.10;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		wOSUITests0000000000000D /* Build configuration list for PBXNativeTarget "IqamahWatchUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				wOSUITests0000000000000B /* Debug */,
+				wOSUITests0000000000000C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		iOSUITests0000000000000D /* Build configuration list for PBXNativeTarget "iqamahiOSUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				iOSUITests0000000000000B /* Debug */,
+				iOSUITests0000000000000C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		UITESTS000000000000000D /* Build configuration list for PBXNativeTarget "iqamahUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				UITESTS000000000000000B /* Debug */,
+				UITESTS000000000000000C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		AA0000000000000000000051 /* Build configuration list for PBXProject "iqamah" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -715,7 +1912,136 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		LA000000000000000000008 /* Build configuration list for PBXNativeTarget "IqamahLiveActivity" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				LA000000000000000000006 /* Debug */,
+				LA000000000000000000007 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		MW00000000000000000022 /* Build configuration list for PBXNativeTarget "IqamahWidgetMac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				MW00000000000000000020 /* Debug */,
+				MW00000000000000000021 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		WA000000000000000000009 /* Build configuration list for PBXNativeTarget "IqamahWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				WA000000000000000000007 /* Debug */,
+				WA000000000000000000008 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		WG000000000000000000080 /* Build configuration list for PBXNativeTarget "IqamahWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				WG000000000000000000081 /* Debug */,
+				WG000000000000000000082 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		WT000000000000000000005 /* Build configuration list for PBXNativeTarget "IqamahWatchTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				WT000000000000000000003 /* Debug */,
+				WT000000000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		WW000000000000000000008 /* Build configuration list for PBXNativeTarget "IqamahWatchWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				WW000000000000000000006 /* Debug */,
+				WW000000000000000000007 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		iOS0000000000000000000060 /* Build configuration list for PBXNativeTarget "iqamah-iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				iOS0000000000000000000061 /* Debug */,
+				iOS0000000000000000000062 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		IC0000000000000000000001 /* XCLocalSwiftPackageReference "Packages/IqamahCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/IqamahCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		SNAP000000000000000001 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-snapshot-testing";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.17.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		SNAP000000000000000002 /* SnapshotTesting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = SNAP000000000000000001 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
+			productName = SnapshotTesting;
+		};
+		IC0000000000000000000002 /* IqamahCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = IC0000000000000000000001 /* XCLocalSwiftPackageReference "Packages/IqamahCore" */;
+			productName = IqamahCore;
+		};
+		IC0000000000000000000004 /* IqamahCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = IC0000000000000000000001 /* XCLocalSwiftPackageReference "Packages/IqamahCore" */;
+			productName = IqamahCore;
+		};
+		MW00000000000000000030 /* IqamahCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = IC0000000000000000000001 /* XCLocalSwiftPackageReference "Packages/IqamahCore" */;
+			productName = IqamahCore;
+		};
+		WA000000000000000000030 /* IqamahCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = IC0000000000000000000001 /* XCLocalSwiftPackageReference "Packages/IqamahCore" */;
+			productName = IqamahCore;
+		};
+		WG000000000000000000032 /* IqamahCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = IC0000000000000000000001 /* XCLocalSwiftPackageReference "Packages/IqamahCore" */;
+			productName = IqamahCore;
+		};
+		WT000000000000000000030 /* IqamahCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = IC0000000000000000000001 /* XCLocalSwiftPackageReference "Packages/IqamahCore" */;
+			productName = IqamahCore;
+		};
+		WW000000000000000000030 /* IqamahCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = IC0000000000000000000001 /* XCLocalSwiftPackageReference "Packages/IqamahCore" */;
+			productName = IqamahCore;
+		};
+		iOS0000000000000000000020 /* IqamahCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = IC0000000000000000000001 /* XCLocalSwiftPackageReference "Packages/IqamahCore" */;
+			productName = IqamahCore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = AA0000000000000000000050 /* Project object */;
 }

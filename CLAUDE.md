@@ -63,3 +63,9 @@ Key docs in `docs/`:
 - UserDefaults keys: `hasCompletedSetup`, `selectedCity*`, `calculationMethod`, `asrMethod`, `prayerAdjustments`
 - Bundle ID: `com.fablesoft.iqamah`, Team: `96Y29SP9JR`
 - Entitlements: App Sandbox enabled, location access via Info.plist keys
+
+## UI Conventions
+
+- **Chrome materials:** Use SwiftUI `Material` (`.regular`, `.thin`, `.ultraThin`, `.ultraThick`) for cards, panels, popovers, sheets, and floating headers. Materials auto-adapt to dark and light modes — do not write per-mode background colour logic.
+- **Liquid Glass (iOS 26 / macOS 26+):** Where available, layer `.glassEffect()` on top of the Material via an `@available(iOS 26.0, macOS 26.0, *)` branch. The Material is the fallback on older OS versions; we do **not** bump the project's iOS 17 / macOS 14 minimum target to require Liquid Glass.
+- **Light / dark parity:** Every new view must be tested in both modes. Tap targets, contrast, shadows, and overlay legibility must look correct in both. Prefer semantic colours (`Color.primary`, `Color.secondary`, `.quaternaryLabelColor`) over hardcoded hex.

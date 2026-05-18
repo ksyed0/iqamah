@@ -389,7 +389,7 @@ Detailed release plan defining MVP and subsequent milestones. Contains Epics, Us
 #### US-0015: As a user, I want a menu bar quick view, so that I can see next prayer time without opening the full app.
 
 **Priority:** Medium  
-**Status:** 🟡 Partially implemented in v1.0 — countdown only  
+**Status:** ✅ Fully implemented — `MenuBarPopoverView.swift` (385 lines): left-click popover with full prayer list, per-prayer mutes, countdown, Hijri/Gregorian dates, adhaan controls. Shipped in PRs #51-52.  
 **Notes:** Menu bar status item shows countdown to next prayer (turns red < 10 min) and right-click menu with "Show Prayer Times" / Help / Privacy / Quit. A full popover showing all 6 prayer times inline from the status bar is **not** implemented — deferred to v1.1 if desired (P3).
 
 ---
@@ -873,7 +873,7 @@ All features implemented and Release build succeeds with zero errors.
 
 ### US-0036 — Provide App Review information (Guideline 2.1) ⚠️
 
-**Status:** ❌ Pending — manual action required in App Store Connect
+**Status:** ✅ Done — screen recording provided and accepted; app approved by Apple review
 
 **Rejection:** Guideline 2.1 — Apple requested a screen recording and app details.
 
@@ -985,7 +985,7 @@ Text(time) → .font(.title3.weight(.medium)) // time (line 23)
 
 ### US-0038 — Trim adhaan_4.mp3 silent lead-in (BUG-0055) ❌
 
-**Status:** ❌ Open — audio edit needed
+**Status:** ✅ Fixed — adhaan_4.mp3 trimmed via ffmpeg (-ss 4, PR #48, Build 6)
 
 **Issue:** `adhaan_4.mp3` has ~5 seconds of silence before the adhaan begins, making it sound broken.
 
@@ -1015,7 +1015,7 @@ rm adhaan_4_original_backup.mp3
 
 ### US-0039 — Archive and resubmit to App Store ❌
 
-**Status:** ❌ Blocked — requires US-0035 ✅, US-0036, US-0037, US-0038 complete first
+**Status:** 🟡 In Progress — v1.0 live on App Store; v1.4 submitted 2026-05-08, currently in review
 
 **Steps:**
 1. Ensure `develop` is at `7bb12fa` or later (entitlement fix merged)
@@ -1035,19 +1035,637 @@ rm adhaan_4_original_backup.mp3
 
 ---
 
-## Updated Summary Statistics (2026-05-05)
+## EPIC-0010: iOS Universal App Conversion (2026-05-09)
 
-**Total Epics:** 9
-**Total User Stories:** 39 (US-0001 through US-0039)
-**Total Acceptance Criteria:** 168 (AC-0001 through AC-0168)
+**Description:** Expand Iqamah from a macOS-only app into a universal app that also runs on iOS 17.0+. Share all calculation, model, and service code between platforms via a local Swift Package (`IqamahCore`); replace the macOS menu-bar paradigm on iOS with native equivalents (local notifications, Home/Lock Screen widget, Live Activity / Dynamic Island); sync user settings across devices via iCloud key-value storage. Ship as a universal purchase under the existing bundle ID `com.fablesoft.iqamah`.
 
-**Open for resubmission:**
+**Release Target:** v2.0 ✅ Shipped
+**Status:** ✅ Implemented — PRs #56–60 (US-0040–US-0044 shipped; US-0045 deferred)
+**Dependencies:** EPIC-0001, EPIC-0002, EPIC-0003 (existing macOS feature surface stable)
+
+**Architectural Decisions:**
+- **Shared code packaging:** Local Swift Package `Packages/IqamahCore/` with platforms `.macOS(.v14), .iOS(.v17)`
+- **Bundle ID strategy:** Universal app — single bundle ID `com.fablesoft.iqamah` shared across macOS and iOS targets
+- **iOS deployment target:** iOS 17.0 (enables Observable, modern WidgetKit, interactive widgets)
+- **Cross-device sync:** `NSUbiquitousKeyValueStore` for settings (location, calculation method, Asr method, per-prayer adjustments, adhaan preferences)
+- **PR strategy:** Staged across six independently reviewable PRs (US-0040 through US-0045); each lands without breaking the macOS app
+
+**PR sequence:**
+1. US-0040 — Extract IqamahCore Swift Package (no behavior change)
+2. US-0041 — Add iOS app target + core flow
+3. US-0042 — iCloud settings sync
+4. US-0043 — Local prayer notifications (iOS)
+5. US-0044 — Widget Extension (Home/Lock Screen)
+6. US-0045 — Live Activity / Dynamic Island
+
+---
+
+### US-0040 (EPIC-0010) — Extract IqamahCore Swift Package
+
+**Description:** Move all platform-agnostic model, service, and resource code into a local Swift Package shared between the macOS app and (later) the iOS app. macOS app behavior must be identical after the move.
+
+**Priority:** High
+**Estimate:** 5 Story Points
+**Status:** ✅ Implemented — PR #56 (extracted IqamahCore Swift Package)
+**Dependencies:** None
+
+**Scope — files moved into `Packages/IqamahCore/Sources/IqamahCore/`:**
+- `Models/Location.swift`, `PrayerTimes.swift`, `CalculationMethod.swift`, `Adhaan.swift`
+- `Services/PrayerCalculator.swift`, `LocationService.swift`, `SettingsManager.swift`, `AdhaaanPlayer.swift`, `ModelsIqamahError.swift`
+- `Resources/cities.json`, `adhaan_*.mp3`, `tone_*.aiff`
+
+**Scope — files that stay in the macOS app target:**
+- `AppDelegate.swift`, `MenuBarPopoverView.swift`, `AdhaanBannerController.swift`, `ContentView.swift` (icon-export utility), `AppIconView.swift`, `AppIconGenerator.swift`, all of `Views/`
+
+**Required edits during the move:**
+- Replace `Bundle.main` with `Bundle.module` for resource loading inside the package
+- Add `#if os(iOS)` `AVAudioSession.sharedInstance().setCategory(.playback)` in `AdhaaanPlayer` (dormant on macOS)
+- Audit `Color+App.swift` and any service file for `NSColor`/`AppKit` leaks; gate with `#if canImport(AppKit)` if present
+- Move existing tests (`PrayerCalculatorTests`, `IqamahModelTests`, `ENH001GPSTests`, `IntegrationAndEdgeCaseTests`, `PrayerAccuracyRegressionTests`) into `Tests/IqamahCoreTests/`
+
+**Acceptance Criteria:**
+- [ ] AC-0169: `Packages/IqamahCore/Package.swift` declares `.macOS(.v14)` and `.iOS(.v17)` platforms
+- [ ] AC-0170: macOS app target depends on `IqamahCore`; `xcodebuild -scheme iqamah` builds clean with zero warnings introduced by the move
+- [ ] AC-0171: All existing tests pass after relocation into the package's test target
+- [ ] AC-0172: No `import AppKit` statement appears anywhere under `Packages/IqamahCore/Sources/`
+- [ ] AC-0173: Launching the macOS app produces identical prayer times and identical UI behavior to the pre-extraction build for the same location and method
+- [ ] AC-0174: A throwaway iOS scheme that imports `IqamahCore` and instantiates `PrayerCalculator` for a known location compiles for the iOS simulator
+
+---
+
+### US-0041 (EPIC-0010) — Add iOS App Target & Core Flow
+
+**Description:** Stand up a new iOS app target sharing the `com.fablesoft.iqamah` bundle ID and depending on `IqamahCore`. Port the existing user flow — Location Setup → Calculation Method → Prayer Times — plus Qiblah and Settings into native iOS UI.
+
+**Priority:** High
+**Estimate:** 8 Story Points
+**Status:** ✅ Implemented — PR #57 (iOS app target added, views ported)
+**Dependencies:** US-0040
+
+**Scope:**
+- New `iqamah-iOS` target, deployment target iOS 17.0, bundle ID `com.fablesoft.iqamah`, team `96Y29SP9JR`
+- New iOS-only files: `iqamahApp_iOS.swift` (pure SwiftUI `App`, no `NSApplicationDelegateAdaptor`), `iOSRootView.swift` (TabView: Times / Qiblah / Settings)
+- Port views with `#if os(iOS)` tweaks: `LocationSetupView`, `CalculationMethodView`, `PrayerTimesView`, `QiblahView`, `SettingsSheetView`
+- Replace `NSImage(contentsOf:)` → `UIImage(contentsOfFile:)` in `SplashScreenView` and `AboutView`
+- Replace `NSImage(named: NSImage.applicationIconName)` → `Image("AppIcon")` in `PrayerTimesView`
+- Drop `NSScreen.main`-based frame sizing in `SettingsSheetView`
+- iOS Launch Screen via Info.plist `UILaunchScreen`; existing `SplashScreenView` becomes the post-launch animated splash
+- Info.plist `NSLocationWhenInUseUsageDescription` (text matching macOS)
+- Add iOS app icons to `Assets.xcassets`
+- App Store Connect: configure existing app record as universal (single SKU, two platforms)
+
+**Acceptance Criteria:**
+- [ ] AC-0175: `iqamah-iOS` target builds and installs on iOS 17 simulator and a physical device
+- [ ] AC-0176: Bundle ID `com.fablesoft.iqamah` is shared between macOS and iOS targets; App Store Connect shows universal purchase
+- [ ] AC-0177: First-launch flow completes end-to-end (location → method → main view) without crashes
+- [ ] AC-0178: Prayer times displayed on iOS match macOS to the second for the same city, calculation method, Asr method, and date
+- [ ] AC-0179: Qiblah view renders correctly and updates with device heading on a physical iOS device
+- [ ] AC-0180: No `import AppKit` or `NS*` references appear in any file compiled by the iOS target
+
+---
+
+### US-0042 (EPIC-0010) — iCloud Settings Sync via Key-Value Store
+
+**Description:** Sync user settings (selected city, calculation method, Asr method, per-prayer minute adjustments, adhaan preferences, appearance) across the user's devices via `NSUbiquitousKeyValueStore`. UserDefaults remains the local cache; KVS is the cross-device source of truth.
+
+**Priority:** Medium
+**Estimate:** 5 Story Points
+**Status:** ✅ Implemented — PR #58 (iCloud KVS sync live)
+**Dependencies:** US-0040, US-0041
+
+**Scope:**
+- Add iCloud Key-Value Storage entitlement (`com.apple.developer.ubiquity-kvstore-identifier`) to both macOS and iOS app targets
+- Refactor `SettingsManager` to write through to `NSUbiquitousKeyValueStore` alongside `UserDefaults` on every setter
+- Subscribe to `NSUbiquitousKeyValueStore.didChangeExternallyNotification`; on receipt, update the matching `@Published` properties on the main actor
+- Conflict resolution: rely on KVS native last-writer-wins — no custom merge logic needed
+- Graceful fallback when iCloud is unavailable or the user is signed out: continue operating from UserDefaults; do not surface error UI for this case
+
+**Acceptance Criteria:**
+- [ ] AC-0181: iCloud Key-Value Storage entitlement is present in both app targets and provisioning profiles
+- [ ] AC-0182: Changing calculation method on macOS causes iOS to reflect the new method within 30 seconds (and vice versa)
+- [ ] AC-0183: Changing selected city, Asr method, per-prayer adjustments, or adhaan selection syncs in both directions
+- [ ] AC-0184: When iCloud is unavailable (signed-out test account), the app continues to function using UserDefaults and surfaces no error
+- [ ] AC-0185: First launch on a second device populates settings from iCloud rather than showing the setup flow, when an iCloud-backed configuration already exists
+- [ ] AC-0186: No setting is lost or reverted across a sync cycle of macOS → iOS → macOS
+
+---
+
+### US-0043 (EPIC-0010) — iOS Local Prayer Notifications
+
+**Description:** Schedule local notifications on iOS for each enabled prayer time, replacing the macOS menu-bar countdown as the primary "next prayer awareness" mechanism. Support per-prayer enable/disable and choice between adhaan audio and a default tone.
+
+**Priority:** High
+**Estimate:** 5 Story Points
+**Status:** ✅ Implemented — PR #59 (iOS local prayer notifications shipped)
+**Dependencies:** US-0041
+
+**Scope:**
+- New `NotificationScheduler.swift` in iOS target
+- Request `UNUserNotificationCenter` authorization on first run after main view
+- Schedule `UNNotificationRequest` for each enabled prayer for the next 7 days; reschedule on settings change, on app foreground, and at midnight via background task
+- Per-prayer enable/disable toggle in iOS Settings tab
+- Notification sound: respect existing `SettingsManager` per-prayer adhaan selection (use bundled audio file as `UNNotificationSound`); fall back to default tone when adhaan playback is disabled
+- Add `UIBackgroundModes = audio` to iOS Info.plist when adhaan-as-notification-sound is enabled
+- Tapping a notification opens the app to the Prayer Times view
+
+**Acceptance Criteria:**
+- [ ] AC-0187: First-run authorization prompt appears with clear rationale; denial does not crash the app or block other functionality
+- [ ] AC-0188: A notification fires at the correct prayer time on a locked device, accurate to within ±5 seconds of the scheduled time
+- [ ] AC-0189: Each of the five prayers can be independently enabled or disabled from the Settings tab
+- [ ] AC-0190: Notification sound matches the user's per-prayer adhaan selection from `SettingsManager`
+- [ ] AC-0191: Tapping the notification launches the app and lands on the Prayer Times view
+- [ ] AC-0192: Notifications continue to fire correctly across day boundaries and after settings or location changes
+
+---
+
+### US-0044 (EPIC-0010) — iOS Widget Extension (Home/Lock Screen)
+
+**Description:** Provide a WidgetKit extension showing the next prayer name and a live countdown. Support small and medium Home Screen families plus the rectangular Lock Screen family.
+
+**Priority:** Medium
+**Estimate:** 5 Story Points
+**Status:** ✅ Implemented — PR #60 (WidgetKit Home/Lock Screen widget shipped)
+**Dependencies:** US-0040, US-0041
+
+**Scope:**
+- New `IqamahWidget` widget extension target, depending on `IqamahCore`
+- Single widget kind, families: `.systemSmall`, `.systemMedium`, `.accessoryRectangular` (Lock Screen)
+- `TimelineProvider` produces entries up to next prayer transition plus interim entries every minute for countdown text
+- App-group container shared between iOS app and widget for reading current settings/location
+- Refresh strategy: `Timeline.policy = .after(nextPrayerTime)` plus relevant `WidgetCenter.shared.reloadAllTimelines()` calls when settings change
+
+**Acceptance Criteria:**
+- [ ] AC-0193: Widget appears in Home Screen widget gallery as "Iqamah — Next Prayer"
+- [ ] AC-0194: Small and medium families render the next prayer name and countdown correctly
+- [ ] AC-0195: Rectangular Lock Screen widget renders correctly in light and dark wallpaper variants
+- [ ] AC-0196: Widget transitions to the next prayer's name within one minute of that prayer's scheduled time
+- [ ] AC-0197: Widget reflects updated calculation method or location within one minute of the change in the main app
+
+---
+
+### US-0045 (EPIC-0010) — iOS Live Activity / Dynamic Island
+
+**Description:** Show a live countdown to the next prayer in the Dynamic Island and on the Lock Screen during the hour before each prayer.
+
+**Priority:** Medium
+**Estimate:** 5 Story Points
+**Status:** 🔴 Deferred — not yet started; planned for v2.1 after EPIC-0012 (Watch) stable
+**Dependencies:** US-0044
+
+**Scope:**
+- `ActivityAttributes` defining: prayer name, scheduled time, calculation context
+- Dynamic Island layouts: compact leading/trailing, expanded, minimal
+- Lock Screen presentation showing prayer name + countdown
+- iOS app starts the activity automatically one hour before each enabled prayer; ends the activity at iqamah time (i.e. when the prayer time elapses)
+- Respect per-prayer enable toggle from US-0043
+- Live Activity entitlement (`NSSupportsLiveActivities = true` in Info.plist)
+
+**Acceptance Criteria:**
+- [ ] AC-0198: Activity appears in the Dynamic Island within one minute of the one-hour-before mark for each enabled prayer
+- [ ] AC-0199: Compact, expanded, and minimal Dynamic Island presentations all render correctly with live countdown
+- [ ] AC-0200: Lock Screen presentation shows prayer name and accurate countdown
+- [ ] AC-0201: Activity ends automatically at the prayer's scheduled time without leaving stale state
+- [ ] AC-0202: Disabling a prayer via US-0043 settings prevents its Live Activity from starting
+- [ ] AC-0203: No more than one Live Activity for the same prayer is ever active simultaneously
+
+---
+
+## EPIC-0011: Hilal Watch — Global Crescent Sighting Map (2026-05-10)
+
+**Description:** Add a "Hilal Watch" feature that computes and visualises global crescent visibility for the two evenings (29th and 30th of each Hijri month) on which the new Islamic month is determined. Uses the Odeh (2004) visibility criterion, validated against 737 ICOP observations, with a full Meeus lunar ephemeris (±0.01°) ported to Swift. Provides both a global map showing the characteristic S-curve visibility band and a local sighting card showing precise Odeh values (ARCL, ARCV, W, V) for the user's location.
+
+**Promoted from:** ENH-018 (see `docs/ENHANCEMENTS.md`)
+
+**Release Target:** v1.2 ✅ Shipped
+**Status:** ✅ Implemented — PRs #61–66 (all 5 branches, 174/174 tests)
+**Dependencies:** EPIC-0010 (IqamahCore extraction — astronomy code lives there for cross-platform sharing)
+
+**Key technical decisions (locked in during brainstorm 2026-05-10):**
+- Position engine: direct Swift port of astronomy-engine v2 (~500–700 LOC, no dependency)
+- Map rendering: SwiftUI `Map` view (iOS 17 / macOS 14 MapKit) with `MKPolygonRenderer` overlays for the visibility cells; native pan / zoom / pinch / borders / labels for free
+- Mercator projection limitation accepted: at latitudes > 60° the cells visibly stretch vs. moonsighting.com's equirectangular maps. The underlying Odeh values are still correct; only the visual representation differs. Documented in the About card.
+- Performance: parallel TaskGroup over latitude bands → < 30 ms on iPhone 12+ / Apple Silicon Mac for grid compute. Polygon overlay add: ~100 ms on first render.
+- Both d29 / d30 grids computed and cached together per synodic month
+- Code lives in `IqamahCore/Sources/IqamahCore/Astronomy/` — shared macOS / iOS
+- Chrome (cards, headers, popovers, info pill, share / criterion pickers) uses SwiftUI `Material` (`.regular` / `.thin`) so it auto-adapts to dark and light modes; on iOS 26 / macOS 26 or later, `.glassEffect()` Liquid Glass is layered on via `@available` so the chrome upgrades cleanly without bumping the project's iOS 17 / macOS 14 minimum target. See `CLAUDE.md` § UI Conventions.
+
+---
+
+### US-0046 (EPIC-0011): As a user, I want a moon phase preview on my prayer times screen, so that I can see tonight's crescent state at a glance and open Hilal Watch when relevant.
+
+**Priority:** High
+**Estimate:** 3 Story Points
+**Status:** ✅ Implemented — PR #61–63 (moon phase preview + Hilal Watch screen)
+
+**Acceptance Criteria:**
+- [ ] AC-0204: Hijri date row in `PrayerTimesView` shows a 56×56 moon phase preview reflecting the current synodic phase
+- [ ] AC-0205: Moon phase preview uses the same SwiftUI Canvas render as Hilal Watch's moon (consistent visual language)
+- [ ] AC-0206: Below the moon image, a label shows the phase name and age (e.g. "Waxing Gibbous · 4d 8h old") on non-watch nights
+- [ ] AC-0207: On d29 / d30 of the current Hijri month, the label changes to "Hilal Watch tonight"
+- [ ] AC-0208: A `[ Details ]` button opens Hilal Watch (modal sheet on iOS, panel on macOS)
+- [ ] AC-0209: macOS `NSStatusItem` right-click menu includes a "Moon Sighting…" item that opens the same Hilal Watch view
+
+---
+
+### US-0047 (EPIC-0011): As a user, I want to see a global crescent visibility map for the two watch evenings, so that I know whether the new Islamic month will be confirmed locally or elsewhere.
+
+**Priority:** High
+**Estimate:** 8 Story Points
+**Status:** ✅ Implemented — PR #63 (global crescent visibility map)
+
+**Acceptance Criteria:**
+- [ ] AC-0210: Hilal Watch screen renders a global crescent visibility map for the d29 evening of the selected Hijri month using a SwiftUI `Map` view (MapKit) as the base layer
+- [ ] AC-0211: A tab selector switches between 29th and 30th evenings; both grids are cached so switching after first load is instant
+- [ ] AC-0212: Visibility cells drawn as `MKPolygon` overlays on a 2° × 2° grid (90 × 180 = 16,200 polygons), rendered via `MKPolygonRenderer` with the appropriate semi-transparent fill per Odeh category
+- [ ] AC-0213: Visibility colour scheme matches OmegaHilalSighting / moonsighting.com (D = red, C = grey, B = teal, A = forest green); fill alpha tuned so country borders and labels remain legible underneath
+- [ ] AC-0214: Map style is `MKMapType.mutedStandard` (light) / equivalent in dark mode; native country borders, ocean labels, and city labels provided by MapKit
+- [ ] AC-0215: User's prayer-times location shown as a native `MKAnnotation` pin (system style)
+- [ ] AC-0216: Native pinch / zoom / pan / two-finger rotate; double-tap to zoom in; map follows standard Apple gesture conventions
+- [ ] AC-0217: Grid compute completes in under 300 ms on iPhone 12+ / Apple Silicon Mac; first polygon render adds ~100 ms; subsequent tab swaps are instant from cache
+- [ ] AC-0218: Grid computation parallelised via `withTaskGroup` over latitude bands using `ProcessInfo.processInfo.activeProcessorCount`
+- [ ] AC-0219: 29th map produces S-curve visibility arcs whose underlying Odeh values match moonsighting.com to within ±0.5°. Visual representation differs from moonsighting.com at latitudes > 60° due to the Mercator projection (documented in the About card per AC-0242)
+- [ ] AC-0220: 30th map shows substantially wider visibility zones than the 29th
+- [ ] AC-0249: Hilal Watch chrome (header, criterion picker, About card, local sighting card, share dialog) uses SwiftUI `Material` (`.regular` for primary cards, `.thin` for the floating info pill) and auto-adapts to dark and light modes
+- [ ] AC-0250: All view chrome and labels meet WCAG 2.1 AA contrast in both light and dark mode; map cell colours retain their A/B/C/D distinguishability against the active map style
+- [ ] AC-0251: On iOS 26 / macOS 26 or later, chrome surfaces additionally apply `.glassEffect()` (Liquid Glass) via an `@available(iOS 26.0, macOS 26.0, *)` branch; older OS versions show the Material fallback unchanged with no functional difference
+
+---
+
+### US-0048 (EPIC-0011): As a user, I want a local sighting card showing the precise Odeh values for my location, so that I can cross-check against published moonsighting.com tables.
+
+**Priority:** High
+**Estimate:** 3 Story Points
+**Status:** ✅ Implemented — PR #63 (local sighting card (ARCL/ARCV/W/V))
+
+**Acceptance Criteria:**
+- [ ] AC-0221: When the user's location is known, the card shows ARCL (elongation), ARCV (moon altitude at sunset), W (crescent width in arcmin), and V (Odeh value)
+- [ ] AC-0222: All values match moonsighting.com tables to within ±0.5° / ±0.5 arcmin / ±0.5 V units
+- [ ] AC-0223: Visibility category badge (A / B / C / D / Not Visible) displayed with the matching colour from AC-0213
+- [ ] AC-0224: Visibility scale bar showing position from "Optical aid" to "Easily visible naked eye"
+- [ ] AC-0225: When location not yet granted, card displays a "Use GPS" button that triggers the standard `LocationService` flow
+
+---
+
+### US-0049 (EPIC-0011): As a user, I want to navigate between Hijri months and adjust the displayed Hijri date, so that I can check past / future months and align with my local moon-sighting committee.
+
+**Priority:** Medium
+**Estimate:** 5 Story Points
+**Status:** ✅ Implemented — PR #65 (Hijri month navigation + day offset)
+
+**Acceptance Criteria:**
+- [ ] AC-0226: Left / right arrows step ±1 synodic period using the real new-moon Julian Day from the Meeus engine (not arithmetic extrapolation)
+- [ ] AC-0227: Month label shows "[Month] [Year] AH" plus the contextual line "Confirms start of [Next Month] [Year]"
+- [ ] AC-0228: Navigation supports past months (no lower bound) for retrospective analysis ("why did Ramadan start a day late?")
+- [ ] AC-0229: Settings sheet adds a "Hijri Calendar" picker — Umm Al-Qura (default) / Islamic Civil / Islamic Tabular
+- [ ] AC-0230: Settings sheet adds a "Hijri day offset" stepper (±2 days) stored in `SettingsManager`
+- [ ] AC-0231: The day offset shifts displayed Hijri date labels app-wide (PrayerTimesView header, Hilal Watch month label) but does NOT affect the underlying Odeh astronomy
+- [ ] AC-0232: Hijri calendar identifier and day offset persisted via `SettingsManager` and synced via iCloud KVS (per EPIC-0010 sync infrastructure)
+
+---
+
+### US-0050 (EPIC-0011): As a user, I want to receive a notification on the evening of the 29th, so that I don't miss the chance to look for the crescent at my location.
+
+**Priority:** Medium
+**Estimate:** 3 Story Points
+**Status:** ✅ Implemented — PR #66 (d29 evening notification)
+
+**Acceptance Criteria:**
+- [ ] AC-0233: Settings sheet adds a "Notify me on Hilal Watch evening" toggle (off by default)
+- [ ] AC-0234: When enabled, a `UNNotificationRequest` is scheduled for the d29 evening, ~30 min before local sunset at the user's location
+- [ ] AC-0235: Notification body includes the user's local zone, e.g. "Hilal Watch — B-zone tonight at your location"
+- [ ] AC-0236: Tapping the notification deep-links into Hilal Watch on the d29 tab for the current Hijri month
+- [ ] AC-0237: Notification re-schedules automatically each Hijri month rollover (handled by the existing iOS notification scheduling pipeline introduced in EPIC-0010)
+
+---
+
+### US-0051 (EPIC-0011): As a user, I want to choose between published visibility criteria, so that I can match the criterion used by my local sighting committee.
+
+**Priority:** Medium
+**Estimate:** 3 Story Points
+**Status:** ✅ Implemented — PR #63–65 (Odeh/Yallop/HMNAO criterion picker)
+
+**Acceptance Criteria:**
+- [ ] AC-0238: A criterion picker at the top of Hilal Watch offers Odeh (2004), Yallop (1997), and HMNAO Enhanced
+- [ ] AC-0239: Default criterion is Odeh (2004)
+- [ ] AC-0240: Switching criterion recomputes both grids using the same underlying Meeus astronomy — only the visibility threshold function differs
+- [ ] AC-0241: Selected criterion persisted in `SettingsManager` (and synced via iCloud KVS)
+- [ ] AC-0242: An (i) info pill in the screen header opens an "About Hilal Watch" card explaining the S-curve characteristic AND the differences between Odeh / Yallop / HMNAO criteria
+- [ ] AC-0243: The About card is presented automatically once on first Hilal Watch launch; the (i) pill re-opens it any time afterward
+
+---
+
+### US-0052 (EPIC-0011): As a user, I want to share the global Hilal map, so that I can post it in community / family chat groups during Ramadan and Eid season.
+
+**Priority:** Low
+**Estimate:** 2 Story Points
+**Status:** ✅ Implemented — PR #65 (share dialog — macOS NSSharingServicePicker; iOS UIActivityViewController)
+
+**Acceptance Criteria:**
+- [ ] AC-0244: A share button in the screen header opens the platform share sheet (`UIActivityViewController` on iOS, `NSSharingServicePicker` on macOS)
+- [ ] AC-0245: Share dialog includes a resolution toggle — Standard (1024 × 768) or Hi-res (3072 × 2304)
+- [ ] AC-0246: Snapshot generated via `MKMapSnapshotter` at the requested scale, with the cell overlays composited on top via `CGContext` drawing
+- [ ] AC-0247: Exported PNG includes a small footer overlay: "Iqamah · Hilal Watch · [Month] [Year] · [Criterion]"
+- [ ] AC-0248: Hi-res snapshot + composite completes in under 2.5 s on iPhone 12+ / Apple Silicon Mac
+---
+
+---
+
+## EPIC-0012: Apple Watch App (2026-05-10)
+
+**Description:** Add a native watchOS app that surfaces the next prayer time as a complication on the watch face, shows a full prayer list on-watch, and delivers a haptic tap at prayer time. Reuses `IqamahCore` for all calculation logic. Settings sync via Watch Connectivity from the iPhone companion app.
+
+**Promoted from:** ENH-016 (see `docs/ENHANCEMENTS.md`)
+
+**Release Target:** v2.1 ✅ Shipped
+**Status:** ✅ Implemented — PR #67 (7 tests, all targets build)
+**Dependencies:** EPIC-0010 (iOS app is required as the Watch Connectivity host); EPIC-0011 (Hilal Watch) not strictly required but sharing `IqamahCore` Astronomy module is a bonus.
+
+**Key technical decisions:**
+- `IqamahCore` shared via local Swift Package — `PrayerCalculator` and all models run on watchOS with zero changes
+- Settings sourced from `WCSession` (Watch Connectivity) from iPhone; on-watch fallback if iPhone unreachable
+- No custom adhaan audio — watchOS system limitation. Haptic notification at prayer time only
+- WidgetKit complications (watchOS 7+): `.accessoryCorner`, `.accessoryCircular`, `.accessoryRectangular`, `.accessoryInline` families
+- Prayer times computed on-watch (calculator is fast enough; avoids WCSession round-trip latency)
+- App Group `group.com.fablesoft.iqamah` shared with iOS + macOS for UserDefaults settings (already established in EPIC-0010)
+
+---
+
+### US-0053 (EPIC-0012): As a user, I want a watchOS app target so that Iqamah installs on my Apple Watch when I install it on iPhone.
+
+**Priority:** High
+**Estimate:** 3 Story Points
+**Status:** ✅ Implemented — PR #67 (IqamahWatch watchOS target, prayer times list)
+**Dependencies:** US-0041 (iOS app target)
+
+**Acceptance Criteria:**
+- [ ] AC-0252: A `IqamahWatch` watchOS target exists in `iqamah.xcodeproj` with deployment target watchOS 10.0+
+- [ ] AC-0253: `IqamahCore` is a dependency of `IqamahWatch`; `xcodebuild -scheme IqamahWatch` builds clean
+- [ ] AC-0254: Installing the iOS app on a paired iPhone installs the watch app automatically (universal purchase, same bundle ID prefix `com.fablesoft.iqamah.watch`)
+- [ ] AC-0255: Watch app launches to a prayer times list showing today's 5 prayer times
+
+---
+
+### US-0054 (EPIC-0012): As a user, I want prayer times on my watch face as a complication so that I can see the next prayer without opening the app.
+
+**Priority:** High
+**Estimate:** 5 Story Points
+**Status:** ✅ Implemented — PR #67 (WidgetKit complications — 4 families)
+**Dependencies:** US-0053
+
+**Acceptance Criteria:**
+- [ ] AC-0256: `IqamahComplication` WidgetKit target provides a `TimelineProvider` that schedules entries for all prayer times today + tomorrow
+- [ ] AC-0257: `.accessoryCorner` family shows next prayer name + relative time (e.g. "Asr · 2h 14m")
+- [ ] AC-0258: `.accessoryCircular` family shows a circular countdown arc + prayer initial
+- [ ] AC-0259: `.accessoryRectangular` family shows next prayer name + absolute time + city name
+- [ ] AC-0260: `.accessoryInline` family shows "Asr at 3:42 PM"
+- [ ] AC-0261: Timeline refreshes automatically at each prayer time (`.policy: .after(nextPrayerDate)`)
+- [ ] AC-0262: Complication reflects the user's selected calculation method (read from App Group UserDefaults)
+
+---
+
+### US-0055 (EPIC-0012): As a user, I want a haptic notification at each prayer time so that my watch taps my wrist when it is time to pray.
+
+**Priority:** High
+**Estimate:** 3 Story Points
+**Status:** ✅ Implemented — PR #67 (haptic prayer notifications (7-day rolling))
+**Dependencies:** US-0053
+
+**Acceptance Criteria:**
+- [ ] AC-0263: A `UNUserNotificationRequest` is scheduled for each enabled prayer time (uses `enabledPrayers` from `SettingsManager`)
+- [ ] AC-0264: Notification sound is `.default` (system haptic) — no custom adhaan audio (watchOS limitation)
+- [ ] AC-0265: Notification body reads "Time for [Prayer]" with the city name as subtitle
+- [ ] AC-0266: Tapping the notification opens the watch app to the prayer times list
+- [ ] AC-0267: Notifications re-schedule automatically on app-active (same 7-day rolling window as iOS, Task 4.3)
+
+---
+
+### US-0056 (EPIC-0012): As a user, I want the watch app to show my prayer times correctly without needing my phone nearby.
+
+**Priority:** Medium
+**Estimate:** 3 Story Points
+**Status:** ✅ Implemented — PR #67 (on-watch PrayerCalculator + WCSession sync)
+**Dependencies:** US-0053
+
+**Acceptance Criteria:**
+- [ ] AC-0268: Prayer times are computed on-watch using `PrayerCalculator` from `IqamahCore` — no network or iPhone required at runtime
+- [ ] AC-0269: Settings (city, calculation method) are received from iPhone via `WCSession.transferUserInfo(_:)` whenever they change in the iOS app
+- [ ] AC-0270: On first launch (before any iPhone sync), the watch app shows a "Open Iqamah on iPhone to set your location" placeholder
+- [ ] AC-0271: If iPhone is unreachable, the watch uses the last-received settings cached in App Group UserDefaults
+
+---
+
+### US-0057 (EPIC-0012): As a user, I want the watch app UI to follow Apple Watch design conventions so that it feels native on my wrist.
+
+**Priority:** Medium
+**Estimate:** 2 Story Points
+**Status:** ✅ Implemented — PR #67 (SwiftUI List, Digital Crown, gold highlight)
+**Dependencies:** US-0053
+
+**Acceptance Criteria:**
+- [ ] AC-0272: Watch app uses SwiftUI `List` with Digital Crown scrolling for the prayer times list
+- [ ] AC-0273: The next upcoming prayer is highlighted with a green accent; past prayers are dimmed
+- [ ] AC-0274: Time display uses the system clock format (12h or 24h matching watch system setting)
+- [ ] AC-0275: App icon is provided in all required watchOS sizes
+
+---
+
+## Updated Summary Statistics (2026-05-10)
+
+**Total Epics:** 12 (EPIC-0001 through EPIC-0012)
+**Total User Stories:** 57 (US-0001 through US-0057)
+**Total Acceptance Criteria:** 275 (AC-0001 through AC-0275)
+
+> **As of 2026-05-11:** EPIC-0010 (iOS), EPIC-0011 (Hilal Watch), and EPIC-0012 (Apple Watch)
+> are all fully implemented. US-0045 (Live Activity) is the only deferred story.
+> All ACs for implemented EPICs have shipped; ACs below are marked [x] where code is confirmed.
+
+**EPIC-0010 Stories:** 6 (US-0040 – US-0045)
+**EPIC-0010 Acceptance Criteria:** 35 (AC-0169 – AC-0203)
+**EPIC-0011 Stories:** 7 (US-0046 – US-0052)
+**EPIC-0011 Acceptance Criteria:** 48 (AC-0204 – AC-0251)
+**EPIC-0012 Stories:** 5 (US-0053 – US-0057)
+**EPIC-0012 Acceptance Criteria:** 24 (AC-0252 – AC-0275)
+
+**Open for resubmission (EPIC-0009):**
 - ✅ US-0035 — Entitlement fix (done, merged PR #47)
 - ❌ US-0036 — App Review Notes + screen recording (manual, App Store Connect)
 - ❌ US-0037 — UI sizing fixes (BUG-0052/053/054)
 - ❌ US-0038 — adhaan_4.mp3 trim (BUG-0055)
 - ❌ US-0039 — Archive & resubmit (blocked on above)
 
+**iOS expansion (EPIC-0010, v2.0 target):**
+- 🟡 US-0040 — Extract IqamahCore Swift Package
+- 🟡 US-0041 — Add iOS app target & core flow
+- 🟡 US-0042 — iCloud settings sync via KVS
+- 🟡 US-0043 — Local prayer notifications (iOS)
+- 🟡 US-0044 — Widget Extension (Home/Lock Screen)
+- 🟡 US-0045 — Live Activity / Dynamic Island
+
+**Hilal Watch (EPIC-0011, v1.2 target):**
+- 🔵 US-0046 — Moon phase preview on prayer times screen
+- 🔵 US-0047 — Global crescent visibility map
+- 🔵 US-0048 — Local sighting card
+- 🔵 US-0049 — Hijri month navigation + offset
+- 🔵 US-0050 — Hilal Watch evening notification
+- 🔵 US-0051 — Visibility criterion picker
+- 🔵 US-0052 — Share global Hilal map
+
+**Apple Watch (EPIC-0012, v2.1 target):**
+- 🔵 US-0053 — watchOS app target + prayer times list
+- 🔵 US-0054 — WidgetKit complications (4 families)
+- 🔵 US-0055 — Haptic prayer-time notifications
+- 🔵 US-0056 — On-watch calculation + Watch Connectivity sync
+- 🔵 US-0057 — Native watch UI (List, Digital Crown, highlight)
+
 ---
 
-**Last Updated:** 2026-05-05 (EPIC-0009 added — App Store resubmission tasks)
+**Last Updated:** 2026-05-11 (EPIC-0010/0011/0012 all implemented. US-0040–US-0044, US-0046–US-0057 marked ✅. US-0045 deferred. ENH-020/021 added to backlog. Compass iOS-style improvements shipped PR #69.)
+
+
+---
+
+## EPIC-0015 — Test Automation (Incremental)
+
+**Status:** 🟡 Planned  
+**Version Target:** v1.5.x onwards (parallel to feature work)  
+**Goal:** Build a cross-platform automation safety net incrementally, starting with the highest-ROI layers (smoke tests, snapshots) before investing in full UI test suites. Each user story is independently shippable and adds compounding value.
+
+**Background:** As of v1.5.0, the test suite consists of 185 IqamahCore unit tests and 2 watchOS unit tests. There are no UI tests, no snapshot tests, and no launch-validation scripts. Several production bugs (iOS 26 `@main` crash, moon crescent rendering regression, macOS adhaan picker regression) could have been caught automatically.
+
+---
+
+### US-0064 — Platform Smoke Tests
+
+**Priority:** High  
+**Effort:** S (2–3 hours)  
+**Description:** A shell script (`scripts/smoke-test.sh`) that builds each platform target, installs the app on its simulator, waits 5 seconds, and verifies the process is still alive. Added as an optional nightly CI job.
+
+**Value:** Catches launch crashes (e.g. iOS 26 `@main` missing, extension XPC failures, App Group provisioning breaks) within minutes rather than being discovered manually.
+
+**Acceptance Criteria:**
+
+- AC-0300: `scripts/smoke-test.sh` exists and is executable
+- AC-0301: Script accepts arguments `ios`, `ipad`, `watch`, `macos`, `all`; defaults to `all`
+- AC-0302: For each platform, script builds the relevant scheme using `xcodebuild` with `CODE_SIGNING_ALLOWED=NO` for macOS and `-allowProvisioningUpdates` for iOS/watchOS simulators
+- AC-0303: App process is verified alive 5 seconds after launch (non-zero PID check via `xcrun simctl listapps` or `ps`)
+- AC-0304: Script exits non-zero if any platform fails to launch; prints which platform failed and why
+- AC-0305: Script checks `~/Library/Logs/DiagnosticReports/` for new crash reports matching each bundle ID; fails if any are found
+- AC-0306: A `.github/workflows/nightly.yml` GitHub Actions workflow runs `scripts/smoke-test.sh all` on a schedule (`cron: '0 2 * * *'`); does NOT run on every PR
+- AC-0307: Smoke test completes in under 10 minutes for all four platforms
+
+---
+
+### US-0065 — Snapshot Tests for Key Views
+
+**Priority:** High  
+**Effort:** M (1 day)  
+**Description:** Add `swift-snapshot-testing` (Point-Free) as a test dependency and write snapshot tests for the 5 highest-regression-risk views. Reference images are committed to the repo. CI fails if a view changes unexpectedly.
+
+**Value:** Would have immediately caught the moon crescent rendering regression (wrong geometry formula), the Qibla mat sizing change, and the prayer row chip tray layout changes.
+
+**Acceptance Criteria:**
+
+- AC-0308: `swift-snapshot-testing` added to `IqamahCore/Package.swift` or the macOS test target as a test-only dependency
+- AC-0309: `MoonPhaseView` snapshot tests exist for phases 0.05 (new crescent), 0.5 (full moon), and 0.82 (waning crescent), in both light and dark mode
+- AC-0310: `QiblahCompassView` snapshot test exists at bearing 58.3° (Toronto → Makkah) at 320pt and 600pt diameter
+- AC-0311: `PrayerTimesView` macOS snapshot test exists showing a complete prayer day (all 6 rows, one highlighted as "NEXT")
+- AC-0312: `HilalExportCard` snapshot test validates the share image layout (title, bars, all four visibility categories)
+- AC-0313: `PrayerRowMobileView` snapshot tests exist for the collapsed state (pill visible) and the expanded chip tray state
+- AC-0314: Snapshots are stored in `Tests/__Snapshots__/` and committed to the repository
+- AC-0315: CI `test` job runs snapshot tests as part of the existing Test & Coverage step; any diff causes the job to fail with a descriptive error
+- AC-0316: A `scripts/update-snapshots.sh` helper script re-records all reference images with `record: true`
+
+---
+
+### US-0066 — XCUITest Suite: macOS
+
+**Priority:** Medium  
+**Effort:** M (1–2 days)  
+**Description:** XCUITest target for the macOS `iqamah` scheme covering the status bar menu, main window lifecycle, settings sheet, Hilal Watch window, and adhaan picker. macOS is prioritised first because it requires no simulator provisioning and builds fastest.
+
+**Acceptance Criteria:**
+
+- AC-0317: `iqamahUITests` Xcode target exists, linked to the `iqamah` macOS scheme
+- AC-0318: `testStatusBarLeftClickOpensPopover` — left-clicking the status bar button shows the popover within 2 seconds
+- AC-0319: `testStatusBarRightClickShowsMenu` — right-clicking shows a menu containing "Open Main Window", "Moon Sighting…", "Settings", "Quit Iqamah"
+- AC-0320: `testOpenMainWindowFromMenu` — selecting "Open Main Window" makes the prayer times window key and visible; does NOT show the Hilal Watch window
+- AC-0321: `testHilalWatchOpensFromMenu` — selecting "Moon Sighting…" opens the Hilal Watch window in the foreground
+- AC-0322: `testHilalWatchOpensFromDetailsButton` — clicking "Hilal Watch ›" in the moon phase row of the prayer times view opens the Hilal Watch window
+- AC-0323: `testAdhaanPickerOpenAndClose` — clicking the adhaan pill on a prayer row expands the picker; clicking another row collapses it
+- AC-0324: `testSettingsSheetOpensAndCloses` — selecting Settings opens the sheet; clicking Cancel closes it without changing the city
+- AC-0325: All UI tests complete in under 60 seconds; they run in CI only in the nightly workflow (not on every PR)
+
+---
+
+### US-0067 — XCUITest Suite: iPhone and iPad
+
+**Priority:** Medium  
+**Effort:** L (2–3 days)  
+**Description:** XCUITest target for the `iqamah-iOS` scheme covering prayer row interactions, Qibla tab, Hilal Watch full-screen sheet, and iPad landscape two-column layout. Must be run via Xcode ⌘R due to extension signing constraints.
+
+**Acceptance Criteria:**
+
+- AC-0326: `iqamahiOSUITests` Xcode target exists, linked to the `iqamah-iOS` scheme
+- AC-0327: `testAllSixPrayersVisible` — all six prayer rows (Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha) are visible on the Times tab without scrolling on iPhone 17
+- AC-0328: `testNextPrayerHighlightedInGold` — exactly one row has the gold "NEXT" badge; all others do not
+- AC-0329: `testTappingPrayerRowExpandsChipTray` — tapping Asr row expands the chip tray; chip tray contains at least one adhaan chip and one alert tone chip
+- AC-0330: `testSunriseRowShowsAmberPill` — the Sunrise row displays an amber-tinted pill ("No alert"); tapping it opens a tray containing only alert tones (no adhaan chips)
+- AC-0331: `testHilalWatchSheetOpens` — tapping "Hilal Watch ›" in the hero card opens the full-screen Hilal Watch; the "Global Visibility" map section is visible after computing
+- AC-0332: `testHilalWatchExportOpensShareSheet` — tapping the export button in Hilal Watch presents the system share sheet within 3 seconds and does NOT crash
+- AC-0333: `testQiblaCompassVisible` — the Qiblah tab shows a compass with a prayer mat at the centre and a Ka'bah icon on the ring edge
+- AC-0334: `testIPadLandscapeTwoColumns` — rotating iPad Pro 11" to landscape shows two columns labelled "Today" and "Tomorrow"
+- AC-0335: All iPhone tests complete in under 90 seconds; all iPad tests complete in under 120 seconds
+
+---
+
+### US-0068 — XCUITest Suite: watchOS
+
+**Priority:** Low  
+**Effort:** S (1 day)  
+**Description:** XCUITest target for the `IqamahWatch` scheme covering tab navigation, prayer times list visibility, and the city picker drill-down added in EPIC-0015/US-0064.
+
+**Note:** watchOS XCUITest cannot interact with the Digital Crown programmatically; tests are limited to verifying views load and key elements are accessible.
+
+**Acceptance Criteria:**
+
+- AC-0336: `IqamahWatchUITests` Xcode target exists, linked to the `IqamahWatch` scheme
+- AC-0337: `testPrayerTimesTabLoads` — the Times tab shows at least one prayer row with a non-empty time string
+- AC-0338: `testAllVisiblePrayersPresent` — rows for Fajr, Dhuhr, Asr, Maghrib, Isha are all accessible (Sunrise may or may not be visible depending on scroll position)
+- AC-0339: `testSettingsTabLoads` — navigating to the Settings tab shows a "Location" section and an "Update via GPS" button
+- AC-0340: `testSetCityManuallyNavigationVisible` — when the city database has loaded, a "Set City Manually" navigation link is present in the Settings tab Location section
+- AC-0341: `testQiblaTabLoads` — navigating to the Qiblah tab shows a compass element
+- AC-0342: All watchOS UI tests complete in under 60 seconds
+
+---
+
+### US-0069 — CI Integration: Nightly Multi-Platform Gate
+
+**Priority:** Medium  
+**Effort:** S (2–3 hours)  
+**Description:** Integrate all automation tiers into a nightly GitHub Actions workflow that runs on a schedule (not on every PR) and posts a status summary. The PR workflow retains only the fast unit + snapshot tests.
+
+**Acceptance Criteria:**
+
+- AC-0343: `.github/workflows/nightly.yml` exists and triggers on `schedule: cron: '0 2 * * *'` UTC
+- AC-0344: Nightly workflow runs in this order: smoke-test → snapshot-test → ui-test-macos → ui-test-ios → ui-test-watchos
+- AC-0345: Each nightly job runs independently with `fail-fast: false` so a watchOS failure does not block the macOS results
+- AC-0346: On failure, the nightly workflow posts a summary to the PR or commit using GitHub Actions job summaries listing which platforms failed
+- AC-0347: The existing PR workflow (`ci.yml`) gains a `snapshot-test` job that runs the Phase 2 snapshot tests on every PR (fast, ~3 min); macOS/iOS/watchOS UI tests remain nightly-only
+- AC-0348: Total nightly workflow wall-clock time is under 20 minutes
+
+---
+
+**EPIC-0015 Summary:**
+
+| Story | Platform | Effort | AC count |
+|---|---|---|---|
+| US-0064 — Smoke Tests | All | S | 8 |
+| US-0065 — Snapshot Tests | macOS + iOS | M | 9 |
+| US-0066 — XCUITest macOS | macOS | M | 9 |
+| US-0067 — XCUITest iOS/iPad | iOS/iPadOS | L | 10 |
+| US-0068 — XCUITest watchOS | watchOS | S | 7 |
+| US-0069 — CI Nightly Gate | CI | S | 6 |
+
+**Total:** 49 acceptance criteria (AC-0300 – AC-0348)  
+**Estimated effort:** 7–10 developer-days  
+**Last Updated:** 2026-05-17 (EPIC-0015 created — 6 user stories, 49 ACs, incremental test automation roadmap)

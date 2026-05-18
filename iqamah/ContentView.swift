@@ -1,4 +1,5 @@
 import SwiftUI
+import IqamahCore
 
 enum AppScreen {
     case splash

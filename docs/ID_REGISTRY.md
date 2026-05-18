@@ -8,12 +8,13 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 | **Sequence** | **Next Available ID** | **Last Assigned** |
 |--------------|-----------------------|-------------------|
-| EPIC         | EPIC-0007             | EPIC-0006         |
-| US           | US-0032               | US-0031           |
+| EPIC         | EPIC-0016             | EPIC-0015         |
+| US           | US-0070               | US-0069           |
 | TASK         | TASK-0001             | None              |
-| AC           | AC-0142               | AC-0141           |
-| TC           | TC-0001               | None              |
-| BUG          | BUG-0031              | BUG-0030          |
+| AC           | AC-0349               | AC-0348           |
+| TC           | TC-0036               | TC-0035           |
+| BUG          | BUG-0056              | BUG-0055          |
+| ENH          | ENH-022               | ENH-021           |
 
 ---
 
@@ -27,4 +28,4 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 ---
 
-**Last Updated:** 2026-04-30 (Live UI review: BUG-0022–BUG-0030 added — Qiblah compass and general screen feedback)
+**Last Updated:** 2026-05-17 (EPIC-0015 Test Automation — US-0064–US-0069, AC-0300–AC-0348. ENH-020/021 Apple TV/visionOS backlog. EPIC-0013 Widget Platform — US-0058–US-0060. EPIC-0014 Adaptive Layout — US-0061–US-0063, AC-0276–AC-0299.)

@@ -1,6 +1,9 @@
 import SwiftUI
-import ServiceManagement
+#if os(macOS)
+    import ServiceManagement
+#endif
 import CoreLocation
+import IqamahCore
 
 /// Non-destructive settings sheet (US-0020).
 /// All changes are held in local draft state until the user taps Save.
@@ -29,7 +32,9 @@ struct SettingsSheetView: View {
     // Scale is applied live; originalUiScale lets Cancel restore it
     private let originalUiScale = SettingsManager.shared.uiScale
     @ObservedObject private var settings = SettingsManager.shared
-    @State private var launchAtLogin = false
+    #if os(macOS)
+        @State private var launchAtLogin = false
+    #endif
     @State private var isDetectingLocation = false
     @StateObject private var locationService = LocationService()
     @State private var detectedLocationInfo: String? = nil // inline result text
@@ -206,7 +211,11 @@ struct SettingsSheetView: View {
                 Text(method.displayName).tag(method)
             }
         }
+        #if os(macOS)
         .pickerStyle(.radioGroup)
+        #else
+        .pickerStyle(.segmented)
+        #endif
     }
 
     @ViewBuilder private var displaySection: some View {
@@ -218,23 +227,25 @@ struct SettingsSheetView: View {
             }
         }
         .toggleStyle(.switch)
-        Toggle(isOn: $launchAtLogin) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Launch at Login")
-                Text("Start Iqamah automatically when you log in")
-                    .font(.caption).foregroundStyle(.secondary)
-            }
-        }
-        .toggleStyle(.switch)
-        .onChange(of: launchAtLogin) { _, enabled in
-            do {
-                if enabled {
-                    try SMAppService.mainApp.register()
-                } else {
-                    try SMAppService.mainApp.unregister()
+        #if os(macOS)
+            Toggle(isOn: $launchAtLogin) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Launch at Login")
+                    Text("Start Iqamah automatically when you log in")
+                        .font(.caption).foregroundStyle(.secondary)
                 }
-            } catch { launchAtLogin = !enabled }
-        }
+            }
+            .toggleStyle(.switch)
+            .onChange(of: launchAtLogin) { _, enabled in
+                do {
+                    if enabled {
+                        try SMAppService.mainApp.register()
+                    } else {
+                        try SMAppService.mainApp.unregister()
+                    }
+                } catch { launchAtLogin = !enabled }
+            }
+        #endif
         Picker("Appearance", selection: $selectedAppearance) {
             ForEach(AppAppearance.allCases, id: \.self) { mode in
                 Text(mode.displayName).tag(mode)
@@ -331,6 +342,7 @@ struct SettingsSheetView: View {
             Section { locationSection } header: { Label("Location", systemImage: "location.fill") }
             Section { calculationSection } header: { Label("Calculation", systemImage: "function") }
             Section { displaySection } header: { Label("Display", systemImage: "display") }
+            Section { HilalWatchSettingsSection() } header: { Label("Hilal Watch", systemImage: "moon.haze.fill") }
             Section {
                 adjustmentsSection
             } header: {
@@ -353,65 +365,95 @@ struct SettingsSheetView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // ── Header ──────────────────────────────────────────────
-            HStack {
-                Text("Settings")
-                    .font(.title3.bold())
-                Spacer()
-            }
-            .padding(.horizontal, 28)
-            .padding(.top, 28)
-            .padding(.bottom, 20)
-
-            ScrollView {
-                settingsForm
-            }
-
-            // ── Action buttons ───────────────────────────────────────
-            HStack(spacing: 12) {
-                Button("Cancel") {
-                    SettingsManager.shared.uiScale = originalUiScale
-                    onCancel()
+        #if os(iOS)
+            // On iOS the Form is its own scroll container. Wrapping it in a ScrollView collapses
+            // it to zero height. Render the Form directly as the navigation content instead.
+            settingsForm
+                .navigationTitle("Settings")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Save") { save() }
+                            .disabled(!canSave)
+                            .bold()
+                    }
                 }
-                .buttonStyle(.bordered)
-                .controlSize(.large)
-                .keyboardShortcut(.escape, modifiers: [])
+                .onAppear { loadInitialState() }
+                .onChange(of: selectedCountry) { _, newCountry in
+                    guard let country = newCountry else { return }
+                    if selectedCity?.countryCode != country.code { selectedCity = nil }
+                    if !userOverrodeMethod {
+                        selectedMethod = CalculationMethod.suggested(forCountryCode: country.code)
+                    }
+                    recommendationLabel = CalculationMethod.recommendationLabel(forCountryCode: country.code)
+                }
+        #else
+            VStack(alignment: .leading, spacing: 0) {
+                // ── Header ──────────────────────────────────────────────
+                HStack {
+                    Text("Settings")
+                        .font(.title3.bold())
+                    Spacer()
+                }
+                .padding(.horizontal, 28)
+                .padding(.top, 28)
+                .padding(.bottom, 20)
 
-                Spacer()
+                ScrollView {
+                    settingsForm
+                }
 
-                Button("Save") { save() }
-                    .buttonStyle(.borderedProminent)
+                // ── Action buttons ───────────────────────────────────────
+                HStack(spacing: 12) {
+                    Button("Cancel") {
+                        SettingsManager.shared.uiScale = originalUiScale
+                        onCancel()
+                    }
+                    .buttonStyle(.bordered)
                     .controlSize(.large)
-                    .disabled(!canSave)
-                    .keyboardShortcut(.return, modifiers: [])
+                    .keyboardShortcut(.escape, modifiers: [])
+                    // XCUITest identifier (AC-0324, US-0066)
+                    .accessibilityIdentifier("settingsCancelButton")
+
+                    Spacer()
+
+                    Button("Save") { save() }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.large)
+                        .disabled(!canSave)
+                        .keyboardShortcut(.return, modifiers: [])
+                }
+                .padding(.horizontal, 28)
+                .padding(.vertical, 20)
             }
-            .padding(.horizontal, 28)
-            .padding(.vertical, 20)
-        }
-        .frame(width: 480, height: min((NSScreen.main?.visibleFrame.height ?? 900) - 80, 820))
-        .background {
-            Rectangle().fill(.regularMaterial)
-        }
-        .onAppear { loadInitialState() }
-        .onChange(of: selectedCountry) { _, newCountry in
-            guard let country = newCountry else { return }
-            // Reset city when country changes
-            if selectedCity?.countryCode != country.code {
-                selectedCity = nil
+            .frame(width: 480, height: min((NSScreen.main?.visibleFrame.height ?? 900) - 80, 820))
+            .background {
+                Rectangle().fill(.regularMaterial)
             }
-            // US-0031: suggest method for new country (only if user hasn't overridden)
-            if !userOverrodeMethod {
-                selectedMethod = CalculationMethod.suggested(forCountryCode: country.code)
+            .onAppear { loadInitialState() }
+            .onChange(of: selectedCountry) { _, newCountry in
+                guard let country = newCountry else { return }
+                // Reset city when country changes
+                if selectedCity?.countryCode != country.code {
+                    selectedCity = nil
+                }
+                // US-0031: suggest method for new country (only if user hasn't overridden)
+                if !userOverrodeMethod {
+                    selectedMethod = CalculationMethod.suggested(forCountryCode: country.code)
+                }
+                recommendationLabel = CalculationMethod.recommendationLabel(forCountryCode: country.code)
             }
-            recommendationLabel = CalculationMethod.recommendationLabel(forCountryCode: country.code)
-        }
+        #endif
     }
+}
 
-    // MARK: - Helpers
+// MARK: - SettingsSheetView helpers (extracted to stay within type body length limit)
 
-    private func loadInitialState() {
-        launchAtLogin = SMAppService.mainApp.status == .enabled
+private extension SettingsSheetView {
+    func loadInitialState() {
+        #if os(macOS)
+            launchAtLogin = SMAppService.mainApp.status == .enabled
+        #endif
 
         // Load cities database
         if case let .success(db) = CitiesLoader.shared.load() {
@@ -444,11 +486,37 @@ struct SettingsSheetView: View {
         userOverrodeMethod = (currentMethod != suggested)
     }
 
-    private func save() {
+    func save() {
         guard let city = selectedCity else { return }
         SettingsManager.shared.use24HourTime = use24Hour
         SettingsManager.shared.appearance = selectedAppearance
         onSave(city, selectedMethod, selectedAsrMethod)
+    }
+}
+
+// MARK: - Hilal Watch settings (extracted to keep SettingsSheetView under line limit)
+
+private struct HilalWatchSettingsSection: View {
+    @ObservedObject private var settings = SettingsManager.shared
+
+    var body: some View {
+        Picker("Hijri Calendar", selection: $settings.hijriCalendarIdentifier) {
+            Text("Umm Al-Qura").tag("islamic-umalqura")
+            Text("Civil").tag("islamic-civil")
+            Text("Tabular").tag("islamic-tbla")
+        }
+
+        Stepper(
+            "Hijri day offset: \(settings.hijriDayOffset > 0 ? "+" : "")\(settings.hijriDayOffset)",
+            value: $settings.hijriDayOffset,
+            in: -2 ... 2
+        )
+
+        Toggle("Notify me on Hilal Watch evening", isOn: $settings.hilalNotificationEnabled)
+            .help("Receive a notification ~30 min before sunset on the 29th of the Hijri month")
+
+        Toggle("Live Activity (Dynamic Island)", isOn: $settings.liveActivityEnabled)
+            .help("Shows prayer countdown in Dynamic Island and on the lock screen all day")
     }
 }
 
