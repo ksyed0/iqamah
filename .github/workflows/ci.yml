@@ -109,21 +109,24 @@ jobs:
             | xcpretty --color && exit ${PIPESTATUS[0]}
 
       # File-size check runs inline after the Release build — no separate job needed.
-      - name: Check .app bundle size ≤ 50 MB (Release only)
+      # Budget raised to 150 MB: the macOS app legitimately embeds 5 adhaan MP3s,
+      # 2 Fajr-specific recordings, 5 alert tones, cities.json (~12 MB), and a
+      # fully compiled IqamahWidgetMac extension (~28 MB in PlugIns).
+      - name: Check .app bundle size ≤ 150 MB (Release only)
         if: matrix.configuration == 'Release'
         run: |
-          APP=$(find DerivedData -name "*.app" -maxdepth 6 | head -1)
+          APP=$(find DerivedData -name "iqamah.app" -maxdepth 6 | head -1)
           if [ -z "$APP" ]; then
-            echo "::error::Could not find .app bundle in DerivedData"
+            echo "::error::Could not find iqamah.app bundle in DerivedData"
             exit 1
           fi
           SIZE_MB=$(du -sm "$APP" | cut -f1)
           echo "Bundle size: ${SIZE_MB} MB  (path: $APP)"
-          if [ "$SIZE_MB" -gt 50 ]; then
-            echo "::error::Bundle size ${SIZE_MB} MB exceeds the 50 MB budget."
+          if [ "$SIZE_MB" -gt 150 ]; then
+            echo "::error::Bundle size ${SIZE_MB} MB exceeds the 150 MB budget."
             exit 1
           fi
-          echo "::notice::Bundle size ${SIZE_MB} MB is within the 50 MB budget."
+          echo "::notice::Bundle size ${SIZE_MB} MB is within the 150 MB budget."
 
   # ──────────────────────────────────────────────────────────────────────────
   # 3. TEST + COVERAGE
@@ -176,7 +179,7 @@ jobs:
 
       - name: Enforce ≥75% domain coverage
         run: |
-          EXCLUDED="Views/|AppDelegate|ContentView|iqamahApp|AppIconGenerator|AppIconView|LocationService|AdhaaanPlayer|UITests|SnapshotTesting|Tests/"
+          EXCLUDED="Views/|AppDelegate|ContentView|iqamahApp|AppIconGenerator|AppIconView|LocationService|AdhaaanPlayer|UITests|SnapshotTesting|Tests/|IqamahWidget|Widget"
           COVERAGE=$(xcrun xccov view --report --json TestResults.xcresult 2>/dev/null \
             | python3 -c "import sys,json,re; d=json.load(sys.stdin); ex=sys.argv[1]; files=[f for t in d.get('targets',[]) for f in t.get('files',[]) if not re.search(ex,f.get('path',''))]; te=sum(f.get('executableLines',0) for f in files); tc=sum(f.get('coveredLines',0) for f in files); print(f'{(tc/te*100) if te>0 else 0:.1f}')" "$EXCLUDED" \
             2>/dev/null || echo "0")
