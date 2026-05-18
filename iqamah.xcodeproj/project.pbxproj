@@ -279,6 +279,7 @@
 		MB000000000000000000BB01 /* MenuBarPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarPopoverView.swift; sourceTree = "<group>"; };
 		MW00000000000000000002 /* IqamahWidgetMac.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = IqamahWidgetMac.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		MW00000000000000000003 /* InfoMac.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = InfoMac.plist; sourceTree = "<group>"; };
+		MW00000000000000000004 /* IqamahWidgetMac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = IqamahWidgetMac.entitlements; sourceTree = "<group>"; };
 		PI000000000000000000AA01 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		SH00000000000000000000A /* HilalShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HilalShareSheet.swift; sourceTree = "<group>"; };
 		TT000000000000000000AA01 /* tone_glass.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; path = tone_glass.aiff; sourceTree = "<group>"; };
@@ -632,6 +633,7 @@
 				WV000000000000000000003R /* InlineWidgetView.swift */,
 				WV000000000000000000004R /* macOSLargeWidgetView.swift */,
 				MW00000000000000000003 /* InfoMac.plist */,
+				MW00000000000000000004 /* IqamahWidgetMac.entitlements */,
 				WG000000000000000000012 /* Info.plist */,
 				WG000000000000000000013 /* IqamahWidget.entitlements */,
 			);
@@ -1632,6 +1634,7 @@
 		MW00000000000000000020 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = IqamahWidget/IqamahWidgetMac.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 9;
 				DEAD_CODE_STRIPPING = YES;
@@ -1657,6 +1660,7 @@
 		MW00000000000000000021 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = IqamahWidget/IqamahWidgetMac.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 9;
 				DEAD_CODE_STRIPPING = YES;
