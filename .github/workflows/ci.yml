@@ -198,7 +198,46 @@ jobs:
           retention-days: 7
 
   # ──────────────────────────────────────────────────────────────────────────
-  # 4. PR TITLE — enforce Conventional Commits format
+  # 4. SNAPSHOT TESTS — visual regression gate on every PR
+  # Runs only the three snapshot test classes (fast, ~1-2 min).
+  # Full coverage reporting is handled by the "Test & Coverage" job above.
+  # AC-0347 (US-0069, EPIC-0015)
+  # ──────────────────────────────────────────────────────────────────────────
+  snapshot-tests:
+    name: Snapshot Tests
+    runs-on: macos-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode ${{ env.XCODE_VERSION }}
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+
+      - name: Run snapshot tests
+        run: |
+          xcodebuild test \
+            -project ${{ env.PROJECT }} \
+            -scheme ${{ env.SCHEME }} \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            -only-testing:iqamahTests/MoonPhaseSnapshotTests \
+            -only-testing:iqamahTests/QiblahCompassSnapshotTests \
+            -only-testing:iqamahTests/PrayerTimesTableSnapshotTests \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcpretty --color && exit ${PIPESTATUS[0]}
+
+      - name: Upload snapshot log on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: snapshot-tests-log
+          path: TestResults.xcresult
+          retention-days: 3
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 5. PR TITLE — enforce Conventional Commits format
   # ──────────────────────────────────────────────────────────────────────────
   pr-title:
     name: PR Title Convention
