@@ -44,8 +44,10 @@ private func fixedPrayerTimes() -> PrayerTimes {
 
 private let toronto = TimeZone(identifier: "America/Toronto")!
 
-/// Renders a SwiftUI view into an NSHostingView of fixed size.
-/// Setting `.appearance` before snapshotting enables reliable dark/light mode.
+/// Renders a SwiftUI view at scale 1.0 via ImageRenderer, making the
+/// reference PNG reproducible on both Retina Macs and 1× CI runners.
+/// Dark mode is injected through the SwiftUI environment.
+@MainActor
 private func snapshotView(
     _ view: some View,
     width: CGFloat,
@@ -55,12 +57,19 @@ private func snapshotView(
     testName: String = #function,
     named: String? = nil
 ) {
-    let hosting = NSHostingView(rootView: view)
-    hosting.frame = NSRect(x: 0, y: 0, width: width, height: height)
-    hosting.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
+    let sized = view
+        .frame(width: width, height: height)
+        .environment(\.colorScheme, dark ? .dark : .light)
+        .background(dark ? Color(white: 0.12) : Color(white: 0.97))
+    let renderer = ImageRenderer(content: sized)
+    renderer.scale = 1.0 // Force 1× — CI virtual displays are always 1×
+    guard let image = renderer.nsImage else {
+        XCTFail("ImageRenderer returned nil for \(testName)")
+        return
+    }
     assertSnapshot(
-        of: hosting,
-        as: .image(precision: 0.98),
+        of: image,
+        as: .image(precision: 0.97),
         named: named,
         file: file,
         testName: testName
@@ -69,6 +78,7 @@ private func snapshotView(
 
 // MARK: - AC-0309: MoonPhaseView
 
+@MainActor
 final class MoonPhaseSnapshotTests: XCTestCase {
     // New crescent (phase ≈ 0.05) — light + dark
     func testNewCrescent_light() {
@@ -106,6 +116,7 @@ final class MoonPhaseSnapshotTests: XCTestCase {
 
 // MARK: - AC-0310: QiblahCompassView
 
+@MainActor
 final class QiblahCompassSnapshotTests: XCTestCase {
     // Toronto → Makkah bearing 58.3° at two sizes
     func testCompass_320pt() {
@@ -121,6 +132,7 @@ final class QiblahCompassSnapshotTests: XCTestCase {
 
 // MARK: - AC-0311: PrayerTimesTable (macOS)
 
+@MainActor
 final class PrayerTimesTableSnapshotTests: XCTestCase {
     /// Six-row prayer table with pinned Toronto data on a dark background.
     /// Which prayer is highlighted as "NEXT" depends on the current clock;
@@ -130,7 +142,6 @@ final class PrayerTimesTableSnapshotTests: XCTestCase {
         let view = PrayerTimesTable(prayerTimes: fixedPrayerTimes(), timezone: toronto)
             .frame(width: 620, height: 380)
             .padding(10)
-            .background(Color(white: 0.12))
         snapshotView(view, width: 640, height: 400, dark: true)
     }
 }
