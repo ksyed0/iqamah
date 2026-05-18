@@ -8,7 +8,7 @@ import SnapshotTesting
 import SwiftUI
 import XCTest
 
-@testable import iqamah
+// @testable import iqamah  ← removed to test if this is the crash root cause
 
 final class MoonPhaseSnapshotTests: XCTestCase {
     func testPlaceholder() { XCTAssertTrue(true) }
