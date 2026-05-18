@@ -6,36 +6,33 @@
 //
 // ── Running ──────────────────────────────────────────────────────────────────
 // Normal:  xcodebuild test -scheme iqamah -destination 'platform=macOS'
-//          (run automatically by PR CI and nightly; diffs = test failure)
 // Record:  bash scripts/update-snapshots.sh
 //
+// ── Threading model ──────────────────────────────────────────────────────────
+// Xcode 26 / Swift 6 XCTest runs test methods on the cooperative thread pool
+// (NOT the main thread). All AppKit / SwiftUI rendering must be dispatched to
+// DispatchQueue.main explicitly; the assertions then happen back on the test
+// thread via XCTestExpectation.
+//
 // ── Why no @testable import ──────────────────────────────────────────────────
-// @testable import iqamah crashes the test process in CI because Swift 6's
-// strict concurrency runtime checks fire during iqamah module initialization
-// (actor-isolated singletons: SettingsManager.shared, AdhaaanPlayer.shared).
-// The three view types used here (MoonPhaseView, QiblahCompassView,
-// PrayerTimesTable) are therefore declared `public` in the app, allowing a
-// regular `import iqamah` which does NOT trigger the problematic initializers.
+// @testable import iqamah triggers a Swift 6 runtime actor-isolation crash
+// during iqamah module initialization.  MoonPhaseView, QiblahCompassView,
+// and PrayerTimesTable are declared `public` so a plain `import iqamah` works.
 //
 // ── Platform notes ───────────────────────────────────────────────────────────
-// AC-0309–AC-0311 (MoonPhaseView, QiblahCompassView, PrayerTimesTable)
-//   run in this macOS test target.
-//
-// AC-0312 (HilalExportCard) and AC-0313 (PrayerRowMobileView) are iOS-only
-// views.  Their snapshot tests will be wired into the iqamah-iOS scheme
-// during US-0067.
+// AC-0309–AC-0311 run in this macOS target.
+// AC-0312/0313 (iOS-only) deferred to US-0067.
 
 import AppKit
 import IqamahCore
 import SnapshotTesting
 import SwiftUI
 import XCTest
-import iqamah // public types only — see note above
+import iqamah // public types only
 
 // MARK: - Helpers
 
 /// Fixed prayer times (Toronto, ISNA, 21 Jun 2024 — summer solstice).
-/// Fajr 05:15 · Sunrise 06:38 · Dhuhr 12:11 · Asr 15:31 · Maghrib 17:44 · Isha 19:07
 private func fixedPrayerTimes() -> PrayerTimes {
     var cal = Calendar(identifier: .gregorian)
     cal.timeZone = TimeZone(identifier: "America/Toronto")!
@@ -43,117 +40,150 @@ private func fixedPrayerTimes() -> PrayerTimes {
     func at(_ h: Int, _ m: Int) -> Date {
         cal.date(bySettingHour: h, minute: m, second: 0, of: ref)!
     }
-    return PrayerTimes(
-        fajr: at(5, 15), sunrise: at(6, 38), dhuhr: at(12, 11),
-        asr: at(15, 31), maghrib: at(17, 44), isha: at(19, 7), date: ref
-    )
+    return PrayerTimes(fajr: at(5, 15), sunrise: at(6, 38), dhuhr: at(12, 11),
+                       asr: at(15, 31), maghrib: at(17, 44), isha: at(19, 7), date: ref)
 }
 
 private let toronto = TimeZone(identifier: "America/Toronto")!
 
-/// Renders a SwiftUI view at exactly scale 1.0 so the reference PNG is
-/// identical across Retina Macs and CI's 1× virtual display.
-///
-/// Uses `MainActor.assumeIsolated` — safe because XCTest unit test methods
-/// always run on the main thread (which IS the main actor's thread).
-private func renderAt1x(_ view: some View, width: CGFloat, height: CGFloat, dark: Bool) -> NSImage? {
-    MainActor.assumeIsolated {
-        let sized = view
-            .frame(width: width, height: height)
-            .environment(\.colorScheme, dark ? .dark : .light)
-            .background(dark ? Color(white: 0.12) : Color(white: 0.97))
-        let renderer = ImageRenderer(content: sized)
-        renderer.scale = 1.0
-        return renderer.nsImage
-    }
+/// Renders `view` on the MAIN QUEUE at 1× scale (1 logical point = 1 pixel)
+/// and calls `assertion` with the resulting `NSImage` on the main queue.
+/// Executes synchronously from the caller's perspective using XCTestExpectation.
+private func onMain(in test: XCTestCase,
+                    _ body: @escaping @Sendable (XCTestExpectation) -> Void) {
+    let exp = test.expectation(description: "main-queue rendering")
+    DispatchQueue.main.async { body(exp) }
+    test.waitForExpectations(timeout: 10)
+}
+
+/// Render a SwiftUI view into an NSImage at exactly 1× scale.
+/// MUST be called from DispatchQueue.main — use `onMain(in:)` to ensure this.
+private func render1x(_ view: some View, width: CGFloat, height: CGFloat, dark: Bool) -> NSImage? {
+    let sized = view
+        .frame(width: width, height: height)
+        .environment(\.colorScheme, dark ? .dark : .light)
+        .background(dark ? Color(white: 0.12) : Color(white: 0.97))
+    let hosting = NSHostingView(rootView: sized)
+    hosting.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
+    hosting.frame = NSRect(x: 0, y: 0, width: width, height: height)
+
+    // Create an explicit 1-point-per-pixel bitmap; the view has no window so
+    // bitmapImageRepForCachingDisplay uses the screen scale factor. Creating
+    // the bitmap rep manually bypasses that and forces 1× regardless of display.
+    guard let bmp = NSBitmapImageRep(bitmapDataPlanes: nil,
+                                     pixelsWide: Int(width), pixelsHigh: Int(height),
+                                     bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true,
+                                     isPlanar: false, colorSpaceName: .deviceRGB,
+                                     bytesPerRow: 0, bitsPerPixel: 0) else { return nil }
+    bmp.size = NSSize(width: width, height: height) // 1pt = 1px
+    guard let ctx = NSGraphicsContext(bitmapImageRep: bmp) else { return nil }
+    NSGraphicsContext.saveGraphicsState()
+    NSGraphicsContext.current = ctx
+    hosting.draw(hosting.bounds)
+    NSGraphicsContext.restoreGraphicsState()
+    let image = NSImage(size: NSSize(width: width, height: height))
+    image.addRepresentation(bmp)
+    return image
 }
 
 // MARK: - AC-0309: MoonPhaseView
 
 final class MoonPhaseSnapshotTests: XCTestCase {
-    private func snap(_ view: some View, width: CGFloat, height: CGFloat, dark: Bool,
-                      precision: Float, named: String,
-                      file: StaticString = #file, testName: String = #function) {
-        guard let image = renderAt1x(view, width: width, height: height, dark: dark) else {
-            XCTFail("renderAt1x returned nil", file: file)
-            return
-        }
-        assertSnapshot(of: image, as: .image(precision: precision),
-                       named: named, file: file, testName: testName)
-    }
-
     func testNewCrescent_light() {
-        snap(MoonPhaseView(phase: 0.05, size: 80), width: 80, height: 80, dark: false,
-             precision: 0.95, named: "newCrescent-light")
+        onMain(in: self) { exp in
+            if let img = render1x(MoonPhaseView(phase: 0.05, size: 80), width: 80, height: 80, dark: false) {
+                assertSnapshot(of: img, as: .image(precision: 0.95), named: "newCrescent-light")
+            } else { XCTFail("render returned nil") }
+            exp.fulfill()
+        }
     }
 
     func testNewCrescent_dark() {
-        snap(MoonPhaseView(phase: 0.05, size: 80), width: 80, height: 80, dark: true,
-             precision: 0.95, named: "newCrescent-dark")
+        onMain(in: self) { exp in
+            if let img = render1x(MoonPhaseView(phase: 0.05, size: 80), width: 80, height: 80, dark: true) {
+                assertSnapshot(of: img, as: .image(precision: 0.95), named: "newCrescent-dark")
+            } else { XCTFail("render returned nil") }
+            exp.fulfill()
+        }
     }
 
     func testFullMoon_light() {
-        snap(MoonPhaseView(phase: 0.50, size: 80), width: 80, height: 80, dark: false,
-             precision: 0.95, named: "fullMoon-light")
+        onMain(in: self) { exp in
+            if let img = render1x(MoonPhaseView(phase: 0.50, size: 80), width: 80, height: 80, dark: false) {
+                assertSnapshot(of: img, as: .image(precision: 0.95), named: "fullMoon-light")
+            } else { XCTFail("render returned nil") }
+            exp.fulfill()
+        }
     }
 
     func testFullMoon_dark() {
-        snap(MoonPhaseView(phase: 0.50, size: 80), width: 80, height: 80, dark: true,
-             precision: 0.95, named: "fullMoon-dark")
+        onMain(in: self) { exp in
+            if let img = render1x(MoonPhaseView(phase: 0.50, size: 80), width: 80, height: 80, dark: true) {
+                assertSnapshot(of: img, as: .image(precision: 0.95), named: "fullMoon-dark")
+            } else { XCTFail("render returned nil") }
+            exp.fulfill()
+        }
     }
 
     func testWaningCrescent_light() {
-        snap(MoonPhaseView(phase: 0.82, size: 80), width: 80, height: 80, dark: false,
-             precision: 0.95, named: "waningCrescent-light")
+        onMain(in: self) { exp in
+            if let img = render1x(MoonPhaseView(phase: 0.82, size: 80), width: 80, height: 80, dark: false) {
+                assertSnapshot(of: img, as: .image(precision: 0.95), named: "waningCrescent-light")
+            } else { XCTFail("render returned nil") }
+            exp.fulfill()
+        }
     }
 
     func testWaningCrescent_dark() {
-        snap(MoonPhaseView(phase: 0.82, size: 80), width: 80, height: 80, dark: true,
-             precision: 0.95, named: "waningCrescent-dark")
+        onMain(in: self) { exp in
+            if let img = render1x(MoonPhaseView(phase: 0.82, size: 80), width: 80, height: 80, dark: true) {
+                assertSnapshot(of: img, as: .image(precision: 0.95), named: "waningCrescent-dark")
+            } else { XCTFail("render returned nil") }
+            exp.fulfill()
+        }
     }
 }
 
 // MARK: - AC-0310: QiblahCompassView
 
 final class QiblahCompassSnapshotTests: XCTestCase {
-    // Toronto → Makkah bearing 58.3° at two sizes
     func testCompass_320pt() {
-        guard let image = renderAt1x(QiblahCompassView(diameter: 320, bearing: 58.3),
-                                     width: 320, height: 320, dark: false) else {
-            XCTFail("renderAt1x returned nil"); return
+        onMain(in: self) { exp in
+            if let img = render1x(QiblahCompassView(diameter: 320, bearing: 58.3), width: 320, height: 320, dark: false) {
+                assertSnapshot(of: img, as: .image(precision: 0.92), named: "compass-320")
+            } else { XCTFail("render returned nil") }
+            exp.fulfill()
         }
-        assertSnapshot(of: image, as: .image(precision: 0.92), named: "compass-320")
     }
 
     func testCompass_600pt() {
-        guard let image = renderAt1x(QiblahCompassView(diameter: 600, bearing: 58.3),
-                                     width: 600, height: 600, dark: false) else {
-            XCTFail("renderAt1x returned nil"); return
+        onMain(in: self) { exp in
+            if let img = render1x(QiblahCompassView(diameter: 600, bearing: 58.3), width: 600, height: 600, dark: false) {
+                assertSnapshot(of: img, as: .image(precision: 0.92), named: "compass-600")
+            } else { XCTFail("render returned nil") }
+            exp.fulfill()
         }
-        assertSnapshot(of: image, as: .image(precision: 0.92), named: "compass-600")
     }
 }
 
 // MARK: - AC-0311: PrayerTimesTable (macOS)
 
 final class PrayerTimesTableSnapshotTests: XCTestCase {
-    /// Six-row prayer table with pinned Toronto data.
-    /// Which prayer is highlighted as "NEXT" depends on the current clock;
-    /// this test catches STRUCTURAL regressions (layout, fonts, spacing) rather
-    /// than specific highlighted states.
     func testPrayerTimesTable_dark() {
-        let view = PrayerTimesTable(prayerTimes: fixedPrayerTimes(), timezone: toronto)
-            .frame(width: 620, height: 380)
-            .padding(10)
-        guard let image = renderAt1x(view, width: 640, height: 400, dark: true) else {
-            XCTFail("renderAt1x returned nil"); return
+        let times = fixedPrayerTimes()
+        onMain(in: self) { exp in
+            let view = PrayerTimesTable(prayerTimes: times, timezone: toronto)
+                .frame(width: 620, height: 380).padding(10)
+            if let img = render1x(view, width: 640, height: 400, dark: true) {
+                assertSnapshot(of: img, as: .image(precision: 0.90))
+            } else { XCTFail("render returned nil") }
+            exp.fulfill()
         }
-        assertSnapshot(of: image, as: .image(precision: 0.90))
     }
 }
 
 // MARK: - AC-0312 & AC-0313: iOS-only views
 
 //
-// HilalExportCard and PrayerRowMobileView are #if os(iOS) types and cannot
-// be rendered in this macOS test target.  CI wiring deferred to US-0067.
+// HilalExportCard and PrayerRowMobileView are #if os(iOS) types.
+// CI wiring deferred to US-0067.
