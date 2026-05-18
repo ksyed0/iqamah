@@ -216,7 +216,8 @@ private struct Triangle: Shape {
 
 /// Self-contained compass that scales to any diameter.
 /// All element sizes are proportional to the radius (diameter / 2).
-private struct QiblahCompassView: View {
+/// Internal so snapshot tests can render it directly (AC-0310, US-0065).
+struct QiblahCompassView: View {
     let diameter: CGFloat
     let bearing: Double
 
