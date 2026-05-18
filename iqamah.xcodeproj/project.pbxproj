@@ -67,6 +67,12 @@
 		WA000000000000000000020 /* IqamahCore in Frameworks */ = {isa = PBXBuildFile; productRef = WA000000000000000000030 /* IqamahCore */; };
 		WA000000000000000000050 /* IqamahWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000050R /* IqamahWatchApp.swift */; };
 		WA000000000000000000060 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000061 /* Assets.xcassets */; };
+		MW00000000000000000080 /* IqamahWidget.swift in Sources (Mac) */ = {isa = PBXBuildFile; fileRef = WG000000000000000000011 /* IqamahWidget.swift */; };
+		MW00000000000000000081 /* macOSLargeWidgetView.swift in Sources (Mac) */ = {isa = PBXBuildFile; fileRef = WV000000000000000000004R /* macOSLargeWidgetView.swift */; };
+		MW00000000000000000082 /* IqamahCore in Frameworks (Mac) */ = {isa = PBXBuildFile; productRef = MW00000000000000000030 /* IqamahCore */; };
+		MW00000000000000000086 /* LargeWidgetView.swift in Sources (Mac) */ = {isa = PBXBuildFile; fileRef = WV000000000000000000001R /* LargeWidgetView.swift */; };
+		MW00000000000000000087 /* CircularWidgetView.swift in Sources (Mac) */ = {isa = PBXBuildFile; fileRef = WV000000000000000000002R /* CircularWidgetView.swift */; };
+		MW00000000000000000088 /* InlineWidgetView.swift in Sources (Mac) */ = {isa = PBXBuildFile; fileRef = WV000000000000000000003R /* InlineWidgetView.swift */; };
 		WG000000000000000000021 /* IqamahWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = WG000000000000000000011 /* IqamahWidget.swift */; };
 		WG000000000000000000031 /* IqamahCore in Frameworks */ = {isa = PBXBuildFile; productRef = WG000000000000000000032 /* IqamahCore */; };
 		WG000000000000000000041 /* IqamahWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = WG000000000000000000042 /* IqamahWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -320,6 +326,14 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		MW00000000000000000084 /* Frameworks (Mac Widget) */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				MW00000000000000000082 /* IqamahCore in Frameworks (Mac) */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		wOSUITests00000000000007 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -783,6 +797,9 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = MW00000000000000000022 /* Build configuration list for PBXNativeTarget "IqamahWidgetMac" */;
 			buildPhases = (
+				MW00000000000000000083 /* Sources (Mac Widget) */,
+				MW00000000000000000084 /* Frameworks (Mac Widget) */,
+				MW00000000000000000085 /* Resources (Mac Widget) */,
 			);
 			buildRules = (
 			);
@@ -955,6 +972,13 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		MW00000000000000000085 /* Resources (Mac Widget) */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		wOSUITests00000000000008 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1034,6 +1058,18 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		MW00000000000000000083 /* Sources (Mac Widget) */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				MW00000000000000000080 /* IqamahWidget.swift in Sources (Mac) */,
+				MW00000000000000000081 /* macOSLargeWidgetView.swift in Sources (Mac) */,
+				MW00000000000000000086 /* LargeWidgetView.swift in Sources (Mac) */,
+				MW00000000000000000087 /* CircularWidgetView.swift in Sources (Mac) */,
+				MW00000000000000000088 /* InlineWidgetView.swift in Sources (Mac) */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		wOSUITests00000000000006 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
