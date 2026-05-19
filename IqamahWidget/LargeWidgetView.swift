@@ -4,7 +4,14 @@ import WidgetKit
 
 struct LargeWidgetView: View {
     let entry: PrayerEntry
-    private let gold = Color(red: 1.0, green: 0.839, blue: 0.039)
+    @Environment(\.colorScheme) private var colorScheme
+
+    // Matches Color.appGold (dark) / Color.appGoldDark (light) from the main app.
+    private var gold: Color {
+        colorScheme == .dark
+            ? Color(red: 0.88, green: 0.69, blue: 0.06)
+            : Color(red: 0.54, green: 0.37, blue: 0.00)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
