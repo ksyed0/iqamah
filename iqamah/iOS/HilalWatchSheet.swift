@@ -225,7 +225,9 @@
 
             // 4. Build share payload — image + text fallback
             let text = "Hilal Watch · \(evening) · \(String(format: "%.0f%%", Double(aCount) / Double(total) * 100)) of globe easily visible · via Iqamah"
-            exportItems = [image, text].compactMap { $0 as AnyObject }
+            var items: [Any] = [text]
+            if let img = image { items.insert(img, at: 0) }
+            exportItems = items
         }
     }
 
