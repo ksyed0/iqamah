@@ -49,10 +49,32 @@ struct PrayerTimelineProvider: TimelineProvider {
 
     func getTimeline(in _: Context, completion: @escaping (Timeline<PrayerEntry>) -> Void) {
         let now = Date()
-        let entry = makeEntry(for: now)
-        // Refresh after next prayer time (or in 1 hour if no prayer found)
-        let nextRefresh = entry.nextPrayerTime > now ? entry.nextPrayerTime : now.addingTimeInterval(3600)
-        completion(Timeline(entries: [entry], policy: .after(nextRefresh)))
+
+        // Generate one entry per prayer transition for today + tomorrow.
+        // WidgetKit reads entries from local cache at the right moment — no
+        // background wake needed. Using .atEnd asks WidgetKit to call
+        // getTimeline again once all entries expire (after tomorrow's last prayer).
+        var entries: [PrayerEntry] = [makeEntry(for: now)] // "right now" entry
+
+        let settings = SettingsManager.shared
+        if let coord = settings.activeCoordinate,
+           let timezone = TimeZone(identifier: settings.activeTimezoneIdentifier) {
+            let calc = PrayerCalculator(
+                coordinate: coord, timezone: timezone,
+                method: settings.calculationMethod, asrMethod: settings.asrMethod
+            )
+            for dayOffset in 0 ... 1 {
+                guard let day = Calendar.current.date(byAdding: .day, value: dayOffset, to: now),
+                      let times = try? calc.calculate(for: day)
+                else { continue }
+                for prayer in times.prayers where prayer.name != "Sunrise" && prayer.time > now {
+                    // Each entry becomes active exactly when that prayer starts.
+                    entries.append(makeEntry(for: prayer.time))
+                }
+            }
+        }
+
+        completion(Timeline(entries: entries, policy: .atEnd))
     }
 
     private func makeEntry(for date: Date) -> PrayerEntry {
@@ -198,12 +220,12 @@ struct IqamahWidget: Widget {
     // iOS/iPadOS also support ExtraLarge and lock-screen accessory families.
     private static var supportedFamilies: [WidgetFamily] {
         #if os(macOS)
-        return [.systemSmall, .systemMedium, .systemLarge]
+            return [.systemSmall, .systemMedium, .systemLarge]
         #else
-        return [
-            .systemSmall, .systemMedium, .systemLarge, .systemExtraLarge,
-            .accessoryRectangular, .accessoryCircular, .accessoryInline,
-        ]
+            return [
+                .systemSmall, .systemMedium, .systemLarge, .systemExtraLarge,
+                .accessoryRectangular, .accessoryCircular, .accessoryInline,
+            ]
         #endif
     }
 
