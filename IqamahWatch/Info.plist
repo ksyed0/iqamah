@@ -20,5 +20,7 @@
     <string>Iqamah uses the compass to show the Qibla direction.</string>
     <key>WKApplication</key>
     <true/>
+    <key>WKCompanionAppBundleIdentifier</key>
+    <string>com.fablesoft.iqamah</string>
 </dict>
 </plist>
