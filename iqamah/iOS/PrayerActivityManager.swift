@@ -23,7 +23,8 @@
             guard let state = buildContentState(settings: settings) else { return }
 
             if let activity = currentActivity {
-                await activity.update(using: state, alertConfiguration: nil)
+                // Use iOS 16.2+ API (update(_:alertConfiguration:))
+                await activity.update(ActivityContent(state: state, staleDate: nil))
             } else {
                 let attributes = PrayerActivityAttributes(
                     cityName: settings.activeCityName,
@@ -32,8 +33,7 @@
                 do {
                     currentActivity = try Activity.request(
                         attributes: attributes,
-                        contentState: state,
-                        pushType: nil
+                        content: ActivityContent(state: state, staleDate: nil)
                     )
                 } catch {
                     print("[PrayerActivityManager] Failed to start activity: \(error)")
@@ -42,7 +42,9 @@
         }
 
         func endActivity() async {
-            await currentActivity?.end(using: nil, dismissalPolicy: .immediate)
+            if let activity = currentActivity {
+                await activity.end(ActivityContent(state: activity.content.state, staleDate: nil), dismissalPolicy: .immediate)
+            }
             currentActivity = nil
         }
 
