@@ -42,7 +42,9 @@
         }
 
         func endActivity() async {
-            await currentActivity?.end(ActivityContent(state: currentActivity!.content.state, staleDate: nil), dismissalPolicy: .immediate)
+            if let activity = currentActivity {
+                await activity.end(ActivityContent(state: activity.content.state, staleDate: nil), dismissalPolicy: .immediate)
+            }
             currentActivity = nil
         }
 
