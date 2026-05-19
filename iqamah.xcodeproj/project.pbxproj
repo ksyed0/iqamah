@@ -64,6 +64,8 @@
 		WA000000000000000000014 /* SettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000014R /* SettingsTab.swift */; };
 		WA000000000000000000015 /* WatchNotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000015R /* WatchNotificationScheduler.swift */; };
 		WA000000000000000000016 /* WatchSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000016R /* WatchSessionManager.swift */; };
+		EW000000000000000000001 /* IqamahWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 94594CE92FB2C01D00D1AD1C /* IqamahWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		EW000000000000000000002 /* IqamahWatchWidget.appex in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 94594CE82FB2C01D00D1AD1C /* IqamahWatchWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		WA000000000000000000020 /* IqamahCore in Frameworks */ = {isa = PBXBuildFile; productRef = WA000000000000000000030 /* IqamahCore */; };
 		WA000000000000000000050 /* IqamahWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000050R /* IqamahWatchApp.swift */; };
 		WA000000000000000000060 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000061 /* Assets.xcassets */; };
@@ -121,6 +123,20 @@
 		/* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		EW000000000000000000003 /* PBXContainerItemProxy (IqamahWatch) */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA0000000000000000000050 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = WA000000000000000000001;
+			remoteInfo = IqamahWatch;
+		};
+		EW000000000000000000004 /* PBXContainerItemProxy (IqamahWatchWidget) */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA0000000000000000000050 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = WW000000000000000000001;
+			remoteInfo = IqamahWatchWidget;
+		};
 		wOSUITests00000000000001 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = AA0000000000000000000050 /* Project object */;
@@ -180,6 +196,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		EW000000000000000000005 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				EW000000000000000000001 /* IqamahWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		MW00000000000000000060 /* Embed Mac Widget Extension */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -904,11 +931,14 @@
 				iOS0000000000000000000041 /* Frameworks */,
 				iOS0000000000000000000043 /* Resources */,
 				WG000000000000000000090 /* Embed Foundation Extensions */,
+				EW000000000000000000005 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				WG000000000000000000052 /* PBXTargetDependency */,
+				EW000000000000000000006 /* PBXTargetDependency (IqamahWatch) */,
+				EW000000000000000000007 /* PBXTargetDependency (IqamahWatchWidget) */,
 			);
 			name = "iqamah-iOS";
 			packageProductDependencies = (
@@ -1234,6 +1264,16 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		EW000000000000000000006 /* PBXTargetDependency (IqamahWatch) */ = {
+			isa = PBXTargetDependency;
+			target = WA000000000000000000001 /* IqamahWatch */;
+			targetProxy = EW000000000000000000003 /* PBXContainerItemProxy (IqamahWatch) */;
+		};
+		EW000000000000000000007 /* PBXTargetDependency (IqamahWatchWidget) */ = {
+			isa = PBXTargetDependency;
+			target = WW000000000000000000001 /* IqamahWatchWidget */;
+			targetProxy = EW000000000000000000004 /* PBXContainerItemProxy (IqamahWatchWidget) */;
+		};
 		wOSUITests00000000000002 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = WA000000000000000000001 /* IqamahWatch */;
