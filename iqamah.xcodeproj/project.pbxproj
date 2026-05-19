@@ -1737,6 +1737,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.fablesoft.iqamah.watch;
 				PRODUCT_NAME = IqamahWatch;
 				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.10;
 				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
@@ -1755,6 +1756,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.fablesoft.iqamah.watch;
 				PRODUCT_NAME = IqamahWatch;
 				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.10;
 				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
