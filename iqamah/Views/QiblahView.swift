@@ -1,3 +1,4 @@
+import CoreLocation
 import SwiftUI
 
 struct QiblahView: View {
@@ -36,6 +37,8 @@ struct QiblahView: View {
     @Environment(\.dismiss) private var dismiss
     #if os(iOS)
         @Environment(\.horizontalSizeClass) private var hSizeClass
+        // Live compass heading — rotates the ring so the Mecca marker tracks physical direction
+        @StateObject private var headingObserver = QiblahHeadingObserver()
     #endif
 
     var body: some View {
@@ -79,6 +82,8 @@ struct QiblahView: View {
                 }
             }
             .background { Rectangle().fill(.regularMaterial) }
+            .onAppear { headingObserver.start() }
+            .onDisappear { headingObserver.stop() }
         #else
             macOSQibla
         #endif
@@ -108,6 +113,9 @@ struct QiblahView: View {
                 GeometryReader { geo in
                     let diameter = min(geo.size.width, geo.size.height) * 0.85
                     QiblahCompassView(diameter: diameter, bearing: qiblahBearing)
+                        // Rotate the ring by -heading so the Ka'bah marker tracks physical Mecca
+                        .rotationEffect(.degrees(-(headingObserver.currentHeading ?? 0)))
+                        .animation(.easeInOut(duration: 0.12), value: headingObserver.currentHeading)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         // XCUITest identifier (AC-0333, US-0067)
                         .accessibilityIdentifier("qiblahCompass")
@@ -124,6 +132,8 @@ struct QiblahView: View {
                 GeometryReader { inner in
                     let diameter = min(inner.size.width, inner.size.height) * 0.88
                     QiblahCompassView(diameter: diameter, bearing: qiblahBearing)
+                        .rotationEffect(.degrees(-(headingObserver.currentHeading ?? 0)))
+                        .animation(.easeInOut(duration: 0.12), value: headingObserver.currentHeading)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -446,3 +456,34 @@ struct PrayerMatIcon: View {
             .frame(width: size * 0.65, height: size)
     }
 }
+
+// MARK: - Live Heading (iOS only)
+
+#if os(iOS)
+    /// Subscribes to CLLocationManager heading updates and publishes the
+    /// device's true (or magnetic) heading in degrees [0, 360).
+    /// Used by QiblahView to rotate the compass ring so the Ka'bah marker
+    /// always points toward physical Mecca as the user turns their phone.
+    @MainActor
+    final class QiblahHeadingObserver: NSObject, ObservableObject, CLLocationManagerDelegate {
+        @Published var currentHeading: Double?
+        private let manager = CLLocationManager()
+
+        func start() {
+            guard CLLocationManager.headingAvailable() else { return }
+            manager.delegate = self
+            manager.headingFilter = 1 // update when heading changes by ≥ 1°
+            manager.startUpdatingHeading()
+        }
+
+        func stop() {
+            manager.stopUpdatingHeading()
+        }
+
+        nonisolated func locationManager(_: CLLocationManager, didUpdateHeading heading: CLHeading) {
+            // Prefer true heading (requires location fix); fall back to magnetic.
+            let value = heading.trueHeading >= 0 ? heading.trueHeading : heading.magneticHeading
+            Task { @MainActor in self.currentHeading = value }
+        }
+    }
+#endif
