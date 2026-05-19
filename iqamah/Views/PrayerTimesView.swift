@@ -186,7 +186,38 @@ struct PrayerTimesView: View {
 
                 Spacer()
 
-                // Mute — the one action important enough for the primary header
+                // ── Qiblah / Settings / About — in header on macOS ──
+                #if os(macOS)
+                    HStack(spacing: 2) {
+                        Button(action: { showQiblah = true }) {
+                            Image(systemName: "location.north.line.fill")
+                                .font(.title3)
+                        }
+                        .buttonStyle(.plain)
+                        .help("Qiblah direction")
+                        .accessibilityLabel("Show Qiblah direction")
+
+                        Button(action: { showSettings = true }) {
+                            Image(systemName: "gearshape")
+                                .font(.title3)
+                        }
+                        .buttonStyle(.plain)
+                        .help("Settings")
+                        .accessibilityLabel("Open settings")
+                        .keyboardShortcut(",", modifiers: .command)
+
+                        Button(action: { showAbout = true }) {
+                            Image(systemName: "info.circle")
+                                .font(.title3)
+                        }
+                        .buttonStyle(.plain)
+                        .help("About Iqamah")
+                        .accessibilityLabel("About Iqamah")
+                    }
+                    .padding(.trailing, 8)
+                #endif
+
+                // Mute button
                 Button(action: { AdhaaanPlayer.shared.toggleMute() }) {
                     Image(systemName: AdhaaanPlayer.shared.isMuted
                         ? "speaker.slash.fill" : "speaker.wave.2.fill")
@@ -201,39 +232,6 @@ struct PrayerTimesView: View {
             .padding(.horizontal, 22)
             .padding(.top, 16)
             .padding(.bottom, 10)
-            .background {
-                Rectangle().fill(.ultraThinMaterial)
-            }
-
-            // ── Secondary toolbar: navigation actions + Hijri date ───
-            // On iOS, Qiblah and Settings are in the tab bar — only About is unique here.
-            HStack(spacing: 0) {
-                #if os(macOS)
-                    SecondaryToolbarButton(
-                        label: "Qiblah",
-                        systemImage: "location.north.line.fill",
-                        action: { showQiblah = true }
-                    )
-                    .accessibilityLabel("Show Qiblah direction")
-
-                    SecondaryToolbarButton(
-                        label: "Settings",
-                        systemImage: "gearshape",
-                        action: { showSettings = true }
-                    )
-                    .accessibilityLabel("Open settings")
-                    .keyboardShortcut(",", modifiers: .command)
-                #endif
-
-                SecondaryToolbarButton(
-                    label: "About",
-                    systemImage: "info.circle",
-                    action: { showAbout = true }
-                )
-                .accessibilityLabel("About Iqamah")
-
-                Spacer()
-            }
             .background {
                 Rectangle().fill(.ultraThinMaterial)
             }
@@ -329,6 +327,9 @@ struct PrayerTimesView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .openSettings)) { _ in
             showSettings = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .openAbout)) { _ in
+            showAbout = true
         }
         // Recalculate when the app returns to foreground so "NEXT" label
         // reflects the current time even after a long background session.

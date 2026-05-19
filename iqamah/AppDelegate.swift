@@ -331,6 +331,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         settingsItem.target = self
         menu.addItem(settingsItem)
 
+        let aboutItem = NSMenuItem(title: "About Iqamah", action: #selector(openAboutFromMenu), keyEquivalent: "")
+        aboutItem.target = self
+        menu.addItem(aboutItem)
+
         menu.addItem(NSMenuItem.separator())
 
         let quitItem = NSMenuItem(title: "Quit Iqamah", action: #selector(quitApp), keyEquivalent: "q")
@@ -424,6 +428,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         showWindow()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             NotificationCenter.default.post(name: .openSettings, object: nil)
+        }
+    }
+
+    @objc func openAboutFromMenu() {
+        showWindow()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            NotificationCenter.default.post(name: .openAbout, object: nil)
         }
     }
 

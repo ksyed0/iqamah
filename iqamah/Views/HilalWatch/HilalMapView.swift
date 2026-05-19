@@ -9,7 +9,15 @@ import IqamahCore
 
         func makeNSView(context: Context) -> MKMapView {
             let map = MKMapView()
-            map.mapType = .mutedStandard
+            // MKStandardMapConfiguration with .default emphasis renders continent
+            // labels in bold black instead of the muted-standard pink/light style.
+            if #available(macOS 13.0, *) {
+                let config = MKStandardMapConfiguration(elevationStyle: .flat)
+                config.emphasisStyle = .default
+                map.preferredConfiguration = config
+            } else {
+                map.mapType = .mutedStandard
+            }
             map.delegate = context.coordinator
             return map
         }
