@@ -330,6 +330,14 @@ struct PrayerTimesView: View {
         .onReceive(NotificationCenter.default.publisher(for: .openSettings)) { _ in
             showSettings = true
         }
+        // Recalculate when the app returns to foreground so "NEXT" label
+        // reflects the current time even after a long background session.
+        .onReceive(NotificationCenter.default.publisher(for: .refreshPrayerTimes)) { _ in
+            currentDate = Date()
+            calculatePrayerTimes()
+            timerSubscription?.cancel()
+            timerSubscription = timer.connect()
+        }
     }
 
     // MARK: - Next Prayer Helpers (iOS)

@@ -50,6 +50,9 @@ struct IqamahiOSApp: App {
                 .onChange(of: scenePhase) { _, phase in
                     if phase == .active {
                         reschedule()
+                        reloadWidget()
+                        // Tell PrayerTimesView to recalculate so "NEXT" label is current
+                        NotificationCenter.default.post(name: .refreshPrayerTimes, object: nil)
                         // Pre-compute Hilal grid in background so sheet opens instantly
                         HilalWatchPreloader.shared.prefetch(settings: settings)
                         if settings.liveActivityEnabled {
