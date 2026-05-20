@@ -3,8 +3,7 @@ import SwiftUI
 
 // MARK: - Prayer Row Identifier
 
-/// Identifies a unique row across two columns (today/tomorrow).
-/// `dayOffset` = 0 for today, 1 for tomorrow — used in iPad landscape.
+/// Identifies a unique row across two columns; `dayOffset` 0=today, 1=tomorrow.
 struct PrayerRowID: Hashable {
     let dayOffset: Int
     let name: String
@@ -12,7 +11,7 @@ struct PrayerRowID: Hashable {
 
 // MARK: - Prayer Times Table
 
-/// Public so snapshot tests can reference it directly without @testable import (AC-0311, US-0065).
+/// Public so snapshot tests can reach it without @testable import.
 public struct PrayerTimesTable: View {
     public let prayerTimes: PrayerTimes
     public let timezone: TimeZone
@@ -20,6 +19,8 @@ public struct PrayerTimesTable: View {
     var dayOffset: Int = 0
     /// Shared across columns in iPad landscape so only one row is open at a time.
     @Binding var expandedRowID: PrayerRowID?
+    /// Passed from parent's 60 s timer — forces re-render so NEXT badge advances.
+    var now: Date = Date()
 
     @State private var adjustments: [String: Int] = [:]
     @State private var adhaanSelections: [String: Adhaan] = [:]
@@ -27,16 +28,16 @@ public struct PrayerTimesTable: View {
     @ObservedObject private var settingsManager = SettingsManager.shared
     @ObservedObject private var player = AdhaaanPlayer.shared
 
-    /// Snapshot-test entry point (AC-0311, US-0065) — no shared expand state.
+    /// Snapshot-test entry point — no shared expand state.
     public init(prayerTimes: PrayerTimes, timezone: TimeZone) {
         self.init(prayerTimes: prayerTimes, timezone: timezone, dayOffset: 0, expandedRowID: .constant(nil))
     }
 
-    /// Full initialiser used internally and in tests.
+    /// Full initialiser.
     init(prayerTimes: PrayerTimes, timezone: TimeZone, dayOffset: Int = 0,
-         expandedRowID: Binding<PrayerRowID?> = .constant(nil)) {
+         expandedRowID: Binding<PrayerRowID?> = .constant(nil), now: Date = Date()) {
         self.prayerTimes = prayerTimes; self.timezone = timezone
-        self.dayOffset = dayOffset; _expandedRowID = expandedRowID
+        self.dayOffset = dayOffset; _expandedRowID = expandedRowID; self.now = now
     }
 
     private var timeFormatter: DateFormatter {
@@ -54,7 +55,7 @@ public struct PrayerTimesTable: View {
                         name: prayer.name,
                         time: adjusted,
                         formatter: timeFormatter,
-                        isPast: adjusted < Date(),
+                        isPast: adjusted < now,
                         isNext: isNextPrayer(adjustedTime: adjusted),
                         selectedAdhaan: adhaanSelections[prayer.name] ?? .silent,
                         isMuted: prayerMuted[prayer.name] ?? false,
@@ -169,9 +170,8 @@ public struct PrayerTimesTable: View {
         settingsManager.setAdjustment(newAdjustment, for: prayerName)
     }
 
-    // BUG-0015: compare adjusted times so this matches the status bar highlight
+    // BUG-0015: use `now` (parent timer) so NEXT badge advances automatically.
     private func isNextPrayer(adjustedTime: Date) -> Bool {
-        let now = Date()
         for prayer in prayerTimes.prayers {
             guard prayer.name != "Sunrise" else { continue } // Sunrise is not a prayer
             let adj = self.adjustedTime(for: prayer)

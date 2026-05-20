@@ -72,43 +72,63 @@ struct HilalWatchView: View {
 
     // MARK: - Header
 
+    private func pickerLabel(_ text: String) -> some View {
+        Text(text.uppercased())
+            .font(.system(size: 9, weight: .semibold))
+            .foregroundStyle(.secondary)
+            .tracking(0.5)
+    }
+
     private var header: some View {
-        HStack(spacing: 12) {
-            VStack(alignment: .leading, spacing: 2) {
+        HStack(spacing: 16) {
+            // Title block
+            VStack(alignment: .leading, spacing: 3) {
                 Text("Hilal Watch")
-                    .font(.headline)
+                    .font(.system(size: 24, weight: .semibold))
                 Text(monthLabel)
-                    .font(.caption)
+                    .font(.callout)
                     .foregroundStyle(.secondary)
             }
 
             Spacer()
 
-            // Evening tab picker
-            Picker("Evening", selection: $selectedEvening) {
-                Text("29th").tag(Evening.d29)
-                Text("30th").tag(Evening.d30)
+            // Evening picker — label above buttons
+            VStack(spacing: 4) {
+                pickerLabel("Evening")
+                Picker("", selection: $selectedEvening) {
+                    Text("29th").tag(Evening.d29)
+                    Text("30th").tag(Evening.d30)
+                }
+                .pickerStyle(.segmented)
+                .frame(width: 120)
             }
-            .pickerStyle(.segmented)
-            .frame(maxWidth: 120)
 
-            HilalCriterionPicker(selectedCriterion: $selectedCriterion)
-
-            Button {
-                showShareSheet = true
-            } label: {
-                Image(systemName: "square.and.arrow.up")
+            // Criterion picker — label above buttons
+            VStack(spacing: 4) {
+                pickerLabel("Criterion")
+                HilalCriterionPicker(selectedCriterion: $selectedCriterion)
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Share Hilal Map")
 
-            Button {
-                withAnimation { showAbout.toggle() }
-            } label: {
-                Image(systemName: "info.circle")
+            // Action buttons
+            HStack(spacing: 10) {
+                Button {
+                    showShareSheet = true
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 14))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Share Hilal Map")
+
+                Button {
+                    withAnimation { showAbout.toggle() }
+                } label: {
+                    Image(systemName: "info.circle")
+                        .font(.system(size: 14))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("About Hilal Watch")
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel("About Hilal Watch")
         }
     }
 

@@ -24,6 +24,12 @@ struct PrayerTimesView: View {
     // AC-0064: scale the serif title with the user's Dynamic Type size preference
     @ScaledMetric(relativeTo: .title3) private var titleFontSize: CGFloat = 28
 
+    /// GPS locality name when active, otherwise the nearest mapped city name.
+    private var displayCityName: String {
+        let name = settingsStore.activeCityName
+        return name.isEmpty ? city.name : name
+    }
+
     private let timer = Timer.publish(every: 60, on: .main, in: .common)
 
     // MARK: - Body
@@ -81,7 +87,8 @@ struct PrayerTimesView: View {
                             prayerTimes: times,
                             timezone: tz,
                             dayOffset: 0,
-                            expandedRowID: $expandedRowID
+                            expandedRowID: $expandedRowID,
+                            now: currentDate
                         )
                         .padding(.horizontal, 12)
                         .padding(.bottom, 16)
@@ -109,7 +116,7 @@ struct PrayerTimesView: View {
                         startPoint: .topLeading, endPoint: .bottomTrailing
                     ))
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(city.name)
+                    Text(displayCityName)
                         .font(.title3.weight(.semibold))
                         .lineLimit(1)
                         .minimumScaleFactor(0.85)
@@ -174,7 +181,7 @@ struct PrayerTimesView: View {
                     )
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(city.name)
+                    Text(displayCityName)
                         .font(.title3.weight(.semibold))
                         .lineLimit(1)
                         .minimumScaleFactor(0.85)
@@ -186,7 +193,38 @@ struct PrayerTimesView: View {
 
                 Spacer()
 
-                // Mute — the one action important enough for the primary header
+                // ── Qiblah / Settings / About — in header on macOS ──
+                #if os(macOS)
+                    HStack(spacing: 2) {
+                        Button(action: { showQiblah = true }) {
+                            Image(systemName: "location.north.line.fill")
+                                .font(.title3)
+                        }
+                        .buttonStyle(.plain)
+                        .help("Qiblah direction")
+                        .accessibilityLabel("Show Qiblah direction")
+
+                        Button(action: { showSettings = true }) {
+                            Image(systemName: "gearshape")
+                                .font(.title3)
+                        }
+                        .buttonStyle(.plain)
+                        .help("Settings")
+                        .accessibilityLabel("Open settings")
+                        .keyboardShortcut(",", modifiers: .command)
+
+                        Button(action: { showAbout = true }) {
+                            Image(systemName: "info.circle")
+                                .font(.title3)
+                        }
+                        .buttonStyle(.plain)
+                        .help("About Iqamah")
+                        .accessibilityLabel("About Iqamah")
+                    }
+                    .padding(.trailing, 8)
+                #endif
+
+                // Mute button
                 Button(action: { AdhaaanPlayer.shared.toggleMute() }) {
                     Image(systemName: AdhaaanPlayer.shared.isMuted
                         ? "speaker.slash.fill" : "speaker.wave.2.fill")
@@ -201,39 +239,6 @@ struct PrayerTimesView: View {
             .padding(.horizontal, 22)
             .padding(.top, 16)
             .padding(.bottom, 10)
-            .background {
-                Rectangle().fill(.ultraThinMaterial)
-            }
-
-            // ── Secondary toolbar: navigation actions + Hijri date ───
-            // On iOS, Qiblah and Settings are in the tab bar — only About is unique here.
-            HStack(spacing: 0) {
-                #if os(macOS)
-                    SecondaryToolbarButton(
-                        label: "Qiblah",
-                        systemImage: "location.north.line.fill",
-                        action: { showQiblah = true }
-                    )
-                    .accessibilityLabel("Show Qiblah direction")
-
-                    SecondaryToolbarButton(
-                        label: "Settings",
-                        systemImage: "gearshape",
-                        action: { showSettings = true }
-                    )
-                    .accessibilityLabel("Open settings")
-                    .keyboardShortcut(",", modifiers: .command)
-                #endif
-
-                SecondaryToolbarButton(
-                    label: "About",
-                    systemImage: "info.circle",
-                    action: { showAbout = true }
-                )
-                .accessibilityLabel("About Iqamah")
-
-                Spacer()
-            }
             .background {
                 Rectangle().fill(.ultraThinMaterial)
             }
@@ -285,7 +290,8 @@ struct PrayerTimesView: View {
                 PrayerTimesTable(
                     prayerTimes: prayerTimes,
                     timezone: TimeZone(identifier: city.timezone) ?? .current,
-                    expandedRowID: $expandedRowID
+                    expandedRowID: $expandedRowID,
+                    now: currentDate
                 )
                 .padding(.horizontal, 24)
                 .padding(.bottom, 24)
@@ -298,7 +304,7 @@ struct PrayerTimesView: View {
         }
         .frame(minWidth: 580, idealWidth: 620, minHeight: 640, idealHeight: 680)
         .sheet(isPresented: $showQiblah) {
-            QiblahView(latitude: city.latitude, longitude: city.longitude, cityName: city.name)
+            QiblahView(latitude: city.latitude, longitude: city.longitude, cityName: displayCityName)
         }
         .sheet(isPresented: $showSettings) {
             SettingsSheetView(
@@ -326,9 +332,27 @@ struct PrayerTimesView: View {
         }
         .onReceive(timer) { _ in
             updateDate()
+            // Keep Live Activity / Dynamic Island in sync with the timer
+            // so it advances to the next prayer without requiring a foreground → background cycle.
+            #if os(iOS)
+                if settingsStore.liveActivityEnabled {
+                    Task { await PrayerActivityManager.shared.startOrUpdateActivity(settings: settingsStore) }
+                }
+            #endif
         }
         .onReceive(NotificationCenter.default.publisher(for: .openSettings)) { _ in
             showSettings = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .openAbout)) { _ in
+            showAbout = true
+        }
+        // Recalculate when the app returns to foreground so "NEXT" label
+        // reflects the current time even after a long background session.
+        .onReceive(NotificationCenter.default.publisher(for: .refreshPrayerTimes)) { _ in
+            currentDate = Date()
+            calculatePrayerTimes()
+            timerSubscription?.cancel()
+            timerSubscription = timer.connect()
         }
     }
 
@@ -508,7 +532,7 @@ struct PrayerTimesView: View {
                             startPoint: .topLeading, endPoint: .bottomTrailing
                         ))
                     VStack(alignment: .leading, spacing: 1) {
-                        Text(city.name)
+                        Text(displayCityName)
                             .font(.callout.weight(.semibold))
                             .lineLimit(1)
                             .minimumScaleFactor(0.75)
@@ -578,7 +602,8 @@ struct PrayerTimesView: View {
                                     prayerTimes: times,
                                     timezone: tz,
                                     dayOffset: 0,
-                                    expandedRowID: $expandedRowID
+                                    expandedRowID: $expandedRowID,
+                                    now: currentDate
                                 )
                                 .padding(.horizontal, 12).padding(.bottom, 12)
                             }
@@ -600,7 +625,8 @@ struct PrayerTimesView: View {
                                     prayerTimes: times,
                                     timezone: tz,
                                     dayOffset: 1,
-                                    expandedRowID: $expandedRowID
+                                    expandedRowID: $expandedRowID,
+                                    now: currentDate
                                 )
                                 .padding(.horizontal, 12).padding(.bottom, 12)
                             } else {

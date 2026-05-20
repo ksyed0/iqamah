@@ -22,8 +22,21 @@
             }
             guard let state = buildContentState(settings: settings) else { return }
 
+            // Adopt any surviving activity from a previous session so we never run
+            // two concurrent Live Activities (which causes duplicate lock-screen banners).
+            if currentActivity == nil {
+                let existing = Activity<PrayerActivityAttributes>.activities
+                if existing.count > 1 {
+                    // End all but the first to remove duplicates
+                    for stale in existing.dropFirst() {
+                        await stale.end(dismissalPolicy: .immediate)
+                    }
+                }
+                currentActivity = existing.first
+            }
+
             if let activity = currentActivity {
-                await activity.update(using: state, alertConfiguration: nil)
+                await activity.update(ActivityContent(state: state, staleDate: nil))
             } else {
                 let attributes = PrayerActivityAttributes(
                     cityName: settings.activeCityName,
@@ -32,8 +45,7 @@
                 do {
                     currentActivity = try Activity.request(
                         attributes: attributes,
-                        contentState: state,
-                        pushType: nil
+                        content: ActivityContent(state: state, staleDate: nil)
                     )
                 } catch {
                     print("[PrayerActivityManager] Failed to start activity: \(error)")
@@ -42,7 +54,9 @@
         }
 
         func endActivity() async {
-            await currentActivity?.end(using: nil, dismissalPolicy: .immediate)
+            if let activity = currentActivity {
+                await activity.end(ActivityContent(state: activity.content.state, staleDate: nil), dismissalPolicy: .immediate)
+            }
             currentActivity = nil
         }
 

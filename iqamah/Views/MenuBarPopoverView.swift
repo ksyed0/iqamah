@@ -61,6 +61,18 @@ struct MenuBarPopoverView: View {
 
             Spacer()
 
+            // Moon phase — shown between countdown and mute button
+            VStack(spacing: 3) {
+                MoonPhaseView(phase: currentMoonPhase, size: 32)
+                    .accessibilityLabel("Current moon phase")
+                Text(moonPhaseLabel)
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .textCase(.uppercase)
+                    .tracking(0.4)
+                    .lineLimit(1)
+            }
+
             VStack(spacing: 3) {
                 Button(action: { AdhaaanPlayer.shared.toggleMute() }) {
                     Image(systemName: player.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
@@ -165,6 +177,27 @@ struct MenuBarPopoverView: View {
     }
 
     // MARK: Helpers
+
+    /// Synodic phase [0, 1) based on days since last new moon.
+    private var currentMoonPhase: Double {
+        let newMoon = NewMoon.previous(before: Date())
+        let daysSince = max(0, Date().timeIntervalSince(newMoon)) / 86400
+        return (daysSince / 29.53).truncatingRemainder(dividingBy: 1.0)
+    }
+
+    private var moonPhaseLabel: String {
+        let phase = currentMoonPhase
+        switch phase {
+        case 0.0 ..< 0.03, 0.97...: return "New"
+        case 0.03 ..< 0.22: return "Waxing"
+        case 0.22 ..< 0.28: return "1st Qtr"
+        case 0.28 ..< 0.47: return "Waxing"
+        case 0.47 ..< 0.53: return "Full"
+        case 0.53 ..< 0.72: return "Waning"
+        case 0.72 ..< 0.78: return "3rd Qtr"
+        default: return "Waning"
+        }
+    }
 
     private var cityMethodLine: String {
         let city = settings.locationSource == "gps" && !settings.gpsLocality.isEmpty

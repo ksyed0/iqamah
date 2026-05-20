@@ -80,7 +80,7 @@ for devs in d['devices'].values():
             print(dev.get('state','Unknown')); exit(0)
 " 2>/dev/null || echo "Unknown")
     if [[ "$state" != "Booted" ]]; then
-        log "Booting simulator $udid…"
+        log "Booting simulator ${udid}..."
         xcrun simctl boot "$udid" 2>/dev/null || true
         sleep 4
     fi
@@ -114,7 +114,7 @@ IOS_APP_PATH=""
 
 build_ios() {
     if [[ -n "$IOS_APP_PATH" ]]; then return 0; fi   # already built
-    log "Building $SCHEME_IOS (Debug)…"
+    log "Building ${SCHEME_IOS} (Debug)..."
     if xcodebuild \
         -project "$PROJECT" -scheme "$SCHEME_IOS" -configuration Debug \
         -destination 'platform=iOS Simulator,name=iPhone 17' \
@@ -149,7 +149,7 @@ smoke_ios_sim() {
     boot_sim "$udid"
 
     # Install
-    log "Installing…"
+    log "Installing..."
     if ! xcrun simctl install "$udid" "$IOS_APP_PATH" 2>/dev/null; then
         fail "$label: install failed"
         FAILURES+=("$label (install failed)")
@@ -161,7 +161,7 @@ smoke_ios_sim() {
 
     # Terminate any existing instance, then launch
     xcrun simctl terminate "$udid" "$BUNDLE_IOS" 2>/dev/null || true
-    log "Launching…"
+    log "Launching..."
     local launch_out
     launch_out=$(xcrun simctl launch "$udid" "$BUNDLE_IOS" 2>&1)
     log "$launch_out"
@@ -197,7 +197,7 @@ smoke_watch() {
     log "Simulator: $udid"
     boot_sim "$udid"
 
-    log "Building $SCHEME_WATCH (Debug)…"
+    log "Building ${SCHEME_WATCH} (Debug)..."
     local build_ok=false
     if xcodebuild \
         -project "$PROJECT" -scheme "$SCHEME_WATCH" -configuration Debug \
@@ -219,13 +219,13 @@ smoke_watch() {
     app_path=$(find "$BUILD_ROOT/watch" -name "IqamahWatch.app" -maxdepth 6 | head -1)
     [[ -z "$app_path" ]] && { fail "Watch: app not found after build"; FAILURES+=("Watch"); return; }
 
-    log "Installing…"
+    log "Installing..."
     xcrun simctl install "$udid" "$app_path" 2>/dev/null \
         || { fail "Watch: install failed"; FAILURES+=("Watch (install failed)"); return; }
 
     local since_epoch; since_epoch=$(date +%s)
     xcrun simctl terminate "$udid" "$BUNDLE_WATCH" 2>/dev/null || true
-    log "Launching…"
+    log "Launching..."
     xcrun simctl launch "$udid" "$BUNDLE_WATCH" 2>&1 | tee -a /dev/null
 
     sleep 5
@@ -246,7 +246,7 @@ smoke_watch() {
 smoke_macos() {
     hdr "Smoke test: macOS"
 
-    log "Building $SCHEME_MACOS (Debug)…"
+    log "Building ${SCHEME_MACOS} (Debug)..."
     local build_ok=false
     if xcodebuild \
         -project "$PROJECT" -scheme "$SCHEME_MACOS" -configuration Debug \
@@ -275,7 +275,7 @@ smoke_macos() {
     pkill -x iqamah 2>/dev/null || true
     sleep 1
 
-    log "Launching…"
+    log "Launching..."
     open -n -a "$app_path" &
     local open_pid=$!
 

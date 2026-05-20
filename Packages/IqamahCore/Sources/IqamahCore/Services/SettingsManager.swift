@@ -6,6 +6,9 @@ public extension Notification.Name {
     static let settingsDidChange = Notification.Name("settingsDidChange")
     static let openSettings = Notification.Name("openSettings")
     static let openHilalWatch = Notification.Name("openHilalWatch")
+    /// Posted when the app returns to foreground so prayer-time views recalculate.
+    static let refreshPrayerTimes = Notification.Name("refreshPrayerTimes")
+    static let openAbout = Notification.Name("openAbout")
 }
 
 public enum AppAppearance: String, CaseIterable {
