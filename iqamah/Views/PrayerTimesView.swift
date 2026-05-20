@@ -24,6 +24,12 @@ struct PrayerTimesView: View {
     // AC-0064: scale the serif title with the user's Dynamic Type size preference
     @ScaledMetric(relativeTo: .title3) private var titleFontSize: CGFloat = 28
 
+    /// GPS locality name when active, otherwise the nearest mapped city name.
+    private var displayCityName: String {
+        let name = settingsStore.activeCityName
+        return name.isEmpty ? city.name : name
+    }
+
     private let timer = Timer.publish(every: 60, on: .main, in: .common)
 
     // MARK: - Body
@@ -109,7 +115,7 @@ struct PrayerTimesView: View {
                         startPoint: .topLeading, endPoint: .bottomTrailing
                     ))
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(city.name)
+                    Text(displayCityName)
                         .font(.title3.weight(.semibold))
                         .lineLimit(1)
                         .minimumScaleFactor(0.85)
@@ -174,7 +180,7 @@ struct PrayerTimesView: View {
                     )
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(city.name)
+                    Text(displayCityName)
                         .font(.title3.weight(.semibold))
                         .lineLimit(1)
                         .minimumScaleFactor(0.85)
@@ -296,7 +302,7 @@ struct PrayerTimesView: View {
         }
         .frame(minWidth: 580, idealWidth: 620, minHeight: 640, idealHeight: 680)
         .sheet(isPresented: $showQiblah) {
-            QiblahView(latitude: city.latitude, longitude: city.longitude, cityName: city.name)
+            QiblahView(latitude: city.latitude, longitude: city.longitude, cityName: displayCityName)
         }
         .sheet(isPresented: $showSettings) {
             SettingsSheetView(
@@ -517,7 +523,7 @@ struct PrayerTimesView: View {
                             startPoint: .topLeading, endPoint: .bottomTrailing
                         ))
                     VStack(alignment: .leading, spacing: 1) {
-                        Text(city.name)
+                        Text(displayCityName)
                             .font(.callout.weight(.semibold))
                             .lineLimit(1)
                             .minimumScaleFactor(0.75)

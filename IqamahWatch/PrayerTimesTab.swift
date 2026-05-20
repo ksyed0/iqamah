@@ -33,6 +33,9 @@ struct PrayerTimesTab: View {
         .onAppear { loadPrayers() }
         .onChange(of: settings.calculationMethod) { _, _ in loadPrayers() }
         .onChange(of: settings.asrMethod) { _, _ in loadPrayers() }
+        // Reload when city changes (manual selection or GPS update)
+        .onChange(of: settings.locationSource) { _, _ in loadPrayers() }
+        .onChange(of: settings.gpsLocality) { _, _ in loadPrayers() }
     }
 
     private func formattedTime(_ date: Date) -> String {
