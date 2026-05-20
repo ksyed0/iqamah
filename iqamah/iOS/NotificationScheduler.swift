@@ -89,6 +89,9 @@
             content.body = "It is time for \(name)"
             content.sound = resolveSound(for: name, settings: settings)
             content.userInfo = ["prayerName": name]
+            // Break through Focus/DND — prayer times are time-bound obligations.
+            // .timeSensitive doesn't need a special Apple entitlement (unlike .critical).
+            content.interruptionLevel = .timeSensitive
 
             let components = Calendar.current.dateComponents(
                 [.year, .month, .day, .hour, .minute],
