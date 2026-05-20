@@ -3,8 +3,7 @@ import SwiftUI
 
 // MARK: - Prayer Row Identifier
 
-/// Identifies a unique row across two columns (today/tomorrow).
-/// `dayOffset` = 0 for today, 1 for tomorrow — used in iPad landscape.
+/// Identifies a unique row across two columns; `dayOffset` 0=today, 1=tomorrow.
 struct PrayerRowID: Hashable {
     let dayOffset: Int
     let name: String
@@ -12,7 +11,7 @@ struct PrayerRowID: Hashable {
 
 // MARK: - Prayer Times Table
 
-/// Public so snapshot tests can reference it directly without @testable import (AC-0311, US-0065).
+/// Public so snapshot tests can reach it without @testable import.
 public struct PrayerTimesTable: View {
     public let prayerTimes: PrayerTimes
     public let timezone: TimeZone
@@ -29,12 +28,12 @@ public struct PrayerTimesTable: View {
     @ObservedObject private var settingsManager = SettingsManager.shared
     @ObservedObject private var player = AdhaaanPlayer.shared
 
-    /// Snapshot-test entry point (AC-0311, US-0065) — no shared expand state.
+    /// Snapshot-test entry point — no shared expand state.
     public init(prayerTimes: PrayerTimes, timezone: TimeZone) {
         self.init(prayerTimes: prayerTimes, timezone: timezone, dayOffset: 0, expandedRowID: .constant(nil))
     }
 
-    /// Full initialiser used internally and in tests.
+    /// Full initialiser.
     init(prayerTimes: PrayerTimes, timezone: TimeZone, dayOffset: Int = 0,
          expandedRowID: Binding<PrayerRowID?> = .constant(nil), now: Date = Date()) {
         self.prayerTimes = prayerTimes; self.timezone = timezone
