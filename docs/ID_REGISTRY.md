@@ -28,4 +28,4 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 ---
 
-**Last Updated:** 2026-05-20 (BUG-0060–BUG-0067 resolved — App Store validation fixes, watchOS GPS, DND bypass, duplicate Live Activity. Build bumped to v1.5.0 (12) for TestFlight.)
+**Last Updated:** 2026-05-20 (BUG-0060–BUG-0067 resolved. v1.5.0 (12) submitted to App Store — iOS first submission + macOS update.)
