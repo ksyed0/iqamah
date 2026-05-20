@@ -20,8 +20,7 @@ public struct PrayerTimesTable: View {
     var dayOffset: Int = 0
     /// Shared across columns in iPad landscape so only one row is open at a time.
     @Binding var expandedRowID: PrayerRowID?
-    /// Current time — passed from parent's 60-second timer so this view re-renders
-    /// and the NEXT badge advances without requiring user interaction.
+    /// Passed from parent's 60 s timer — forces re-render so NEXT badge advances.
     var now: Date = Date()
 
     @State private var adjustments: [String: Int] = [:]
@@ -172,10 +171,8 @@ public struct PrayerTimesTable: View {
         settingsManager.setAdjustment(newAdjustment, for: prayerName)
     }
 
-    // BUG-0015: compare adjusted times so this matches the status bar highlight
+    // BUG-0015: use `now` (parent timer) so NEXT badge advances automatically.
     private func isNextPrayer(adjustedTime: Date) -> Bool {
-        // Use `now` (from parent timer) instead of Date() so the NEXT badge
-        // advances without user interaction when a prayer time passes.
         for prayer in prayerTimes.prayers {
             guard prayer.name != "Sunrise" else { continue } // Sunrise is not a prayer
             let adj = self.adjustedTime(for: prayer)
