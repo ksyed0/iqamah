@@ -2,6 +2,7 @@ import AppKit
 import SwiftUI
 import CoreLocation
 import IqamahCore
+import UserNotifications
 
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var statusItem: NSStatusItem?
@@ -31,6 +32,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         setupStatusBarItem()
         startUpdateTimer()
+        // Request notification authorization so .timeSensitive alerts can break
+        // through macOS Focus/DND when the app is in the background.
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
 
         NotificationCenter.default.addObserver(
             self,
@@ -121,6 +125,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         updateTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
             self?.updateStatusBarDisplay()
+            // Tell the main window's PrayerTimesTable to re-render so the NEXT badge
+            // advances automatically when a prayer time passes (parity with iOS fix).
+            NotificationCenter.default.post(name: .refreshPrayerTimes, object: nil)
         }
     }
 
@@ -257,6 +264,19 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                     )
                 }
             }
+
+            // Post a .timeSensitive system notification so the alert surfaces even
+            // when macOS Focus/DND is active (app-in-background scenario).
+            // The in-app banner handles the foreground case; this covers background.
+            let content = UNMutableNotificationContent()
+            content.title = "Iqamah"
+            content.body = "It is time for \(prayer.name)"
+            content.interruptionLevel = .timeSensitive
+            let req = UNNotificationRequest(
+                identifier: "macos.prayer.\(prayer.name).\(dateKey(prayer.name))",
+                content: content, trigger: nil
+            )
+            UNUserNotificationCenter.current().add(req, withCompletionHandler: nil)
         }
     }
 
