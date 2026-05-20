@@ -10,8 +10,9 @@ struct PrayerEntry: TimelineEntry {
     let nextPrayerTime: Date
     let cityName: String
     let methodName: String // "" in stub entries
-    let todaysPrayers: [(name: String, time: Date)] // [] in stub entries
+    let todaysPrayers: [(name: String, time: Date)] // excludes Sunrise
     let hijriDateString: String // "" in stub entries
+    let sunriseTime: Date? // nil in stub entries
 
     var countdown: String {
         let interval = nextPrayerTime.timeIntervalSince(date)
@@ -39,7 +40,8 @@ struct PrayerTimelineProvider: TimelineProvider {
                 ("Maghrib", Date().addingTimeInterval(18000)),
                 ("Isha", Date().addingTimeInterval(25200)),
             ],
-            hijriDateString: "9 Dhu al-Hijjah 1447"
+            hijriDateString: "9 Dhu al-Hijjah 1447",
+            sunriseTime: Date().addingTimeInterval(-5400)
         )
     }
 
@@ -83,7 +85,8 @@ struct PrayerTimelineProvider: TimelineProvider {
               let timezone = TimeZone(identifier: settings.activeTimezoneIdentifier)
         else {
             return PrayerEntry(date: date, nextPrayerName: "—", nextPrayerTime: date,
-                               cityName: "—", methodName: "", todaysPrayers: [], hijriDateString: "")
+                               cityName: "—", methodName: "", todaysPrayers: [], hijriDateString: "",
+                               sunriseTime: nil)
         }
 
         let calc = PrayerCalculator(
@@ -97,12 +100,11 @@ struct PrayerTimelineProvider: TimelineProvider {
         let methodName = settings.calculationMethod.shortName
         let hijri = hijriDateString(for: date, offset: settings.hijriDayOffset)
 
-        // Full day prayer list for Large widget
-        let todaysPrayers: [(name: String, time: Date)] = if let times = try? calc.calculate(for: date) {
-            times.prayers.filter { $0.name != "Sunrise" }
-        } else {
-            []
-        }
+        // Full day prayer list (excluding Sunrise) + capture sunrise separately
+        let todayTimes = try? calc.calculate(for: date)
+        let todaysPrayers: [(name: String, time: Date)] = todayTimes?.prayers
+            .filter { $0.name != "Sunrise" } ?? []
+        let sunriseTime: Date? = todayTimes?.prayers.first { $0.name == "Sunrise" }?.time
 
         // Find next upcoming prayer (today or tomorrow if all past)
         for dayOffset in 0 ... 1 {
@@ -117,14 +119,16 @@ struct PrayerTimelineProvider: TimelineProvider {
                     cityName: cityName,
                     methodName: methodName,
                     todaysPrayers: todaysPrayers,
-                    hijriDateString: hijri
+                    hijriDateString: hijri,
+                    sunriseTime: sunriseTime
                 )
             }
         }
 
         return PrayerEntry(date: date, nextPrayerName: "—", nextPrayerTime: date,
                            cityName: cityName, methodName: methodName,
-                           todaysPrayers: todaysPrayers, hijriDateString: hijri)
+                           todaysPrayers: todaysPrayers, hijriDateString: hijri,
+                           sunriseTime: sunriseTime)
     }
 }
 
@@ -175,29 +179,81 @@ struct IqamahWidgetView: View {
     }
 
     private var mediumView: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(entry.cityName)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                Text(entry.nextPrayerName)
-                    .font(.title2.bold())
+        let timeFmt: DateFormatter = {
+            let f = DateFormatter()
+            f.dateFormat = "h:mm"
+            return f
+        }()
+        let prayers = entry.todaysPrayers.filter { $0.name != "Sunrise" }
+        // Parse "9 Dhu al-Hijjah 1447" → day "9" + rest
+        let hijriParts = entry.hijriDateString.split(separator: " ", maxSplits: 1)
+        let hijriDay = hijriParts.first.map(String.init) ?? ""
+        let hijriRest = hijriParts.dropFirst().first.map(String.init) ?? ""
+
+        return VStack(spacing: 0) {
+            // ── Top row: Hijri date left, Sunrise right ──────────────────
+            HStack(alignment: .top) {
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    Text(hijriDay)
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .foregroundStyle(gold)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(hijriRest.isEmpty ? entry.hijriDateString : hijriRest)
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(.secondary)
+                        Text(entry.cityName)
+                            .font(.system(size: 9))
+                            .foregroundStyle(.tertiary)
+                            .lineLimit(1)
+                    }
+                }
+                Spacer()
+                if let sr = entry.sunriseTime {
+                    VStack(alignment: .trailing, spacing: 1) {
+                        HStack(spacing: 3) {
+                            Image(systemName: "sunrise.fill")
+                                .font(.system(size: 10))
+                                .foregroundStyle(.yellow.opacity(0.85))
+                            Text("Sunrise")
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundStyle(.secondary)
+                        }
+                        Text(timeFmt.string(from: sr))
+                            .font(.system(size: 16, weight: .bold).monospacedDigit())
+                    }
+                }
             }
-            Spacer()
-            VStack(alignment: .trailing) {
-                Text("in")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Text(entry.nextPrayerTime, style: .relative)
-                    .font(.title3.monospacedDigit().bold())
-                Text(entry.nextPrayerTime, style: .time)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+            .padding(.horizontal, 14)
+            .padding(.top, 10)
+            .padding(.bottom, 6)
+
+            Divider().opacity(0.4).padding(.horizontal, 8)
+
+            // ── Prayer columns ────────────────────────────────────────────
+            HStack(spacing: 0) {
+                ForEach(prayers, id: \.name) { prayer in
+                    let isNext = prayer.name == entry.nextPrayerName
+                    let isPast = prayer.time < entry.date
+                    VStack(spacing: 2) {
+                        Text(prayer.name == "Dhuhr" ? "Zuhr" : prayer.name)
+                            .font(.system(size: 9, weight: .semibold))
+                            .foregroundStyle(isNext ? gold : .secondary)
+                        Text(timeFmt.string(from: prayer.time))
+                            .font(.system(size: 14, weight: isNext ? .bold : .medium).monospacedDigit())
+                            .foregroundStyle(isNext ? gold : .primary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .opacity(isPast && !isNext ? 0.35 : 1)
+                }
             }
+            .padding(.horizontal, 8)
+            .padding(.top, 6)
+            .padding(.bottom, 10)
         }
-        .padding()
         .containerBackground(.fill.tertiary, for: .widget)
     }
+
+    private var gold: Color { Color(red: 0.88, green: 0.69, blue: 0.06) }
 
     private var lockScreenView: some View {
         HStack {

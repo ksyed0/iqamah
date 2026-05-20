@@ -39,6 +39,7 @@ final class WatchNotificationScheduler {
                 content.title = "Time for \(prayer.name)"
                 content.subtitle = settings.activeCityName
                 content.sound = .default
+                content.interruptionLevel = .timeSensitive
 
                 let id = "watch.prayer.\(prayer.name).\(formatter.string(from: day))"
                 let comps = calendar.dateComponents(
