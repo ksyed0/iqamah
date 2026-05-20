@@ -74,7 +74,21 @@ final class WatchLocationSetup: NSObject, ObservableObject, CLLocationManagerDel
         }
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyKilometer
-        manager.requestWhenInUseAuthorization()
+
+        // If permission is already granted, requestWhenInUseAuthorization() is a no-op
+        // and the delegate callback may not fire — so check the current status explicitly
+        // and call requestLocation() directly when already authorised.
+        switch manager.authorizationStatus {
+        case .authorizedWhenInUse, .authorizedAlways:
+            manager.requestLocation()
+        case .denied, .restricted:
+            statusMessage = "Enable location in Watch Settings"
+            isReady = true
+            return
+        default: // .notDetermined — show the permission prompt
+            manager.requestWhenInUseAuthorization()
+        }
+
         // Watchdog: if GPS hasn't resolved after 20 s (simulator or denied), mark ready
         // so the user lands on prayer times with a "select location in Settings" prompt.
         Task {
