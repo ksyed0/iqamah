@@ -20,6 +20,9 @@ public struct PrayerTimesTable: View {
     var dayOffset: Int = 0
     /// Shared across columns in iPad landscape so only one row is open at a time.
     @Binding var expandedRowID: PrayerRowID?
+    /// Current time — passed from parent's 60-second timer so this view re-renders
+    /// and the NEXT badge advances without requiring user interaction.
+    var now: Date = Date()
 
     @State private var adjustments: [String: Int] = [:]
     @State private var adhaanSelections: [String: Adhaan] = [:]
@@ -34,9 +37,9 @@ public struct PrayerTimesTable: View {
 
     /// Full initialiser used internally and in tests.
     init(prayerTimes: PrayerTimes, timezone: TimeZone, dayOffset: Int = 0,
-         expandedRowID: Binding<PrayerRowID?> = .constant(nil)) {
+         expandedRowID: Binding<PrayerRowID?> = .constant(nil), now: Date = Date()) {
         self.prayerTimes = prayerTimes; self.timezone = timezone
-        self.dayOffset = dayOffset; _expandedRowID = expandedRowID
+        self.dayOffset = dayOffset; _expandedRowID = expandedRowID; self.now = now
     }
 
     private var timeFormatter: DateFormatter {
@@ -54,7 +57,7 @@ public struct PrayerTimesTable: View {
                         name: prayer.name,
                         time: adjusted,
                         formatter: timeFormatter,
-                        isPast: adjusted < Date(),
+                        isPast: adjusted < now,
                         isNext: isNextPrayer(adjustedTime: adjusted),
                         selectedAdhaan: adhaanSelections[prayer.name] ?? .silent,
                         isMuted: prayerMuted[prayer.name] ?? false,
@@ -171,7 +174,8 @@ public struct PrayerTimesTable: View {
 
     // BUG-0015: compare adjusted times so this matches the status bar highlight
     private func isNextPrayer(adjustedTime: Date) -> Bool {
-        let now = Date()
+        // Use `now` (from parent timer) instead of Date() so the NEXT badge
+        // advances without user interaction when a prayer time passes.
         for prayer in prayerTimes.prayers {
             guard prayer.name != "Sunrise" else { continue } // Sunrise is not a prayer
             let adj = self.adjustedTime(for: prayer)
