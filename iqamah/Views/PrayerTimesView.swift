@@ -87,7 +87,8 @@ struct PrayerTimesView: View {
                             prayerTimes: times,
                             timezone: tz,
                             dayOffset: 0,
-                            expandedRowID: $expandedRowID
+                            expandedRowID: $expandedRowID,
+                            now: currentDate
                         )
                         .padding(.horizontal, 12)
                         .padding(.bottom, 16)
@@ -289,7 +290,8 @@ struct PrayerTimesView: View {
                 PrayerTimesTable(
                     prayerTimes: prayerTimes,
                     timezone: TimeZone(identifier: city.timezone) ?? .current,
-                    expandedRowID: $expandedRowID
+                    expandedRowID: $expandedRowID,
+                    now: currentDate
                 )
                 .padding(.horizontal, 24)
                 .padding(.bottom, 24)
@@ -330,6 +332,13 @@ struct PrayerTimesView: View {
         }
         .onReceive(timer) { _ in
             updateDate()
+            // Keep Live Activity / Dynamic Island in sync with the timer
+            // so it advances to the next prayer without requiring a foreground → background cycle.
+            #if os(iOS)
+                if settingsStore.liveActivityEnabled {
+                    Task { await PrayerActivityManager.shared.startOrUpdateActivity(settings: settingsStore) }
+                }
+            #endif
         }
         .onReceive(NotificationCenter.default.publisher(for: .openSettings)) { _ in
             showSettings = true
@@ -593,7 +602,8 @@ struct PrayerTimesView: View {
                                     prayerTimes: times,
                                     timezone: tz,
                                     dayOffset: 0,
-                                    expandedRowID: $expandedRowID
+                                    expandedRowID: $expandedRowID,
+                                    now: currentDate
                                 )
                                 .padding(.horizontal, 12).padding(.bottom, 12)
                             }
@@ -615,7 +625,8 @@ struct PrayerTimesView: View {
                                     prayerTimes: times,
                                     timezone: tz,
                                     dayOffset: 1,
-                                    expandedRowID: $expandedRowID
+                                    expandedRowID: $expandedRowID,
+                                    now: currentDate
                                 )
                                 .padding(.horizontal, 12).padding(.bottom, 12)
                             } else {

@@ -22,8 +22,20 @@
             }
             guard let state = buildContentState(settings: settings) else { return }
 
+            // Adopt any surviving activity from a previous session so we never run
+            // two concurrent Live Activities (which causes duplicate lock-screen banners).
+            if currentActivity == nil {
+                let existing = Activity<PrayerActivityAttributes>.activities
+                if existing.count > 1 {
+                    // End all but the first to remove duplicates
+                    for stale in existing.dropFirst() {
+                        await stale.end(dismissalPolicy: .immediate)
+                    }
+                }
+                currentActivity = existing.first
+            }
+
             if let activity = currentActivity {
-                // Use iOS 16.2+ API (update(_:alertConfiguration:))
                 await activity.update(ActivityContent(state: state, staleDate: nil))
             } else {
                 let attributes = PrayerActivityAttributes(
