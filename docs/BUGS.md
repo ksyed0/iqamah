@@ -10,7 +10,121 @@ All bugs and defects tracked here with BUG-XXXX identifiers and status.
 **Medium:** 0  
 **Low:** 0
 
-> **All bugs BUG-0001 through BUG-0059 resolved as of 2026-05-11.** No open production bugs.
+> **All bugs BUG-0001 through BUG-0067 resolved as of 2026-05-20.** No open production bugs.
+
+---
+
+## Session — 2026-05-12 to 2026-05-20 (v1.5.0 App Store submission + TestFlight feedback batch)
+
+All bugs below were discovered during App Store validation, CI runs, and TestFlight user feedback on v1.5.0 (builds 10–12). All resolved and shipped in PRs #117–#126.
+
+### Resolved
+
+**BUG-0060 (iOS build): Generic Xcode Archive — IqamahWatch missing SKIP_INSTALL**
+
+**Severity:** High (blocks App Store submission)  
+**Discovered:** 2026-05-12 during iOS archive attempt  
+**Status:** ✅ Fixed — PR #117
+
+**Description:** Archiving the `iqamah-iOS` scheme produced a "Generic Xcode Archive" instead of an iOS App Archive. Xcode includes every product that doesn't set `SKIP_INSTALL = YES` in the archive bundle; the watchOS companion app binary was being treated as a standalone install target, corrupting the archive type.
+
+**Fix:** Added `SKIP_INSTALL = YES` to the `IqamahWatch` Release build configuration in `project.pbxproj`.
+
+---
+
+**BUG-0061 (iOS): Deprecated ActivityKit APIs causing runtime warnings**
+
+**Severity:** Low  
+**Discovered:** 2026-05-12 during code review  
+**Status:** ✅ Fixed — PR #118
+
+**Description:** `PrayerActivityManager.swift` used deprecated `Activity.update(_:)`, `Activity.request(attributes:content:pushType:)`, and `Activity.end(_:dismissalPolicy:)` signatures from iOS 16.1. iOS 16.2+ requires the `ActivityContent`-wrapped versions.
+
+**Fix:** Updated all three call sites to use `ActivityContent(state:staleDate:)` wrappers per the iOS 16.2+ API.
+
+---
+
+**BUG-0062 (App Store validation): WKWatchOnly=true blocked by App Store (error 90753)**
+
+**Severity:** High (blocks App Store submission)  
+**Discovered:** 2026-05-12 during App Store Connect upload  
+**Status:** ✅ Fixed — PR #119
+
+**Description:** `IqamahWatch/Info.plist` contained `WKWatchOnly = true`, which declares the watch app as an independent (standalone) app. Apple's validation rule 90753 rejects this when the watch binary is embedded inside an iOS app bundle — the two declarations contradict each other.
+
+**Fix:** Removed `WKWatchOnly` key. Added `WKCompanionAppBundleIdentifier = com.fablesoft.iqamah` to correctly declare the watch app as a companion to the iOS app.
+
+---
+
+**BUG-0063 (App Store validation): Missing WKCompanionAppBundleIdentifier (error 90536)**
+
+**Severity:** High (blocks App Store submission)  
+**Discovered:** 2026-05-12 during App Store Connect upload  
+**Status:** ✅ Fixed — PR #120 (bundled with BUG-0062 fix)
+
+**Description:** Companion watch apps require `WKCompanionAppBundleIdentifier` in `Info.plist` to declare their parent iOS app. Without it, App Store Connect cannot establish the app relationship and rejects with error 90536.
+
+**Fix:** Added `WKCompanionAppBundleIdentifier = com.fablesoft.iqamah` to `IqamahWatch/Info.plist`.
+
+---
+
+**BUG-0064 (watchOS): GPS location not triggering when permission already granted**
+
+**Severity:** Medium  
+**Discovered:** 2026-05-12 during watchOS testing  
+**Status:** ✅ Fixed — PR #121
+
+**Description:** `WatchLocationSetup` called `requestWhenInUseAuthorization()` unconditionally on "Update via GPS" tap. When the user had already granted location permission, CoreLocation silently ignores the redundant request and never calls the delegate, leaving the GPS flow stuck indefinitely with no update.
+
+**Fix:** Added a check against `manager.authorizationStatus` before calling `requestWhenInUseAuthorization()`. When status is already `.authorizedWhenInUse` or `.authorizedAlways`, the flow proceeds directly to `startUpdatingLocation()`.
+
+---
+
+**BUG-0065 (iOS/watchOS): GPS city name not shown in headers and Qibla view**
+
+**Severity:** Medium  
+**Discovered:** 2026-05-12 (TestFlight feedback)  
+**Status:** ✅ Fixed — PR #122
+
+**Description:** When using GPS location, the iOS prayer times header, watchOS prayer times tab, and Qibla view all displayed a blank or stale city name. `activeCityName` fell back to the manually-selected city rather than the GPS-resolved locality. Additionally, watchOS did not reload prayer times when the city or location source changed.
+
+**Fix:** Added `displayCityName` computed property using `settings.activeCityName` (which resolves GPS locality over mapped city). Added `.onChange(of: settings.locationSource)` and `.onChange(of: settings.gpsLocality)` observers in `PrayerTimesTab.swift` to reload prayers on city change.
+
+---
+
+**BUG-0066 (iOS): Prayer reminder notifications bypass Focus / Do Not Disturb**
+
+**Severity:** Medium  
+**Discovered:** 2026-05-12 (user request / TestFlight feedback)  
+**Status:** ✅ Fixed — PR #123
+
+**Description:** Prayer time notifications were silenced by iOS Focus modes (DND, Sleep, Work). No Critical Alerts entitlement is available without Apple approval, but `.timeSensitive` interruption level is available to all apps and bypasses Focus filters while respecting DND off — the correct balance for prayer reminders.
+
+**Fix:** Added `content.interruptionLevel = .timeSensitive` to `NotificationScheduler.swift` (iOS), `WatchNotificationScheduler.swift` (watchOS), and the widget notification request in `IqamahWidget.swift`.
+
+---
+
+**BUG-0067 (iOS): Duplicate Live Activity / Dynamic Island banners at prayer times**
+
+**Severity:** High (TestFlight feedback — "Maghrib reminder shows up twice")  
+**Discovered:** 2026-05-12 (TestFlight v1.5.0 build 11 feedback)  
+**Status:** ✅ Fixed — PR #124
+
+**Description:** On app launch, two code paths called `PrayerActivityManager.startOrUpdateActivity()` concurrently: the `scenePhase` `.active` handler and the 60-second timer firing on first tick. With `currentActivity == nil`, both entered the `else` branch and called `Activity.request()`, producing two independent `Activity<PrayerActivityAttributes>` instances. iOS rendered both — as duplicate lock screen banners and as competing Dynamic Island presentations.
+
+**Fix:** Before creating a new Activity, adopt any surviving instance from the previous session:
+```swift
+if currentActivity == nil {
+    let existing = Activity<PrayerActivityAttributes>.activities
+    if existing.count > 1 {
+        for stale in existing.dropFirst() {
+            await stale.end(dismissalPolicy: .immediate)
+        }
+    }
+    currentActivity = existing.first
+}
+```
+This eliminates both the race condition and any duplicates left from a previous session. The fix covers both lock screen banners and Dynamic Island (same `Activity` object, different presentation surfaces).
 
 ---
 
