@@ -13,7 +13,7 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 | TASK         | TASK-0001             | None              |
 | AC           | AC-0349               | AC-0348           |
 | TC           | TC-0036               | TC-0035           |
-| BUG          | BUG-0056              | BUG-0055          |
+| BUG          | BUG-0068              | BUG-0067          |
 | ENH          | ENH-022               | ENH-021           |
 
 ---
@@ -28,4 +28,4 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 ---
 
-**Last Updated:** 2026-05-17 (EPIC-0015 Test Automation — US-0064–US-0069, AC-0300–AC-0348. ENH-020/021 Apple TV/visionOS backlog. EPIC-0013 Widget Platform — US-0058–US-0060. EPIC-0014 Adaptive Layout — US-0061–US-0063, AC-0276–AC-0299.)
+**Last Updated:** 2026-05-20 (BUG-0060–BUG-0067 resolved — App Store validation fixes, watchOS GPS, DND bypass, duplicate Live Activity. Build bumped to v1.5.0 (12) for TestFlight.)
