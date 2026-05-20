@@ -6,47 +6,68 @@ Detailed release plan defining MVP and subsequent milestones. Contains Epics, Us
 
 ## Project Overview
 
-**Project:** Iqamah — macOS Prayer Times Application  
-**Current Version:** 0.1.0 (In Development)  
-**Target MVP Release:** TBD (Q2 2026)
+**Project:** Iqamah — Multi-Platform Islamic Prayer Times App (macOS · iOS · iPadOS · watchOS)
+**Current Version:** 1.5.0 (build 12)
+**App Store Status:** 🟢 **SUBMITTED** — iOS first submission + macOS v1.5.0 update sent 2026-05-20
 
 ---
 
 ## Release Status
 
-**Status:** 🟢 **PLANNING COMPLETE** — Ready to begin development
+**Status:** 🟢 **v1.5.0 SUBMITTED TO APP STORE** — 2026-05-20
+
+| Platform | Status | Notes |
+|---|---|---|
+| macOS | ✅ v1.5.0 update submitted | Build 12, under review |
+| iOS | ✅ First submission | Build 12, under review |
+| iPadOS | ✅ First submission | Same binary as iOS |
+| watchOS | ✅ First submission | Embedded in iOS binary |
+
+---
+
+## Shipped Releases
+
+### **v1.5.0 — Multi-Platform + Bug Fix Release** *(Submitted 2026-05-20)*
+
+**Build:** 12  
+**Status:** 🟡 Under App Store Review  
+**Platforms:** macOS, iOS, iPadOS, watchOS
+
+**What shipped:**
+- EPIC-0010: iPhone & iPad app (prayer times, Qibla, Hilal Watch, Live Activity, Lock Screen widgets, iCloud sync)
+- EPIC-0011: Hilal Watch — global crescent visibility map (Odeh criterion, MapKit, d29/d30 evenings)
+- EPIC-0012: Apple Watch companion app (prayer list, Qibla, WidgetKit complications, haptic alerts)
+- EPIC-0013: WidgetKit platform — iOS/macOS widgets (small, medium, large, Lock Screen)
+- EPIC-0014: Adaptive layout — iPad two-column landscape, macOS resize
+- EPIC-0015: Test automation — smoke tests, snapshot tests, nightly CI gate
+- BUG-0060–0067: App Store validation fixes, duplicate Live Activity, DND bypass, GPS city names, watchOS GPS
 
 ---
 
 ## Planned Releases
 
-### **MVP v1.0.0 (Minimum Viable Product)**
+### **Release 1.6 (Next)**
 
-**Target Date:** Q2 2026 (TBD)  
-**Status:** 🟡 Ready to Start  
-**Description:** Core prayer times functionality with location services, Qibla direction, and Hijri date display.
-
-**Epics in MVP:**
-- EPIC-0001: Location & City Selection
-- EPIC-0002: Prayer Time Calculation & Display
-- EPIC-0003: Qibla Direction Finder
-- EPIC-0004: Testing & Quality Assurance
+**Status:** 🔴 Planning  
+**Candidates:**
+- ENH-001: GPS prayer time accuracy (exact coordinate + CLGeocoder timezone)
+- ENH-002: Ramadan mode (Suhoor/Iftar countdown in menu bar)
+- ENH-008: Sunnah prayer times (Tahajjud, Duha)
+- EPIC-0015 execution: XCUITest suites (US-0066–0069)
 
 ---
 
-### **Release 1.1 (Future Enhancements)**
+### **Release 1.7 (Future)**
 
-**Target Date:** Q3 2026  
-**Status:** 🔴 Not Started  
-**Description:** Adhan alerts, notifications, menu bar quick view
+**Status:** 🔴 Backlog  
+**Description:** Internationalisation (ENH-019) — Arabic, Urdu, Indonesian first
 
 ---
 
-### **Release 1.2 (Future Enhancements)**
+### **Release 2.0 (Future)**
 
-**Target Date:** Q4 2026  
-**Status:** 🔴 Not Started  
-**Description:** Internationalization (i18n), UI language selection, widgets
+**Status:** 🔴 Backlog  
+**Description:** Apple TV (ENH-020) and/or visionOS (ENH-021) platform expansion
 
 ---
 

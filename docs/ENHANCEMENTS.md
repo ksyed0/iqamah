@@ -2,10 +2,10 @@
 
 Logged from competitive analysis (May 2026) and product research. Items are grouped by theme, not priority. See competitive-analysis.md for the feature gap matrix these derive from.
 
-**Implementation status as of 2026-05-11:**
-- ENH-015 (iPhone/iPad) → ✅ Implemented as EPIC-0010 (PRs #56–60)
-- ENH-016 (Apple Watch) → ✅ Implemented as EPIC-0012 (PR #67)
-- ENH-018 (Hilal Watch) → ✅ Implemented as EPIC-0011 (PRs #61–66)
+**Implementation status as of 2026-05-20:**
+- ENH-015 (iPhone/iPad) → ✅ Implemented as EPIC-0010 (PRs #56–60). Submitted to App Store 2026-05-20.
+- ENH-016 (Apple Watch) → ✅ Implemented as EPIC-0012 (PR #67). Submitted to App Store 2026-05-20.
+- ENH-018 (Hilal Watch) → ✅ Implemented as EPIC-0011 (PRs #61–66). Submitted to App Store 2026-05-20.
 - ENH-019 (i18n) → 🔵 Planned — not yet started
 - ENH-020 (Apple TV) → 🔵 Backlog — see Platform Expansion section
 - ENH-021 (visionOS) → 🔵 Backlog — see Platform Expansion section
