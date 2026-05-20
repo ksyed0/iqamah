@@ -88,7 +88,8 @@ struct SettingsTab: View {
     }
 
     private var locationLabel: String {
-        if let city = settings.loadCity() { return city.name }
+        let name = settings.activeCityName // GPS locality or nearest city name
+        if !name.isEmpty { return name }
         if let coord = settings.activeCoordinate {
             return String(format: "%.2f°, %.2f°", coord.latitude, coord.longitude)
         }

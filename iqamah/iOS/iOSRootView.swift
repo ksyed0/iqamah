@@ -55,7 +55,8 @@ struct MainTabView: View {
 
             NavigationStack {
                 if let city {
-                    QiblahView(latitude: city.latitude, longitude: city.longitude, cityName: city.name)
+                    QiblahView(latitude: city.latitude, longitude: city.longitude,
+                               cityName: settings.activeCityName.isEmpty ? city.name : settings.activeCityName)
                 } else {
                     Text("Select a location first")
                         .foregroundStyle(.secondary)
