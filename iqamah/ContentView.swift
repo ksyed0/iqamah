@@ -379,81 +379,109 @@ extension AppIconView {
 
 struct IconExporterView: View {
     @State private var exported = false
+    @State private var watchExportedVariant: WatchIconVariant?
     @State private var exportPath = ""
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
-        VStack(spacing: 30) {
+        VStack(spacing: 24) {
             Text("Export App Icons")
                 .font(.title)
                 .fontWeight(.bold)
 
-            // Preview
-            AppIconView(size: 256, showBackground: true)
-                .frame(width: 256, height: 256)
-                .clipShape(RoundedRectangle(cornerRadius: 52, style: .continuous))
+            // iOS / macOS icon preview
+            AppIconView(size: 200, showBackground: true)
+                .frame(width: 200, height: 200)
+                .clipShape(RoundedRectangle(cornerRadius: 40, style: .continuous))
                 .shadow(radius: 10)
 
-            VStack(spacing: 12) {
-                Button(action: {
-                    // Get the actual path
-                    let fileManager = FileManager.default
-                    let desktopURL = fileManager.urls(for: .desktopDirectory, in: .userDomainMask).first!
-                    let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+            Button(action: {
+                let fileManager = FileManager.default
+                let desktopURL = fileManager.urls(for: .desktopDirectory, in: .userDomainMask).first!
+                let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+                if fileManager.isWritableFile(atPath: desktopURL.path) {
+                    exportPath = desktopURL.appendingPathComponent("IqamahAppIcons").path
+                } else {
+                    exportPath = documentsURL.appendingPathComponent("IqamahAppIcons").path
+                }
+                AppIconView.exportIconsToDesktop()
+                exported = true
+            }) {
+                Label(exported ? "iOS Icons Exported" : "Export iOS Icons",
+                      systemImage: exported ? "checkmark.circle.fill" : "square.and.arrow.down")
+                    .font(.headline)
+                    .frame(width: 280)
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(exported)
 
-                    // Try Desktop first, fallback to Documents
-                    if fileManager.isWritableFile(atPath: desktopURL.path) {
-                        exportPath = desktopURL.appendingPathComponent("IqamahAppIcons").path
-                    } else {
-                        exportPath = documentsURL.appendingPathComponent("IqamahAppIcons").path
+            Divider().padding(.horizontal, 40)
+
+            // BUG-0068 — watch icon variants
+            Text("Watch Icon Variants — BUG-0068")
+                .font(.headline)
+            HStack(spacing: 16) {
+                ForEach(WatchIconVariant.allCases) { variant in
+                    VStack(spacing: 6) {
+                        WatchAppIconView(size: 80, variant: variant)
+                            .clipShape(Circle())
+                            .overlay(
+                                Circle().stroke(watchExportedVariant == variant ? Color.green : Color.clear, lineWidth: 3)
+                            )
+                        Text(variant.rawValue)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
                     }
+                }
+            }
+            .padding(10)
+            .background(Color.black.opacity(0.85))
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
 
-                    AppIconView.exportIconsToDesktop()
-                    exported = true
+            VStack(spacing: 8) {
+                ForEach(WatchIconVariant.allCases) { variant in
+                    Button(action: {
+                        WatchAppIconView.exportVariantToDesktop(variant)
+                        watchExportedVariant = variant
+                    }) {
+                        Label("Export Watch — \(variant.label)",
+                              systemImage: watchExportedVariant == variant ? "checkmark.circle.fill" : "square.and.arrow.down")
+                            .frame(width: 280)
+                    }
+                    .buttonStyle(.bordered)
+                }
+                Button(action: {
+                    WatchAppIconView.exportAllVariantsToDesktop()
+                    watchExportedVariant = .radialGlow
                 }) {
-                    Label(exported ? "Icons Exported!" : "Export Icons",
-                          systemImage: exported ? "checkmark.circle.fill" : "square.and.arrow.down")
-                        .font(.headline)
+                    Label("Export ALL Watch Variants",
+                          systemImage: "square.and.arrow.down.on.square")
                         .frame(width: 280)
                 }
                 .buttonStyle(.borderedProminent)
-                .disabled(exported)
-
-                if exported {
-                    VStack(spacing: 8) {
-                        Text("✅ Icons exported successfully!")
-                            .foregroundColor(.green)
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-
-                        if !exportPath.isEmpty {
-                            Text(exportPath)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                                .multilineTextAlignment(.center)
-                                .textSelection(.enabled)
-                                .padding(.horizontal)
-                        }
-
-                        Button("Open in Finder") {
-                            NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: exportPath)
-                        }
-                        .buttonStyle(.bordered)
-                    }
-                }
-
-                Button("Close") {
-                    dismiss()
-                }
-                .buttonStyle(.bordered)
+                .tint(.purple)
             }
 
-            Text("Exports: 16, 32, 64, 128, 256, 512, 1024 px")
-                .font(.caption)
-                .foregroundColor(.secondary)
+            if exported || watchExportedVariant != nil {
+                VStack(spacing: 4) {
+                    Text("✅ Exported")
+                        .foregroundColor(.green)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                    Button("Open Watch Icons Folder in Finder") {
+                        let path = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask).first!
+                            .appendingPathComponent("IqamahWatchIcons").path
+                        NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: path)
+                    }
+                    .buttonStyle(.bordered)
+                }
+            }
+
+            Button("Close") { dismiss() }
+                .buttonStyle(.bordered)
         }
-        .padding(40)
-        .frame(width: 500, height: 600)
+        .padding(24)
+        .frame(width: 540, height: 760)
     }
 }
 
