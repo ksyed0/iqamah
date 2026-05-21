@@ -1955,62 +1955,1758 @@ Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>"
 
 ---
 
-## Task 10 onwards (UI surfaces, notification schedulers, docs)
+## Task 10: `FastingBanner` shared SwiftUI view
 
-Tasks 10–21 cover UI rendering, per-platform notification scheduling, and registry promotion. Each task is structured the same as Tasks 1–9: TDD where applicable, exact file paths and code, and one commit per task. Due to the breadth of platform-specific surface code, **these tasks will be added incrementally during execution** rather than fully pre-specified — the engine + helpers built in Tasks 1–9 provide the stable API contract that downstream UI work consumes, and the SwiftUI surface code is best validated against a running simulator as it's written.
+**Files:**
+- Create: `iqamah/Views/Shared/FastingBanner.swift`
+- Modify: `iqamah.xcodeproj/project.pbxproj` (add file ref + memberships for `iqamah` and `iqamah-iOS` targets)
 
-The remaining task headings are reserved as follows; each will be expanded to the same TDD step structure before that task is started:
+**Why:** AC-0366, AC-0367. Renders the dual-countdown banner (Suhoor ends + Iftar at) when state is active, or the prohibition message when `state.prohibition != nil`. Purple gradient + 🌙 for Ramadan; teal + 🕗 for Nawafil; grey + ⚠️ for prohibition. Used by macOS popover (Task 11) and iOS hero card (Task 12).
 
-### Task 10: `FastingBanner` shared SwiftUI view (iOS+macOS)
-Render the dual-countdown banner. Purple+🌙 for Ramadan; teal+🕗 for Nawafil; grey+⚠️ for prohibition. New file at `iqamah/Views/Shared/FastingBanner.swift` with multi-target membership in `iqamah.xcodeproj/project.pbxproj`.
+- [ ] **Step 1: Create the SwiftUI view**
 
-### Task 11: macOS menu bar + popover wiring
-Modify `iqamah/AppDelegate.swift:136` (`updateStatusBarDisplay`) to consult engine + apply relabel. Modify `iqamah/Views/MenuBarPopoverView.swift` to render `FastingBanner` above the prayer list.
+Create `iqamah/Views/Shared/` directory if it doesn't exist. Then create `iqamah/Views/Shared/FastingBanner.swift`:
 
-### Task 12: iOS hero card + row relabel
-Modify `iqamah/iOS/PrayerHeroCard.swift` to render `FastingBanner` above next-prayer block. Modify `iqamah/iOS/PrayerRowMobileView.swift` to apply relabel within 2h window.
+```swift
+import SwiftUI
+import IqamahCore
 
-### Task 13: watchOS prayer tab relabel
-Modify `IqamahWatch/PrayerTimesTab.swift:48` to apply relabel. No banner on watch.
+/// Shared dual-countdown banner for Fasting Mode.
+/// Renders either: active state (Suhoor ends + Iftar at), or prohibition message.
+/// Callers must gate on `state.isActive || state.prohibition != nil` before rendering.
+public struct FastingBanner: View {
+    let state: FastingDayState
+    let fajrTime: Date?
+    let maghribTime: Date?
+    let isShiaMethod: Bool
 
-### Task 14: Widgets + Live Activity wiring
-Modify `IqamahWidget/IqamahWidget.swift` provider to include Fasting Mode state in TimelineEntry; views call FastingLabelFormatter. Modify `IqamahLiveActivity/PrayerActivityAttributes.swift` to add optional `fastingActive: Bool?` and `fastingTriggerRaw: String?` to ContentState with default-nil. Modify `IqamahLiveActivity/PrayerLiveActivityView.swift` to apply relabel.
+    public init(state: FastingDayState, fajrTime: Date?, maghribTime: Date?, isShiaMethod: Bool) {
+        self.state = state
+        self.fajrTime = fajrTime
+        self.maghribTime = maghribTime
+        self.isShiaMethod = isShiaMethod
+    }
 
-### Task 15: `FastingModeSection` settings UI
-New shared view at `iqamah/Views/Shared/FastingModeSection.swift`. Master toggle hides sub-controls when off. Weekday picker pills + warnings. Tradition-aware row visibility (`midShaban`/`mabath`) and Muharram label adaptation.
+    public var body: some View {
+        Group {
+            if let prohibition = state.prohibition {
+                prohibitionBanner(prohibition)
+            } else if state.isActive {
+                activeBanner
+            } else {
+                EmptyView()  // caller should not have rendered us
+            }
+        }
+    }
 
-### Task 16: watchOS SettingsTab entry
-Add a minimal "Fasting Mode" row + navigation link to `IqamahWatch/SettingsTab.swift`. Detail screen shows master toggle only with "Configure on iPhone/Mac" link.
+    private var activeBanner: some View {
+        let isRamadan = state.trigger == .autoRamadan
+        let gradient: LinearGradient = isRamadan
+            ? LinearGradient(colors: [Color(red: 0.16, green: 0.10, blue: 0.23),
+                                       Color(red: 0.10, green: 0.16, blue: 0.23)],
+                              startPoint: .topLeading, endPoint: .bottomTrailing)
+            : LinearGradient(colors: [Color(red: 0.10, green: 0.23, blue: 0.23),
+                                       Color(red: 0.10, green: 0.16, blue: 0.23)],
+                              startPoint: .topLeading, endPoint: .bottomTrailing)
+        let glyph = isRamadan ? "🌙" : "🕗"
 
-### Task 17: macOS `FastingNotificationScheduler` + debounce
-New file `iqamah/FastingNotificationScheduler.swift`. Wraps `UNUserNotificationCenter`. Implements 7-day rolling window with 500ms debounce via `DispatchWorkItem` cancellation pattern.
+        return HStack(alignment: .center, spacing: 12) {
+            Text(glyph).font(.system(size: 28))
+            VStack(alignment: .leading, spacing: 4) {
+                if let fajr = fajrTime {
+                    HStack {
+                        Text("Suhoor ends")
+                            .font(.caption).fontWeight(.semibold)
+                            .foregroundStyle(Color(red: 0.79, green: 0.63, blue: 0.23))
+                        Spacer()
+                        Text(formatted(fajr))
+                            .font(.caption).fontWeight(.medium).monospacedDigit()
+                            .foregroundStyle(.white)
+                    }
+                }
+                if let maghrib = maghribTime {
+                    HStack {
+                        Text("Iftar at")
+                            .font(.caption).fontWeight(.semibold)
+                            .foregroundStyle(Color(red: 0.79, green: 0.63, blue: 0.23))
+                        Spacer()
+                        Text(formatted(maghrib))
+                            .font(.caption).fontWeight(.medium).monospacedDigit()
+                            .foregroundStyle(.white)
+                    }
+                }
+            }
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(gradient)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .strokeBorder(Color(red: 0.79, green: 0.63, blue: 0.23).opacity(0.3), lineWidth: 1)
+                )
+        )
+    }
 
-### Task 18: iOS notification scheduler extension
-Extend `iqamah/iOS/NotificationScheduler.swift` with `scheduleFastingReminders(...)` consuming `FastingNotificationPlanner`. Same 500ms debounce.
+    private func prohibitionBanner(_ prohibition: ProhibitedDay) -> some View {
+        HStack(alignment: .center, spacing: 12) {
+            Text("⚠️").font(.system(size: 24))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(prohibition.displayName)
+                    .font(.subheadline).fontWeight(.semibold)
+                    .foregroundStyle(.white)
+                Text("Fasting is forbidden today")
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.7))
+            }
+            Spacer()
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(LinearGradient(colors: [Color(white: 0.16), Color(white: 0.10)],
+                                      startPoint: .topLeading, endPoint: .bottomTrailing))
+        )
+    }
 
-### Task 19: watchOS notification scheduler extension
-Extend `IqamahWatch/WatchNotificationScheduler.swift` similarly.
+    private func formatted(_ date: Date) -> String {
+        let fmt = DateFormatter()
+        fmt.timeStyle = .short
+        return fmt.string(from: date)
+    }
+}
+```
 
-### Task 20: Doc registry updates
+- [ ] **Step 2: Add file refs to pbxproj for both targets**
 
-- Mark ENH-002 ✅ in `docs/ENHANCEMENTS.md` (with surface-by-surface table)
-- Add ENH-022 stub for "Islamic Holiday Celebration Reminders" to `docs/ENHANCEMENTS.md`
-- Add EPIC-0017 + US-0071–US-0075 + AC-0357–AC-0382 to `docs/RELEASE_PLAN.md`
-- Add TC-0044 through TC-0073 to `docs/TEST_CASES.md`
-- Bump counters in `docs/ID_REGISTRY.md`: EPIC→0018, US→0076, AC→0383, TC→0074, ENH→0023
+Open `iqamah.xcodeproj/project.pbxproj`. The file needs:
+1. One PBXFileReference (e.g., `FB000000000000000000001R`)
+2. Two PBXBuildFile entries (one per target) referencing the same file ref
+3. Membership in the iqamah Sources phase AND iqamah-iOS Sources phase
+4. A group entry under a new `Shared` group inside the `Views` group (or under iqamah/Views/ directly)
 
-### Task 21: Final verification
+Use the pattern already established by `PrayerActivityAttributes.swift` (consolidated in commit `c5215bd`) for multi-target membership. Run:
 
-- `cd Packages/IqamahCore && swift test` — all tests pass
-- Build `iqamah`, `iqamah-iOS`, `IqamahWatch Watch App`, `IqamahLiveActivity`, `IqamahWidget` schemes
-- Manual smoke on simulators
-- Open PR to `develop`
+```bash
+grep -A1 "LA000000000000000000010R" iqamah.xcodeproj/project.pbxproj | head -10
+```
+
+Then mirror that structure for `FastingBanner.swift` with new GUIDs `FB000000000000000000001` (build file iqamah), `FB000000000000000000002` (build file iqamah-iOS), and `FB000000000000000000001R` (file ref).
+
+- [ ] **Step 3: Build both targets to verify the view compiles into both**
+
+```bash
+xcodebuild -project iqamah.xcodeproj -scheme iqamah -configuration Debug build 2>&1 | tail -5
+xcodebuild -project iqamah.xcodeproj -scheme iqamah-iOS -destination 'platform=iOS Simulator,name=iPhone 17' build 2>&1 | tail -5
+```
+
+Expected: both `BUILD SUCCEEDED`.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add iqamah/Views/Shared/FastingBanner.swift iqamah.xcodeproj/project.pbxproj
+git commit -m "feat(ui): shared FastingBanner view for macOS + iOS
+
+AC-0366, AC-0367. Renders dual Suhoor/Iftar countdown for active state
+(purple+🌙 for Ramadan, teal+🕗 for Nawafil) or prohibition message
+(grey+⚠️). Multi-target membership via pbxproj — single file compiled
+into both iqamah and iqamah-iOS schemes.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>"
+```
 
 ---
 
-## Spec coverage check
+## Task 11: macOS menu bar + popover wiring
 
-| Spec AC | Implemented in | TC |
+**Files:**
+- Modify: `iqamah/AppDelegate.swift:136-211` (`updateStatusBarDisplay`)
+- Modify: `iqamah/Views/MenuBarPopoverView.swift`
+
+**Why:** AC-0368. Apply `FastingLabelFormatter.relabel` to the next-prayer name in the menu bar display. Render `FastingBanner` above the prayer list in the popover.
+
+- [ ] **Step 1: Modify menu bar to use FastingLabelFormatter**
+
+In `iqamah/AppDelegate.swift`, locate the `displayText` line in `updateStatusBarDisplay` (around line 200):
+
+```swift
+        let displayText = "\(next.name) \(formatter.string(from: next.time))"
+```
+
+Replace with:
+
+```swift
+        let fastingState = FastingModeEngine.evaluate(
+            for: now,
+            settings: settings.fastingModeSettings,
+            calculationMethod: settings.calculationMethod,
+            hijriCalendar: Calendar(identifier: .islamicUmmAlQura),
+            timezone: timezone
+        )
+        let labeledName = FastingLabelFormatter.relabel(
+            prayerName: next.name,
+            prayerTime: next.time,
+            currentTime: now,
+            state: fastingState
+        )
+        let displayText = "\(labeledName) \(formatter.string(from: next.time))"
+```
+
+- [ ] **Step 2: Render FastingBanner in the popover**
+
+Find the body of `iqamah/Views/MenuBarPopoverView.swift`:
+
+```bash
+grep -n "var body" iqamah/Views/MenuBarPopoverView.swift | head -3
+```
+
+Inside the body, locate where the prayer list begins (likely a `ForEach` or `VStack { ... prayerRows ... }`). Immediately above it, insert:
+
+```swift
+            let fastingState = FastingModeEngine.evaluate(
+                for: Date(),
+                settings: settings.fastingModeSettings,
+                calculationMethod: settings.calculationMethod,
+                hijriCalendar: Calendar(identifier: .islamicUmmAlQura),
+                timezone: TimeZone(identifier: settings.activeTimezoneIdentifier) ?? .current
+            )
+            if fastingState.isActive || fastingState.prohibition != nil {
+                FastingBanner(
+                    state: fastingState,
+                    fajrTime: prayerTimes?.fajr,
+                    maghribTime: prayerTimes?.maghrib,
+                    isShiaMethod: settings.calculationMethod.isShiaMethod
+                )
+                .padding(.horizontal, 14)
+                .padding(.bottom, 8)
+            }
+```
+
+(Adjust `prayerTimes?.fajr` / `.maghrib` to whatever variable holds today's `PrayerTimes` in the popover view.)
+
+- [ ] **Step 3: Build the macOS scheme**
+
+```bash
+xcodebuild -project iqamah.xcodeproj -scheme iqamah -configuration Debug build 2>&1 | tail -5
+```
+
+Expected: `BUILD SUCCEEDED`.
+
+- [ ] **Step 4: Manual smoke**
+
+Run the macOS app. With Fasting Mode disabled, menu bar should show standard countdown. Enable Fasting Mode in Settings, toggle `weeklyDays` to include today's weekday, and reopen the popover. Banner should appear above the prayer list within ~60 s.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add iqamah/AppDelegate.swift iqamah/Views/MenuBarPopoverView.swift
+git commit -m "feat(macos): Fasting Mode in menu bar countdown + popover banner
+
+AC-0368. Menu bar countdown applies FastingLabelFormatter relabel within
+2h window. Popover renders FastingBanner above the prayer list when
+fasting today (or when today is hard-prohibited).
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>"
+```
+
+---
+
+## Task 12: iOS hero card + prayer row relabel
+
+**Files:**
+- Modify: `iqamah/iOS/PrayerHeroCard.swift` (render FastingBanner above the next-prayer block)
+- Modify: `iqamah/iOS/PrayerRowMobileView.swift` (apply relabel within 2h window)
+
+**Why:** AC-0369 (iOS portion). The hero card is the most prominent iOS surface for Fasting Mode messaging; the per-row relabel keeps the next-prayer name consistent with the menu bar treatment.
+
+- [ ] **Step 1: Add FastingBanner to PrayerHeroCard**
+
+Locate the body of `iqamah/iOS/PrayerHeroCard.swift`. Find the outer `VStack` that contains the next-prayer label + countdown. Insert immediately ABOVE the existing content (so the banner appears above the hero):
+
+```swift
+            let fastingState = FastingModeEngine.evaluate(
+                for: Date(),
+                settings: settings.fastingModeSettings,
+                calculationMethod: settings.calculationMethod,
+                hijriCalendar: Calendar(identifier: .islamicUmmAlQura),
+                timezone: TimeZone(identifier: settings.activeTimezoneIdentifier) ?? .current
+            )
+            if fastingState.isActive || fastingState.prohibition != nil {
+                FastingBanner(
+                    state: fastingState,
+                    fajrTime: prayerTimes.fajr,
+                    maghribTime: prayerTimes.maghrib,
+                    isShiaMethod: settings.calculationMethod.isShiaMethod
+                )
+                .padding(.bottom, 12)
+            }
+```
+
+Use the existing `prayerTimes` variable (the same struct the hero card consumes for the next-prayer countdown). If the hero card receives a `PrayerTimes` parameter under a different name (e.g. `times`), substitute accordingly.
+
+- [ ] **Step 2: Apply relabel in PrayerRowMobileView**
+
+In `iqamah/iOS/PrayerRowMobileView.swift`, find where the prayer name `Text(...)` is rendered. Replace:
+
+```swift
+Text(prayer.name)
+```
+
+with:
+
+```swift
+Text(FastingLabelFormatter.relabel(
+    prayerName: prayer.name,
+    prayerTime: prayer.time,
+    currentTime: Date(),
+    state: FastingModeEngine.evaluate(
+        for: Date(),
+        settings: settings.fastingModeSettings,
+        calculationMethod: settings.calculationMethod,
+        hijriCalendar: Calendar(identifier: .islamicUmmAlQura),
+        timezone: TimeZone(identifier: settings.activeTimezoneIdentifier) ?? .current
+    )
+))
+```
+
+`settings` must be accessible via `@EnvironmentObject` or passed in. If the row doesn't currently observe settings, add:
+
+```swift
+@EnvironmentObject private var settings: SettingsManager
+```
+
+Find the actual binding by searching:
+
+```bash
+grep -n "@EnvironmentObject\|settings:" iqamah/iOS/PrayerRowMobileView.swift | head -5
+```
+
+- [ ] **Step 3: Build iOS scheme**
+
+```bash
+xcodebuild -project iqamah.xcodeproj -scheme iqamah-iOS -destination 'platform=iOS Simulator,name=iPhone 17' build 2>&1 | tail -5
+```
+
+Expected: `BUILD SUCCEEDED`.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add iqamah/iOS/PrayerHeroCard.swift iqamah/iOS/PrayerRowMobileView.swift
+git commit -m "feat(ios): Fasting Mode hero banner + row relabel
+
+AC-0369 (iOS). PrayerHeroCard renders FastingBanner above next-prayer
+block when active or prohibited. PrayerRowMobileView applies relabel
+within 2h window so the row name flips from Fajr/Maghrib to
+Suhoor/Iftar with the appropriate glyph.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>"
+```
+
+---
+
+## Task 13: watchOS prayer tab relabel
+
+**Files:**
+- Modify: `IqamahWatch/PrayerTimesTab.swift:48` (and the row rendering loop)
+
+**Why:** AC-0369 (watchOS portion). Watch gets the relabel but NOT the banner (limited screen real estate).
+
+- [ ] **Step 1: Apply relabel in the watch row**
+
+In `IqamahWatch/PrayerTimesTab.swift`, find the row rendering loop (search for `ForEach` or `prayer.name`):
+
+```bash
+grep -n "prayer.name\|ForEach" IqamahWatch/PrayerTimesTab.swift | head -5
+```
+
+Replace the prayer-name `Text(prayer.name)` (likely line 48 or nearby) with:
+
+```swift
+Text(FastingLabelFormatter.relabel(
+    prayerName: prayer.name,
+    prayerTime: prayer.time,
+    currentTime: Date(),
+    state: FastingModeEngine.evaluate(
+        for: Date(),
+        settings: settings.fastingModeSettings,
+        calculationMethod: settings.calculationMethod,
+        hijriCalendar: Calendar(identifier: .islamicUmmAlQura),
+        timezone: TimeZone(identifier: settings.activeTimezoneIdentifier) ?? .current
+    )
+))
+```
+
+- [ ] **Step 2: Build watch scheme**
+
+```bash
+xcodebuild -project iqamah.xcodeproj -scheme "IqamahWatch Watch App" -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build 2>&1 | tail -5
+```
+
+Expected: `BUILD SUCCEEDED`.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add IqamahWatch/PrayerTimesTab.swift
+git commit -m "feat(watch): Fasting Mode relabel in prayer rows
+
+AC-0369 (watchOS). Watch shares the relabel logic with iOS/macOS but
+skips the banner due to limited screen real estate.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>"
+```
+
+---
+
+## Task 14: Widgets + Live Activity wiring
+
+**Files:**
+- Modify: `IqamahLiveActivity/PrayerActivityAttributes.swift` (add optional ContentState fields)
+- Modify: `IqamahLiveActivity/PrayerLiveActivityView.swift` (apply relabel)
+- Modify: `iqamah/iOS/PrayerActivityManager.swift` (pass FastingDayState into ContentState)
+- Modify: `IqamahWidget/IqamahWidget.swift` (provider includes fasting state; views relabel)
+
+**Why:** AC-0370. Adds backward-compatible optional fields to `ContentState`; widget timeline entries carry today's fasting state; LA and widget views apply the relabel.
+
+- [ ] **Step 1: Add optional fields to ContentState**
+
+In `IqamahLiveActivity/PrayerActivityAttributes.swift`, modify the `ContentState` struct:
+
+```swift
+struct ContentState: Codable, Hashable {
+    let nextPrayerName: String
+    let nextPrayerTime: Date
+    let followingPrayerName: String
+    let moonPhase: Double
+    let hijriDateString: String
+    // v1.6 additions — optional with default-nil so v1.5 in-flight activities decode cleanly
+    var fastingActive: Bool? = nil
+    var fastingTriggerRaw: String? = nil
+
+    init(
+        nextPrayerName: String, nextPrayerTime: Date,
+        followingPrayerName: String, moonPhase: Double, hijriDateString: String,
+        fastingActive: Bool? = nil, fastingTriggerRaw: String? = nil
+    ) {
+        self.nextPrayerName = nextPrayerName
+        self.nextPrayerTime = nextPrayerTime
+        self.followingPrayerName = followingPrayerName
+        self.moonPhase = moonPhase
+        self.hijriDateString = hijriDateString
+        self.fastingActive = fastingActive
+        self.fastingTriggerRaw = fastingTriggerRaw
+    }
+}
+```
+
+- [ ] **Step 2: Apply relabel in the Live Activity view**
+
+In `IqamahLiveActivity/PrayerLiveActivityView.swift`, find each place that renders `context.state.nextPrayerName`. Wrap with:
+
+```swift
+private func displayedNextPrayerName(_ context: ActivityViewContext<PrayerActivityAttributes>) -> String {
+    guard context.state.fastingActive == true,
+          let triggerRaw = context.state.fastingTriggerRaw,
+          let trigger = FastingTriggerKind(rawValue: triggerRaw) else {
+        return context.state.nextPrayerName
+    }
+    let stubState = FastingDayState(isActive: true, trigger: trigger, prohibition: nil, date: Date())
+    return FastingLabelFormatter.relabel(
+        prayerName: context.state.nextPrayerName,
+        prayerTime: context.state.nextPrayerTime,
+        currentTime: Date(),
+        state: stubState
+    )
+}
+```
+
+Replace each `Text(context.state.nextPrayerName)` with `Text(displayedNextPrayerName(context))`.
+
+- [ ] **Step 3: Populate fasting state in PrayerActivityManager**
+
+In `iqamah/iOS/PrayerActivityManager.swift`, find the `buildContentState` method (around line 65). Add to the local computations:
+
+```swift
+let fastingState = FastingModeEngine.evaluate(
+    for: Date(),
+    settings: settings.fastingModeSettings,
+    calculationMethod: settings.calculationMethod,
+    hijriCalendar: Calendar(identifier: .islamicUmmAlQura),
+    timezone: TimeZone(identifier: settings.activeTimezoneIdentifier) ?? .current
+)
+```
+
+Then add to the `return PrayerActivityAttributes.ContentState(...)` constructor:
+
+```swift
+return PrayerActivityAttributes.ContentState(
+    nextPrayerName: nextPrayer.name,
+    nextPrayerTime: nextPrayer.time,
+    followingPrayerName: followingPrayer.name,
+    moonPhase: moonPhase,
+    hijriDateString: hijriDateString,
+    fastingActive: fastingState.isActive,
+    fastingTriggerRaw: fastingState.trigger?.rawValue
+)
+```
+
+- [ ] **Step 4: Apply relabel in widgets**
+
+In `IqamahWidget/IqamahWidget.swift`, find each `Text(entry.nextPrayerName)` or similar (around line 188-201). Wrap with a helper function that mirrors `displayedNextPrayerName` above but reads from the `TimelineEntry` instead of `ActivityViewContext`.
+
+If the widget's `TimelineEntry` does not currently carry Fasting Mode state, add two optional fields to its struct definition (search for `struct PrayerEntry: TimelineEntry`):
+
+```swift
+let fastingActive: Bool?
+let fastingTriggerRaw: String?
+```
+
+Populate them in the provider's `getTimeline(...)` by calling `FastingModeEngine.evaluate(...)` once per entry date.
+
+- [ ] **Step 5: Build extension schemes**
+
+```bash
+xcodebuild -project iqamah.xcodeproj -scheme IqamahLiveActivity -destination 'platform=iOS Simulator,name=iPhone 17' build 2>&1 | tail -5
+xcodebuild -project iqamah.xcodeproj -scheme IqamahWidget -destination 'platform=iOS Simulator,name=iPhone 17' build 2>&1 | tail -5
+xcodebuild -project iqamah.xcodeproj -scheme iqamah-iOS -destination 'platform=iOS Simulator,name=iPhone 17' build 2>&1 | tail -5
+```
+
+Expected: all three `BUILD SUCCEEDED`.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add IqamahLiveActivity/PrayerActivityAttributes.swift \
+        IqamahLiveActivity/PrayerLiveActivityView.swift \
+        iqamah/iOS/PrayerActivityManager.swift \
+        IqamahWidget/IqamahWidget.swift
+git commit -m "feat(widgets+live-activity): Fasting Mode state through ContentState
+
+AC-0370. ContentState gains two optional fields (fastingActive,
+fastingTriggerRaw) with default-nil — v1.5 in-flight activities decode
+cleanly under v1.6. Widget TimelineEntry mirrors the same fields.
+Views apply FastingLabelFormatter relabel when fastingActive == true.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>"
+```
+
+---
+
+## Task 15: `FastingModeSection` settings UI
+
+**Files:**
+- Create: `iqamah/Views/Shared/FastingModeSection.swift`
+- Modify: `iqamah/Views/SettingsSheetView.swift` (include the new section)
+- Modify: `iqamah.xcodeproj/project.pbxproj` (multi-target membership for new file)
+
+**Why:** AC-0371, AC-0372, AC-0373, AC-0374. The configuration UI — master toggle, all 9 trigger toggles with tradition-aware visibility/labels, weekday picker, Friday-alone/Saturday-alone warnings, and reminder controls.
+
+- [ ] **Step 1: Create FastingModeSection**
+
+Create `iqamah/Views/Shared/FastingModeSection.swift`:
+
+```swift
+import SwiftUI
+import IqamahCore
+
+/// Settings section for Fasting Mode. Renders the master toggle and, when on,
+/// all sub-controls. Adapts visibility/labels based on calculationMethod.isShiaMethod.
+public struct FastingModeSection: View {
+    @ObservedObject var settings: SettingsManager
+
+    public init(settings: SettingsManager) {
+        self.settings = settings
+    }
+
+    public var body: some View {
+        Section("Fasting Mode") {
+            Toggle("Enable Fasting Mode", isOn: $settings.fastingModeSettings.enabled)
+
+            if settings.fastingModeSettings.enabled {
+                Group {
+                    activationSection
+                    remindersSection
+                }
+            }
+        }
+    }
+
+    private var activationSection: some View {
+        Group {
+            Toggle("Auto-enable during Ramadan", isOn: $settings.fastingModeSettings.autoRamadan)
+
+            weeklyPicker
+            if settings.fastingModeSettings.hasFridayAloneWarning {
+                Label("Friday alone is discouraged. Consider adding Thursday or Saturday.",
+                      systemImage: "exclamationmark.triangle.fill")
+                    .font(.caption).foregroundStyle(.orange)
+            }
+            if settings.fastingModeSettings.hasSaturdayAloneWarning {
+                Label("Saturday alone is discouraged. Consider adding Friday.",
+                      systemImage: "exclamationmark.triangle.fill")
+                    .font(.caption).foregroundStyle(.orange)
+            }
+
+            Toggle("Monthly: Ayyam al-Beed (13–15)", isOn: $settings.fastingModeSettings.ayyamAlBeed)
+            Toggle("Annual: 6 days of Shawwal", isOn: $settings.fastingModeSettings.sixDaysShawwal)
+            Toggle("Annual: Day of Arafah (9 Dhul-Hijjah)", isOn: $settings.fastingModeSettings.dayOfArafah)
+            Toggle("Annual: First 9 of Dhul-Hijjah", isOn: $settings.fastingModeSettings.firstNineDhulHijjah)
+
+            muharramFastRow
+
+            if settings.calculationMethod.isShiaMethod {
+                Toggle("Annual: 15 Sha'ban — Laylat al-Bara'ah", isOn: $settings.fastingModeSettings.midShaban)
+                Toggle("Annual: 27 Rajab — Mab'ath an-Nabi", isOn: $settings.fastingModeSettings.mabath)
+            }
+        }
+    }
+
+    private var muharramFastRow: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Toggle(isOn: $settings.fastingModeSettings.muharramFast) {
+                Text(settings.calculationMethod.isShiaMethod
+                     ? "Annual: Tasu'a (9 Muharram)"
+                     : "Annual: Ashura (9+10 Muharram)")
+            }
+            Text(settings.calculationMethod.isShiaMethod
+                 ? "Shia tradition: commemoration day"
+                 : "Sunni Sunnah fast")
+                .font(.caption).foregroundStyle(.secondary)
+        }
+    }
+
+    private var weeklyPicker: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Weekly schedule").font(.subheadline)
+            HStack(spacing: 6) {
+                ForEach(weekdayShortNames, id: \.day) { wd in
+                    Button {
+                        toggleWeekday(wd.day)
+                    } label: {
+                        Text(wd.short)
+                            .frame(minWidth: 32, minHeight: 32)
+                            .background(
+                                Circle().fill(settings.fastingModeSettings.weeklyDays.contains(wd.day)
+                                               ? Color(red: 0.79, green: 0.63, blue: 0.23)
+                                               : Color.gray.opacity(0.2))
+                            )
+                            .foregroundStyle(settings.fastingModeSettings.weeklyDays.contains(wd.day) ? .white : .primary)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
+    private var weekdayShortNames: [(day: Int, short: String)] {
+        // 1=Sun, 2=Mon, ..., 7=Sat per Calendar.component(.weekday)
+        [(2, "M"), (3, "T"), (4, "W"), (5, "Th"), (6, "F"), (7, "S"), (1, "Su")]
+    }
+
+    private func toggleWeekday(_ day: Int) {
+        if settings.fastingModeSettings.weeklyDays.contains(day) {
+            settings.fastingModeSettings.weeklyDays.remove(day)
+        } else {
+            settings.fastingModeSettings.weeklyDays.insert(day)
+        }
+    }
+
+    private var remindersSection: some View {
+        Group {
+            Toggle("Send system notifications", isOn: $settings.fastingModeSettings.notificationsEnabled)
+
+            if settings.fastingModeSettings.notificationsEnabled {
+                Stepper(value: $settings.fastingModeSettings.suhoorLeadMinutes, in: 5...120, step: 5) {
+                    Text("Suhoor lead time: \(settings.fastingModeSettings.suhoorLeadMinutes) min")
+                }
+                Stepper(value: $settings.fastingModeSettings.iftarLeadMinutes, in: 5...120, step: 5) {
+                    Text("Iftar lead time: \(settings.fastingModeSettings.iftarLeadMinutes) min")
+                }
+                Toggle("Notify night before fasting day", isOn: $settings.fastingModeSettings.dayBeforeEnabled)
+                if settings.fastingModeSettings.dayBeforeEnabled {
+                    HStack {
+                        Text("Day-before time")
+                        Spacer()
+                        Stepper(value: $settings.fastingModeSettings.dayBeforeHour, in: 0...23) {
+                            Text("\(settings.fastingModeSettings.dayBeforeHour):\(String(format: "%02d", settings.fastingModeSettings.dayBeforeMinute))")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+- [ ] **Step 2: Add to SettingsSheetView**
+
+In `iqamah/Views/SettingsSheetView.swift`, find the main `Form` or `ScrollView` body. Insert `FastingModeSection(settings: SettingsManager.shared)` at an appropriate point (typically after the notifications/adhaan section, before the appearance/UI scale section). Search for an existing section header to find the right spot:
+
+```bash
+grep -n "Section(\|Text(\"Notifications\|Text(\"Appearance" iqamah/Views/SettingsSheetView.swift | head -10
+```
+
+- [ ] **Step 3: Add pbxproj entry for FastingModeSection.swift**
+
+Mirror the multi-target membership pattern from Task 10 (FastingBanner). Use new GUIDs `FB000000000000000000003` (build file iqamah), `FB000000000000000000004` (build file iqamah-iOS), `FB000000000000000000003R` (file ref).
+
+- [ ] **Step 4: Build both schemes**
+
+```bash
+xcodebuild -project iqamah.xcodeproj -scheme iqamah -configuration Debug build 2>&1 | tail -5
+xcodebuild -project iqamah.xcodeproj -scheme iqamah-iOS -destination 'platform=iOS Simulator,name=iPhone 17' build 2>&1 | tail -5
+```
+
+Expected: both `BUILD SUCCEEDED`.
+
+- [ ] **Step 5: Manual smoke**
+
+Open Settings on iOS simulator. Verify:
+1. Master toggle off → no sub-controls visible
+2. Master toggle on → autoRamadan ON by default, all other triggers OFF, weekly empty
+3. Tap Friday pill alone → Friday-alone warning appears
+4. Switch calculation method to Ja'fari → Muharram row relabels to "Tasu'a (9 Muharram)"; 15 Sha'ban + 27 Rajab toggles appear
+5. Switch back to MWL → Muharram row relabels to "Ashura (9+10 Muharram)"; 15 Sha'ban + 27 Rajab toggles disappear
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add iqamah/Views/Shared/FastingModeSection.swift iqamah/Views/SettingsSheetView.swift iqamah.xcodeproj/project.pbxproj
+git commit -m "feat(settings): FastingModeSection with tradition-aware UI gating
+
+AC-0371, AC-0372, AC-0373, AC-0374. Master toggle hides sub-controls
+when off. Weekday picker pills with Friday/Saturday-alone warnings.
+Muharram label adapts to isShiaMethod. 15 Sha'ban + 27 Rajab toggles
+visible only for Shia methods. Toggle state persists via the underlying
+FastingModeSettings struct across method changes (hidden toggles retain
+stored values).
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>"
+```
+
+---
+
+## Task 16: watchOS SettingsTab entry
+
+**Files:**
+- Modify: `IqamahWatch/SettingsTab.swift`
+
+**Why:** AC-0375. Watch shows only a minimal Fasting Mode master toggle + "Configure on iPhone/Mac" hint.
+
+- [ ] **Step 1: Add the section**
+
+In `IqamahWatch/SettingsTab.swift`, find the `Form` or `List` body. Add a new section:
+
+```swift
+Section("Fasting Mode") {
+    Toggle("Enable", isOn: $settings.fastingModeSettings.enabled)
+    Text("Configure triggers + reminders on iPhone or Mac")
+        .font(.caption2).foregroundStyle(.secondary)
+}
+```
+
+- [ ] **Step 2: Build watch scheme**
+
+```bash
+xcodebuild -project iqamah.xcodeproj -scheme "IqamahWatch Watch App" -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build 2>&1 | tail -5
+```
+
+Expected: `BUILD SUCCEEDED`.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add IqamahWatch/SettingsTab.swift
+git commit -m "feat(watch): minimal Fasting Mode entry in SettingsTab
+
+AC-0375. Master toggle only — full configuration deferred to iPhone/Mac.
+Watch syncs the settings struct via KVS.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>"
+```
+
+---
+
+## Task 17: macOS `FastingNotificationScheduler` + debounce
+
+**Files:**
+- Create: `iqamah/FastingNotificationScheduler.swift`
+- Modify: `iqamah/AppDelegate.swift` (call `requestReschedule()` at app launch + on settings change + at midnight)
+- Modify: `iqamah.xcodeproj/project.pbxproj` (add file to iqamah target only)
+
+**Why:** AC-0376, AC-0377, AC-0378, AC-0379. macOS wrapper around `UNUserNotificationCenter`. 7-day rolling window via `FastingNotificationPlanner`. 500ms debounce coalesces rapid settings changes.
+
+- [ ] **Step 1: Create the scheduler**
+
+Create `iqamah/FastingNotificationScheduler.swift`:
+
+```swift
+import Foundation
+import IqamahCore
+import UserNotifications
+
+/// macOS scheduler for Fasting Mode reminders. Wraps UNUserNotificationCenter
+/// with a 500ms debounce so rapid settings changes coalesce into one reschedule.
+@MainActor
+final class FastingNotificationScheduler {
+    static let shared = FastingNotificationScheduler()
+    private init() {}
+
+    private var debounceWorkItem: DispatchWorkItem?
+
+    /// Debounced entry point — call from any settings observer.
+    func requestReschedule() {
+        debounceWorkItem?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            Task { @MainActor in
+                await self?.rescheduleNow()
+            }
+        }
+        debounceWorkItem = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: work)
+    }
+
+    /// Immediate reschedule — clears existing fastingmode.* notifications + posts new 7-day window.
+    func rescheduleNow() async {
+        let center = UNUserNotificationCenter.current()
+
+        // Remove all existing fastingmode.* requests
+        let pending = await center.pendingNotificationRequests()
+        let ids = pending.map(\.identifier).filter { $0.hasPrefix("fastingmode.") }
+        center.removePendingNotificationRequests(withIdentifiers: ids)
+
+        let settings = SettingsManager.shared
+        guard settings.fastingModeSettings.enabled,
+              settings.fastingModeSettings.notificationsEnabled else { return }
+
+        guard let city = settings.loadCity() else { return }
+        let tz = TimeZone(identifier: settings.activeTimezoneIdentifier) ?? .current
+        let hCal = Calendar(identifier: .islamicUmmAlQura)
+        let calculator = PrayerCalculator(
+            coordinate: city.coordinate,
+            timezone: tz,
+            method: settings.calculationMethod,
+            asrMethod: settings.asrMethod
+        )
+
+        // Walk 7 days starting today
+        var gregCal = Calendar(identifier: .gregorian)
+        gregCal.timeZone = tz
+        let now = Date()
+
+        for dayOffset in 0..<7 {
+            guard let day = gregCal.date(byAdding: .day, value: dayOffset, to: now) else { continue }
+            let dayState = FastingModeEngine.evaluate(
+                for: day,
+                settings: settings.fastingModeSettings,
+                calculationMethod: settings.calculationMethod,
+                hijriCalendar: hCal,
+                timezone: tz
+            )
+
+            // Suhoor + Iftar for active fasting days
+            if dayState.isActive, let prayerTimes = try? calculator.calculate(for: day) {
+                let suhoorFire = FastingNotificationPlanner.suhoorFireDate(fajr: prayerTimes.fajr, settings: settings.fastingModeSettings)
+                let iftarFire = FastingNotificationPlanner.iftarFireDate(maghrib: prayerTimes.maghrib, settings: settings.fastingModeSettings)
+                if suhoorFire > now {
+                    await schedule(at: suhoorFire,
+                                   title: dayState.trigger == .autoRamadan ? "🌙 Suhoor reminder" : "🕗 Suhoor reminder",
+                                   body: "Suhoor ends in \(settings.fastingModeSettings.suhoorLeadMinutes) min — Fajr at \(format(prayerTimes.fajr, tz: tz))",
+                                   identifier: FastingNotificationPlanner.identifier(for: day, kind: "suhoor", timezone: tz))
+                }
+                if iftarFire > now {
+                    await schedule(at: iftarFire,
+                                   title: dayState.trigger == .autoRamadan ? "🌙 Iftar approaches" : "🕗 Iftar approaches",
+                                   body: "Iftar in \(settings.fastingModeSettings.iftarLeadMinutes) min — Maghrib at \(format(prayerTimes.maghrib, tz: tz))",
+                                   identifier: FastingNotificationPlanner.identifier(for: day, kind: "iftar", timezone: tz))
+                }
+            }
+
+            // Day-before reminder: today's state used for "tomorrow" (offset+1)
+            if dayOffset < 6 {
+                guard let tomorrow = gregCal.date(byAdding: .day, value: dayOffset + 1, to: now) else { continue }
+                let tomorrowState = FastingModeEngine.evaluate(
+                    for: tomorrow,
+                    settings: settings.fastingModeSettings,
+                    calculationMethod: settings.calculationMethod,
+                    hijriCalendar: hCal,
+                    timezone: tz
+                )
+                if let plan = FastingNotificationPlanner.dayBefore(
+                    tomorrow: tomorrow,
+                    tomorrowState: tomorrowState,
+                    settings: settings.fastingModeSettings,
+                    hijriCalendar: hCal,
+                    timezone: tz
+                ), plan.fireDate > now {
+                    await schedule(at: plan.fireDate, title: plan.title, body: plan.body, identifier: plan.identifier)
+                }
+            }
+        }
+    }
+
+    private func schedule(at date: Date, title: String, body: String, identifier: String) async {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = .default
+
+        let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: date)
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+        try? await UNUserNotificationCenter.current().add(request)
+    }
+
+    private func format(_ date: Date, tz: TimeZone) -> String {
+        let fmt = DateFormatter()
+        fmt.timeStyle = .short
+        fmt.timeZone = tz
+        return fmt.string(from: date)
+    }
+}
+```
+
+- [ ] **Step 2: Wire AppDelegate to call requestReschedule**
+
+In `iqamah/AppDelegate.swift`, at the end of `applicationDidFinishLaunching` (or wherever app setup completes), add:
+
+```swift
+FastingNotificationScheduler.shared.requestReschedule()
+
+// Re-schedule on settings change
+NotificationCenter.default.addObserver(
+    forName: .settingsDidChange,
+    object: nil, queue: .main
+) { _ in
+    FastingNotificationScheduler.shared.requestReschedule()
+}
+
+// Re-schedule at midnight (uses the existing midnight check in updateStatusBarDisplay)
+```
+
+In the existing 60-second timer callback (or at the midnight detection point in `updateStatusBarDisplay`), add a `Calendar.current.isDate(now, inSameDayAs: announcedDate)` guard — when the day changes, call `FastingNotificationScheduler.shared.requestReschedule()`.
+
+- [ ] **Step 3: Add pbxproj entry for FastingNotificationScheduler.swift**
+
+Add to the `iqamah` target only (not iqamah-iOS — iOS has its own scheduler in Task 18). Use new GUIDs `FN000000000000000000001` (build file) and `FN000000000000000000001R` (file ref).
+
+- [ ] **Step 4: Build macOS scheme**
+
+```bash
+xcodebuild -project iqamah.xcodeproj -scheme iqamah -configuration Debug build 2>&1 | tail -5
+```
+
+Expected: `BUILD SUCCEEDED`.
+
+- [ ] **Step 5: Manual smoke**
+
+Run the macOS app. Enable Fasting Mode + weekly Mon. Open Console.app and filter for `UNUserNotificationCenter`. Within ~600 ms after toggling, verify Suhoor + Iftar + day-before reminders are added for the upcoming Monday.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add iqamah/FastingNotificationScheduler.swift iqamah/AppDelegate.swift iqamah.xcodeproj/project.pbxproj
+git commit -m "feat(macos): FastingNotificationScheduler with 500ms debounce
+
+AC-0376, AC-0377, AC-0378, AC-0379. macOS wrapper around
+UNUserNotificationCenter. 7-day rolling window. Consumes
+FastingNotificationPlanner for fire-date arithmetic. Debounces
+rapid settings changes via DispatchWorkItem cancellation pattern.
+Wired to AppDelegate launch + settings observers + midnight rollover.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>"
+```
+
+---
+
+## Task 18: iOS notification scheduler extension
+
+**Files:**
+- Modify: `iqamah/iOS/NotificationScheduler.swift`
+
+**Why:** AC-0376, AC-0377, AC-0378, AC-0379 (iOS portion). Extend the existing iOS scheduler to schedule Fasting Mode reminders alongside prayer notifications. Same 500ms debounce pattern.
+
+- [ ] **Step 1: Add fasting reminder logic**
+
+In `iqamah/iOS/NotificationScheduler.swift`, locate the existing scheduling method (search for `func schedule` or `UNUserNotificationCenter`). At the bottom of the class, add:
+
+```swift
+    private var fastingDebounce: DispatchWorkItem?
+
+    /// Debounced entry point for fasting reminder rescheduling.
+    func requestFastingReschedule() {
+        fastingDebounce?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            Task { @MainActor in
+                await self?.rescheduleFastingNow()
+            }
+        }
+        fastingDebounce = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: work)
+    }
+
+    @MainActor
+    func rescheduleFastingNow() async {
+        let center = UNUserNotificationCenter.current()
+        let pending = await center.pendingNotificationRequests()
+        let ids = pending.map(\.identifier).filter { $0.hasPrefix("fastingmode.") }
+        center.removePendingNotificationRequests(withIdentifiers: ids)
+
+        let settings = SettingsManager.shared
+        guard settings.fastingModeSettings.enabled,
+              settings.fastingModeSettings.notificationsEnabled,
+              let city = settings.loadCity() else { return }
+        let tz = TimeZone(identifier: settings.activeTimezoneIdentifier) ?? .current
+        let hCal = Calendar(identifier: .islamicUmmAlQura)
+        let calculator = PrayerCalculator(coordinate: city.coordinate, timezone: tz,
+                                          method: settings.calculationMethod,
+                                          asrMethod: settings.asrMethod)
+        var gregCal = Calendar(identifier: .gregorian); gregCal.timeZone = tz
+        let now = Date()
+
+        for dayOffset in 0..<7 {
+            guard let day = gregCal.date(byAdding: .day, value: dayOffset, to: now) else { continue }
+            let state = FastingModeEngine.evaluate(for: day, settings: settings.fastingModeSettings,
+                                                    calculationMethod: settings.calculationMethod,
+                                                    hijriCalendar: hCal, timezone: tz)
+            if state.isActive, let times = try? calculator.calculate(for: day) {
+                let suhoor = FastingNotificationPlanner.suhoorFireDate(fajr: times.fajr, settings: settings.fastingModeSettings)
+                let iftar = FastingNotificationPlanner.iftarFireDate(maghrib: times.maghrib, settings: settings.fastingModeSettings)
+                let glyph = state.trigger == .autoRamadan ? "🌙" : "🕗"
+                if suhoor > now {
+                    await schedule(at: suhoor,
+                                   title: "\(glyph) Suhoor reminder",
+                                   body: "Suhoor ends in \(settings.fastingModeSettings.suhoorLeadMinutes) min",
+                                   identifier: FastingNotificationPlanner.identifier(for: day, kind: "suhoor", timezone: tz))
+                }
+                if iftar > now {
+                    await schedule(at: iftar,
+                                   title: "\(glyph) Iftar approaches",
+                                   body: "Iftar in \(settings.fastingModeSettings.iftarLeadMinutes) min",
+                                   identifier: FastingNotificationPlanner.identifier(for: day, kind: "iftar", timezone: tz))
+                }
+            }
+            if dayOffset < 6, let tomorrow = gregCal.date(byAdding: .day, value: dayOffset + 1, to: now) {
+                let tState = FastingModeEngine.evaluate(for: tomorrow, settings: settings.fastingModeSettings,
+                                                        calculationMethod: settings.calculationMethod,
+                                                        hijriCalendar: hCal, timezone: tz)
+                if let plan = FastingNotificationPlanner.dayBefore(tomorrow: tomorrow, tomorrowState: tState,
+                                                                    settings: settings.fastingModeSettings,
+                                                                    hijriCalendar: hCal, timezone: tz),
+                   plan.fireDate > now {
+                    await schedule(at: plan.fireDate, title: plan.title, body: plan.body, identifier: plan.identifier)
+                }
+            }
+        }
+    }
+
+    private func schedule(at date: Date, title: String, body: String, identifier: String) async {
+        let content = UNMutableNotificationContent()
+        content.title = title; content.body = body; content.sound = .default
+        let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: date)
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+        try? await UNUserNotificationCenter.current().add(request)
+    }
+```
+
+- [ ] **Step 2: Wire to settings observers in the iOS app**
+
+In `iqamah/iOS/iqamahApp_iOS.swift` (or wherever the iOS app initializes), add at app launch:
+
+```swift
+NotificationScheduler.shared.requestFastingReschedule()
+NotificationCenter.default.addObserver(forName: .settingsDidChange, object: nil, queue: .main) { _ in
+    NotificationScheduler.shared.requestFastingReschedule()
+}
+```
+
+- [ ] **Step 3: Build iOS scheme**
+
+```bash
+xcodebuild -project iqamah.xcodeproj -scheme iqamah-iOS -destination 'platform=iOS Simulator,name=iPhone 17' build 2>&1 | tail -5
+```
+
+Expected: `BUILD SUCCEEDED`.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add iqamah/iOS/NotificationScheduler.swift iqamah/iOS/iqamahApp_iOS.swift
+git commit -m "feat(ios): extend NotificationScheduler with Fasting Mode reminders
+
+AC-0376, AC-0377, AC-0378, AC-0379 (iOS). 7-day rolling window with
+500ms debounce. Mirrors the macOS scheduler structure but runs in the
+existing NotificationScheduler singleton.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>"
+```
+
+---
+
+## Task 19: watchOS notification scheduler extension
+
+**Files:**
+- Modify: `IqamahWatch/WatchNotificationScheduler.swift`
+
+**Why:** AC-0376, AC-0377, AC-0378, AC-0379 (watchOS). Extend the existing watch scheduler. Logic identical to iOS — call `FastingNotificationPlanner` over a 7-day window with 500ms debounce.
+
+- [ ] **Step 1: Add watch fasting scheduler methods**
+
+In `IqamahWatch/WatchNotificationScheduler.swift`, locate the existing scheduling section. At the bottom of the class, add:
+
+```swift
+    private var fastingDebounce: DispatchWorkItem?
+
+    func requestFastingReschedule() {
+        fastingDebounce?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            Task { @MainActor in
+                await self?.rescheduleFastingNow()
+            }
+        }
+        fastingDebounce = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: work)
+    }
+
+    @MainActor
+    func rescheduleFastingNow() async {
+        let center = UNUserNotificationCenter.current()
+        let pending = await center.pendingNotificationRequests()
+        let ids = pending.map(\.identifier).filter { $0.hasPrefix("fastingmode.") }
+        center.removePendingNotificationRequests(withIdentifiers: ids)
+
+        let settings = SettingsManager.shared
+        guard settings.fastingModeSettings.enabled,
+              settings.fastingModeSettings.notificationsEnabled,
+              let city = settings.loadCity() else { return }
+        let tz = TimeZone(identifier: settings.activeTimezoneIdentifier) ?? .current
+        let hCal = Calendar(identifier: .islamicUmmAlQura)
+        let calculator = PrayerCalculator(coordinate: city.coordinate, timezone: tz,
+                                          method: settings.calculationMethod,
+                                          asrMethod: settings.asrMethod)
+        var gregCal = Calendar(identifier: .gregorian); gregCal.timeZone = tz
+        let now = Date()
+
+        for dayOffset in 0..<7 {
+            guard let day = gregCal.date(byAdding: .day, value: dayOffset, to: now) else { continue }
+            let state = FastingModeEngine.evaluate(for: day, settings: settings.fastingModeSettings,
+                                                    calculationMethod: settings.calculationMethod,
+                                                    hijriCalendar: hCal, timezone: tz)
+            if state.isActive, let times = try? calculator.calculate(for: day) {
+                let suhoor = FastingNotificationPlanner.suhoorFireDate(fajr: times.fajr, settings: settings.fastingModeSettings)
+                let iftar = FastingNotificationPlanner.iftarFireDate(maghrib: times.maghrib, settings: settings.fastingModeSettings)
+                let glyph = state.trigger == .autoRamadan ? "🌙" : "🕗"
+                if suhoor > now {
+                    await scheduleFasting(at: suhoor,
+                                          title: "\(glyph) Suhoor reminder",
+                                          body: "Suhoor ends in \(settings.fastingModeSettings.suhoorLeadMinutes) min",
+                                          identifier: FastingNotificationPlanner.identifier(for: day, kind: "suhoor", timezone: tz))
+                }
+                if iftar > now {
+                    await scheduleFasting(at: iftar,
+                                          title: "\(glyph) Iftar approaches",
+                                          body: "Iftar in \(settings.fastingModeSettings.iftarLeadMinutes) min",
+                                          identifier: FastingNotificationPlanner.identifier(for: day, kind: "iftar", timezone: tz))
+                }
+            }
+            if dayOffset < 6, let tomorrow = gregCal.date(byAdding: .day, value: dayOffset + 1, to: now) {
+                let tState = FastingModeEngine.evaluate(for: tomorrow, settings: settings.fastingModeSettings,
+                                                        calculationMethod: settings.calculationMethod,
+                                                        hijriCalendar: hCal, timezone: tz)
+                if let plan = FastingNotificationPlanner.dayBefore(tomorrow: tomorrow, tomorrowState: tState,
+                                                                    settings: settings.fastingModeSettings,
+                                                                    hijriCalendar: hCal, timezone: tz),
+                   plan.fireDate > now {
+                    await scheduleFasting(at: plan.fireDate, title: plan.title, body: plan.body, identifier: plan.identifier)
+                }
+            }
+        }
+    }
+
+    private func scheduleFasting(at date: Date, title: String, body: String, identifier: String) async {
+        let content = UNMutableNotificationContent()
+        content.title = title; content.body = body; content.sound = .default
+        let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: date)
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+        try? await UNUserNotificationCenter.current().add(request)
+    }
+```
+
+Use `scheduleFasting` as a private helper name to avoid conflict if the class already has a `schedule(...)` method for prayer notifications. If the existing class already exposes a compatible helper that takes title/body/identifier/fireDate, reuse it instead.
+
+- [ ] **Step 2: Wire to settings observers**
+
+In `IqamahWatch/IqamahWatchApp.swift`, in the `.onAppear` block (around line 33), add:
+
+```swift
+WatchNotificationScheduler.shared.requestFastingReschedule()
+NotificationCenter.default.addObserver(forName: .settingsDidChange, object: nil, queue: .main) { _ in
+    WatchNotificationScheduler.shared.requestFastingReschedule()
+}
+```
+
+- [ ] **Step 3: Build watch scheme**
+
+```bash
+xcodebuild -project iqamah.xcodeproj -scheme "IqamahWatch Watch App" -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build 2>&1 | tail -5
+```
+
+Expected: `BUILD SUCCEEDED`.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add IqamahWatch/WatchNotificationScheduler.swift IqamahWatch/IqamahWatchApp.swift
+git commit -m "feat(watch): extend WatchNotificationScheduler with Fasting Mode reminders
+
+AC-0376, AC-0377, AC-0378, AC-0379 (watchOS). Same 7-day debounced
+window as iOS/macOS. Watch displays haptic + banner per existing
+notification UX; no custom adhaan-style sounds (watchOS limitation).
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>"
+```
+
+---
+
+## Task 20: Doc registry updates (ENHANCEMENTS + RELEASE_PLAN + TEST_CASES + ID_REGISTRY)
+
+**Files:**
+- Modify: `docs/ENHANCEMENTS.md`
+- Modify: `docs/RELEASE_PLAN.md`
+- Modify: `docs/TEST_CASES.md`
+- Modify: `docs/ID_REGISTRY.md`
+
+**Why:** Per CLAUDE.md convention — approved enhancements promote to EPIC + US + AC in `RELEASE_PLAN.md` with 1:1 TC mapping in `TEST_CASES.md`. Also add ENH-022 stub for celebration reminders.
+
+- [ ] **Step 1: Mark ENH-002 ✅ and add ENH-022 stub in ENHANCEMENTS.md**
+
+In `docs/ENHANCEMENTS.md`, replace the existing ENH-002 section (lines around 35-43) with:
+
+```markdown
+### ENH-002 — Fasting Mode (Suhoor & Iftar Countdowns + Nawafil Triggers) ✅ Implemented (2026-05-21)
+**Status:** ✅ Implemented as EPIC-0017 (US-0071–US-0075 shipped in v1.6). Generalized from Ramadan-only mode to a Fasting Mode covering 9 activation triggers (auto-Ramadan, weekly schedule, Ayyam al-Beed, 6 of Shawwal, Day of Arafah, first 9 of Dhul-Hijjah, Muharram fast, 15 Sha'ban, 27 Rajab). Tradition-aware UI gating driven by isShiaMethod helper; Ja'fari calculation method added alongside Tehran. Spec at `docs/superpowers/specs/2026-05-21-fasting-mode-design.md`.
+
+| Surface | Treatment |
+|---|---|
+| macOS menu bar | Relabel Fajr→Suhoor / Maghrib→Iftar (🌙 Ramadan, 🕗 Nawafil) within 2h window |
+| macOS popover | Banner + relabel |
+| iOS hero card | Banner + relabel |
+| iOS prayer row | Relabel |
+| watchOS prayer tab | Relabel |
+| Widgets | Relabel in entries |
+| Live Activity | Relabel via ContentState fastingActive/fastingTriggerRaw fields |
+```
+
+Locate the celebration-reminder placeholder section (or at the end of the file before the "## Multi-Platform Migration Assessment" header). Insert:
+
+```markdown
+### ENH-022 — Islamic Holiday Celebration Reminders
+**Source:** Spawned from Fasting Mode brainstorming (2026-05-21) as a sibling concept
+
+**Problem:** Iqamah surfaces fasting practice via Fasting Mode (ENH-002) but does not commemorate non-fasting Islamic holidays. Users miss notifications for Eid al-Fitr, Eid al-Adha, Mawlid an-Nabi, Laylat al-Qadr, Hijri New Year, Ashura commemorations (Shia tradition), Isra wal-Mi'raj, Laylat al-Bara'ah, and Eid al-Ghadir (Shia).
+
+**Solution:** Reuse the FastingModeEngine's Hijri-date evaluation infrastructure to expose celebration notifications. Per-holiday opt-in toggles in Settings. Tradition-aware visibility (some holidays observed primarily in Shia or Sunni tradition).
+
+**Effort:** Medium — engine pattern is established; mainly date data + UI toggles + per-platform notification scheduling.
+
+**Files (when implemented):**
+- `Packages/IqamahCore/Sources/IqamahCore/Services/CelebrationCalendar.swift` (new)
+- `Packages/IqamahCore/Sources/IqamahCore/Services/SettingsManager.swift` (new celebration toggles)
+- Settings UI section (parallel to FastingModeSection)
+- Per-platform notification scheduler extensions
+```
+
+- [ ] **Step 2: Add EPIC-0017 to RELEASE_PLAN.md**
+
+Locate the end of EPIC-0016 (the ENH-001 finish-up section added in earlier work) in `docs/RELEASE_PLAN.md`. Insert before the existing `**Last Updated:**` footer:
+
+```markdown
+## EPIC-0017 — Fasting Mode (ENH-002)
+
+**Status:** 🟡 Planned
+**Version Target:** v1.6
+**Cross-references:** ENH-002 in `docs/ENHANCEMENTS.md`; spec at `docs/superpowers/specs/2026-05-21-fasting-mode-design.md`; plan at `docs/superpowers/plans/2026-05-21-fasting-mode.md`
+
+**Goal:** Generalize Ramadan Mode into a year-round Fasting Mode covering auto-Ramadan + 7 Nawafil triggers with method-gated visibility, dedicated banner + relabel display across all surfaces, configurable Suhoor/Iftar/day-before notifications, and a new Ja'fari calculation method.
+
+---
+
+### US-0071 — FastingModeEngine + settings schema (IqamahCore foundation)
+
+**Acceptance Criteria:**
+- AC-0357: FastingModeSettings struct with 16 default-valued fields; Codable round-trip preserves all; legacy JSON missing fields decodes with defaults
+- AC-0358: FastingModeEngine.evaluate is pure-functional and returns FastingDayState
+- AC-0359: autoRamadan + weeklySchedule triggers fire correctly
+- AC-0360: ayyamAlBeed + sixDaysShawwal triggers
+- AC-0361: dayOfArafah + firstNineDhulHijjah with Arafah priority on day 9
+- AC-0362: muharramFast tradition-adaptive (Sunni 9+10, Shia 9 only)
+- AC-0363: midShaban + mabath suppressed in engine when !isShiaMethod
+- AC-0364: Prohibition filter (Eid×2 + Tashriq×3) always wins over triggers
+
+### US-0072 — UI Surfaces (banner + relabel)
+
+**Acceptance Criteria:**
+- AC-0365: FastingLabelFormatter relabels Fajr↔Suhoor + Maghrib↔Iftar within 2h window with appropriate glyph
+- AC-0366: FastingBanner active-state rendering (Ramadan vs Nawafil tinting)
+- AC-0367: FastingBanner prohibition rendering
+- AC-0368: macOS menu bar + popover wiring
+- AC-0369: iOS hero card + row relabel + watchOS prayer tab relabel
+- AC-0370: Live Activity ContentState backward-compatible with v1.5
+
+### US-0073 — Settings UI + tradition-aware gating
+
+**Acceptance Criteria:**
+- AC-0371: Master toggle hides sub-controls when off
+- AC-0372: Muharram label adaptation + midShaban/mabath visibility driven by isShiaMethod
+- AC-0373: Friday-alone + Saturday-alone warnings
+- AC-0374: Toggle state persists across method changes
+- AC-0375: watchOS Settings shows master toggle + "Configure on iPhone/Mac" hint only
+
+### US-0074 — Notifications + scheduling
+
+**Acceptance Criteria:**
+- AC-0376: Suhoor + Iftar reminders with independent lead times (5–120 min)
+- AC-0377: Day-before reminder fires for Ramadan day 1 and Nawafil days, skipped for Ramadan days 2–30
+- AC-0378: 7-day rolling window with 500ms debounce
+- AC-0379: All reminders suppressed for hard-prohibited days
+- AC-0380: Permission-denied state shows deep link (iOS + macOS)
+
+### US-0075 — Ja'fari calculation method
+
+**Acceptance Criteria:**
+- AC-0381: .jafari case with Fajr 16°, Isha 14°, Maghrib 4° below horizon
+- AC-0382: isShiaMethod returns true for .tehran/.jafari, false otherwise; picker includes Ja'fari row
+
+---
+
+**EPIC-0017 Summary:**
+
+| Story | Surfaces | Effort | AC count |
+|---|---|---|---|
+| US-0071 — Engine + settings | IqamahCore | M | 8 |
+| US-0072 — UI surfaces | All | M | 6 |
+| US-0073 — Settings UI | iOS+macOS+watchOS | M | 5 |
+| US-0074 — Notifications | All | M | 5 |
+| US-0075 — Ja'fari method | IqamahCore + UI | S | 2 |
+
+**Total:** 26 acceptance criteria (AC-0357 – AC-0382), mapped 1:1 to TC-0044 – TC-0072 (plus TC-0073 for multi-platform smoke).
+**Estimated effort:** 2–3 developer-weeks.
+```
+
+Update the `**Last Updated:**` footer:
+
+```markdown
+**Last Updated:** 2026-05-21 (EPIC-0017 created — 5 user stories, 26 ACs, generalized Fasting Mode with Ja'fari method)
+```
+
+- [ ] **Step 3: Add TC-0044 through TC-0073 to TEST_CASES.md**
+
+In `docs/TEST_CASES.md`, append after the EPIC-0016 test cases (added in earlier work):
+
+```markdown
+### EPIC-0017 — Fasting Mode (ENH-002)
+
+#### US-0071 — FastingModeEngine + settings schema
+
+**TC-0044 (AC-0357) — FastingModeSettings round-trip preserves all fields**
+Type: Functional · Preconditions: IqamahCore tests building
+Steps:
+  1. `cd Packages/IqamahCore && swift test --filter FastingModeSettingsCodecTests`
+Expected: All 8 codec tests pass (default round-trip, populated round-trip, forward-compat decode, both warning helpers)
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0045 (AC-0357) — Forward-compat decode applies defaults for missing fields**
+Type: Edge Case
+Steps:
+  1. Decode legacy JSON that omits midShaban/mabath/dayBeforeMinute
+  2. Verify decoded struct has expected default values
+Expected: Decoded struct.midShaban == false; struct.mabath == false; struct.dayBeforeMinute == 0
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0046 (AC-0358) — FastingModeEngine.evaluate is pure**
+Type: Functional
+Steps:
+  1. Call evaluate twice with identical input
+Expected: Two calls return equal FastingDayState
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0047 (AC-0359) — autoRamadan + weeklySchedule fire correctly**
+Type: Functional
+Steps:
+  1. With autoRamadan=true, evaluate a Ramadan date → trigger should be .autoRamadan
+  2. With weeklyDays=[2] (Mon), evaluate a Monday → trigger should be .weeklySchedule
+Expected: Both behaviors per spec
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0048 (AC-0360) — Ayyam al-Beed + 6 Shawwal fire correctly**
+Type: Functional
+Steps:
+  1. With ayyamAlBeed=true, evaluate 13/14/15 of a non-Ramadan Hijri month → active
+  2. With sixDaysShawwal=true, evaluate 2-7 Shawwal → active; day 8 → inactive
+Expected: Both behaviors per spec
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0049 (AC-0361) — Arafah priority over firstNineDhulHijjah on day 9**
+Type: Edge Case
+Steps:
+  1. Set dayOfArafah=true and firstNineDhulHijjah=true
+  2. Evaluate 9 Dhul-Hijjah
+Expected: state.trigger == .dayOfArafah (Arafah wins)
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0050 (AC-0362) — muharramFast Sunni fires on 9+10 Muharram**
+Type: Functional
+Steps:
+  1. With method=.mwl and muharramFast=true, evaluate 9 Muharram → active
+  2. Same setup, evaluate 10 Muharram → active
+  3. Same setup, evaluate 11 Muharram → inactive
+Expected: 9 and 10 active; 11 inactive
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0051 (AC-0362) — muharramFast Shia fires on 9 Muharram only**
+Type: Functional
+Steps:
+  1. With method=.tehran and muharramFast=true, evaluate 9 Muharram → active
+  2. Same setup, evaluate 10 Muharram → inactive
+Expected: 9 active, 10 inactive
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0052 (AC-0363) — midShaban visible+active for Shia methods**
+Type: Functional
+Steps:
+  1. With method=.tehran and midShaban=true, evaluate 15 Sha'ban
+Expected: state.trigger == .midShaban
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0053 (AC-0363) — midShaban suppressed for Sunni methods even when toggle is true**
+Type: Functional
+Steps:
+  1. With method=.mwl and midShaban=true (stored), evaluate 15 Sha'ban
+Expected: state.isActive == false (suppressed even though toggle is true)
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0054 (AC-0364) — Eid al-Fitr suppresses sixDaysShawwal**
+Type: Edge Case
+Steps:
+  1. With sixDaysShawwal=true, evaluate 1 Shawwal
+Expected: state.isActive == false; state.prohibition == .eidAlFitr
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0055 (AC-0364) — Tashriq days 11-13 suppress ayyamAlBeed**
+Type: Edge Case
+Steps:
+  1. With ayyamAlBeed=true, evaluate 11, 12, and 13 Dhul-Hijjah
+Expected: All three return prohibition matching the day; isActive=false
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+#### US-0072 — UI Surfaces
+
+**TC-0056 (AC-0365) — FastingLabelFormatter relabels within 2h, passes through outside**
+Type: Functional
+Steps:
+  1. Active Ramadan state, Fajr 42 min away → "🌙 Suhoor"
+  2. Active Ramadan state, Fajr 3 hours away → "Fajr" (passthrough)
+  3. Active Nawafil state, Fajr 42 min away → "🕗 Suhoor"
+Expected: All three behaviors per spec
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0057 (AC-0366) — FastingBanner renders active state with correct tinting**
+Type: Functional · Preconditions: iOS or macOS app with Fasting Mode enabled
+Steps:
+  1. Trigger an active autoRamadan day; view PrayerHeroCard
+  2. Trigger an active weeklySchedule day; view PrayerHeroCard
+Expected: Ramadan day shows 🌙 + purple gradient; Nawafil day shows 🕗 + teal gradient
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0058 (AC-0367) — FastingBanner renders prohibition state in grey**
+Type: Functional
+Steps:
+  1. Trigger a prohibition-day evaluation (Eid)
+Expected: Banner shows ⚠️ + grey gradient + "Fasting is forbidden today" text
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0059 (AC-0368) — macOS menu bar relabel + popover banner**
+Type: Functional · Preconditions: macOS app with Fasting Mode enabled, today is a fasting day
+Steps:
+  1. Verify menu bar shows "🌙 Suhoor" or "🕗 Suhoor" relabel when within 2h of Fajr
+  2. Open popover; verify FastingBanner renders above prayer list
+Expected: Relabel visible in menu bar; banner visible in popover
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0060 (AC-0369) — iOS hero banner + iOS row relabel + watch row relabel**
+Type: Functional
+Steps:
+  1. iOS: verify FastingBanner above PrayerHeroCard on a fasting day
+  2. iOS: verify PrayerRowMobileView shows relabel within 2h window
+  3. watchOS: verify PrayerTimesTab row shows relabel within 2h window
+Expected: All three surfaces behave correctly
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0061 (AC-0370) — Live Activity ContentState backward decode**
+Type: Regression
+Steps:
+  1. Start a Live Activity on v1.5 ContentState (no fasting fields)
+  2. Upgrade to v1.6
+  3. Verify the in-flight activity does not crash; new fastingActive == nil
+Expected: No crash; relabel does not apply (defaults to standard countdown)
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+#### US-0073 — Settings UI
+
+**TC-0062 (AC-0371) — Master toggle hides sub-controls when off**
+Type: Functional
+Steps:
+  1. Open Settings → Fasting Mode section
+  2. Toggle master OFF
+Expected: All sub-controls disappear; only the master toggle remains visible
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0063 (AC-0372) — Tradition gating + Muharram label adaptation**
+Type: Functional
+Steps:
+  1. Switch to Tehran method → Settings shows "Tasu'a (9 Muharram)" + Shia subtitle; 15 Sha'ban + 27 Rajab toggles appear
+  2. Switch to MWL → label changes to "Ashura (9+10 Muharram)" + Sunni subtitle; Shia toggles disappear
+Expected: Both adaptations per spec
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0064 (AC-0373) — Friday-alone + Saturday-alone warnings**
+Type: Functional
+Steps:
+  1. Select only Friday in weekly picker → warning appears
+  2. Add Thursday → warning clears
+  3. Remove Thursday, add Saturday → warning clears
+  4. Select only Saturday → Saturday-alone warning appears
+  5. Add Friday → warning clears
+Expected: All warning transitions per spec
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0065 (AC-0374) — Toggle persistence across method changes**
+Type: Regression
+Steps:
+  1. With Tehran method, enable midShaban
+  2. Switch to MWL → midShaban toggle hidden
+  3. Inspect SettingsManager.fastingModeSettings.midShaban → still true
+  4. Switch back to Tehran → midShaban toggle reappears, still on
+Expected: Stored value preserved through method swap
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0066 (AC-0375) — watch Settings minimal UI**
+Type: Functional
+Steps:
+  1. Open IqamahWatch Settings tab
+Expected: Fasting Mode section shows master toggle + "Configure on iPhone/Mac" hint only; no sub-controls
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+#### US-0074 — Notifications
+
+**TC-0067 (AC-0376) — Suhoor + Iftar lead-time arithmetic + range**
+Type: Functional
+Steps:
+  1. Set suhoorLeadMinutes=30, schedule for Fajr=05:12 → notification fires at 04:42
+  2. Set suhoorLeadMinutes=120 → notification fires at 03:12
+  3. Set iftarLeadMinutes=15, Maghrib=20:32 → notification fires at 20:17
+Expected: Fire dates match arithmetic
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0068 (AC-0377) — Day-before logic per Ramadan/Nawafil/prohibition**
+Type: Functional
+Steps:
+  1. Tomorrow is 1 Ramadan → plan != nil
+  2. Tomorrow is 2 Ramadan → plan == nil (skipped)
+  3. Tomorrow is a scheduled Nawafil Monday → plan != nil
+  4. Tomorrow is Eid → plan == nil
+Expected: All four cases per spec
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0069 (AC-0378) — 7-day rolling window + 500ms debounce**
+Type: Functional
+Steps:
+  1. Enable Fasting Mode + weekly = [2,5]
+  2. Rapidly toggle additional weekdays (5 changes in 1 second)
+  3. Wait 1 second
+  4. Inspect pending notifications
+Expected: Notifications reflect final state only (one reschedule occurred, not 5)
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0070 (AC-0380) — Permission-denied deep link UI**
+Type: Negative · Preconditions: Notifications denied in System Settings
+Steps:
+  1. Open Settings → Fasting Mode → Send system notifications row
+  2. Tap "Enable in System Settings" link
+Expected: Deep link opens Notifications preferences on the appropriate platform (iOS: Iqamah notification settings; macOS: System Settings Notifications pane)
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+#### US-0075 — Ja'fari calculation method
+
+**TC-0071 (AC-0381) — Ja'fari Maghrib timing matches reference**
+Type: Functional
+Steps:
+  1. With method=.jafari, compute prayer times for Toronto on 2026-06-21 (summer solstice)
+  2. Compare Maghrib to PrayTimes.org Ja'fari reference output for same coordinates/date
+Expected: Maghrib time within ±1 minute of reference
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0072 (AC-0382) — isShiaMethod returns expected for all 7 methods**
+Type: Functional
+Steps:
+  1. `cd Packages/IqamahCore && swift test --filter CalculationMethodJafariTests`
+Expected: All Jafari tests pass — only .tehran and .jafari return true; all other methods return false
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+#### Multi-platform smoke
+
+**TC-0073 — All schemes build clean after Fasting Mode merge**
+Type: Regression
+Steps:
+  1. `cd Packages/IqamahCore && swift test`
+  2. `xcodebuild -project iqamah.xcodeproj -scheme iqamah build`
+  3. `xcodebuild -project iqamah.xcodeproj -scheme iqamah-iOS -destination 'platform=iOS Simulator,name=iPhone 17' build`
+  4. `xcodebuild -project iqamah.xcodeproj -scheme "IqamahWatch Watch App" -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build`
+  5. `xcodebuild -project iqamah.xcodeproj -scheme IqamahLiveActivity -destination 'platform=iOS Simulator,name=iPhone 17' build`
+  6. `xcodebuild -project iqamah.xcodeproj -scheme IqamahWidget -destination 'platform=iOS Simulator,name=iPhone 17' build`
+Expected: All commands succeed with BUILD SUCCEEDED / Test Suite passed
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+```
+
+Update the registry header:
+
+```markdown
+**Total Test Cases:** 73
+**Status:** 🟡 EPIC-0010, EPIC-0016, and EPIC-0017 covered (TC-0001 through TC-0073); EPIC-0001 through EPIC-0009 and EPIC-0011 through EPIC-0015 still pending TC backfill
+```
+
+Add to the "Test Cases by Type" lists:
+- Functional Tests: append `, 0044, 0046, 0047, 0048, 0050, 0051, 0052, 0053, 0056, 0057, 0058, 0059, 0060, 0062, 0063, 0064, 0066, 0067, 0068, 0069, 0071, 0072`
+- Regression Tests: append `, 0061, 0065, 0073`
+- Edge Case Tests: append `, 0045, 0049, 0054, 0055`
+- Negative Tests: append `, 0070`
+
+Update the footer:
+```markdown
+**Last Updated:** 2026-05-21 (TC-0044 through TC-0073 added covering EPIC-0017 / US-0071–US-0075 acceptance criteria)
+```
+
+- [ ] **Step 4: Bump ID_REGISTRY counters**
+
+In `docs/ID_REGISTRY.md`, update the table rows:
+
+```markdown
+| EPIC         | EPIC-0018             | EPIC-0017         |
+| US           | US-0076               | US-0075           |
+| AC           | AC-0383               | AC-0382           |
+| TC           | TC-0074               | TC-0073           |
+| ENH          | ENH-023               | ENH-022           |
+```
+
+Update the footer:
+```markdown
+**Last Updated:** 2026-05-21 (EPIC-0017 created — Fasting Mode; US-0071–US-0075, AC-0357–AC-0382, TC-0044–TC-0073 consumed; ENH-022 stub for celebration reminders added.)
+```
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add docs/ENHANCEMENTS.md docs/RELEASE_PLAN.md docs/TEST_CASES.md docs/ID_REGISTRY.md
+git commit -m "docs: promote ENH-002 Fasting Mode to EPIC-0017 + TC-0044-0073
+
+Per CLAUDE.md convention. ENH-002 marked ✅ Implemented with surface
+table. ENH-022 stub added for sibling celebration reminders feature.
+EPIC-0017 with 5 user stories + 26 ACs in RELEASE_PLAN.md. 30 TCs
+in TEST_CASES.md (one per AC plus multi-platform smoke). ID_REGISTRY
+counters bumped.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>"
+```
+
+---
+
+## Task 21: Final verification — multi-platform build + tests + PR
+
+**Files:** None directly — verification + PR creation only.
+
+- [ ] **Step 1: Run all IqamahCore tests**
+
+```bash
+cd Packages/IqamahCore && swift test 2>&1 | tail -15
+```
+
+Expected: all existing tests (185+) plus all new Fasting Mode tests (~40) pass.
+
+- [ ] **Step 2: Build every scheme**
+
+```bash
+xcodebuild -project iqamah.xcodeproj -scheme iqamah -configuration Debug build 2>&1 | tail -3
+xcodebuild -project iqamah.xcodeproj -scheme iqamah-iOS -destination 'platform=iOS Simulator,name=iPhone 17' build 2>&1 | tail -3
+xcodebuild -project iqamah.xcodeproj -scheme "IqamahWatch Watch App" -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build 2>&1 | tail -3
+xcodebuild -project iqamah.xcodeproj -scheme IqamahLiveActivity -destination 'platform=iOS Simulator,name=iPhone 17' build 2>&1 | tail -3
+xcodebuild -project iqamah.xcodeproj -scheme IqamahWidget -destination 'platform=iOS Simulator,name=iPhone 17' build 2>&1 | tail -3
+```
+
+Expected: five `BUILD SUCCEEDED` lines.
+
+- [ ] **Step 3: Manual smoke — macOS**
+
+Launch macOS app. Open Settings → Fasting Mode. Toggle master on. Toggle weekly Monday on. Verify:
+1. Menu bar relabels when within 2 hours of Fajr or Maghrib on a Monday
+2. Popover shows banner above the prayer list on a Monday
+3. Switching to Tehran method shows Tasu'a label + 15 Sha'ban + 27 Rajab toggles
+
+- [ ] **Step 4: Manual smoke — iOS**
+
+Launch iOS app on iPhone 17 simulator. Same checks as macOS plus:
+1. Hero card shows banner on a fasting day
+2. Prayer row shows relabel within 2-hour window
+3. Live Activity (if started near a prayer time) shows relabel
+
+- [ ] **Step 5: Manual smoke — watch**
+
+Launch IqamahWatch on Apple Watch Series 11 simulator:
+1. Prayer Times tab shows row relabel within window
+2. Settings tab shows minimal Fasting Mode section
+
+- [ ] **Step 6: Push branch + open PR**
+
+```bash
+git push -u origin claude/vigilant-mccarthy-5435c6
+gh pr create --title "Fasting Mode (EPIC-0017): engine + UI + notifications + Ja'fari method" --body "$(cat <<'EOF'
+## Summary
+
+- Generalized ENH-002 from Ramadan Mode to Fasting Mode
+- 9 activation triggers: auto-Ramadan, weekly schedule, Ayyam al-Beed, 6 of Shawwal, Day of Arafah, first 9 of Dhul-Hijjah, Muharram fast, 15 Sha'ban, 27 Rajab
+- 5 hard-prohibited days (Eid×2 + Tashriq×3) with runtime suppression
+- Cross-surface display per Option D hybrid: relabel on narrow (menu bar, watch, widgets, Live Activity), banner on wide (iOS hero, macOS popover)
+- Configurable Suhoor + Iftar lead times (5–120 min independent) + day-before reminders with Ramadan-day-2-30 skip
+- New Ja'fari calculation method (Fajr 16°, Isha 14°, Maghrib 4° below horizon) + isShiaMethod helper drives tradition-aware UI gating
+- Pure-functional FastingModeEngine in IqamahCore with full test coverage
+
+Spec: `docs/superpowers/specs/2026-05-21-fasting-mode-design.md`
+Plan: `docs/superpowers/plans/2026-05-21-fasting-mode.md`
+ACs: AC-0357 — AC-0382 (26 ACs)
+TCs: TC-0044 — TC-0073 (30 TCs)
+
+## Test plan
+
+- [ ] `swift test` in `Packages/IqamahCore` — all tests pass (~225 total)
+- [ ] `xcodebuild` clean for all 5 schemes (iqamah, iqamah-iOS, IqamahWatch Watch App, IqamahLiveActivity, IqamahWidget)
+- [ ] macOS smoke: menu bar relabel + popover banner + Settings tradition gating
+- [ ] iOS smoke: hero banner + row relabel + Live Activity backward compat
+- [ ] watch smoke: row relabel + minimal Settings entry
+- [ ] Notification smoke: enable Fasting Mode + weekly Monday; verify Suhoor + Iftar + day-before reminders schedule within 1s of settings change
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)"
+```
+
+Expected: PR URL returned. Share it back to the user.
+
+---
+
+
 |---|---|---|
 | AC-0357 (settings codec) | Task 3 | TC-0044, TC-0045 |
 | AC-0358 (engine purity) | Task 4 | TC-0046 |
