@@ -7,7 +7,7 @@ Detailed release plan defining MVP and subsequent milestones. Contains Epics, Us
 ## Project Overview
 
 **Project:** Iqamah — Multi-Platform Islamic Prayer Times App (macOS · iOS · iPadOS · watchOS)
-**Current Version:** 1.5.0 (build 12)
+**Current Version:** 1.5.0 (build 14) — bumped from 12 after v1.5 (13) was rejected (BUG-0068 watch icon)
 **App Store Status:** 🟢 **SUBMITTED** — iOS first submission + macOS v1.5.0 update sent 2026-05-20
 
 ---
