@@ -26,7 +26,7 @@
 		AA000000000000000000000D /* QiblahView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001E /* QiblahView.swift */; };
 		AB000000000000000000BB01 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000000000000000000AA01 /* AboutView.swift */; };
 		AM000000000000000000001 /* PrayerActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AM000000000000000000001R /* PrayerActivityManager.swift */; };
-		AM000000000000000000002 /* PrayerActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AM000000000000000000002R /* PrayerActivityAttributes.swift */; };
+		AM00000000000000000000A /* PrayerActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = LA000000000000000000010R /* PrayerActivityAttributes.swift */; };
 		B5000000000000000000001 /* MoonPhaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000004 /* MoonPhaseView.swift */; };
 		B5000000000000000000002 /* HilalCriterionPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000006 /* HilalCriterionPicker.swift */; };
 		B5000000000000000000003 /* LocalSightingCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000005 /* LocalSightingCardView.swift */; };
@@ -281,7 +281,6 @@
 		AD000000000000000000AA07 /* adhaan_fajr_2.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = adhaan_fajr_2.mp3; sourceTree = "<group>"; };
 		AD000000000000000000AA08 /* adhaan_fajr_3.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = adhaan_fajr_3.mp3; sourceTree = "<group>"; };
 		AM000000000000000000001R /* PrayerActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerActivityManager.swift; sourceTree = "<group>"; };
-		AM000000000000000000002R /* PrayerActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerActivityAttributes.swift; sourceTree = "<group>"; };
 		B5000000000000000000020 /* HilalWatchSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HilalWatchSheet.swift; sourceTree = "<group>"; };
 		BB000000000000000000001A /* SettingsSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSheetView.swift; sourceTree = "<group>"; };
 		BN000000000000000000AA01 /* AdhaanBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdhaanBannerView.swift; sourceTree = "<group>"; };
@@ -694,7 +693,6 @@
 				iOS000000000000000000001F /* NotificationScheduler.swift */,
 				B5000000000000000000020 /* HilalWatchSheet.swift */,
 				AM000000000000000000001R /* PrayerActivityManager.swift */,
-				AM000000000000000000002R /* PrayerActivityAttributes.swift */,
 				HC000000000000000000001 /* PrayerHeroCard.swift */,
 				HL000000000000000000001 /* HilalWatchPreloader.swift */,
 				HC000000000000000000003 /* PrayerRowMobileView.swift */,
@@ -1232,7 +1230,7 @@
 			files = (
 				iOS0000000000000000000001 /* iqamahApp_iOS.swift in Sources */,
 				AM000000000000000000001 /* PrayerActivityManager.swift in Sources */,
-				AM000000000000000000002 /* PrayerActivityAttributes.swift in Sources */,
+				AM00000000000000000000A /* PrayerActivityAttributes.swift in Sources */,
 				HC000000000000000000002 /* PrayerHeroCard.swift in Sources */,
 				HC000000000000000000004 /* PrayerRowMobileView.swift in Sources */,
 				iOS0000000000000000000002 /* iOSRootView.swift in Sources */,

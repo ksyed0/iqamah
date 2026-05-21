@@ -1,23 +1,28 @@
 import ActivityKit
 import Foundation
 
-public struct PrayerActivityAttributes: ActivityAttributes {
-    public let cityName: String
-    public let methodName: String
+/// Live Activity attributes — single source of truth, compiled into both the
+/// iqamah-iOS app target and the IqamahLiveActivity widget extension via
+/// multi-target membership in iqamah.xcodeproj. ActivityKit matches Activity
+/// instances by encoded representation, so the two targets must compile an
+/// identical type definition — which a single file guarantees.
+struct PrayerActivityAttributes: ActivityAttributes {
+    let cityName: String
+    let methodName: String
 
-    public init(cityName: String, methodName: String) {
+    init(cityName: String, methodName: String) {
         self.cityName = cityName
         self.methodName = methodName
     }
 
-    public struct ContentState: Codable, Hashable {
-        public let nextPrayerName: String
-        public let nextPrayerTime: Date
-        public let followingPrayerName: String
-        public let moonPhase: Double
-        public let hijriDateString: String
+    struct ContentState: Codable, Hashable {
+        let nextPrayerName: String
+        let nextPrayerTime: Date
+        let followingPrayerName: String
+        let moonPhase: Double
+        let hijriDateString: String
 
-        public init(
+        init(
             nextPrayerName: String, nextPrayerTime: Date,
             followingPrayerName: String, moonPhase: Double, hijriDateString: String
         ) {
