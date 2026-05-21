@@ -19,6 +19,7 @@
 		94CAD56B2F23D3C800E1689F /* SplashScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CAD56A2F23D3C800E1689F /* SplashScreenView.swift */; };
 		AA0000000000000000000001 /* iqamahApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000011 /* iqamahApp.swift */; };
 		AA0000000000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000012 /* ContentView.swift */; };
+		WI000000000000000000001 /* WatchAppIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WI000000000000000000001R /* WatchAppIconView.swift */; };
 		AA0000000000000000000008 /* LocationSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000018 /* LocationSetupView.swift */; };
 		AA0000000000000000000009 /* CalculationMethodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000019 /* CalculationMethodView.swift */; };
 		AA000000000000000000000A /* PrayerTimesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001A /* PrayerTimesView.swift */; };
@@ -265,6 +266,7 @@
 		AA0000000000000000000010 /* iqamah.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iqamah.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0000000000000000000011 /* iqamahApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iqamahApp.swift; sourceTree = "<group>"; };
 		AA0000000000000000000012 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		WI000000000000000000001R /* WatchAppIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchAppIconView.swift; sourceTree = "<group>"; };
 		AA0000000000000000000018 /* LocationSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationSetupView.swift; sourceTree = "<group>"; };
 		AA0000000000000000000019 /* CalculationMethodView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculationMethodView.swift; sourceTree = "<group>"; };
 		AA000000000000000000001A /* PrayerTimesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerTimesView.swift; sourceTree = "<group>"; };
@@ -512,6 +514,7 @@
 				94CAD5642F23CBB800E1689F /* AppDelegate.swift */,
 				AA0000000000000000000011 /* iqamahApp.swift */,
 				AA0000000000000000000012 /* ContentView.swift */,
+				WI000000000000000000001R /* WatchAppIconView.swift */,
 				HW000000000000000000009 /* HilalWatchWindow.swift */,
 				EE0000000000000000005001 /* Extensions */,
 				AA0000000000000000000034 /* Services */,
@@ -1133,6 +1136,7 @@
 				AA0000000000000000000001 /* iqamahApp.swift in Sources */,
 				944B0D992F635A0500EC6A01 /* TestsAdditionalTests.swift in Sources */,
 				AA0000000000000000000002 /* ContentView.swift in Sources */,
+				WI000000000000000000001 /* WatchAppIconView.swift in Sources */,
 				EE0000000000000000003002 /* Color+App.swift in Sources */,
 				BN000000000000000000BB01 /* AdhaanBannerView.swift in Sources */,
 				AB000000000000000000BB01 /* AboutView.swift in Sources */,
