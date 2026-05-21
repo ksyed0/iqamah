@@ -135,7 +135,7 @@ The user's `calculationMethod` implicitly signals tradition. `isShiaMethod` is t
 
 | Method | Date(s) fired | Label | Subtitle |
 |---|---|---|---|
-| Sunni (MWL, ISNA, Egypt, Umm al-Qura, Karachi) | 9 + 10 Muharram | "Ashura + Tasu'a (9–10 Muharram)" | "Sunni Sunnah fast" |
+| Sunni (MWL, ISNA, Egypt, Umm al-Qura, Karachi) | 9 + 10 Muharram | "Ashura (10 Muharram)" | "Sunni Sunnah fast — observed on 9 + 10 Muharram" |
 | Shia (Tehran, Ja'fari) | 9 Muharram only | "Tasu'a (9 Muharram)" | "Shia tradition: commemoration day" |
 
 The trigger enum value is the same (`.muharramFast`); the date set and label are method-dependent at evaluation time. The engine reads the method from the passed-in settings struct.
@@ -236,7 +236,7 @@ New section in `SettingsSheetView` (shared between macOS and iOS):
 
 | isShiaMethod | Label | Subtitle |
 |---|---|---|
-| false | "Ashura + Tasu'a (9–10 Muharram)" | "Sunni Sunnah fast" |
+| false | "Ashura (10 Muharram)" | "Sunni Sunnah fast — observed on 9 + 10 Muharram" |
 | true | "Tasu'a (9 Muharram)" | "Shia tradition: commemoration day" |
 
 **watchOS Settings:** shows only the master toggle + a "Configure on iPhone/Mac" navigation link. Full configuration done on phone/Mac and synced via iCloud KVS.
