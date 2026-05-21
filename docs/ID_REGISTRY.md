@@ -13,7 +13,7 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 | TASK         | TASK-0001             | None              |
 | AC           | AC-0349               | AC-0348           |
 | TC           | TC-0036               | TC-0035           |
-| BUG          | BUG-0068              | BUG-0067          |
+| BUG          | BUG-0069              | BUG-0068          |
 | ENH          | ENH-022               | ENH-021           |
 
 ---
@@ -28,4 +28,4 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 ---
 
-**Last Updated:** 2026-05-20 (BUG-0060–BUG-0067 resolved. v1.5.0 (12) submitted to App Store — iOS first submission + macOS update.)
+**Last Updated:** 2026-05-21 (BUG-0068 logged — App Store rejection of v1.5 (13) submission citing Guideline 4 / Design: watchOS app icon black background does not render as a clear circle on Apple Watch home screen.)

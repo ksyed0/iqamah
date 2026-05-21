@@ -4,13 +4,64 @@ All bugs and defects tracked here with BUG-XXXX identifiers and status.
 
 ---
 
-**Total Active Bugs:** 0  
-**Critical:** 0  
-**High:** 0  
-**Medium:** 0  
+**Total Active Bugs:** 1
+**Critical:** 1
+**High:** 0
+**Medium:** 0
 **Low:** 0
 
-> **All bugs BUG-0001 through BUG-0067 resolved as of 2026-05-20.** No open production bugs.
+> **All bugs BUG-0001 through BUG-0067 resolved as of 2026-05-20.** One open bug (BUG-0068) blocking App Store approval of v1.5 (13) submission.
+
+---
+
+## Session — 2026-05-21 (App Store rejection — v1.5 build 13)
+
+### Open
+
+**BUG-0068 (watchOS): Watch app icon black background — App Store rejection (Guideline 4 — Design)**
+
+**Severity:** 🔴 Critical (blocks App Store approval of v1.5 (13) submission)
+**Discovered:** 2026-05-21 — App Store review feedback
+**Status:** 🔴 Open
+**Submission ID:** b0de0a72-84bc-4693-81df-4d8f7bfac818
+**Review device:** Apple Watch and iPhone 17 Pro Max
+**Version reviewed:** 1.5 (13)
+**Guideline cited:** App Store Review Guideline 4 — Design
+
+**Apple's verbatim feedback:**
+
+> Your Apple Watch app icon's design creates a poor experience when viewed on Apple Watch. Specifically:
+> - The app icon does not appear circular because your Apple Watch app icon's background color is black.
+>
+> Next Steps — Modify the app's Apple Watch app icon to include a lighter background color to ensure that it is recognizable and appears circular on Apple Watch.
+
+**Description:** The current watch app icon (`IqamahWatch/Assets.xcassets/AppIcon.appiconset/`) uses a pure black or near-black background under the minaret artwork. watchOS home screen renders icons on a black wallpaper by default, so the icon's bounding circle blends into the background and the app appears as a floating minaret rather than a clearly-bounded circular icon. Apple's HIG explicitly requires icons to be visually distinct from the watch face background.
+
+**Visual evidence:** Screenshot attached to the review feedback (also captured in the user's bug report) shows Iqamah's icon on the watch home screen — the minaret is visible but the icon's circular boundary is indistinguishable from the surrounding black background. Adjacent third-party icons (Maps, Weather, Compass, Books) all have lighter, visually distinct backgrounds and read as discrete circles.
+
+**Root cause:** The watch icon set was generated to match the iOS/macOS app icon's dark-background design (deep navy gradient), but the gradient's darkest stop sits at nearly the same luminance as `#000000`. On the watch's pure-black wallpaper this produces no contrast at the icon's edge.
+
+**Fix required:**
+1. Update the watch icon design in `IqamahWatch/Assets.xcassets/AppIcon.appiconset/` to use a lighter background — options include:
+   - Apple's recommended approach: a solid mid-luminance color (e.g. `#1f2a3a` or a deeper gold) that contrasts the black watch wallpaper
+   - A radial gradient that brightens toward the centre (similar to how Apple's own watchOS icons handle this)
+   - A solid gold (`Color.appGold` / `#d9a52e`) background with the minaret in white/dark to maintain the brand
+2. Regenerate all watch-icon sizes (24×24 @2x through 117×117 @2x — see existing `Contents.json` for the exact list).
+3. Bump build number to 14 and resubmit.
+
+**Files affected:**
+- `IqamahWatch/Assets.xcassets/AppIcon.appiconset/Contents.json` (no change to JSON expected; new images replace existing slots)
+- All PNG files in `IqamahWatch/Assets.xcassets/AppIcon.appiconset/` (replace each with the new design)
+- iOS/macOS icon sets do NOT need to change (Apple's rejection is watch-specific)
+
+**Verification before resubmit:**
+- Install on Apple Watch Series 11 simulator (46mm) — verify icon shows as a clearly-bounded circle on the home screen grid, distinguishable from adjacent app icons against black background
+- Check icon at all watch sizes — Series 10 41mm, Series 11 46mm, Ultra 49mm
+- Cross-check against Apple's HIG sample circles in `WKInterfaceImage` to ensure full coverage to the circle edge
+
+**Related work:**
+- Watch app icons originally added in PR #75 (EPIC-0011 / EPIC-0012 watchOS shipping work, 2026-05-11). The black-background design was a deliberate brand choice that did not anticipate watchOS circular cropping behavior.
+- No code changes required — this is purely an asset replacement.
 
 ---
 
