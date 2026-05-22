@@ -325,22 +325,16 @@ struct MinaretShape: Shape {
 // MARK: - Icon Export Utility
 
 extension AppIconView {
-    /// Generate an NSImage at a specific size
+    /// Generate an NSImage at a specific size.
+    /// Uses `ImageRenderer` with `scale = 1.0` so output is `size`×`size`
+    /// pixels at 72 DPI regardless of host display backing-scale — avoids the
+    /// retina-DPI hazard that triggered the BUG-0068 asset-compiler mismatch.
     static func generateImage(size: CGFloat) -> NSImage? {
         let view = AppIconView(size: size, showBackground: true)
-        let hostingView = NSHostingView(rootView: view)
-        hostingView.frame = CGRect(x: 0, y: 0, width: size, height: size)
-
-        guard let bitmapRep = hostingView.bitmapImageRepForCachingDisplay(in: hostingView.bounds) else {
-            return nil
-        }
-
-        hostingView.cacheDisplay(in: hostingView.bounds, to: bitmapRep)
-
-        let image = NSImage(size: NSSize(width: size, height: size))
-        image.addRepresentation(bitmapRep)
-
-        return image
+            .frame(width: size, height: size)
+        let renderer = ImageRenderer(content: view)
+        renderer.scale = 1.0
+        return renderer.nsImage
     }
 
     /// Export all icon sizes to Desktop

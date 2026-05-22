@@ -181,21 +181,23 @@ extension WatchAppIconView {
     /// `~/Desktop/IqamahWatchIcons/icon_<variant>_1024x1024.png`.
     /// Call from a debug button or `IconExporterView`; not shipped in release builds.
     static func exportVariantToDesktop(_ variant: WatchIconVariant) {
+        // ImageRenderer with scale=1 emits 1024×1024 @ 72 DPI directly — see
+        // BUG-0068 post-mortem for why bitmapImageRepForCachingDisplay caused
+        // a retina-DPI mismatch with the asset catalog.
         let view = WatchAppIconView(size: 1024, variant: variant)
-        let hostingView = NSHostingView(rootView: view)
-        hostingView.frame = CGRect(x: 0, y: 0, width: 1024, height: 1024)
-
-        guard let bitmapRep = hostingView.bitmapImageRepForCachingDisplay(in: hostingView.bounds) else { return }
-        bitmapRep.size = NSSize(width: 1024, height: 1024)
-        hostingView.cacheDisplay(in: hostingView.bounds, to: bitmapRep)
-
-        guard let tiff = NSImage(size: NSSize(width: 1024, height: 1024)).pngFrom(rep: bitmapRep) else { return }
+            .frame(width: 1024, height: 1024)
+        let renderer = ImageRenderer(content: view)
+        renderer.scale = 1.0
+        guard let nsImage = renderer.nsImage,
+              let tiff = nsImage.tiffRepresentation,
+              let rep = NSBitmapImageRep(data: tiff),
+              let pngData = rep.representation(using: .png, properties: [:]) else { return }
 
         let desktop = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask).first!
         let dir = desktop.appendingPathComponent("IqamahWatchIcons")
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         let url = dir.appendingPathComponent("icon_\(variant.rawValue)_1024x1024.png")
-        try? tiff.write(to: url)
+        try? pngData.write(to: url)
         print("✅ Wrote \(url.path)")
         NSWorkspace.shared.selectFile(url.path, inFileViewerRootedAtPath: dir.path)
     }
@@ -208,10 +210,5 @@ extension WatchAppIconView {
     }
 }
 
-private extension NSImage {
-    func pngFrom(rep: NSBitmapImageRep) -> Data? {
-        rep.representation(using: .png, properties: [:])
-    }
-}
 #endif // canImport(AppKit)
 #endif // DEBUG
