@@ -30,6 +30,11 @@ struct IOSRootView: View {
                     Button("Re-detect") {
                         settings.didShowGPSReDetectPromptV16 = true
                         selectedTab = 2  // jump to Settings tab — re-detect button lives there
+                        // SettingsSheetView observes this and pulses the Detect button.
+                        // Slight delay so the tab switch settles before the highlight fires.
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            NotificationCenter.default.post(name: .openSettingsForReDetect, object: nil)
+                        }
                     }
                     Button("Keep current", role: .cancel) {
                         settings.didShowGPSReDetectPromptV16 = true

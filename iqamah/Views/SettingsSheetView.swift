@@ -36,6 +36,9 @@ struct SettingsSheetView: View {
         @State private var launchAtLogin = false
     #endif
     @State private var isDetectingLocation = false
+    /// Transient highlight pulse on the Detect button when the user arrives
+    /// from the v1.6 legacy GPS re-detect alert (ENH-001 finish-up).
+    @State private var highlightReDetect = false
     @StateObject private var locationService = LocationService()
     @State private var detectedLocationInfo: String? = nil // inline result text
 
@@ -85,6 +88,21 @@ struct SettingsSheetView: View {
                 }
             }
             .disabled(isDetectingLocation)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .stroke(Color.appGold, lineWidth: highlightReDetect ? 2 : 0)
+                    .padding(-4)
+                    .opacity(highlightReDetect ? 1 : 0)
+                    .animation(.easeOut(duration: 0.4), value: highlightReDetect)
+            )
+            .onReceive(NotificationCenter.default.publisher(for: .openSettingsForReDetect)) { _ in
+                // Pulse the gold ring for 2s to draw the user's eye after the
+                // legacy GPS re-detect alert routed them here.
+                highlightReDetect = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    highlightReDetect = false
+                }
+            }
 
             if isDetectingLocation {
                 ProgressView().controlSize(.small)
