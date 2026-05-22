@@ -245,8 +245,11 @@ struct LocationSetupView: View {
             let timezone = placemark.timeZone?.identifier ?? TimeZone.current.identifier
 
             DispatchQueue.main.async {
-                SettingsManager.shared.gpsLocality = locality
-                SettingsManager.shared.gpsTimezone = timezone
+                // Single source of truth: same helper used by IqamahWatchApp.refineWithCLGeocoder.
+                SettingsManager.shared.applyGeocodingRefinement(
+                    locality: locality,
+                    timezoneIdentifier: timezone
+                )
                 // Refine the saved city name and timezone with authoritative values
                 if let city = SettingsManager.shared.loadCity(),
                    let refined = try? City(
