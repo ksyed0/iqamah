@@ -320,50 +320,65 @@ player.scheduleFile(file, at: AVAudioTime(sampleTime: offset, atRate: rate))
 
 ---
 
-### ENH-024 — Verify Adhaan Bypasses iPhone Silent Switch
-**Source:** User request (2026-05-21)
-**Priority:** Medium — religiously significant if currently broken; user-confirmation needed first
+### ENH-024 — Adhaan Bypasses iPhone Silent Switch (Critical Alerts Entitlement)
+**Source:** User request (2026-05-21); audit completed same day
+**Priority:** Medium-High — religiously significant; affects a substantial fraction of daily-use scenarios
 
-**Problem:** Unclear whether the current adhaan playback bypasses the iPhone's silent switch (physical ring/silent toggle). For an adhaan app, most users expect prayer-time alerts to play regardless of silent mode, since prayer-time alerts are not "interruptions" to silence in the religious sense. If the current behavior silences the adhaan when the switch is engaged, users miss prayers.
+**Audit summary (2026-05-21):**
 
-**iOS audio session behavior reference:**
-- `AVAudioSession.Category.ambient` / default — silenced by the silent switch
-- `AVAudioSession.Category.playback` — plays regardless of the silent switch (intended for media playback)
-- Notification sounds via `UNNotificationSound` — always respect the silent switch
-- Critical Alerts entitlement — bypasses everything including DND; requires Apple approval
+| Path | Status | Reason |
+|---|---|---|
+| **Foreground playback** (`AdhaaanPlayer.swift:60-61`) | ✅ Bypasses silent switch correctly | Uses `AVAudioSession.Category.playback` + `setActive(true)` before each playback |
+| **Background / locked playback** (`NotificationScheduler.swift:90` via `UNNotificationSound(named:)`) | ⚠️ Silenced by switch | iOS notification sounds always respect the silent switch unless using `criticalSound` (requires Critical Alerts entitlement) |
+| **Focus / DND bypass** (`interruptionLevel = .timeSensitive`) | ✅ Already working | Per BUG-0066. Independent of silent-switch concern. |
 
-**Investigation needed:**
-1. Audit `AdhaanPlayer.swift` (or equivalent iOS audio playback code) — which `AVAudioSession.Category` is configured?
-2. Audit `iqamah/iOS/NotificationScheduler.swift` — are notifications using `UNNotificationSound` (silenced) or trigger app-side audio session activation (works around switch)?
-3. On a real device with silent switch ON, verify at a prayer time:
-   - Adhaan plays at audible volume (expected behavior for an adhaan app)
-   - Locked-screen behavior matches unlocked behavior
-   - Lock-screen + silent-switch + DND combination handled correctly (`.timeSensitive` interruption level from BUG-0066 is one layer; silent switch is another)
+**User-facing behavior right now:**
+- App foregrounded at prayer time → adhaan plays at full volume regardless of silent switch
+- App backgrounded or device locked → lock-screen banner appears (Focus/DND bypassed), but the adhaan sound is muted by the silent switch ❌
 
-**Likely remediation if broken:**
-```swift
-try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.duckOthers])
-try? AVAudioSession.sharedInstance().setActive(true)
-```
-This is the conventional pattern for audio apps that want to bypass the silent switch. Set in `AdhaanPlayer` before each playback.
+**Problem:** A substantial fraction of prayer-time events happen with the app backgrounded — that's the normal case. Users with silent switch enabled (which many keep on by default outside of phone calls) will miss the audible adhaan despite expecting it. This isn't a code bug — Apple deliberately prevents apps from bypassing the silent switch via plain local notifications. The only sanctioned route is the **Critical Alerts entitlement** (`com.apple.developer.usernotifications.critical-alerts`).
+
+**Solution — three parts:**
+
+1. **Apply to Apple for the Critical Alerts entitlement.** Apply via Apple Developer support. Justification: prayer times are time-bound religious obligations; missed prayers due to silenced alerts is a real harm to observant users. Apple has historically granted this for prayer apps in some cases (worth a competitor check — Athan Pro and Muslim Pro behavior on silent suggests they may have it; verify before applying).
+
+2. **Once entitlement is granted, switch notification sound construction:**
+   ```swift
+   // Was: UNNotificationSound(named: UNNotificationSoundName(notifFilename))
+   content.sound = UNNotificationSound.defaultCriticalSound(withAudioVolume: 1.0)
+   // — or, for the specific adhaan file —
+   content.sound = UNNotificationSound.criticalSoundNamed(
+       UNNotificationSoundName(notifFilename),
+       withAudioVolume: 1.0
+   )
+   content.interruptionLevel = .critical  // upgrade from .timeSensitive
+   ```
+
+3. **Settings UX:**
+   - Add a "Play through silent mode" toggle (default ON) — gives users opt-out for moments when they truly want silence (cinema, meetings)
+   - Show a one-time explanation banner when the user first enables notifications: *"Iqamah uses the Critical Alerts permission to play the adhaan even when your phone is on silent. You can disable this in Settings if you prefer."*
+   - Document the behavior in the App Store description so it's not a surprise
 
 **Acceptance criteria (when promoted to an Epic):**
-- [ ] `AdhaanPlayer`'s `AVAudioSession` category is `.playback` on iOS
-- [ ] On a real iPhone with silent switch ON, the adhaan plays at prayer time at audible volume
-- [ ] Background playback works when device is locked (verify `Background Modes: Audio` entitlement is enabled)
-- [ ] Settings exposes a "Play through silent mode" toggle (default ON) for users who want to opt out
-- [ ] Behavior documented in the App Store description so users understand and expect it
-- [ ] watchOS-paired behavior verified — does the adhaan haptic still fire when iPhone is on silent?
+- [ ] Critical Alerts entitlement granted by Apple
+- [ ] `UNNotificationSound.criticalSoundNamed(_:withAudioVolume:)` used for prayer notifications when entitled
+- [ ] `interruptionLevel = .critical` for the Critical-Alerts path
+- [ ] Fallback: if entitlement is not granted (provisional builds, side-loaded), code gracefully falls back to current `.timeSensitive` + non-critical sound (no user-visible error)
+- [ ] Settings exposes "Play through silent mode" toggle (default ON)
+- [ ] First-launch onboarding mentions the behavior + how to opt out
+- [ ] On a real iPhone with silent switch ON and the app backgrounded, adhaan plays at audible volume at prayer time
+- [ ] App Store description and What's New mention the behavior
 
 **Cross-references:**
-- BUG-0066 (resolved) — added `.timeSensitive` interruption level for Focus / DND bypass. Silent-switch bypass is a separate (lower-level) audio-session concern.
+- BUG-0066 (resolved) — `.timeSensitive` interruption level for Focus / DND bypass. Silent-switch bypass is a separate (lower) layer.
+- ENH-023 (Surround Mode) — Critical Alerts grant would let Surround Mode also play through silent.
 
-**Effort:** Small — investigation + likely 5-line fix + manual test on a real device. Smaller if the audio session is already correctly configured.
+**Effort:** Small-Medium for the code (~30 lines + Settings toggle). Large for the entitlement application — Apple's response time is days-to-weeks, may require iteration, and there's a non-zero chance of denial. Ship the code path behind a runtime entitlement check so it's ready to flip when approval arrives.
 
-**Open questions:**
-- Per-prayer toggle for silent-mode bypass, or global? (Likely global — per-prayer overcomplicates)
-- macOS has no silent switch — N/A there
-- watchOS adhaan playback uses haptics only; the iPhone's silent switch shouldn't affect the watch's haptic at all, but worth confirming during the audit
+**Watch behavior:** watchOS adhaan uses haptics only (no audio sound file); iPhone's silent switch doesn't affect the watch haptic. Verified during the audit.
+
+**Why we should pursue this:**
+The audit showed Iqamah is doing everything correctly within Apple's default constraints. The remaining gap requires Apple's explicit permission and is the single biggest quality-of-experience opportunity for a prayer-times app. Worth applying for.
 
 ---
 
