@@ -8,9 +8,9 @@ import CoreLocation
 @Suite("Calculation Method Model Tests")
 struct CalculationMethodTests {
 
-    @Test("All 6 calculation methods are available")
+    @Test("All 7 calculation methods are available")
     func allMethodsPresent() {
-        #expect(CalculationMethod.allCases.count == 6)
+        #expect(CalculationMethod.allCases.count == 7)
     }
 
     @Test("Each method has a non-empty display name", arguments: CalculationMethod.allCases)
@@ -47,10 +47,11 @@ struct CalculationMethodTests {
         }
     }
 
-    @Test("Tehran method has a Maghrib angle; others do not")
+    @Test("Tehran and Ja'fari methods have a Maghrib angle; others do not")
     func maghribAngle() {
         #expect(CalculationMethod.tehran.maghribAngle == 4.5)
-        for method in CalculationMethod.allCases where method != .tehran {
+        #expect(CalculationMethod.jafari.maghribAngle == 4.0)
+        for method in CalculationMethod.allCases where method != .tehran && method != .jafari {
             #expect(method.maghribAngle == nil, "\(method.displayName) should not have Maghrib angle")
         }
     }
