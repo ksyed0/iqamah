@@ -193,16 +193,21 @@ struct WatchAppIconView: View {
 
 @MainActor
 func renderPNG(variant: WatchIconVariant, size: CGFloat = 1024) -> Data? {
+    // ImageRenderer with scale=1 produces exactly `size`×`size` pixels at 72 DPI,
+    // regardless of host display's backing-scale factor. Avoids the retina-DPI
+    // metadata hazard that broke BUG-0068 (asset compiler saw the older
+    // bitmapImageRepForCachingDisplay output as 2048×2048 @ 144 DPI).
     let view = WatchAppIconView(size: size, variant: variant)
-    let hostingView = NSHostingView(rootView: view)
-    hostingView.frame = CGRect(x: 0, y: 0, width: size, height: size)
+        .frame(width: size, height: size)
+    let renderer = ImageRenderer(content: view)
+    renderer.scale = 1.0
 
-    guard let bitmapRep = hostingView.bitmapImageRepForCachingDisplay(in: hostingView.bounds) else {
+    guard let nsImage = renderer.nsImage,
+          let tiff = nsImage.tiffRepresentation,
+          let rep = NSBitmapImageRep(data: tiff) else {
         return nil
     }
-    bitmapRep.size = NSSize(width: size, height: size)
-    hostingView.cacheDisplay(in: hostingView.bounds, to: bitmapRep)
-    return bitmapRep.representation(using: .png, properties: [:])
+    return rep.representation(using: .png, properties: [:])
 }
 
 @MainActor
