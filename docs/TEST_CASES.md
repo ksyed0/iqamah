@@ -41,8 +41,8 @@ Human-readable test cases (TC-XXXX) linked to user stories and acceptance criter
 
 ## Test Case Registry
 
-**Total Test Cases:** 43
-**Status:** 🟡 EPIC-0010 and EPIC-0016 covered (TC-0001 through TC-0043); EPIC-0001 through EPIC-0009 and EPIC-0011 through EPIC-0015 still pending TC backfill
+**Total Test Cases:** 92
+**Status:** 🟡 EPIC-0010, EPIC-0015, and EPIC-0016 covered (TC-0001 through TC-0092); EPIC-0001 through EPIC-0009 and EPIC-0011 through EPIC-0014 still pending TC backfill
 
 ---
 
@@ -457,27 +457,399 @@ Steps:
 Expected: All three greps return at least one match; ENHANCEMENTS.md ENH-001 section includes the surface-by-surface implementation table; CLAUDE.md section explains the duplicate-filename + PrayerActivityAttributes patterns
 Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
 
+### EPIC-0015 — Test Automation (Incremental)
+
+#### US-0064 — Platform Smoke Tests
+
+**TC-0044 (AC-0300) — smoke-test.sh exists and is executable**
+Type: Functional · Preconditions: Repo root checkout
+Steps:
+  1. `test -x scripts/smoke-test.sh && echo OK`
+Expected: Prints `OK`; file is present with executable bit set
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0045 (AC-0301) — Platform argument parsing**
+Type: Functional · Preconditions: smoke-test.sh present
+Steps:
+  1. `scripts/smoke-test.sh ios`
+  2. `scripts/smoke-test.sh ipad`
+  3. `scripts/smoke-test.sh watch`
+  4. `scripts/smoke-test.sh macos`
+  5. `scripts/smoke-test.sh` (no args)
+Expected: Each argument restricts the run to the named platform; the no-arg invocation runs all four
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0046 (AC-0302) — xcodebuild invocation uses correct signing flags**
+Type: Functional · Preconditions: smoke-test.sh present
+Steps:
+  1. Run smoke-test with `set -x` enabled
+  2. Inspect xcodebuild invocations
+Expected: macOS build line includes `CODE_SIGNING_ALLOWED=NO`; iOS/watchOS build lines include `-allowProvisioningUpdates`
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0047 (AC-0303) — App process verified alive 5s post-launch**
+Type: Functional · Preconditions: iOS simulator booted, app installed via smoke script
+Steps:
+  1. Run `scripts/smoke-test.sh ios`
+  2. Observe `xcrun simctl listapps` or `ps` PID check 5s after launch
+Expected: Non-zero PID detected; script reports the platform as alive
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0048 (AC-0304) — Failure exits non-zero with platform identified**
+Type: Negative · Preconditions: Deliberately break one platform (e.g. invalid scheme)
+Steps:
+  1. Run `scripts/smoke-test.sh all`
+  2. Check exit code and stdout
+Expected: Exit code is non-zero; output names the failing platform and the reason
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0049 (AC-0305) — DiagnosticReports scanned for new crashes**
+Type: Functional · Preconditions: Empty `~/Library/Logs/DiagnosticReports/`; smoke-test.sh present
+Steps:
+  1. Plant a synthetic crash report file matching the iOS bundle ID
+  2. Run smoke-test
+Expected: Script exits non-zero and lists the bundle ID whose crash report it detected
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0050 (AC-0306) — Nightly workflow scheduled, not per-PR**
+Type: Functional · Preconditions: `.github/workflows/` checked out
+Steps:
+  1. Inspect `.github/workflows/nightly.yml`
+Expected: File exists with `on: schedule: cron: '0 2 * * *'`; no `pull_request:` or `push:` trigger
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0051 (AC-0307) — Smoke completes under 10 minutes**
+Type: Performance · Preconditions: Fresh simulator boot
+Steps:
+  1. `time scripts/smoke-test.sh all`
+Expected: Wall-clock time < 600 seconds
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+#### US-0065 — Snapshot Tests for Key Views
+
+**TC-0052 (AC-0308) — swift-snapshot-testing dependency declared**
+Type: Functional · Preconditions: Repo root
+Steps:
+  1. `grep -n "swift-snapshot-testing" Packages/IqamahCore/Package.swift`
+Expected: Match exists; dependency declared as test-only
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0053 (AC-0309) — MoonPhaseView snapshots for three phases × two appearances**
+Type: Functional · Preconditions: Snapshot test target builds
+Steps:
+  1. Run MoonPhaseView snapshot tests
+  2. Inspect generated reference images
+Expected: Six images exist (phases 0.05, 0.5, 0.82 × light/dark); all tests pass
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0054 (AC-0310) — QiblahCompassView snapshot at Toronto→Makkah bearing**
+Type: Functional · Preconditions: Snapshot test target builds
+Steps:
+  1. Run QiblahCompassView snapshot tests at 320pt and 600pt
+Expected: Both reference images exist; bearing rendered at 58.3°; tests pass
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0055 (AC-0311) — PrayerTimesView macOS snapshot**
+Type: Functional · Preconditions: Snapshot test target on macOS
+Steps:
+  1. Run PrayerTimesView snapshot test
+Expected: Reference image shows all six prayer rows with exactly one row carrying the "NEXT" badge
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0056 (AC-0312) — HilalExportCard snapshot**
+Type: Functional · Preconditions: Snapshot test target builds
+Steps:
+  1. Run HilalExportCard snapshot test
+Expected: Reference image contains title, four visibility category bars, and matches stored reference
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0057 (AC-0313) — PrayerRowMobileView collapsed and expanded snapshots**
+Type: Functional · Preconditions: iOS snapshot test target
+Steps:
+  1. Run PrayerRowMobileView snapshot tests for collapsed and expanded states
+Expected: Two reference images exist; collapsed shows pill only, expanded shows chip tray
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0058 (AC-0314) — Snapshot artefacts stored in repo**
+Type: Functional · Preconditions: Branch with snapshot tests committed
+Steps:
+  1. `ls Tests/__Snapshots__/`
+  2. `git ls-files Tests/__Snapshots__/ | wc -l`
+Expected: Directory exists; image count > 0; files tracked by git
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0059 (AC-0315) — CI fails on unexpected diff**
+Type: Regression · Preconditions: PR that intentionally mutates one snapshotted view without re-recording
+Steps:
+  1. Push branch to GitHub
+  2. Observe CI Test & Coverage step
+Expected: Job fails with descriptive diff message naming the affected view
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0060 (AC-0316) — update-snapshots.sh re-records references**
+Type: Functional · Preconditions: scripts/update-snapshots.sh present
+Steps:
+  1. `scripts/update-snapshots.sh`
+  2. `git status Tests/__Snapshots__/`
+Expected: Script runs the snapshot suite with `record: true`; updated reference images appear in git status
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+#### US-0066 — XCUITest Suite: macOS
+
+**TC-0061 (AC-0317) — iqamahUITests target exists**
+Type: Functional · Preconditions: Repo checkout
+Steps:
+  1. `grep -n "iqamahUITests" iqamah.xcodeproj/project.pbxproj`
+Expected: Target reference present and linked to the `iqamah` macOS scheme
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0062 (AC-0318) — Status bar left-click opens popover**
+Type: Functional · Preconditions: macOS UI test target runs
+Steps:
+  1. Run `testStatusBarLeftClickOpensPopover`
+Expected: Popover appears within 2 seconds; test passes
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0063 (AC-0319) — Status bar right-click menu items present**
+Type: Functional · Preconditions: macOS UI test target runs
+Steps:
+  1. Run `testStatusBarRightClickShowsMenu`
+Expected: Menu contains "Open Main Window", "Moon Sighting…", "Settings", "Quit Iqamah"
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0064 (AC-0320) — Open Main Window opens prayer times only**
+Type: Functional · Preconditions: macOS UI test target runs
+Steps:
+  1. Run `testOpenMainWindowFromMenu`
+Expected: Prayer times window becomes key and visible; Hilal Watch window remains hidden
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0065 (AC-0321) — Hilal Watch opens from menu**
+Type: Functional · Preconditions: macOS UI test target runs
+Steps:
+  1. Run `testHilalWatchOpensFromMenu`
+Expected: Hilal Watch window is foregrounded
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0066 (AC-0322) — Hilal Watch opens from details button**
+Type: Functional · Preconditions: macOS UI test target runs
+Steps:
+  1. Run `testHilalWatchOpensFromDetailsButton`
+Expected: Clicking "Hilal Watch ›" in the moon phase row opens the Hilal Watch window
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0067 (AC-0323) — Adhaan picker open and collapse**
+Type: Functional · Preconditions: macOS UI test target runs
+Steps:
+  1. Run `testAdhaanPickerOpenAndClose`
+Expected: Clicking adhaan pill expands picker; clicking another row collapses it
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0068 (AC-0324) — Settings sheet open/cancel preserves city**
+Type: Functional · Preconditions: macOS UI test target runs
+Steps:
+  1. Run `testSettingsSheetOpensAndCloses`
+Expected: Sheet opens; Cancel closes it; current city unchanged
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0069 (AC-0325) — macOS UI tests complete under 60s, nightly only**
+Type: Performance · Preconditions: Nightly workflow run
+Steps:
+  1. `time xcodebuild test -scheme iqamah -only-testing:iqamahUITests`
+  2. Inspect `.github/workflows/ci.yml` for absence of UI test job
+Expected: Wall-clock < 60 seconds; UI tests run only in nightly workflow
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+#### US-0067 — XCUITest Suite: iPhone and iPad
+
+**TC-0070 (AC-0326) — iqamahiOSUITests target exists**
+Type: Functional · Preconditions: Repo checkout
+Steps:
+  1. `grep -n "iqamahiOSUITests" iqamah.xcodeproj/project.pbxproj`
+Expected: Target reference present and linked to the `iqamah-iOS` scheme
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0071 (AC-0327) — All six prayer rows visible without scrolling on iPhone 17**
+Type: Functional · Preconditions: iPhone 17 simulator
+Steps:
+  1. Run `testAllSixPrayersVisible`
+Expected: Rows Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha all hittable without scrolling
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0072 (AC-0328) — Exactly one row highlighted as NEXT**
+Type: Functional · Preconditions: iOS UI test target runs
+Steps:
+  1. Run `testNextPrayerHighlightedInGold`
+Expected: Exactly one row carries the gold "NEXT" badge
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0073 (AC-0329) — Asr row expands to chip tray with adhaan + alert chips**
+Type: Functional · Preconditions: iOS UI test target runs
+Steps:
+  1. Run `testTappingPrayerRowExpandsChipTray`
+Expected: Chip tray contains at least one adhaan chip and one alert tone chip
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0074 (AC-0330) — Sunrise row shows amber pill with alert-only tray**
+Type: Functional · Preconditions: iOS UI test target runs
+Steps:
+  1. Run `testSunriseRowShowsAmberPill`
+Expected: Pill is amber and labelled "No alert"; tray contains alert tones only, no adhaan chips
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0075 (AC-0331) — Hilal Watch sheet opens with map**
+Type: Functional · Preconditions: iOS UI test target runs
+Steps:
+  1. Run `testHilalWatchSheetOpens`
+Expected: Full-screen Hilal Watch sheet appears; "Global Visibility" map section visible after compute
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0076 (AC-0332) — Hilal Watch export opens share sheet**
+Type: Functional · Preconditions: iOS UI test target runs
+Steps:
+  1. Run `testHilalWatchExportOpensShareSheet`
+Expected: Share sheet appears within 3 seconds; no crash recorded
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0077 (AC-0333) — Qibla compass visible with mat and Ka'bah icon**
+Type: Functional · Preconditions: iOS UI test target runs
+Steps:
+  1. Run `testQiblaCompassVisible`
+Expected: Compass renders with prayer mat at centre and Ka'bah marker on ring
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0078 (AC-0334) — iPad landscape shows Today/Tomorrow two-column layout**
+Type: Functional · Preconditions: iPad Pro 11" simulator
+Steps:
+  1. Run `testIPadLandscapeTwoColumns`
+Expected: Two columns visible labelled "Today" and "Tomorrow"
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0079 (AC-0335) — iOS UI tests within budget**
+Type: Performance · Preconditions: iOS UI test suite passes
+Steps:
+  1. `time xcodebuild test -scheme iqamah-iOS -only-testing:iqamahiOSUITests -destination 'platform=iOS Simulator,name=iPhone 17'`
+  2. Repeat with iPad Pro 11" destination
+Expected: iPhone wall-clock < 90s; iPad wall-clock < 120s
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+#### US-0068 — XCUITest Suite: watchOS
+
+**TC-0080 (AC-0336) — IqamahWatchUITests target exists**
+Type: Functional · Preconditions: Repo checkout
+Steps:
+  1. `grep -n "IqamahWatchUITests" iqamah.xcodeproj/project.pbxproj`
+Expected: Target reference present and linked to the `IqamahWatch` scheme
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0081 (AC-0337) — Times tab shows at least one prayer row**
+Type: Functional · Preconditions: watchOS UI test target runs
+Steps:
+  1. Run `testPrayerTimesTabLoads`
+Expected: At least one prayer row visible with a non-empty time string
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0082 (AC-0338) — Five core prayer rows accessible**
+Type: Functional · Preconditions: watchOS UI test target runs
+Steps:
+  1. Run `testAllVisiblePrayersPresent`
+Expected: Rows for Fajr, Dhuhr, Asr, Maghrib, Isha all reachable via accessibility query (Sunrise tolerated either way)
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0083 (AC-0339) — Settings tab shows Location section and Update via GPS**
+Type: Functional · Preconditions: watchOS UI test target runs
+Steps:
+  1. Run `testSettingsTabLoads`
+Expected: Settings tab displays a "Location" section header and an "Update via GPS" button
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0084 (AC-0340) — Set City Manually navigation link visible**
+Type: Functional · Preconditions: watchOS UI test target with city DB loaded
+Steps:
+  1. Run `testSetCityManuallyNavigationVisible`
+Expected: "Set City Manually" navigation link is present in the Settings Location section
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0085 (AC-0341) — Qibla tab shows compass element**
+Type: Functional · Preconditions: watchOS UI test target runs
+Steps:
+  1. Run `testQiblaTabLoads`
+Expected: Qiblah tab displays a compass element
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0086 (AC-0342) — watchOS UI tests complete under 60s**
+Type: Performance · Preconditions: watchOS UI test suite passes
+Steps:
+  1. `time xcodebuild test -scheme IqamahWatch -only-testing:IqamahWatchUITests -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)'`
+Expected: Wall-clock < 60 seconds
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+#### US-0069 — CI Integration: Nightly Multi-Platform Gate
+
+**TC-0087 (AC-0343) — Nightly workflow scheduled at 02:00 UTC**
+Type: Functional · Preconditions: Repo checkout
+Steps:
+  1. `grep -n "cron: '0 2 \* \* \*'" .github/workflows/nightly.yml`
+Expected: Match exists
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0088 (AC-0344) — Nightly job order honoured**
+Type: Functional · Preconditions: nightly.yml present
+Steps:
+  1. Inspect job `needs:` dependencies in nightly.yml
+Expected: Order is smoke-test → snapshot-test → ui-test-macos → ui-test-ios → ui-test-watchos
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0089 (AC-0345) — fail-fast disabled across nightly matrix**
+Type: Functional · Preconditions: nightly.yml present
+Steps:
+  1. `grep -n "fail-fast: false" .github/workflows/nightly.yml`
+Expected: Match exists at the matrix or job-strategy level
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0090 (AC-0346) — Failure posts platform summary**
+Type: Negative · Preconditions: Force one nightly job to fail
+Steps:
+  1. Re-run the workflow with a deliberately broken UI test
+  2. Inspect the GitHub Actions job summary
+Expected: Summary lists which platforms failed using job-summary markdown
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0091 (AC-0347) — PR workflow gains snapshot-test job only**
+Type: Functional · Preconditions: ci.yml present
+Steps:
+  1. Inspect `.github/workflows/ci.yml` job list
+Expected: A `snapshot-test` job exists and runs on PR; no UI test job on PR; snapshot job completes ≈3 minutes
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0092 (AC-0348) — Nightly wall-clock under 20 minutes**
+Type: Performance · Preconditions: A clean nightly run
+Steps:
+  1. Inspect nightly workflow duration in the GitHub Actions UI
+Expected: Total wall-clock time < 1200 seconds
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
 ---
 
 ## Test Cases by Type
 
 ### Functional Tests
-TC-0001, 0006, 0007, 0008, 0009, 0010, 0011, 0012, 0013, 0014, 0015, 0017, 0019, 0020, 0021, 0022, 0023, 0025, 0026, 0027, 0028, 0029, 0030, 0031, 0032, 0033, 0036, 0039, 0040, 0042, 0043
+TC-0001, 0006, 0007, 0008, 0009, 0010, 0011, 0012, 0013, 0014, 0015, 0017, 0019, 0020, 0021, 0022, 0023, 0025, 0026, 0027, 0028, 0029, 0030, 0031, 0032, 0033, 0036, 0039, 0040, 0042, 0043, 0044, 0045, 0046, 0047, 0049, 0050, 0052, 0053, 0054, 0055, 0056, 0057, 0058, 0060, 0061, 0062, 0063, 0064, 0065, 0066, 0067, 0068, 0070, 0071, 0072, 0073, 0074, 0075, 0076, 0077, 0078, 0080, 0081, 0082, 0083, 0084, 0085, 0087, 0088, 0089, 0091
 
 ### Regression Tests
-TC-0002, 0003, 0005, 0018, 0024, 0041
+TC-0002, 0003, 0005, 0018, 0024, 0041, 0059
 
 ### Edge Case Tests
 TC-0035, 0037
 
 ### Negative Tests
-TC-0016, 0034, 0038
+TC-0016, 0034, 0038, 0048, 0090
 
 ### Accessibility Tests
 *[To be created — recommend covering VoiceOver labels for new iOS surfaces in a follow-up]*
 
 ### Performance Tests
-*[To be created — recommend covering widget timeline build time and Live Activity request latency in a follow-up]*
+TC-0051, 0069, 0079, 0086, 0092
 
 ---
 
@@ -493,4 +865,4 @@ TC-0016, 0034, 0038
 
 ---
 
-**Last Updated:** 2026-05-21 (TC-0036 through TC-0043 added covering EPIC-0016 / US-0070 acceptance criteria)
+**Last Updated:** 2026-05-22 (TC-0044 through TC-0092 added covering EPIC-0015 / US-0064 through US-0069 acceptance criteria)
