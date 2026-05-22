@@ -14,7 +14,16 @@ Logged from competitive analysis (May 2026) and product research. Items are grou
 
 ## Location Accuracy
 
-### ENH-001 — Exact GPS Prayer Times via CLGeocoder (Option A + B)
+### ENH-001 — Exact GPS Prayer Times via CLGeocoder (Option A + B) ✅ Implemented (2026-05-21)
+**Status:** ✅ Fully implemented across all platforms. A+B shipped during v1.5.0 (macOS/iOS first-launch and Settings re-detect); watchOS Option B parity, a one-time v1.6 re-detect prompt for legacy users, and structural cleanups landed in the v1.6 cycle (see docs/superpowers/specs/2026-05-21-enh-001-finish-up-design.md).
+
+| Surface | Option | Location |
+|---|---|---|
+| macOS first-launch | A+B | `iqamah/Views/LocationSetupView.swift` |
+| iOS first-launch | A+B | same (shared via `iOSRootView`) |
+| macOS/iOS Settings re-detect | A+B | `iqamah/Views/SettingsSheetView.swift` |
+| watchOS first-launch + Settings | A+B | `IqamahWatch/IqamahWatchApp.swift` |
+
 **Source:** Internal — Brampton vs. Toronto discrepancy (~2–3 min offset)
 
 **Problem:** The current flow maps GPS coordinates to the nearest city in `cities.json`, then uses that city's coordinates and timezone for calculation. The mismatch between actual location (e.g. Brampton: 43.685°N, 79.759°W) and the proxy city (Toronto: 43.653°N, 79.383°W) introduces a systematic error in transit time and every derived prayer time.
@@ -253,6 +262,132 @@ Expand the adhan library beyond the current 5 regular + 3 Fajr. Potential additi
 Add a play/preview button next to each adhan option in the settings sheet so users can hear a short clip before selecting.
 
 **Effort:** Small
+
+---
+
+### ENH-023 — Adhaan Surround Mode (Spatial Multi-Muezzin)
+**Source:** User suggestion (2026-05-21)
+**Priority:** Medium — distinctive feature; emotionally meaningful for users from Muslim-majority countries
+
+**Problem:** Iqamah plays a single adhaan at prayer time. Users who grew up in Muslim-majority countries — Egypt, Saudi Arabia, Pakistan, Indonesia, Malaysia, Turkey, the Levant — describe the experience of hearing multiple mosques start the adhaan within a 5–15 second window, each from a different direction, as one of the most emotionally evocative aspects of daily prayer life. The single-source adhaan in apps misses this sensory dimension entirely.
+
+**Solution:** "Surround Mode" that:
+1. Lets the user select 2–5 different adhaan recordings simultaneously (existing 5 regular + 3 Fajr library plus any added via ENH-010)
+2. Plays them with staggered start times — small natural jitter (e.g. 0s / +3s / +8s / +12s) to mimic real-world multi-mosque overlap
+3. Positions each in 3D space using `AVAudioEnvironmentNode` — different azimuth/distance per source so the listener perceives mosques in different directions and at different perceived distances
+4. Master volume + per-source mix balance so overlapping playback doesn't clip
+
+**Platforms:**
+- iOS / iPadOS — full support; spatial audio works via head-tracking with AirPods Pro/Max
+- macOS — full support; positional audio through any output device
+- visionOS — best fit; spatial audio is native and the experience would be remarkable
+- watchOS — likely unavailable; watchOS audio APIs don't expose `AVAudioEnvironmentNode`
+- tvOS — would work but unusual use case (living-room ambient)
+
+**Technical sketch:**
+```swift
+let engine = AVAudioEngine()
+let environment = AVAudioEnvironmentNode()
+engine.attach(environment)
+engine.connect(environment, to: engine.mainMixerNode, format: nil)
+
+// For each adhaan source:
+let player = AVAudioPlayerNode()
+engine.attach(player)
+engine.connect(player, to: environment, format: file.processingFormat)
+player.position = AVAudio3DPoint(x: 10, y: 0, z: 5)  // azimuth + distance
+player.scheduleFile(file, at: AVAudioTime(sampleTime: offset, atRate: rate))
+```
+
+**Settings UI:**
+- New section: "Surround Mode" with master toggle (off by default — opt-in)
+- Per-prayer enable (Fajr / Dhuhr / Asr / Maghrib / Isha — Sunrise excluded)
+- Multi-select picker for 2–5 source adhaans
+- Spread slider: tight (3–5 s window) → wide (10–15 s window)
+- Spatial layout preset: Cairo (5 mosques typical), Istanbul (3), Lahore (4), or "Custom" with manual 3D positions
+- Master volume
+
+**Acceptance criteria (when promoted to an Epic):**
+- [ ] User can select 2–5 adhaans for simultaneous playback
+- [ ] Each source has a configurable start offset (0–15 s)
+- [ ] `AVAudioEnvironmentNode` positions each source in 3D space
+- [ ] Mix is balanced — no clipping at default master volume
+- [ ] Preset layouts ship with sensible defaults
+- [ ] Feature gracefully degrades on devices without spatial audio support (falls back to stereo)
+- [ ] watchOS and tvOS gracefully ignore the setting (Surround Mode unavailable badge in settings)
+
+**Cross-references:**
+- ENH-010 (Additional Adhaan Voices) — synergistic; more voices = more variety
+- ENH-021 (Vision Pro Path 2) — spatial Qibla mentioned; Surround Mode is a natural pair
+
+**Effort:** Medium (1–2 weeks). Audio engine code is the main lift; `AVAudioEnvironmentNode` has a learning curve but standard Apple sample code covers it.
+
+**Open questions:**
+- Headphones-required or speaker-OK? Likely speaker for the at-home use case (most users won't be wearing AirPods at prayer time)
+- Per-prayer config or single global setting?
+- Should licensed recordings from iconic mosques (Masjid al-Haram, Al-Aqsa, Prophet's Mosque in Madinah) ship as optional preset packs?
+
+---
+
+### ENH-024 — Adhaan Bypasses iPhone Silent Switch (Critical Alerts Entitlement)
+**Source:** User request (2026-05-21); audit completed same day
+**Priority:** Medium-High — religiously significant; affects a substantial fraction of daily-use scenarios
+
+**Audit summary (2026-05-21):**
+
+| Path | Status | Reason |
+|---|---|---|
+| **Foreground playback** (`AdhaaanPlayer.swift:60-61`) | ✅ Bypasses silent switch correctly | Uses `AVAudioSession.Category.playback` + `setActive(true)` before each playback |
+| **Background / locked playback** (`NotificationScheduler.swift:90` via `UNNotificationSound(named:)`) | ⚠️ Silenced by switch | iOS notification sounds always respect the silent switch unless using `criticalSound` (requires Critical Alerts entitlement) |
+| **Focus / DND bypass** (`interruptionLevel = .timeSensitive`) | ✅ Already working | Per BUG-0066. Independent of silent-switch concern. |
+
+**User-facing behavior right now:**
+- App foregrounded at prayer time → adhaan plays at full volume regardless of silent switch
+- App backgrounded or device locked → lock-screen banner appears (Focus/DND bypassed), but the adhaan sound is muted by the silent switch ❌
+
+**Problem:** A substantial fraction of prayer-time events happen with the app backgrounded — that's the normal case. Users with silent switch enabled (which many keep on by default outside of phone calls) will miss the audible adhaan despite expecting it. This isn't a code bug — Apple deliberately prevents apps from bypassing the silent switch via plain local notifications. The only sanctioned route is the **Critical Alerts entitlement** (`com.apple.developer.usernotifications.critical-alerts`).
+
+**Solution — three parts:**
+
+1. **Apply to Apple for the Critical Alerts entitlement.** Apply via Apple Developer support. Justification: prayer times are time-bound religious obligations; missed prayers due to silenced alerts is a real harm to observant users. Apple has historically granted this for prayer apps in some cases (worth a competitor check — Athan Pro and Muslim Pro behavior on silent suggests they may have it; verify before applying).
+
+2. **Once entitlement is granted, switch notification sound construction:**
+   ```swift
+   // Was: UNNotificationSound(named: UNNotificationSoundName(notifFilename))
+   content.sound = UNNotificationSound.defaultCriticalSound(withAudioVolume: 1.0)
+   // — or, for the specific adhaan file —
+   content.sound = UNNotificationSound.criticalSoundNamed(
+       UNNotificationSoundName(notifFilename),
+       withAudioVolume: 1.0
+   )
+   content.interruptionLevel = .critical  // upgrade from .timeSensitive
+   ```
+
+3. **Settings UX:**
+   - Add a "Play through silent mode" toggle (default ON) — gives users opt-out for moments when they truly want silence (cinema, meetings)
+   - Show a one-time explanation banner when the user first enables notifications: *"Iqamah uses the Critical Alerts permission to play the adhaan even when your phone is on silent. You can disable this in Settings if you prefer."*
+   - Document the behavior in the App Store description so it's not a surprise
+
+**Acceptance criteria (when promoted to an Epic):**
+- [ ] Critical Alerts entitlement granted by Apple
+- [ ] `UNNotificationSound.criticalSoundNamed(_:withAudioVolume:)` used for prayer notifications when entitled
+- [ ] `interruptionLevel = .critical` for the Critical-Alerts path
+- [ ] Fallback: if entitlement is not granted (provisional builds, side-loaded), code gracefully falls back to current `.timeSensitive` + non-critical sound (no user-visible error)
+- [ ] Settings exposes "Play through silent mode" toggle (default ON)
+- [ ] First-launch onboarding mentions the behavior + how to opt out
+- [ ] On a real iPhone with silent switch ON and the app backgrounded, adhaan plays at audible volume at prayer time
+- [ ] App Store description and What's New mention the behavior
+
+**Cross-references:**
+- BUG-0066 (resolved) — `.timeSensitive` interruption level for Focus / DND bypass. Silent-switch bypass is a separate (lower) layer.
+- ENH-023 (Surround Mode) — Critical Alerts grant would let Surround Mode also play through silent.
+
+**Effort:** Small-Medium for the code (~30 lines + Settings toggle). Large for the entitlement application — Apple's response time is days-to-weeks, may require iteration, and there's a non-zero chance of denial. Ship the code path behind a runtime entitlement check so it's ready to flip when approval arrives.
+
+**Watch behavior:** watchOS adhaan uses haptics only (no audio sound file); iPhone's silent switch doesn't affect the watch haptic. Verified during the audit.
+
+**Why we should pursue this:**
+The audit showed Iqamah is doing everything correctly within Apple's default constraints. The remaining gap requires Apple's explicit permission and is the single biggest quality-of-experience opportunity for a prayer-times app. Worth applying for.
 
 ---
 

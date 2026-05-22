@@ -19,6 +19,7 @@
 		94CAD56B2F23D3C800E1689F /* SplashScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CAD56A2F23D3C800E1689F /* SplashScreenView.swift */; };
 		AA0000000000000000000001 /* iqamahApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000011 /* iqamahApp.swift */; };
 		AA0000000000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000012 /* ContentView.swift */; };
+		WI000000000000000000001 /* WatchAppIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WI000000000000000000001R /* WatchAppIconView.swift */; };
 		AA0000000000000000000008 /* LocationSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000018 /* LocationSetupView.swift */; };
 		AA0000000000000000000009 /* CalculationMethodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000019 /* CalculationMethodView.swift */; };
 		AA000000000000000000000A /* PrayerTimesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001A /* PrayerTimesView.swift */; };
@@ -26,7 +27,7 @@
 		AA000000000000000000000D /* QiblahView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001E /* QiblahView.swift */; };
 		AB000000000000000000BB01 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000000000000000000AA01 /* AboutView.swift */; };
 		AM000000000000000000001 /* PrayerActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AM000000000000000000001R /* PrayerActivityManager.swift */; };
-		AM000000000000000000002 /* PrayerActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AM000000000000000000002R /* PrayerActivityAttributes.swift */; };
+		AM00000000000000000000A /* PrayerActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = LA000000000000000000010R /* PrayerActivityAttributes.swift */; };
 		B5000000000000000000001 /* MoonPhaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000004 /* MoonPhaseView.swift */; };
 		B5000000000000000000002 /* HilalCriterionPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000006 /* HilalCriterionPicker.swift */; };
 		B5000000000000000000003 /* LocalSightingCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = HW000000000000000000005 /* LocalSightingCardView.swift */; };
@@ -58,7 +59,7 @@
 		MW00000000000000000050 /* IqamahWidgetMac.appex in Embed Mac Widget Extension */ = {isa = PBXBuildFile; fileRef = MW00000000000000000002 /* IqamahWidgetMac.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		PI000000000000000000BB01 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = PI000000000000000000AA01 /* PrivacyInfo.xcprivacy */; };
 		SH00000000000000000001A /* HilalShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = SH00000000000000000000A /* HilalShareSheet.swift */; };
-		WA000000000000000000011 /* LocationSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000011R /* LocationSetupView.swift */; };
+		WA000000000000000000011 /* WatchLocationSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000011R /* WatchLocationSetupView.swift */; };
 		WA000000000000000000012 /* PrayerTimesTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000012R /* PrayerTimesTab.swift */; };
 		WA000000000000000000013 /* QiblaTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000013R /* QiblaTab.swift */; };
 		WA000000000000000000014 /* SettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000014R /* SettingsTab.swift */; };
@@ -265,6 +266,7 @@
 		AA0000000000000000000010 /* iqamah.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iqamah.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0000000000000000000011 /* iqamahApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iqamahApp.swift; sourceTree = "<group>"; };
 		AA0000000000000000000012 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		WI000000000000000000001R /* WatchAppIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchAppIconView.swift; sourceTree = "<group>"; };
 		AA0000000000000000000018 /* LocationSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationSetupView.swift; sourceTree = "<group>"; };
 		AA0000000000000000000019 /* CalculationMethodView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculationMethodView.swift; sourceTree = "<group>"; };
 		AA000000000000000000001A /* PrayerTimesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerTimesView.swift; sourceTree = "<group>"; };
@@ -281,7 +283,6 @@
 		AD000000000000000000AA07 /* adhaan_fajr_2.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = adhaan_fajr_2.mp3; sourceTree = "<group>"; };
 		AD000000000000000000AA08 /* adhaan_fajr_3.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = adhaan_fajr_3.mp3; sourceTree = "<group>"; };
 		AM000000000000000000001R /* PrayerActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerActivityManager.swift; sourceTree = "<group>"; };
-		AM000000000000000000002R /* PrayerActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerActivityAttributes.swift; sourceTree = "<group>"; };
 		B5000000000000000000020 /* HilalWatchSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HilalWatchSheet.swift; sourceTree = "<group>"; };
 		BB000000000000000000001A /* SettingsSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSheetView.swift; sourceTree = "<group>"; };
 		BN000000000000000000AA01 /* AdhaanBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdhaanBannerView.swift; sourceTree = "<group>"; };
@@ -314,7 +315,7 @@
 		TT000000000000000000AA03 /* tone_tink.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; path = tone_tink.aiff; sourceTree = "<group>"; };
 		TT000000000000000000AA04 /* tone_hero.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; path = tone_hero.aiff; sourceTree = "<group>"; };
 		TT000000000000000000AA05 /* tone_breeze.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; path = tone_breeze.aiff; sourceTree = "<group>"; };
-		WA000000000000000000011R /* LocationSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationSetupView.swift; sourceTree = "<group>"; };
+		WA000000000000000000011R /* WatchLocationSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchLocationSetupView.swift; sourceTree = "<group>"; };
 		WA000000000000000000012R /* PrayerTimesTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerTimesTab.swift; sourceTree = "<group>"; };
 		WA000000000000000000013R /* QiblaTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QiblaTab.swift; sourceTree = "<group>"; };
 		WA000000000000000000014R /* SettingsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsTab.swift; sourceTree = "<group>"; };
@@ -513,6 +514,7 @@
 				94CAD5642F23CBB800E1689F /* AppDelegate.swift */,
 				AA0000000000000000000011 /* iqamahApp.swift */,
 				AA0000000000000000000012 /* ContentView.swift */,
+				WI000000000000000000001R /* WatchAppIconView.swift */,
 				HW000000000000000000009 /* HilalWatchWindow.swift */,
 				EE0000000000000000005001 /* Extensions */,
 				AA0000000000000000000034 /* Services */,
@@ -641,7 +643,7 @@
 			children = (
 				WA000000000000000000061 /* Assets.xcassets */,
 				WA000000000000000000050R /* IqamahWatchApp.swift */,
-				WA000000000000000000011R /* LocationSetupView.swift */,
+				WA000000000000000000011R /* WatchLocationSetupView.swift */,
 				WA000000000000000000012R /* PrayerTimesTab.swift */,
 				WA000000000000000000013R /* QiblaTab.swift */,
 				WA000000000000000000014R /* SettingsTab.swift */,
@@ -694,7 +696,6 @@
 				iOS000000000000000000001F /* NotificationScheduler.swift */,
 				B5000000000000000000020 /* HilalWatchSheet.swift */,
 				AM000000000000000000001R /* PrayerActivityManager.swift */,
-				AM000000000000000000002R /* PrayerActivityAttributes.swift */,
 				HC000000000000000000001 /* PrayerHeroCard.swift */,
 				HL000000000000000000001 /* HilalWatchPreloader.swift */,
 				HC000000000000000000003 /* PrayerRowMobileView.swift */,
@@ -1135,6 +1136,7 @@
 				AA0000000000000000000001 /* iqamahApp.swift in Sources */,
 				944B0D992F635A0500EC6A01 /* TestsAdditionalTests.swift in Sources */,
 				AA0000000000000000000002 /* ContentView.swift in Sources */,
+				WI000000000000000000001 /* WatchAppIconView.swift in Sources */,
 				EE0000000000000000003002 /* Color+App.swift in Sources */,
 				BN000000000000000000BB01 /* AdhaanBannerView.swift in Sources */,
 				AB000000000000000000BB01 /* AboutView.swift in Sources */,
@@ -1184,7 +1186,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				WA000000000000000000050 /* IqamahWatchApp.swift in Sources */,
-				WA000000000000000000011 /* LocationSetupView.swift in Sources */,
+				WA000000000000000000011 /* WatchLocationSetupView.swift in Sources */,
 				WA000000000000000000012 /* PrayerTimesTab.swift in Sources */,
 				WA000000000000000000013 /* QiblaTab.swift in Sources */,
 				WA000000000000000000014 /* SettingsTab.swift in Sources */,
@@ -1232,7 +1234,7 @@
 			files = (
 				iOS0000000000000000000001 /* iqamahApp_iOS.swift in Sources */,
 				AM000000000000000000001 /* PrayerActivityManager.swift in Sources */,
-				AM000000000000000000002 /* PrayerActivityAttributes.swift in Sources */,
+				AM00000000000000000000A /* PrayerActivityAttributes.swift in Sources */,
 				HC000000000000000000002 /* PrayerHeroCard.swift in Sources */,
 				HC000000000000000000004 /* PrayerRowMobileView.swift in Sources */,
 				iOS0000000000000000000002 /* iOSRootView.swift in Sources */,
@@ -1536,7 +1538,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "";
 				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = YES;
@@ -1573,7 +1575,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "";
 				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = YES;
@@ -1640,7 +1642,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = IqamahLiveActivity/IqamahLiveActivity.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_TEAM = 96Y29SP9JR;
 				INFOPLIST_FILE = IqamahLiveActivity/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -1658,7 +1660,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = IqamahLiveActivity/IqamahLiveActivity.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_TEAM = 96Y29SP9JR;
 				INFOPLIST_FILE = IqamahLiveActivity/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -1676,7 +1678,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = IqamahWidget/IqamahWidgetMac.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = IqamahWidget/InfoMac.plist;
@@ -1702,7 +1704,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = IqamahWidget/IqamahWidgetMac.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = IqamahWidget/InfoMac.plist;
@@ -1767,7 +1769,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = IqamahWidget/IqamahWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = IqamahWidget/Info.plist;
@@ -1794,7 +1796,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = IqamahWidget/IqamahWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = IqamahWidget/Info.plist;
@@ -1884,7 +1886,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "iqamah/iOS/iqamah-iOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "";
 				ENABLE_PREVIEWS = YES;
@@ -1914,7 +1916,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "iqamah/iOS/iqamah-iOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "";
 				ENABLE_PREVIEWS = YES;

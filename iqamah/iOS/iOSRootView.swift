@@ -6,6 +6,7 @@ struct IOSRootView: View {
     /// Drives switching to the Times tab when a prayer notification is tapped.
     @State private var selectedTab: Int = 0
     @State private var showHilalWatch = false
+    @State private var showLegacyReDetectPrompt = false
 
     var body: some View {
         if settings.hasCompletedSetup {
@@ -19,6 +20,30 @@ struct IOSRootView: View {
                 }
                 .onReceive(NotificationCenter.default.publisher(for: .openHilalWatch)) { _ in
                     showHilalWatch = true
+                }
+                .onAppear {
+                    if settings.isLegacyV15User, !settings.didShowGPSReDetectPromptV16 {
+                        showLegacyReDetectPrompt = true
+                    }
+                }
+                .alert("Location accuracy improved", isPresented: $showLegacyReDetectPrompt) {
+                    Button("Re-detect") {
+                        settings.didShowGPSReDetectPromptV16 = true
+                        selectedTab = 2 // jump to Settings tab — re-detect button lives there
+                        // SettingsSheetView observes this and pulses the Detect button.
+                        // Slight delay so the tab switch settles before the highlight fires.
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            NotificationCenter.default.post(name: .openSettingsForReDetect, object: nil)
+                        }
+                    }
+                    Button("Keep current", role: .cancel) {
+                        settings.didShowGPSReDetectPromptV16 = true
+                        settings.locationSource = "manual"
+                    }
+                } message: {
+                    Text(
+                        "Iqamah v1.6 uses your exact GPS position and authoritative timezone for prayer-time calculations. Re-detect your location now to apply the improvement?"
+                    )
                 }
         } else {
             OnboardingFlow()

@@ -16,6 +16,25 @@ xcodebuild -project iqamah.xcodeproj -scheme iqamah -configuration Debug build
 
 There are no external dependencies, package managers, or test targets.
 
+## Project Structure Conventions
+
+Filenames recur across platform targets (e.g. `LocationSetupView.swift` lives
+in `iqamah/Views/` for macOS+iOS and `WatchLocationSetupView.swift` in
+`IqamahWatch/` — historically the watch file shared the base name, leading to
+grep ambiguity). When you need to know which file a given target compiles,
+search `iqamah.xcodeproj/project.pbxproj` for the file reference and trace its
+target membership rather than relying on `grep` over the working tree. Xcode
+resolves `sourceTree = "<group>"` paths relative to the parent group's on-disk
+location, not the repo root.
+
+`PrayerActivityAttributes.swift` previously existed as two drifted copies in
+`IqamahLiveActivity/` and `iqamah/iOS/`; it has been consolidated into a single
+file at `IqamahLiveActivity/PrayerActivityAttributes.swift` with multi-target
+membership in pbxproj (build file refs `LA000000000000000000010` for the
+extension and `AM00000000000000000000A` for the iqamah-iOS app target, both
+pointing at file ref `LA000000000000000000010R`). When extending the type,
+edit that single file — never re-introduce a duplicate.
+
 ## Architecture
 
 ### App Lifecycle

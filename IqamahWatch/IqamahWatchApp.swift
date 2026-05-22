@@ -27,7 +27,7 @@ struct IqamahWatchApp: App {
                     MainWatchView()
                         .environmentObject(settings)
                 } else {
-                    LocationSetupView(setup: locationSetup)
+                    WatchLocationSetupView(setup: locationSetup)
                 }
             }
             .onAppear {
@@ -123,6 +123,31 @@ final class WatchLocationSetup: NSObject, ObservableObject, CLLocationManagerDel
             settings.locationSource = "gps"
             settings.gpsTimezone = TimeZone.current.identifier
             isReady = true
+            refineWithCLGeocoder(coordinate: loc.coordinate, settings: settings)
+        }
+    }
+
+    @MainActor
+    private func refineWithCLGeocoder(coordinate: CLLocationCoordinate2D, settings: SettingsManager) {
+        // 5 km / non-empty locality cache short-circuit — mirrors macOS LocationSetupView:230-235.
+        if let cached = settings.cachedGPSCoordinate() {
+            let cachedLoc = CLLocation(latitude: cached.latitude, longitude: cached.longitude)
+            let newLoc = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+            if cachedLoc.distance(from: newLoc) < 5000, !settings.gpsLocality.isEmpty { return }
+        }
+
+        CLGeocoder().reverseGeocodeLocation(
+            CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+        ) { placemarks, error in
+            guard error == nil, let placemark = placemarks?.first else {
+                print("[ENH-001] Watch CLGeocoder failed: \(error?.localizedDescription ?? "unknown")")
+                return
+            }
+            let locality = placemark.locality ?? placemark.name ?? ""
+            let timezone = placemark.timeZone?.identifier ?? TimeZone.current.identifier
+            Task { @MainActor in
+                settings.applyGeocodingRefinement(locality: locality, timezoneIdentifier: timezone)
+            }
         }
     }
 

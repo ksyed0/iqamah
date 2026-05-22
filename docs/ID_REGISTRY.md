@@ -8,13 +8,13 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 | **Sequence** | **Next Available ID** | **Last Assigned** |
 |--------------|-----------------------|-------------------|
-| EPIC         | EPIC-0016             | EPIC-0015         |
-| US           | US-0070               | US-0069           |
+| EPIC         | EPIC-0017             | EPIC-0016         |
+| US           | US-0071               | US-0070           |
 | TASK         | TASK-0001             | None              |
-| AC           | AC-0349               | AC-0348           |
-| TC           | TC-0036               | TC-0035           |
-| BUG          | BUG-0068              | BUG-0067          |
-| ENH          | ENH-022               | ENH-021           |
+| AC           | AC-0357               | AC-0356           |
+| TC           | TC-0044               | TC-0043           |
+| BUG          | BUG-0069              | BUG-0068          |
+| ENH          | ENH-025               | ENH-024           |
 
 ---
 
@@ -28,4 +28,4 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 ---
 
-**Last Updated:** 2026-05-20 (BUG-0060–BUG-0067 resolved. v1.5.0 (12) submitted to App Store — iOS first submission + macOS update.)
+**Last Updated:** 2026-05-21 (ENH-001 finish-up — EPIC-0016 + US-0070 promoted; AC-0349 through AC-0356 and TC-0036 through TC-0043 consumed; PrayerActivityAttributes consolidated; watch Option B parity, v1.6 re-detect prompt, dead Views/ cleanup, watch view rename, and CLAUDE.md repo-structure note shipped.)

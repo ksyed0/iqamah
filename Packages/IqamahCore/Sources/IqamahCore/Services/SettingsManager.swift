@@ -9,6 +9,9 @@ public extension Notification.Name {
     /// Posted when the app returns to foreground so prayer-time views recalculate.
     static let refreshPrayerTimes = Notification.Name("refreshPrayerTimes")
     static let openAbout = Notification.Name("openAbout")
+    /// Posted when the v1.6 re-detect prompt's "Re-detect" button is tapped.
+    /// PrayerTimesView (macOS) / iOSRootView (iOS) opens the Settings sheet in response.
+    static let openSettingsForReDetect = Notification.Name("openSettingsForReDetect")
 }
 
 public enum AppAppearance: String, CaseIterable {
@@ -74,6 +77,7 @@ public class SettingsManager: ObservableObject {
         static let selectedCriterion = "selectedCriterion"
         static let hilalNotificationEnabled = "hilalNotificationEnabled"
         static let liveActivityEnabled = "liveActivityEnabled"
+        static let didShowGPSReDetectPromptV16 = "didShowGPSReDetectPromptV16"
     }
 
     // MARK: - Keys synced via iCloud KVS
@@ -282,6 +286,22 @@ public class SettingsManager: ObservableObject {
         }
     }
 
+    /// True once the v1.6 GPS re-detect prompt has been shown (or dismissed).
+    /// Stored in UserDefaults only — NOT KVS-synced; the prompt should fire once per device.
+    @Published public var didShowGPSReDetectPromptV16: Bool {
+        didSet {
+            defaults.set(didShowGPSReDetectPromptV16, forKey: Keys.didShowGPSReDetectPromptV16)
+        }
+    }
+
+    /// True when the install has `hasCompletedSetup` but never wrote a `locationSource` key —
+    /// i.e. the user finished onboarding before the ENH-001 schema landed (v1.5.0 or earlier).
+    /// Reads UserDefaults directly because `locationSource` defaults the in-memory value to
+    /// `"manual"` on init, masking the legacy state.
+    public var isLegacyV15User: Bool {
+        hasCompletedSetup && defaults.object(forKey: Keys.locationSource) == nil
+    }
+
     public static let uiScaleMin: Double = 0.7
     public static let uiScaleMax: Double = 1.5
     public static let uiScaleStep: Double = 0.1
@@ -319,6 +339,7 @@ public class SettingsManager: ObservableObject {
         locationSource = userDefaults.string(forKey: Keys.locationSource) ?? "manual"
         gpsLocality = userDefaults.string(forKey: Keys.gpsLocality) ?? ""
         gpsTimezone = userDefaults.string(forKey: Keys.gpsTimezone) ?? TimeZone.current.identifier
+        didShowGPSReDetectPromptV16 = userDefaults.bool(forKey: Keys.didShowGPSReDetectPromptV16)
         if let data = userDefaults.data(forKey: Keys.gpsDetectedCity),
            let city = try? JSONDecoder().decode(City.self, from: data) {
             gpsDetectedCity = city
@@ -546,6 +567,16 @@ public class SettingsManager: ObservableObject {
         let lat = defaults.double(forKey: Keys.gpsLatitude)
         let lon = defaults.double(forKey: Keys.gpsLongitude)
         return CLLocationCoordinate2D(latitude: lat, longitude: lon)
+    }
+
+    /// Apply CLGeocoder-derived locality and timezone to the GPS settings.
+    /// Empty locality is ignored (preserves whatever was set by the fast path).
+    /// Empty timezone falls back to `TimeZone.current.identifier`.
+    public func applyGeocodingRefinement(locality: String, timezoneIdentifier: String) {
+        if !locality.isEmpty {
+            gpsLocality = locality
+        }
+        gpsTimezone = timezoneIdentifier.isEmpty ? TimeZone.current.identifier : timezoneIdentifier
     }
 
     public func completeSetup(city: City, calculationMethod: CalculationMethod, asrMethod: AsrJuristicMethod) {
