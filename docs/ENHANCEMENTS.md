@@ -256,6 +256,117 @@ Add a play/preview button next to each adhan option in the settings sheet so use
 
 ---
 
+### ENH-023 — Adhaan Surround Mode (Spatial Multi-Muezzin)
+**Source:** User suggestion (2026-05-21)
+**Priority:** Medium — distinctive feature; emotionally meaningful for users from Muslim-majority countries
+
+**Problem:** Iqamah plays a single adhaan at prayer time. Users who grew up in Muslim-majority countries — Egypt, Saudi Arabia, Pakistan, Indonesia, Malaysia, Turkey, the Levant — describe the experience of hearing multiple mosques start the adhaan within a 5–15 second window, each from a different direction, as one of the most emotionally evocative aspects of daily prayer life. The single-source adhaan in apps misses this sensory dimension entirely.
+
+**Solution:** "Surround Mode" that:
+1. Lets the user select 2–5 different adhaan recordings simultaneously (existing 5 regular + 3 Fajr library plus any added via ENH-010)
+2. Plays them with staggered start times — small natural jitter (e.g. 0s / +3s / +8s / +12s) to mimic real-world multi-mosque overlap
+3. Positions each in 3D space using `AVAudioEnvironmentNode` — different azimuth/distance per source so the listener perceives mosques in different directions and at different perceived distances
+4. Master volume + per-source mix balance so overlapping playback doesn't clip
+
+**Platforms:**
+- iOS / iPadOS — full support; spatial audio works via head-tracking with AirPods Pro/Max
+- macOS — full support; positional audio through any output device
+- visionOS — best fit; spatial audio is native and the experience would be remarkable
+- watchOS — likely unavailable; watchOS audio APIs don't expose `AVAudioEnvironmentNode`
+- tvOS — would work but unusual use case (living-room ambient)
+
+**Technical sketch:**
+```swift
+let engine = AVAudioEngine()
+let environment = AVAudioEnvironmentNode()
+engine.attach(environment)
+engine.connect(environment, to: engine.mainMixerNode, format: nil)
+
+// For each adhaan source:
+let player = AVAudioPlayerNode()
+engine.attach(player)
+engine.connect(player, to: environment, format: file.processingFormat)
+player.position = AVAudio3DPoint(x: 10, y: 0, z: 5)  // azimuth + distance
+player.scheduleFile(file, at: AVAudioTime(sampleTime: offset, atRate: rate))
+```
+
+**Settings UI:**
+- New section: "Surround Mode" with master toggle (off by default — opt-in)
+- Per-prayer enable (Fajr / Dhuhr / Asr / Maghrib / Isha — Sunrise excluded)
+- Multi-select picker for 2–5 source adhaans
+- Spread slider: tight (3–5 s window) → wide (10–15 s window)
+- Spatial layout preset: Cairo (5 mosques typical), Istanbul (3), Lahore (4), or "Custom" with manual 3D positions
+- Master volume
+
+**Acceptance criteria (when promoted to an Epic):**
+- [ ] User can select 2–5 adhaans for simultaneous playback
+- [ ] Each source has a configurable start offset (0–15 s)
+- [ ] `AVAudioEnvironmentNode` positions each source in 3D space
+- [ ] Mix is balanced — no clipping at default master volume
+- [ ] Preset layouts ship with sensible defaults
+- [ ] Feature gracefully degrades on devices without spatial audio support (falls back to stereo)
+- [ ] watchOS and tvOS gracefully ignore the setting (Surround Mode unavailable badge in settings)
+
+**Cross-references:**
+- ENH-010 (Additional Adhaan Voices) — synergistic; more voices = more variety
+- ENH-021 (Vision Pro Path 2) — spatial Qibla mentioned; Surround Mode is a natural pair
+
+**Effort:** Medium (1–2 weeks). Audio engine code is the main lift; `AVAudioEnvironmentNode` has a learning curve but standard Apple sample code covers it.
+
+**Open questions:**
+- Headphones-required or speaker-OK? Likely speaker for the at-home use case (most users won't be wearing AirPods at prayer time)
+- Per-prayer config or single global setting?
+- Should licensed recordings from iconic mosques (Masjid al-Haram, Al-Aqsa, Prophet's Mosque in Madinah) ship as optional preset packs?
+
+---
+
+### ENH-024 — Verify Adhaan Bypasses iPhone Silent Switch
+**Source:** User request (2026-05-21)
+**Priority:** Medium — religiously significant if currently broken; user-confirmation needed first
+
+**Problem:** Unclear whether the current adhaan playback bypasses the iPhone's silent switch (physical ring/silent toggle). For an adhaan app, most users expect prayer-time alerts to play regardless of silent mode, since prayer-time alerts are not "interruptions" to silence in the religious sense. If the current behavior silences the adhaan when the switch is engaged, users miss prayers.
+
+**iOS audio session behavior reference:**
+- `AVAudioSession.Category.ambient` / default — silenced by the silent switch
+- `AVAudioSession.Category.playback` — plays regardless of the silent switch (intended for media playback)
+- Notification sounds via `UNNotificationSound` — always respect the silent switch
+- Critical Alerts entitlement — bypasses everything including DND; requires Apple approval
+
+**Investigation needed:**
+1. Audit `AdhaanPlayer.swift` (or equivalent iOS audio playback code) — which `AVAudioSession.Category` is configured?
+2. Audit `iqamah/iOS/NotificationScheduler.swift` — are notifications using `UNNotificationSound` (silenced) or trigger app-side audio session activation (works around switch)?
+3. On a real device with silent switch ON, verify at a prayer time:
+   - Adhaan plays at audible volume (expected behavior for an adhaan app)
+   - Locked-screen behavior matches unlocked behavior
+   - Lock-screen + silent-switch + DND combination handled correctly (`.timeSensitive` interruption level from BUG-0066 is one layer; silent switch is another)
+
+**Likely remediation if broken:**
+```swift
+try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.duckOthers])
+try? AVAudioSession.sharedInstance().setActive(true)
+```
+This is the conventional pattern for audio apps that want to bypass the silent switch. Set in `AdhaanPlayer` before each playback.
+
+**Acceptance criteria (when promoted to an Epic):**
+- [ ] `AdhaanPlayer`'s `AVAudioSession` category is `.playback` on iOS
+- [ ] On a real iPhone with silent switch ON, the adhaan plays at prayer time at audible volume
+- [ ] Background playback works when device is locked (verify `Background Modes: Audio` entitlement is enabled)
+- [ ] Settings exposes a "Play through silent mode" toggle (default ON) for users who want to opt out
+- [ ] Behavior documented in the App Store description so users understand and expect it
+- [ ] watchOS-paired behavior verified — does the adhaan haptic still fire when iPhone is on silent?
+
+**Cross-references:**
+- BUG-0066 (resolved) — added `.timeSensitive` interruption level for Focus / DND bypass. Silent-switch bypass is a separate (lower-level) audio-session concern.
+
+**Effort:** Small — investigation + likely 5-line fix + manual test on a real device. Smaller if the audio session is already correctly configured.
+
+**Open questions:**
+- Per-prayer toggle for silent-mode bypass, or global? (Likely global — per-prayer overcomplicates)
+- macOS has no silent switch — N/A there
+- watchOS adhaan playback uses haptics only; the iPhone's silent switch shouldn't affect the watch's haptic at all, but worth confirming during the audit
+
+---
+
 ## Content & Information
 
 ### ENH-012 — Hadith of the Day
