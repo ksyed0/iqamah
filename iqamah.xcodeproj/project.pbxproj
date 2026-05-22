@@ -1734,8 +1734,10 @@
 				ASYNCTESTTIMEOUT = 60;
 				CODE_SIGN_ENTITLEMENTS = IqamahWatch/IqamahWatch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_TEAM = 96Y29SP9JR;
 				INFOPLIST_FILE = IqamahWatch/Info.plist;
+				MARKETING_VERSION = 1.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.fablesoft.iqamah.watch;
 				PRODUCT_NAME = IqamahWatch;
 				SDKROOT = watchos;
@@ -1753,8 +1755,10 @@
 				ASSETCATALOG_COMPILER_SKIP_APP_STORE_DEPLOYMENT = YES;
 				CODE_SIGN_ENTITLEMENTS = IqamahWatch/IqamahWatch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_TEAM = 96Y29SP9JR;
 				INFOPLIST_FILE = IqamahWatch/Info.plist;
+				MARKETING_VERSION = 1.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.fablesoft.iqamah.watch;
 				PRODUCT_NAME = IqamahWatch;
 				SDKROOT = watchos;
