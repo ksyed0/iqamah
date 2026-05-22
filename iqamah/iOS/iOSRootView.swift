@@ -30,7 +30,6 @@ struct IOSRootView: View {
                     Button("Re-detect") {
                         settings.didShowGPSReDetectPromptV16 = true
                         selectedTab = 2  // jump to Settings tab — re-detect button lives there
-                        NotificationCenter.default.post(name: .openSettingsForReDetect, object: nil)
                     }
                     Button("Keep current", role: .cancel) {
                         settings.didShowGPSReDetectPromptV16 = true
