@@ -118,4 +118,19 @@ final class ENH001GPSTests: XCTestCase {
         XCTAssertTrue(mgr2.didShowGPSReDetectPromptV16)
         suite.removePersistentDomain(forName: suiteName)
     }
+
+    // MARK: - applyGeocodingRefinement
+
+    func testApplyGeocodingRefinementWritesLocalityAndTimezone() throws {
+        settings.applyGeocodingRefinement(locality: "Brampton", timezoneIdentifier: "America/Toronto")
+        XCTAssertEqual(settings.gpsLocality, "Brampton")
+        XCTAssertEqual(settings.gpsTimezone, "America/Toronto")
+    }
+
+    func testApplyGeocodingRefinementIgnoresEmptyLocality() throws {
+        settings.gpsLocality = "Brampton"
+        settings.applyGeocodingRefinement(locality: "", timezoneIdentifier: "America/New_York")
+        XCTAssertEqual(settings.gpsLocality, "Brampton")
+        XCTAssertEqual(settings.gpsTimezone, "America/New_York")
+    }
 }
