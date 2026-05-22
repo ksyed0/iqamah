@@ -74,6 +74,7 @@ public class SettingsManager: ObservableObject {
         static let selectedCriterion = "selectedCriterion"
         static let hilalNotificationEnabled = "hilalNotificationEnabled"
         static let liveActivityEnabled = "liveActivityEnabled"
+        static let didShowGPSReDetectPromptV16 = "didShowGPSReDetectPromptV16"
     }
 
     // MARK: - Keys synced via iCloud KVS
@@ -282,6 +283,22 @@ public class SettingsManager: ObservableObject {
         }
     }
 
+    /// True once the v1.6 GPS re-detect prompt has been shown (or dismissed).
+    /// Stored in UserDefaults only — NOT KVS-synced; the prompt should fire once per device.
+    @Published public var didShowGPSReDetectPromptV16: Bool {
+        didSet {
+            defaults.set(didShowGPSReDetectPromptV16, forKey: Keys.didShowGPSReDetectPromptV16)
+        }
+    }
+
+    /// True when the install has `hasCompletedSetup` but never wrote a `locationSource` key —
+    /// i.e. the user finished onboarding before the ENH-001 schema landed (v1.5.0 or earlier).
+    /// Reads UserDefaults directly because `locationSource` defaults the in-memory value to
+    /// `"manual"` on init, masking the legacy state.
+    public var isLegacyV15User: Bool {
+        hasCompletedSetup && defaults.object(forKey: Keys.locationSource) == nil
+    }
+
     public static let uiScaleMin: Double = 0.7
     public static let uiScaleMax: Double = 1.5
     public static let uiScaleStep: Double = 0.1
@@ -319,6 +336,7 @@ public class SettingsManager: ObservableObject {
         locationSource = userDefaults.string(forKey: Keys.locationSource) ?? "manual"
         gpsLocality = userDefaults.string(forKey: Keys.gpsLocality) ?? ""
         gpsTimezone = userDefaults.string(forKey: Keys.gpsTimezone) ?? TimeZone.current.identifier
+        didShowGPSReDetectPromptV16 = userDefaults.bool(forKey: Keys.didShowGPSReDetectPromptV16)
         if let data = userDefaults.data(forKey: Keys.gpsDetectedCity),
            let city = try? JSONDecoder().decode(City.self, from: data) {
             gpsDetectedCity = city
