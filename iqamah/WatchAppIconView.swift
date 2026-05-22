@@ -3,7 +3,8 @@ import SwiftUI
 import AppKit
 #endif
 
-// MARK: - BUG-0068 fix
+#if DEBUG
+// MARK: - BUG-0068 fix (developer-only — wrapped in #if DEBUG)
 
 /// Watch-specific app icon designs aimed at fixing BUG-0068 (App Store rejection
 /// citing Guideline 4 — Design: existing watch icon background blends into the
@@ -212,4 +213,5 @@ private extension NSImage {
         rep.representation(using: .png, properties: [:])
     }
 }
-#endif
+#endif // canImport(AppKit)
+#endif // DEBUG

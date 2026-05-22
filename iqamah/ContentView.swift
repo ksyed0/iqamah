@@ -135,6 +135,14 @@ struct ContentView: View {
     }
 }
 
+#if DEBUG
+// MARK: - Developer-only icon export tooling (not in Release builds)
+//
+// `AppIconView`, `MinaretShape`, the export extension, and `IconExporterView`
+// below are dev tools used to generate app-icon PNGs for the Asset Catalog.
+// They write to ~/Desktop and are not part of the shipping app.
+// See scripts/export-watch-icon.swift for the CLI equivalent.
+
 // swiftlint:disable force_unwrapping function_body_length
 // MARK: - App Icon View
 
@@ -509,3 +517,4 @@ struct IconExporterView: View {
     IconExporterView()
 }
 // swiftlint:enable force_unwrapping function_body_length
+#endif // DEBUG
