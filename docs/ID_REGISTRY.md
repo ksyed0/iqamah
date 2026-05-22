@@ -14,7 +14,7 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 | AC           | AC-0349               | AC-0348           |
 | TC           | TC-0036               | TC-0035           |
 | BUG          | BUG-0069              | BUG-0068          |
-| ENH          | ENH-022               | ENH-021           |
+| ENH          | ENH-025               | ENH-024           |
 
 ---
 
@@ -28,4 +28,4 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 ---
 
-**Last Updated:** 2026-05-21 (BUG-0068 logged — App Store rejection of v1.5 (13) submission citing Guideline 4 / Design: watchOS app icon black background does not render as a clear circle on Apple Watch home screen.)
+**Last Updated:** 2026-05-21 (BUG-0068 logged — App Store rejection of v1.5 (13) for watchOS icon background; ENH-023 added — Adhaan Surround Mode spatial multi-muezzin; ENH-024 added — verify adhaan bypasses iPhone silent switch.)
