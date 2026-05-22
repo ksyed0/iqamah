@@ -78,6 +78,8 @@ public class SettingsManager: ObservableObject {
         static let hilalNotificationEnabled = "hilalNotificationEnabled"
         static let liveActivityEnabled = "liveActivityEnabled"
         static let didShowGPSReDetectPromptV16 = "didShowGPSReDetectPromptV16"
+        static let fastingModeSettings = "fastingModeSettings"
+        static let didShowFastingModePromo = "didShowFastingModePromo"
     }
 
     // MARK: - Keys synced via iCloud KVS
@@ -106,6 +108,7 @@ public class SettingsManager: ObservableObject {
         Keys.selectedCriterion,
         Keys.hilalNotificationEnabled,
         Keys.liveActivityEnabled,
+        Keys.fastingModeSettings,
     ]
 
     @Published public var hasCompletedSetup: Bool {
@@ -286,6 +289,24 @@ public class SettingsManager: ObservableObject {
         }
     }
 
+    /// Fasting Mode user-configurable settings. Persisted as JSON blob; KVS-synced.
+    @Published public var fastingModeSettings: FastingModeSettings {
+        didSet {
+            guard let data = try? JSONEncoder().encode(fastingModeSettings) else { return }
+            defaults.set(data, forKey: Keys.fastingModeSettings)
+            guard !isApplyingRemote else { return }
+            kvs.set(data, forKey: Keys.fastingModeSettings)
+        }
+    }
+
+    /// True once the first-Ramadan Fasting Mode promo banner has been shown.
+    /// NOT KVS-synced — per-device flag.
+    @Published public var didShowFastingModePromo: Bool {
+        didSet {
+            defaults.set(didShowFastingModePromo, forKey: Keys.didShowFastingModePromo)
+        }
+    }
+
     /// True once the v1.6 GPS re-detect prompt has been shown (or dismissed).
     /// Stored in UserDefaults only — NOT KVS-synced; the prompt should fire once per device.
     @Published public var didShowGPSReDetectPromptV16: Bool {
@@ -365,6 +386,14 @@ public class SettingsManager: ObservableObject {
         selectedCriterion = userDefaults.string(forKey: Keys.selectedCriterion) ?? "odeh"
         hilalNotificationEnabled = userDefaults.bool(forKey: Keys.hilalNotificationEnabled)
         liveActivityEnabled = userDefaults.bool(forKey: Keys.liveActivityEnabled)
+
+        if let data = userDefaults.data(forKey: Keys.fastingModeSettings),
+           let decoded = try? JSONDecoder().decode(FastingModeSettings.self, from: data) {
+            fastingModeSettings = decoded
+        } else {
+            fastingModeSettings = FastingModeSettings()
+        }
+        didShowFastingModePromo = userDefaults.bool(forKey: Keys.didShowFastingModePromo)
 
         // Start KVS sync: subscribe to remote changes and trigger an initial pull.
         NotificationCenter.default.addObserver(
@@ -491,6 +520,11 @@ public class SettingsManager: ObservableObject {
             hilalNotificationEnabled = kvs.bool(forKey: key)
         case Keys.liveActivityEnabled:
             liveActivityEnabled = kvs.bool(forKey: key)
+        case Keys.fastingModeSettings:
+            if let data = kvs.data(forKey: key),
+               let decoded = try? JSONDecoder().decode(FastingModeSettings.self, from: data) {
+                fastingModeSettings = decoded
+            }
         default:
             break
         }

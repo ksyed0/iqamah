@@ -124,6 +124,34 @@ public struct FastingModeSettings: Codable, Equatable {
         self.notificationsEnabled = notificationsEnabled
     }
 
+    // MARK: - Forward-compatible decoding
+    //
+    // Synthesized Codable throws `keyNotFound` for any absent field, which would
+    // break users upgrading from an earlier version whose persisted JSON predates
+    // a newly-added field. Decode each field with `decodeIfPresent` and fall back
+    // to the same defaults the memberwise `init(...)` uses.
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            enabled: try c.decodeIfPresent(Bool.self, forKey: .enabled) ?? false,
+            autoRamadan: try c.decodeIfPresent(Bool.self, forKey: .autoRamadan) ?? true,
+            weeklyDays: try c.decodeIfPresent(Set<Int>.self, forKey: .weeklyDays) ?? [],
+            ayyamAlBeed: try c.decodeIfPresent(Bool.self, forKey: .ayyamAlBeed) ?? false,
+            sixDaysShawwal: try c.decodeIfPresent(Bool.self, forKey: .sixDaysShawwal) ?? false,
+            dayOfArafah: try c.decodeIfPresent(Bool.self, forKey: .dayOfArafah) ?? false,
+            firstNineDhulHijjah: try c.decodeIfPresent(Bool.self, forKey: .firstNineDhulHijjah) ?? false,
+            muharramFast: try c.decodeIfPresent(Bool.self, forKey: .muharramFast) ?? false,
+            midShaban: try c.decodeIfPresent(Bool.self, forKey: .midShaban) ?? false,
+            mabath: try c.decodeIfPresent(Bool.self, forKey: .mabath) ?? false,
+            suhoorLeadMinutes: try c.decodeIfPresent(Int.self, forKey: .suhoorLeadMinutes) ?? 30,
+            iftarLeadMinutes: try c.decodeIfPresent(Int.self, forKey: .iftarLeadMinutes) ?? 15,
+            dayBeforeEnabled: try c.decodeIfPresent(Bool.self, forKey: .dayBeforeEnabled) ?? true,
+            dayBeforeHour: try c.decodeIfPresent(Int.self, forKey: .dayBeforeHour) ?? 20,
+            dayBeforeMinute: try c.decodeIfPresent(Int.self, forKey: .dayBeforeMinute) ?? 0,
+            notificationsEnabled: try c.decodeIfPresent(Bool.self, forKey: .notificationsEnabled) ?? true
+        )
+    }
+
     /// Friday in weeklyDays without Thursday or Saturday — discouraged in many traditions.
     public var hasFridayAloneWarning: Bool {
         weeklyDays.contains(6) && !weeklyDays.contains(5) && !weeklyDays.contains(7)
