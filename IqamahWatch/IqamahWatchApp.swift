@@ -145,8 +145,16 @@ final class WatchLocationSetup: NSObject, ObservableObject, CLLocationManagerDel
             }
             let locality = placemark.locality ?? placemark.name ?? ""
             let timezone = placemark.timeZone?.identifier ?? TimeZone.current.identifier
+            // Reach SettingsManager via `.shared` inside the @MainActor body rather
+            // than capturing the local `settings` parameter — the CLGeocoder
+            // completion handler runs on an arbitrary queue and the implicit
+            // @Sendable Task closure would otherwise capture a non-Sendable
+            // SettingsManager reference (Swift 6 concurrency warning).
             Task { @MainActor in
-                settings.applyGeocodingRefinement(locality: locality, timezoneIdentifier: timezone)
+                SettingsManager.shared.applyGeocodingRefinement(
+                    locality: locality,
+                    timezoneIdentifier: timezone
+                )
             }
         }
     }
