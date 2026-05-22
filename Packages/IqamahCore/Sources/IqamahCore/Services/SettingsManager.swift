@@ -566,6 +566,16 @@ public class SettingsManager: ObservableObject {
         return CLLocationCoordinate2D(latitude: lat, longitude: lon)
     }
 
+    /// Apply CLGeocoder-derived locality and timezone to the GPS settings.
+    /// Empty locality is ignored (preserves whatever was set by the fast path).
+    /// Empty timezone falls back to `TimeZone.current.identifier`.
+    public func applyGeocodingRefinement(locality: String, timezoneIdentifier: String) {
+        if !locality.isEmpty {
+            gpsLocality = locality
+        }
+        gpsTimezone = timezoneIdentifier.isEmpty ? TimeZone.current.identifier : timezoneIdentifier
+    }
+
     public func completeSetup(city: City, calculationMethod: CalculationMethod, asrMethod: AsrJuristicMethod) {
         saveCity(city)
         self.calculationMethod = calculationMethod
