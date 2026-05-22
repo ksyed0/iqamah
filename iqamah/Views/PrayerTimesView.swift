@@ -343,6 +343,9 @@ struct PrayerTimesView: View {
         .onReceive(NotificationCenter.default.publisher(for: .openSettings)) { _ in
             showSettings = true
         }
+        .onReceive(NotificationCenter.default.publisher(for: .openSettingsForReDetect)) { _ in
+            showSettings = true
+        }
         .onReceive(NotificationCenter.default.publisher(for: .openAbout)) { _ in
             showAbout = true
         }

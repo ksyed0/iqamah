@@ -11,6 +11,7 @@ enum AppScreen {
 struct ContentView: View {
     @StateObject private var settings = SettingsManager.shared
     @State private var currentScreen: AppScreen = .splash
+    @State private var showLegacyReDetectPrompt = false
     @State private var selectedCity: City?
     @State private var calculationMethod: CalculationMethod = .muslimWorldLeague
     @State private var asrMethod: AsrJuristicMethod = .standard
@@ -102,6 +103,23 @@ struct ContentView: View {
         //         transform so it never grows or shrinks with the UI.
         .padding(10)
         .background(IqamahBackground())
+        .onAppear {
+            if settings.isLegacyV15User && !settings.didShowGPSReDetectPromptV16 {
+                showLegacyReDetectPrompt = true
+            }
+        }
+        .alert("Location accuracy improved", isPresented: $showLegacyReDetectPrompt) {
+            Button("Re-detect") {
+                settings.didShowGPSReDetectPromptV16 = true
+                NotificationCenter.default.post(name: .openSettingsForReDetect, object: nil)
+            }
+            Button("Keep current", role: .cancel) {
+                settings.didShowGPSReDetectPromptV16 = true
+                settings.locationSource = "manual"
+            }
+        } message: {
+            Text("Iqamah v1.6 uses your exact GPS position and authoritative timezone for prayer-time calculations. Re-detect your location now to apply the improvement?")
+        }
         .preferredColorScheme(settings.appearance.colorScheme)
     }
 
