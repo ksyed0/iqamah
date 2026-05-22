@@ -27,7 +27,7 @@ struct IqamahWatchApp: App {
                     MainWatchView()
                         .environmentObject(settings)
                 } else {
-                    LocationSetupView(setup: locationSetup)
+                    WatchLocationSetupView(setup: locationSetup)
                 }
             }
             .onAppear {
