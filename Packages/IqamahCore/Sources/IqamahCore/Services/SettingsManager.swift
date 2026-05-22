@@ -9,6 +9,9 @@ public extension Notification.Name {
     /// Posted when the app returns to foreground so prayer-time views recalculate.
     static let refreshPrayerTimes = Notification.Name("refreshPrayerTimes")
     static let openAbout = Notification.Name("openAbout")
+    /// Posted when the v1.6 re-detect prompt's "Re-detect" button is tapped.
+    /// PrayerTimesView (macOS) / iOSRootView (iOS) opens the Settings sheet in response.
+    static let openSettingsForReDetect = Notification.Name("openSettingsForReDetect")
 }
 
 public enum AppAppearance: String, CaseIterable {
