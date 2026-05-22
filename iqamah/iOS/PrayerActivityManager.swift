@@ -29,7 +29,9 @@
                 if existing.count > 1 {
                     // End all but the first to remove duplicates
                     for stale in existing.dropFirst() {
-                        await stale.end(dismissalPolicy: .immediate)
+                        // iOS 16.2+ API. Pass nil content to preserve whatever
+                        // the stale activity was showing at the moment we end it.
+                        await stale.end(nil, dismissalPolicy: .immediate)
                     }
                 }
                 currentActivity = existing.first
