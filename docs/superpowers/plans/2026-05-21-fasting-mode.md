@@ -2341,7 +2341,7 @@ Text(FastingLabelFormatter.relabel(
 - [ ] **Step 2: Build watch scheme**
 
 ```bash
-xcodebuild -project iqamah.xcodeproj -scheme "IqamahWatch Watch App" -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build 2>&1 | tail -5
+xcodebuild -project iqamah.xcodeproj -scheme IqamahWatch -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build 2>&1 | tail -5
 ```
 
 Expected: `BUILD SUCCEEDED`.
@@ -2710,7 +2710,7 @@ Section("Fasting Mode") {
 - [ ] **Step 2: Build watch scheme**
 
 ```bash
-xcodebuild -project iqamah.xcodeproj -scheme "IqamahWatch Watch App" -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build 2>&1 | tail -5
+xcodebuild -project iqamah.xcodeproj -scheme IqamahWatch -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build 2>&1 | tail -5
 ```
 
 Expected: `BUILD SUCCEEDED`.
@@ -3152,7 +3152,7 @@ NotificationCenter.default.addObserver(forName: .settingsDidChange, object: nil,
 - [ ] **Step 3: Build watch scheme**
 
 ```bash
-xcodebuild -project iqamah.xcodeproj -scheme "IqamahWatch Watch App" -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build 2>&1 | tail -5
+xcodebuild -project iqamah.xcodeproj -scheme IqamahWatch -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build 2>&1 | tail -5
 ```
 
 Expected: `BUILD SUCCEEDED`.
@@ -3565,7 +3565,7 @@ Steps:
   1. `cd Packages/IqamahCore && swift test`
   2. `xcodebuild -project iqamah.xcodeproj -scheme iqamah build`
   3. `xcodebuild -project iqamah.xcodeproj -scheme iqamah-iOS -destination 'platform=iOS Simulator,name=iPhone 17' build`
-  4. `xcodebuild -project iqamah.xcodeproj -scheme "IqamahWatch Watch App" -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build`
+  4. `xcodebuild -project iqamah.xcodeproj -scheme IqamahWatch -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build`
   5. `xcodebuild -project iqamah.xcodeproj -scheme IqamahLiveActivity -destination 'platform=iOS Simulator,name=iPhone 17' build`
   6. `xcodebuild -project iqamah.xcodeproj -scheme IqamahWidget -destination 'platform=iOS Simulator,name=iPhone 17' build`
 Expected: All commands succeed with BUILD SUCCEEDED / Test Suite passed
@@ -3641,7 +3641,7 @@ Expected: all existing tests (185+) plus all new Fasting Mode tests (~40) pass.
 ```bash
 xcodebuild -project iqamah.xcodeproj -scheme iqamah -configuration Debug build 2>&1 | tail -3
 xcodebuild -project iqamah.xcodeproj -scheme iqamah-iOS -destination 'platform=iOS Simulator,name=iPhone 17' build 2>&1 | tail -3
-xcodebuild -project iqamah.xcodeproj -scheme "IqamahWatch Watch App" -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build 2>&1 | tail -3
+xcodebuild -project iqamah.xcodeproj -scheme IqamahWatch -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build 2>&1 | tail -3
 xcodebuild -project iqamah.xcodeproj -scheme IqamahLiveActivity -destination 'platform=iOS Simulator,name=iPhone 17' build 2>&1 | tail -3
 xcodebuild -project iqamah.xcodeproj -scheme IqamahWidget -destination 'platform=iOS Simulator,name=iPhone 17' build 2>&1 | tail -3
 ```
@@ -3691,7 +3691,7 @@ TCs: TC-0044 — TC-0073 (30 TCs)
 ## Test plan
 
 - [ ] `swift test` in `Packages/IqamahCore` — all tests pass (~225 total)
-- [ ] `xcodebuild` clean for all 5 schemes (iqamah, iqamah-iOS, IqamahWatch Watch App, IqamahLiveActivity, IqamahWidget)
+- [ ] `xcodebuild` clean for all 5 schemes (iqamah, iqamah-iOS, IqamahWatch, IqamahLiveActivity, IqamahWidget)
 - [ ] macOS smoke: menu bar relabel + popover banner + Settings tradition gating
 - [ ] iOS smoke: hero banner + row relabel + Live Activity backward compat
 - [ ] watch smoke: row relabel + minimal Settings entry
