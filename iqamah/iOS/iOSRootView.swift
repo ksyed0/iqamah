@@ -22,14 +22,14 @@ struct IOSRootView: View {
                     showHilalWatch = true
                 }
                 .onAppear {
-                    if settings.isLegacyV15User && !settings.didShowGPSReDetectPromptV16 {
+                    if settings.isLegacyV15User, !settings.didShowGPSReDetectPromptV16 {
                         showLegacyReDetectPrompt = true
                     }
                 }
                 .alert("Location accuracy improved", isPresented: $showLegacyReDetectPrompt) {
                     Button("Re-detect") {
                         settings.didShowGPSReDetectPromptV16 = true
-                        selectedTab = 2  // jump to Settings tab — re-detect button lives there
+                        selectedTab = 2 // jump to Settings tab — re-detect button lives there
                         // SettingsSheetView observes this and pulses the Detect button.
                         // Slight delay so the tab switch settles before the highlight fires.
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
@@ -41,7 +41,9 @@ struct IOSRootView: View {
                         settings.locationSource = "manual"
                     }
                 } message: {
-                    Text("Iqamah v1.6 uses your exact GPS position and authoritative timezone for prayer-time calculations. Re-detect your location now to apply the improvement?")
+                    Text(
+                        "Iqamah v1.6 uses your exact GPS position and authoritative timezone for prayer-time calculations. Re-detect your location now to apply the improvement?"
+                    )
                 }
         } else {
             OnboardingFlow()
