@@ -71,4 +71,51 @@ final class ENH001GPSTests: XCTestCase {
     func testGPSTimezoneDefaultsToCurrentDevice() {
         XCTAssertEqual(settings.gpsTimezone, TimeZone.current.identifier)
     }
+
+    // MARK: - isLegacyV15User
+
+    func testIsLegacyV15UserTrueWhenHasCompletedSetupButLocationSourceAbsent() {
+        let suiteName = "test.enh001.legacyV15"
+        let suite = UserDefaults(suiteName: suiteName)!
+        suite.removePersistentDomain(forName: suiteName)
+        suite.set(true, forKey: "hasCompletedSetup")
+        // locationSource key intentionally NOT set
+        let mgr = SettingsManager(userDefaults: suite)
+        XCTAssertTrue(mgr.isLegacyV15User)
+        suite.removePersistentDomain(forName: suiteName)
+    }
+
+    func testIsLegacyV15UserFalseOnFreshInstall() {
+        let suiteName = "test.enh001.fresh"
+        let suite = UserDefaults(suiteName: suiteName)!
+        suite.removePersistentDomain(forName: suiteName)
+        let mgr = SettingsManager(userDefaults: suite)
+        XCTAssertFalse(mgr.isLegacyV15User)
+        suite.removePersistentDomain(forName: suiteName)
+    }
+
+    func testIsLegacyV15UserFalseAfterLocationSourceSet() {
+        let suiteName = "test.enh001.migrated"
+        let suite = UserDefaults(suiteName: suiteName)!
+        suite.removePersistentDomain(forName: suiteName)
+        suite.set(true, forKey: "hasCompletedSetup")
+        suite.set("manual", forKey: "locationSource")
+        let mgr = SettingsManager(userDefaults: suite)
+        XCTAssertFalse(mgr.isLegacyV15User)
+        suite.removePersistentDomain(forName: suiteName)
+    }
+
+    // MARK: - didShowGPSReDetectPromptV16
+
+    func testDidShowGPSReDetectPromptV16Persists() {
+        let suiteName = "test.enh001.prompt"
+        let suite = UserDefaults(suiteName: suiteName)!
+        suite.removePersistentDomain(forName: suiteName)
+        let mgr = SettingsManager(userDefaults: suite)
+        XCTAssertFalse(mgr.didShowGPSReDetectPromptV16)
+        mgr.didShowGPSReDetectPromptV16 = true
+        let mgr2 = SettingsManager(userDefaults: suite)
+        XCTAssertTrue(mgr2.didShowGPSReDetectPromptV16)
+        suite.removePersistentDomain(forName: suiteName)
+    }
 }
