@@ -59,7 +59,7 @@
 		MW00000000000000000050 /* IqamahWidgetMac.appex in Embed Mac Widget Extension */ = {isa = PBXBuildFile; fileRef = MW00000000000000000002 /* IqamahWidgetMac.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		PI000000000000000000BB01 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = PI000000000000000000AA01 /* PrivacyInfo.xcprivacy */; };
 		SH00000000000000000001A /* HilalShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = SH00000000000000000000A /* HilalShareSheet.swift */; };
-		WA000000000000000000011 /* LocationSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000011R /* LocationSetupView.swift */; };
+		WA000000000000000000011 /* WatchLocationSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000011R /* WatchLocationSetupView.swift */; };
 		WA000000000000000000012 /* PrayerTimesTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000012R /* PrayerTimesTab.swift */; };
 		WA000000000000000000013 /* QiblaTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000013R /* QiblaTab.swift */; };
 		WA000000000000000000014 /* SettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000014R /* SettingsTab.swift */; };
@@ -315,7 +315,7 @@
 		TT000000000000000000AA03 /* tone_tink.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; path = tone_tink.aiff; sourceTree = "<group>"; };
 		TT000000000000000000AA04 /* tone_hero.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; path = tone_hero.aiff; sourceTree = "<group>"; };
 		TT000000000000000000AA05 /* tone_breeze.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; path = tone_breeze.aiff; sourceTree = "<group>"; };
-		WA000000000000000000011R /* LocationSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationSetupView.swift; sourceTree = "<group>"; };
+		WA000000000000000000011R /* WatchLocationSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchLocationSetupView.swift; sourceTree = "<group>"; };
 		WA000000000000000000012R /* PrayerTimesTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerTimesTab.swift; sourceTree = "<group>"; };
 		WA000000000000000000013R /* QiblaTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QiblaTab.swift; sourceTree = "<group>"; };
 		WA000000000000000000014R /* SettingsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsTab.swift; sourceTree = "<group>"; };
@@ -643,7 +643,7 @@
 			children = (
 				WA000000000000000000061 /* Assets.xcassets */,
 				WA000000000000000000050R /* IqamahWatchApp.swift */,
-				WA000000000000000000011R /* LocationSetupView.swift */,
+				WA000000000000000000011R /* WatchLocationSetupView.swift */,
 				WA000000000000000000012R /* PrayerTimesTab.swift */,
 				WA000000000000000000013R /* QiblaTab.swift */,
 				WA000000000000000000014R /* SettingsTab.swift */,
@@ -1186,7 +1186,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				WA000000000000000000050 /* IqamahWatchApp.swift in Sources */,
-				WA000000000000000000011 /* LocationSetupView.swift in Sources */,
+				WA000000000000000000011 /* WatchLocationSetupView.swift in Sources */,
 				WA000000000000000000012 /* PrayerTimesTab.swift in Sources */,
 				WA000000000000000000013 /* QiblaTab.swift in Sources */,
 				WA000000000000000000014 /* SettingsTab.swift in Sources */,

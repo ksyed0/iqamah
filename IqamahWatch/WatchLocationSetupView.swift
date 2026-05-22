@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct LocationSetupView: View {
+struct WatchLocationSetupView: View {
     @ObservedObject var setup: WatchLocationSetup
 
     var body: some View {
