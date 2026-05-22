@@ -41,8 +41,8 @@ Human-readable test cases (TC-XXXX) linked to user stories and acceptance criter
 
 ## Test Case Registry
 
-**Total Test Cases:** 35
-**Status:** 🟡 EPIC-0010 covered (TC-0001 through TC-0035); EPIC-0001 through EPIC-0009 still pending TC backfill
+**Total Test Cases:** 43
+**Status:** 🟡 EPIC-0010 and EPIC-0016 covered (TC-0001 through TC-0043); EPIC-0001 through EPIC-0009 and EPIC-0011 through EPIC-0015 still pending TC backfill
 
 ---
 
@@ -374,21 +374,104 @@ Steps:
 Expected: At most one Live Activity active for the upcoming prayer at any time
 Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
 
+### EPIC-0016 — ENH-001 GPS Accuracy Finish-Up
+
+#### US-0070 — Finish ENH-001 across watchOS + Legacy Migration + Structural Cleanup
+
+**TC-0036 (AC-0349) — Watch CLGeocoder refines locality and timezone**
+Type: Functional · Preconditions: Apple Watch Series 11 simulator; Custom location set to Brampton (43.685, -79.759); fresh watch app install
+Steps:
+  1. Launch IqamahWatch app
+  2. Allow location permission
+  3. Wait ~3 seconds for CLGeocoder to resolve
+  4. Inspect `SettingsManager.shared.gpsLocality` and `.gpsTimezone`
+Expected: `gpsLocality` is "Brampton" (or nearest reverse-geocoded locality name); `gpsTimezone` is "America/Toronto"
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0037 (AC-0349) — Watch 5 km cache short-circuit suppresses redundant geocoding**
+Type: Edge Case · Preconditions: Watch app already has `gpsLocality` populated; new GPS fix within 5 km of cached coordinate
+Steps:
+  1. Trigger a new location fix (e.g. tap "Update via GPS" in Settings)
+  2. Inspect debug logs for `[ENH-001]` CLGeocoder invocations
+Expected: No new CLGeocoder request is made; existing `gpsLocality`/`gpsTimezone` values remain unchanged
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0038 (AC-0350) — Watch CLGeocoder failure retains Option-A values**
+Type: Negative · Preconditions: Watch simulator with airplane mode (no network)
+Steps:
+  1. Launch IqamahWatch app
+  2. Allow location permission
+  3. Wait 5 seconds
+  4. Inspect `gpsTimezone` and confirm no error UI displayed
+Expected: `gpsTimezone` equals `TimeZone.current.identifier` (Option A fallback); no alert/banner shown to user; failure logged with `[ENH-001]` tag
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0039 (AC-0351, AC-0352) — Legacy v1.5 user sees prompt once on macOS v1.6**
+Type: Functional · Preconditions: macOS app UserDefaults with `hasCompletedSetup=true` but `locationSource` key absent; `didShowGPSReDetectPromptV16=false`
+Steps:
+  1. Reset state via `defaults delete com.fablesoft.iqamah locationSource && defaults delete com.fablesoft.iqamah didShowGPSReDetectPromptV16 && defaults write com.fablesoft.iqamah hasCompletedSetup -bool YES`
+  2. Launch macOS app
+  3. Observe alert
+  4. Click "Keep current"
+  5. Close and relaunch app
+Expected: Alert appears exactly once on first launch; "Keep current" sets `locationSource="manual"` and `didShowGPSReDetectPromptV16=true`; second launch shows no alert
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0040 (AC-0351, AC-0352) — Legacy v1.5 user sees prompt once on iOS v1.6**
+Type: Functional · Preconditions: Same legacy state as TC-0039, on iOS simulator
+Steps:
+  1. Reset state via `xcrun simctl spawn booted defaults ...` (equivalent to macOS reset)
+  2. Launch iOS app
+  3. Tap "Re-detect"
+  4. Observe iOS Settings tab is opened (selectedTab=2)
+  5. Force-quit and relaunch
+Expected: Alert appears once; tapping "Re-detect" switches to Settings tab where re-detect controls live; second launch shows no alert
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0041 (AC-0354) — Dead Views/ deletion does not break any build**
+Type: Regression · Preconditions: ENH-001 finish-up branch checked out
+Steps:
+  1. `xcodebuild -project iqamah.xcodeproj -scheme iqamah build`
+  2. `xcodebuild -project iqamah.xcodeproj -scheme iqamah-iOS -destination 'platform=iOS Simulator,name=iPhone 17' build`
+  3. `xcodebuild -project iqamah.xcodeproj -scheme IqamahWatch -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build`
+  4. `ls Views/ 2>&1`
+Expected: All three schemes report BUILD SUCCEEDED; `ls Views/` returns "No such file or directory"
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0042 (AC-0355) — Watch view rename compiles and is reachable**
+Type: Functional · Preconditions: ENH-001 finish-up branch checked out
+Steps:
+  1. `grep -rn "WatchLocationSetupView" IqamahWatch/`
+  2. `grep -rn "struct LocationSetupView" IqamahWatch/` (should return nothing)
+  3. Build IqamahWatch scheme
+  4. Launch watch app and verify location setup screen still renders correctly
+Expected: WatchLocationSetupView is referenced in IqamahWatchApp.swift line 30; no legacy struct LocationSetupView remains in IqamahWatch/; build succeeds; screen renders identically to pre-rename behavior
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0043 (AC-0353, AC-0356) — Documentation updated**
+Type: Functional · Preconditions: Final commit of ENH-001 finish-up branch
+Steps:
+  1. `grep "✅ Implemented (2026-05-21)" docs/ENHANCEMENTS.md`
+  2. `grep "Project Structure Conventions" CLAUDE.md`
+  3. `grep "AC-0356" docs/ID_REGISTRY.md`
+Expected: All three greps return at least one match; ENHANCEMENTS.md ENH-001 section includes the surface-by-surface implementation table; CLAUDE.md section explains the duplicate-filename + PrayerActivityAttributes patterns
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
 ---
 
 ## Test Cases by Type
 
 ### Functional Tests
-TC-0001, 0006, 0007, 0008, 0009, 0010, 0011, 0012, 0013, 0014, 0015, 0017, 0019, 0020, 0021, 0022, 0023, 0025, 0026, 0027, 0028, 0029, 0030, 0031, 0032, 0033
+TC-0001, 0006, 0007, 0008, 0009, 0010, 0011, 0012, 0013, 0014, 0015, 0017, 0019, 0020, 0021, 0022, 0023, 0025, 0026, 0027, 0028, 0029, 0030, 0031, 0032, 0033, 0036, 0039, 0040, 0042, 0043
 
 ### Regression Tests
-TC-0002, 0003, 0005, 0018, 0024
+TC-0002, 0003, 0005, 0018, 0024, 0041
 
 ### Edge Case Tests
-TC-0035
+TC-0035, 0037
 
 ### Negative Tests
-TC-0016, 0034
+TC-0016, 0034, 0038
 
 ### Accessibility Tests
 *[To be created — recommend covering VoiceOver labels for new iOS surfaces in a follow-up]*
@@ -410,4 +493,4 @@ TC-0016, 0034
 
 ---
 
-**Last Updated:** 2026-05-09 (TC-0001 through TC-0035 added covering EPIC-0010 acceptance criteria; EPIC-0001 through EPIC-0009 still pending TC backfill)
+**Last Updated:** 2026-05-21 (TC-0036 through TC-0043 added covering EPIC-0016 / US-0070 acceptance criteria)

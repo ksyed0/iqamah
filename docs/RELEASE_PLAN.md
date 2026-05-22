@@ -1689,4 +1689,44 @@ rm adhaan_4_original_backup.mp3
 
 **Total:** 49 acceptance criteria (AC-0300 – AC-0348)  
 **Estimated effort:** 7–10 developer-days  
-**Last Updated:** 2026-05-17 (EPIC-0015 created — 6 user stories, 49 ACs, incremental test automation roadmap)
+## EPIC-0016 — ENH-001 GPS Accuracy Finish-Up
+
+**Status:** 🟡 Planned
+**Version Target:** v1.6
+**Cross-references:** ENH-001 in `docs/ENHANCEMENTS.md`; spec at `docs/superpowers/specs/2026-05-21-enh-001-finish-up-design.md`; plan at `docs/superpowers/plans/2026-05-21-enh-001-finish-up.md`
+
+**Goal:** Close out ENH-001 by adding watchOS CLGeocoder parity (Option B), a one-time v1.6 re-detect prompt for legacy users whose `locationSource` UserDefaults key was never written (i.e. setup completed pre-ENH-001), and two structural cleanups (dead repo-root `Views/` directory deletion + watch view rename for filename disambiguation).
+
+**Background:** ENH-001 A+B shipped during v1.5.0 across macOS first-launch, iOS first-launch, and macOS/iOS Settings re-detect. The watchOS path implemented Option A only, and legacy v1.5.0 users never had their stored timezone migrated to the authoritative value. This epic delivers parity and migration.
+
+---
+
+### US-0070 — Finish ENH-001 across watchOS + Legacy Migration + Structural Cleanup
+
+**Priority:** Medium
+**Effort:** S (½ day)
+**Description:** Extend the CLGeocoder refinement to watchOS, present a one-time re-detect alert to legacy users on first launch of v1.6, and clean up the dead `Views/` directory + watch view filename ambiguity. Also documents the new project-structure convention in `CLAUDE.md`.
+
+**Acceptance Criteria:**
+
+- AC-0349: watchOS `IqamahWatchApp.locationManager(_:didUpdateLocations:)` invokes `CLGeocoder().reverseGeocodeLocation(...)` after saving raw GPS coordinates; on success writes `placemark.locality` to `SettingsManager.gpsLocality` and `placemark.timeZone?.identifier` to `SettingsManager.gpsTimezone`. CLGeocoder is short-circuited when the cached coordinate is within 5 km of the new fix and `gpsLocality` is non-empty (mirrors macOS).
+- AC-0350: On CLGeocoder failure or no network, watchOS retains the Option-A values (raw coords + `TimeZone.current`). Failure is logged with the `[ENH-001]` tag. No UI degradation.
+- AC-0351: First launch of v1.6 on a device with `hasCompletedSetup && locationSource UserDefaults key absent` presents the re-detect `.alert()` exactly once on macOS and on iOS. Watch app does not present a prompt.
+- AC-0352: Either alert action sets `SettingsManager.didShowGPSReDetectPromptV16 = true`. "Keep current" also sets `locationSource = "manual"`. The alert never re-presents on subsequent launches.
+- AC-0353: `docs/ENHANCEMENTS.md` ENH-001 entry is updated to ✅ Implemented (2026-05-21) with PR references and a surface-by-surface table.
+- AC-0354: Repo-root `Views/` directory no longer exists; `LocationSetupView`, `CalculationMethodView`, and `SplashScreenView` exist only in their target-specific locations. Both `iqamah` and `iqamah-iOS` schemes build clean.
+- AC-0355: `IqamahWatch/WatchLocationSetupView.swift` exists; the struct is renamed to `WatchLocationSetupView`; the pbxproj path is updated; `IqamahWatchApp.swift` references the new type. `IqamahWatch` scheme builds clean.
+- AC-0356: `CLAUDE.md` contains a "Project Structure Conventions" section explaining that filenames recur across targets and pbxproj is authoritative for target membership; also documents the consolidated PrayerActivityAttributes single-source-of-truth pattern.
+
+---
+
+**EPIC-0016 Summary:**
+
+| Story | Surfaces | Effort | AC count |
+|---|---|---|---|
+| US-0070 — Finish ENH-001 | watchOS, macOS, iOS, repo hygiene | S | 8 |
+
+**Total:** 8 acceptance criteria (AC-0349 – AC-0356), mapped 1:1 to TC-0036 – TC-0043.
+**Estimated effort:** ½ developer-day.
+
+**Last Updated:** 2026-05-21 (EPIC-0016 created — 1 user story, 8 ACs, ENH-001 finish-up)
