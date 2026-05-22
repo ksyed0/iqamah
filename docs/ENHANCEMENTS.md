@@ -14,7 +14,16 @@ Logged from competitive analysis (May 2026) and product research. Items are grou
 
 ## Location Accuracy
 
-### ENH-001 — Exact GPS Prayer Times via CLGeocoder (Option A + B)
+### ENH-001 — Exact GPS Prayer Times via CLGeocoder (Option A + B) ✅ Implemented (2026-05-21)
+**Status:** ✅ Fully implemented across all platforms. A+B shipped during v1.5.0 (macOS/iOS first-launch and Settings re-detect); watchOS Option B parity, a one-time v1.6 re-detect prompt for legacy users, and structural cleanups landed in the v1.6 cycle (see docs/superpowers/specs/2026-05-21-enh-001-finish-up-design.md).
+
+| Surface | Option | Location |
+|---|---|---|
+| macOS first-launch | A+B | `iqamah/Views/LocationSetupView.swift` |
+| iOS first-launch | A+B | same (shared via `iOSRootView`) |
+| macOS/iOS Settings re-detect | A+B | `iqamah/Views/SettingsSheetView.swift` |
+| watchOS first-launch + Settings | A+B | `IqamahWatch/IqamahWatchApp.swift` |
+
 **Source:** Internal — Brampton vs. Toronto discrepancy (~2–3 min offset)
 
 **Problem:** The current flow maps GPS coordinates to the nearest city in `cities.json`, then uses that city's coordinates and timezone for calculation. The mismatch between actual location (e.g. Brampton: 43.685°N, 79.759°W) and the proxy city (Toronto: 43.653°N, 79.383°W) introduces a systematic error in transit time and every derived prayer time.
