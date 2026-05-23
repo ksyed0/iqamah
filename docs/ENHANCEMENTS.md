@@ -391,6 +391,28 @@ The audit showed Iqamah is doing everything correctly within Apple's default con
 
 ---
 
+### ENH-025 — Per-day Alert Scheduling
+**Source:** User request (2026-05-23)
+**Priority:** Medium — quality-of-life refinement on top of existing notification system
+
+**Problem:** Notifications are currently global — when prayer notifications are enabled, they fire for every selected prayer every day. Some users want different behaviour on different days (e.g., mute Fajr on weekends; silence everything on Friday during travel).
+
+**Proposed solution:** Add a settings UI that lets the user enable/disable each prayer's notification independently per day-of-week (7 × N-prayers matrix, or a simpler "per-day master toggle" if matrix is too dense).
+
+**Why backlog (not Epic yet):**
+- Requires schema decision: matrix vs per-day master vs per-prayer-per-day
+- Storage cost in `SettingsManager` (likely a new `[Int: Set<String>]` keyed by Calendar weekday)
+- Notification scheduler (per-platform) needs to consult the day-of-week before scheduling each fire
+- UI is non-trivial — Settings sheet on macOS/iOS will need a new section
+
+**Promotion criteria:** Promote to EPIC + US in `RELEASE_PLAN.md` when (a) at least one more user requests this OR (b) a v1.7 planning cycle scopes it.
+
+**References:**
+- `iqamah/iOS/PrayerNotificationScheduler.swift` (or equivalent — the per-platform scheduler that would need to consult day-of-week)
+- `Packages/IqamahCore/Sources/IqamahCore/Services/SettingsManager.swift` (storage)
+
+---
+
 ## Content & Information
 
 ### ENH-012 — Hadith of the Day
