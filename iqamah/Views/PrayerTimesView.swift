@@ -195,18 +195,26 @@ struct PrayerTimesView: View {
 
                 // ── Qiblah / Settings / About — in header on macOS ──
                 #if os(macOS)
-                    HStack(spacing: 2) {
+                    HStack(spacing: 16) {
                         Button(action: { showQiblah = true }) {
-                            Image(systemName: "location.north.line.fill")
-                                .font(.title3)
+                            VStack(spacing: 2) {
+                                Image(systemName: "location.north.line.fill")
+                                    .font(.title3)
+                                Text("Qiblah")
+                                    .font(.caption2)
+                            }
                         }
                         .buttonStyle(.plain)
                         .help("Qiblah direction")
                         .accessibilityLabel("Show Qiblah direction")
 
                         Button(action: { showSettings = true }) {
-                            Image(systemName: "gearshape")
-                                .font(.title3)
+                            VStack(spacing: 2) {
+                                Image(systemName: "gearshape")
+                                    .font(.title3)
+                                Text("Settings")
+                                    .font(.caption2)
+                            }
                         }
                         .buttonStyle(.plain)
                         .help("Settings")
@@ -214,8 +222,12 @@ struct PrayerTimesView: View {
                         .keyboardShortcut(",", modifiers: .command)
 
                         Button(action: { showAbout = true }) {
-                            Image(systemName: "info.circle")
-                                .font(.title3)
+                            VStack(spacing: 2) {
+                                Image(systemName: "info.circle")
+                                    .font(.title3)
+                                Text("About")
+                                    .font(.caption2)
+                            }
                         }
                         .buttonStyle(.plain)
                         .help("About Iqamah")
@@ -226,11 +238,17 @@ struct PrayerTimesView: View {
 
                 // Mute button
                 Button(action: { AdhaaanPlayer.shared.toggleMute() }) {
-                    Image(systemName: AdhaaanPlayer.shared.isMuted
-                        ? "speaker.slash.fill" : "speaker.wave.2.fill")
-                        .font(.title3)
-                        .foregroundColor(AdhaaanPlayer.shared.isMuted ? .secondary : .accentColor)
-                        .symbolRenderingMode(.hierarchical)
+                    VStack(spacing: 2) {
+                        Image(systemName: AdhaaanPlayer.shared.isMuted
+                            ? "speaker.slash.fill" : "speaker.wave.2.fill")
+                            .font(.title3)
+                            .foregroundColor(AdhaaanPlayer.shared.isMuted ? .secondary : .accentColor)
+                            .symbolRenderingMode(.hierarchical)
+                        #if os(macOS)
+                            Text(AdhaaanPlayer.shared.isMuted ? "Unmute" : "Mute")
+                                .font(.caption2)
+                        #endif
+                    }
                 }
                 .buttonStyle(.plain)
                 .help(AdhaaanPlayer.shared.isMuted ? "Unmute Adhaan" : "Mute Adhaan")
