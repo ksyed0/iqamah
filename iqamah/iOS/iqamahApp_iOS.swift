@@ -40,6 +40,10 @@ struct IqamahiOSApp: App {
                 .preferredColorScheme(settings.appearance.colorScheme)
                 .onAppear {
                     activateWCSession()
+                    NotificationScheduler.shared.requestFastingReschedule()
+                }
+                .onChange(of: settings.fastingModeSettings) { _, _ in
+                    NotificationScheduler.shared.requestFastingReschedule()
                 }
                 // Reschedule when settings that affect prayer times change
                 .onChange(of: settings.calculationMethod) { _, _ in reschedule(); reloadWidget(); pushSettingsToWatch() }
@@ -50,6 +54,7 @@ struct IqamahiOSApp: App {
                 .onChange(of: scenePhase) { _, phase in
                     if phase == .active {
                         reschedule()
+                        NotificationScheduler.shared.requestFastingReschedule()
                         reloadWidget()
                         // Tell PrayerTimesView to recalculate so "NEXT" label is current
                         NotificationCenter.default.post(name: .refreshPrayerTimes, object: nil)
