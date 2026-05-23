@@ -56,6 +56,8 @@
 		LA000000000000000000011 /* PrayerLiveActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = LA000000000000000000011R /* PrayerLiveActivityView.swift */; };
 		LA000000000000000000021 /* IqamahLiveActivity.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = LA000000000000000000005 /* IqamahLiveActivity.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		MB000000000000000000BB02 /* MenuBarPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = MB000000000000000000BB01 /* MenuBarPopoverView.swift */; };
+		FB000000000000000000001 /* FastingBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB000000000000000000001R /* FastingBanner.swift */; };
+		FB000000000000000000002 /* FastingBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB000000000000000000001R /* FastingBanner.swift */; };
 		MW00000000000000000050 /* IqamahWidgetMac.appex in Embed Mac Widget Extension */ = {isa = PBXBuildFile; fileRef = MW00000000000000000002 /* IqamahWidgetMac.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		PI000000000000000000BB01 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = PI000000000000000000AA01 /* PrivacyInfo.xcprivacy */; };
 		SH00000000000000000001A /* HilalShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = SH00000000000000000000A /* HilalShareSheet.swift */; };
@@ -305,6 +307,7 @@
 		LA000000000000000000010R /* PrayerActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerActivityAttributes.swift; sourceTree = "<group>"; };
 		LA000000000000000000011R /* PrayerLiveActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerLiveActivityView.swift; sourceTree = "<group>"; };
 		MB000000000000000000BB01 /* MenuBarPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarPopoverView.swift; sourceTree = "<group>"; };
+		FB000000000000000000001R /* FastingBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastingBanner.swift; sourceTree = "<group>"; };
 		MW00000000000000000002 /* IqamahWidgetMac.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = IqamahWidgetMac.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		MW00000000000000000003 /* InfoMac.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = InfoMac.plist; sourceTree = "<group>"; };
 		MW00000000000000000004 /* IqamahWidgetMac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = IqamahWidgetMac.entitlements; sourceTree = "<group>"; };
@@ -577,6 +580,7 @@
 				EE0000000000000000004003 /* IqamahBackground.swift */,
 				EE0000000000000000006002 /* PrayerTimesComponents.swift */,
 				HW000000000000000000020 /* HilalWatch */,
+				FB000000000000000000050 /* Shared */,
 				944B0D982F635A0500EC6A01 /* TestsAdditionalTests.swift */,
 				944B0D9A2F635AC100EC6A01 /* DocsFINAL_SESSION_SUMMARY.md */,
 			);
@@ -611,6 +615,14 @@
 				EE0000000000000000003003 /* Color+App.swift */,
 			);
 			path = Extensions;
+			sourceTree = "<group>";
+		};
+		FB000000000000000000050 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				FB000000000000000000001R /* FastingBanner.swift */,
+			);
+			path = Shared;
 			sourceTree = "<group>";
 		};
 		HW000000000000000000020 /* HilalWatch */ = {
@@ -1141,6 +1153,7 @@
 				BN000000000000000000BB01 /* AdhaanBannerView.swift in Sources */,
 				AB000000000000000000BB01 /* AboutView.swift in Sources */,
 				MB000000000000000000BB02 /* MenuBarPopoverView.swift in Sources */,
+				FB000000000000000000001 /* FastingBanner.swift in Sources */,
 				BN000000000000000000BB02 /* AdhaanBannerController.swift in Sources */,
 				AA0000000000000000000008 /* LocationSetupView.swift in Sources */,
 				AA0000000000000000000009 /* CalculationMethodView.swift in Sources */,
@@ -1237,6 +1250,7 @@
 				AM00000000000000000000A /* PrayerActivityAttributes.swift in Sources */,
 				HC000000000000000000002 /* PrayerHeroCard.swift in Sources */,
 				HC000000000000000000004 /* PrayerRowMobileView.swift in Sources */,
+				FB000000000000000000002 /* FastingBanner.swift in Sources */,
 				iOS0000000000000000000002 /* iOSRootView.swift in Sources */,
 				iOS0000000000000000000003 /* PrayerTimesView.swift in Sources */,
 				iOS0000000000000000000004 /* LocationSetupView.swift in Sources */,

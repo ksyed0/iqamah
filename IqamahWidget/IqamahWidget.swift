@@ -13,6 +13,9 @@ struct PrayerEntry: TimelineEntry {
     let todaysPrayers: [(name: String, time: Date)] // excludes Sunrise
     let hijriDateString: String // "" in stub entries
     let sunriseTime: Date? // nil in stub entries
+    // AC-0370: Fasting Mode state for the moment this entry becomes active.
+    let fastingActive: Bool
+    let fastingTriggerRaw: String?
 
     var countdown: String {
         let interval = nextPrayerTime.timeIntervalSince(date)
@@ -41,7 +44,9 @@ struct PrayerTimelineProvider: TimelineProvider {
                 ("Isha", Date().addingTimeInterval(25200)),
             ],
             hijriDateString: "9 Dhu al-Hijjah 1447",
-            sunriseTime: Date().addingTimeInterval(-5400)
+            sunriseTime: Date().addingTimeInterval(-5400),
+            fastingActive: false,
+            fastingTriggerRaw: nil
         )
     }
 
@@ -86,7 +91,7 @@ struct PrayerTimelineProvider: TimelineProvider {
         else {
             return PrayerEntry(date: date, nextPrayerName: "—", nextPrayerTime: date,
                                cityName: "—", methodName: "", todaysPrayers: [], hijriDateString: "",
-                               sunriseTime: nil)
+                               sunriseTime: nil, fastingActive: false, fastingTriggerRaw: nil)
         }
 
         let calc = PrayerCalculator(
@@ -106,6 +111,15 @@ struct PrayerTimelineProvider: TimelineProvider {
             .filter { $0.name != "Sunrise" } ?? []
         let sunriseTime: Date? = todayTimes?.prayers.first { $0.name == "Sunrise" }?.time
 
+        // AC-0370: evaluate Fasting Mode state once per entry date.
+        let fastingState = FastingModeEngine.evaluate(
+            for: date,
+            settings: settings.fastingModeSettings,
+            calculationMethod: settings.calculationMethod,
+            hijriCalendar: Calendar(identifier: .islamicUmmAlQura),
+            timezone: timezone
+        )
+
         // Find next upcoming prayer (today or tomorrow if all past)
         for dayOffset in 0 ... 1 {
             guard let day = Calendar.current.date(byAdding: .day, value: dayOffset, to: date),
@@ -120,7 +134,9 @@ struct PrayerTimelineProvider: TimelineProvider {
                     methodName: methodName,
                     todaysPrayers: todaysPrayers,
                     hijriDateString: hijri,
-                    sunriseTime: sunriseTime
+                    sunriseTime: sunriseTime,
+                    fastingActive: fastingState.isActive,
+                    fastingTriggerRaw: fastingState.trigger?.rawValue
                 )
             }
         }
@@ -128,8 +144,40 @@ struct PrayerTimelineProvider: TimelineProvider {
         return PrayerEntry(date: date, nextPrayerName: "—", nextPrayerTime: date,
                            cityName: cityName, methodName: methodName,
                            todaysPrayers: todaysPrayers, hijriDateString: hijri,
-                           sunriseTime: sunriseTime)
+                           sunriseTime: sunriseTime,
+                           fastingActive: fastingState.isActive,
+                           fastingTriggerRaw: fastingState.trigger?.rawValue)
     }
+}
+
+// MARK: - Fasting Mode relabel helper (AC-0370)
+
+//
+// Widgets only have row name strings; we re-derive the relabel using the
+// engine's contract — Fajr→Suhoor / Maghrib→Iftar within a 2h window when
+// `fastingActive` is true.
+private let widgetRelabelWindow: TimeInterval = 2 * 60 * 60
+
+func displayedPrayerName(
+    _ prayerName: String,
+    prayerTime: Date,
+    referenceDate: Date,
+    fastingActive: Bool,
+    fastingTriggerRaw: String?
+) -> String {
+    guard fastingActive, let trigger = fastingTriggerRaw, !trigger.isEmpty else {
+        return prayerName
+    }
+    let newLabel: String
+    switch prayerName {
+    case "Fajr": newLabel = "Suhoor"
+    case "Maghrib": newLabel = "Iftar"
+    default: return prayerName
+    }
+    let secondsUntil = prayerTime.timeIntervalSince(referenceDate)
+    guard (0 ... widgetRelabelWindow).contains(secondsUntil) else { return prayerName }
+    let glyph = trigger == "autoRamadan" ? "🌙" : "🕗"
+    return "\(glyph) \(newLabel)"
 }
 
 // MARK: - Widget views
@@ -168,8 +216,14 @@ struct IqamahWidgetView: View {
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
             Spacer()
-            Text(entry.nextPrayerName)
-                .font(.title3.bold())
+            Text(displayedPrayerName(
+                entry.nextPrayerName,
+                prayerTime: entry.nextPrayerTime,
+                referenceDate: entry.date,
+                fastingActive: entry.fastingActive,
+                fastingTriggerRaw: entry.fastingTriggerRaw
+            ))
+            .font(.title3.bold())
             Text(entry.nextPrayerTime, style: .relative)
                 .font(.caption.monospacedDigit())
                 .foregroundStyle(.secondary)
@@ -234,8 +288,15 @@ struct IqamahWidgetView: View {
                 ForEach(prayers, id: \.name) { prayer in
                     let isNext = prayer.name == entry.nextPrayerName
                     let isPast = prayer.time < entry.date
+                    let relabeled = displayedPrayerName(
+                        prayer.name,
+                        prayerTime: prayer.time,
+                        referenceDate: entry.date,
+                        fastingActive: entry.fastingActive,
+                        fastingTriggerRaw: entry.fastingTriggerRaw
+                    )
                     VStack(spacing: 2) {
-                        Text(prayer.name == "Dhuhr" ? "Zuhr" : prayer.name)
+                        Text(relabeled == prayer.name && prayer.name == "Dhuhr" ? "Zuhr" : relabeled)
                             .font(.system(size: 9, weight: .semibold))
                             .foregroundStyle(isNext ? gold : .secondary)
                         Text(timeFmt.string(from: prayer.time))
@@ -257,8 +318,14 @@ struct IqamahWidgetView: View {
 
     private var lockScreenView: some View {
         HStack {
-            Text(entry.nextPrayerName)
-                .font(.headline)
+            Text(displayedPrayerName(
+                entry.nextPrayerName,
+                prayerTime: entry.nextPrayerTime,
+                referenceDate: entry.date,
+                fastingActive: entry.fastingActive,
+                fastingTriggerRaw: entry.fastingTriggerRaw
+            ))
+            .font(.headline)
             Spacer()
             Text(entry.nextPrayerTime, style: .relative)
                 .font(.caption.monospacedDigit())

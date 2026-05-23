@@ -6,6 +6,37 @@ import WidgetKit
 
 private let activityGold = Color(red: 1.0, green: 0.839, blue: 0.039)
 
+// MARK: - Fasting Mode relabel helper (AC-0370)
+
+//
+// IqamahCore is intentionally not linked into the Live Activity extension to
+// keep the extension binary small. The relabel logic is tiny — mirror it here
+// rather than pull in the framework. Stays in sync with
+// FastingLabelFormatter.relabel(...) in IqamahCore.
+private let liveActivityRelabelWindow: TimeInterval = 2 * 60 * 60
+
+private func displayedNextPrayerName(
+    _ context: ActivityViewContext<PrayerActivityAttributes>
+) -> String {
+    guard context.state.fastingActive == true,
+          let triggerRaw = context.state.fastingTriggerRaw,
+          !triggerRaw.isEmpty else {
+        return context.state.nextPrayerName
+    }
+    let newLabel: String
+    switch context.state.nextPrayerName {
+    case "Fajr": newLabel = "Suhoor"
+    case "Maghrib": newLabel = "Iftar"
+    default: return context.state.nextPrayerName
+    }
+    let secondsUntil = context.state.nextPrayerTime.timeIntervalSinceNow
+    guard (0 ... liveActivityRelabelWindow).contains(secondsUntil) else {
+        return context.state.nextPrayerName
+    }
+    let glyph = triggerRaw == "autoRamadan" ? "🌙" : "🕗"
+    return "\(glyph) \(newLabel)"
+}
+
 // MARK: - Inline crescent (MoonPhaseView lives in macOS target; can't import it here)
 
 private struct CrescentView: View {
@@ -67,7 +98,7 @@ struct PrayerLiveActivityView: Widget {
             } compactLeading: {
                 HStack(spacing: 4) {
                     Circle().fill(activityGold).frame(width: 7, height: 7)
-                    Text(context.state.nextPrayerName)
+                    Text(displayedNextPrayerName(context))
                         .font(.system(size: 13, weight: .bold))
                         .foregroundStyle(activityGold)
                 }
@@ -112,7 +143,7 @@ private struct ExpandedTrailingView: View {
     let context: ActivityViewContext<PrayerActivityAttributes>
     var body: some View {
         VStack(alignment: .trailing, spacing: 2) {
-            Text(context.state.nextPrayerName)
+            Text(displayedNextPrayerName(context))
                 .font(.system(size: 22, weight: .bold))
                 .foregroundStyle(activityGold)
             Text(context.state.nextPrayerTime, style: .timer)
@@ -164,7 +195,7 @@ private struct LockScreenLiveActivityView: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 6) {
-                    Text(context.state.nextPrayerName)
+                    Text(displayedNextPrayerName(context))
                         .font(.system(size: 15, weight: .bold))
                         .foregroundStyle(activityGold)
                     Text(context.state.nextPrayerTime.formatted(.dateTime.hour().minute()))

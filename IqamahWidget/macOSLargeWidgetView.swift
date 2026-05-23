@@ -43,9 +43,15 @@
                         if isNext {
                             Circle().fill(gold).frame(width: 5, height: 5)
                         }
-                        Text(prayer.name)
-                            .font(.system(size: 13, weight: isNext ? .bold : .regular))
-                            .foregroundStyle(isNext ? gold : .primary)
+                        Text(displayedPrayerName(
+                            prayer.name,
+                            prayerTime: prayer.time,
+                            referenceDate: entry.date,
+                            fastingActive: entry.fastingActive,
+                            fastingTriggerRaw: entry.fastingTriggerRaw
+                        ))
+                        .font(.system(size: 13, weight: isNext ? .bold : .regular))
+                        .foregroundStyle(isNext ? gold : .primary)
                         Spacer()
                         Text(prayer.time, style: .time)
                             .font(.system(size: 13, weight: isNext ? .bold : .regular).monospacedDigit())

@@ -22,6 +22,7 @@ struct MenuBarPopoverView: View {
         VStack(spacing: 0) {
             popoverHeader
             datebar
+            fastingBanner
             columnHeaders
             prayerList
             popoverFooter
@@ -113,6 +114,45 @@ struct MenuBarPopoverView: View {
             .padding(.vertical, 5)
             .background(Color.primary.opacity(0.03))
             .overlay(alignment: .bottom) { Divider().opacity(0.5) }
+    }
+
+    // MARK: Fasting banner (AC-0368)
+
+    /// Today's PrayerTimes, recomputed each body pass. Cheap enough — pure math.
+    private var todaysPrayerTimes: PrayerTimes? {
+        guard let city = settings.loadCity(),
+              let tz = TimeZone(identifier: city.timezone) else { return nil }
+        let calc = PrayerCalculator(
+            coordinate: city.coordinate,
+            timezone: tz,
+            method: settings.calculationMethod,
+            asrMethod: settings.asrMethod
+        )
+        return try? calc.calculate(for: Date())
+    }
+
+    @ViewBuilder
+    private var fastingBanner: some View {
+        let timezone = TimeZone(identifier: settings.activeTimezoneIdentifier) ?? .current
+        let fastingState = FastingModeEngine.evaluate(
+            for: Date(),
+            settings: settings.fastingModeSettings,
+            calculationMethod: settings.calculationMethod,
+            hijriCalendar: Calendar(identifier: .islamicUmmAlQura),
+            timezone: timezone
+        )
+        if fastingState.isActive || fastingState.prohibition != nil {
+            let times = todaysPrayerTimes
+            FastingBanner(
+                state: fastingState,
+                fajrTime: times?.fajr,
+                maghribTime: times?.maghrib,
+                isShiaMethod: settings.calculationMethod.isShiaMethod
+            )
+            .padding(.horizontal, 14)
+            .padding(.top, 8)
+            .padding(.bottom, 4)
+        }
     }
 
     // MARK: Column headers

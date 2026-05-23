@@ -23,7 +23,8 @@ struct PrayerTimesTab: View {
                             prayer: prayer,
                             isNext: prayer.name == nextPrayerName,
                             gold: gold,
-                            timeString: formattedTime(prayer.time)
+                            timeString: formattedTime(prayer.time),
+                            displayName: displayName(for: prayer)
                         )
                     }
                 }
@@ -42,6 +43,24 @@ struct PrayerTimesTab: View {
         let f = DateFormatter()
         f.dateFormat = settings.use24HourTime ? "HH:mm" : "h:mm"
         return f.string(from: date)
+    }
+
+    /// AC-0369 (watchOS): apply FastingLabelFormatter relabel within 2h window.
+    private func displayName(for prayer: (name: String, time: Date)) -> String {
+        let tz = TimeZone(identifier: settings.activeTimezoneIdentifier) ?? .current
+        let state = FastingModeEngine.evaluate(
+            for: Date(),
+            settings: settings.fastingModeSettings,
+            calculationMethod: settings.calculationMethod,
+            hijriCalendar: Calendar(identifier: .islamicUmmAlQura),
+            timezone: tz
+        )
+        return FastingLabelFormatter.relabel(
+            prayerName: prayer.name,
+            prayerTime: prayer.time,
+            currentTime: Date(),
+            state: state
+        )
     }
 
     private var hijriHeader: String {
@@ -78,11 +97,12 @@ private struct PrayerRow: View {
     let isNext: Bool
     let gold: Color
     let timeString: String
+    let displayName: String
 
     var body: some View {
         let font: Font = isNext ? .system(size: 13, weight: .bold) : .system(size: 13)
         HStack {
-            Text(prayer.name).font(font)
+            Text(displayName).font(font)
             Spacer()
             Text(timeString).font(font)
         }

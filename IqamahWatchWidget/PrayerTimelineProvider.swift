@@ -59,12 +59,22 @@ struct PrayerTimelineProvider: TimelineProvider {
             else { continue }
 
             for prayer in times.prayers where prayer.name != "Sunrise" && prayer.time > cursor {
+                // AC-0370: capture Fasting Mode state for the moment this entry becomes active.
+                let fastingState = FastingModeEngine.evaluate(
+                    for: cursor,
+                    settings: settings.fastingModeSettings,
+                    calculationMethod: settings.calculationMethod,
+                    hijriCalendar: Calendar(identifier: .islamicUmmAlQura),
+                    timezone: timezone
+                )
                 entries.append(PrayerEntry(
                     date: cursor,
                     nextPrayerName: prayer.name,
                     nextPrayerTime: prayer.time,
                     cityName: cityName,
-                    methodName: methodName
+                    methodName: methodName,
+                    fastingActive: fastingState.isActive,
+                    fastingTriggerRaw: fastingState.trigger?.rawValue
                 ))
                 cursor = prayer.time
             }
