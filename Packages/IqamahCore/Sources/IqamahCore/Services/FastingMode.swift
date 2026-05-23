@@ -2,7 +2,7 @@ import Foundation
 
 /// Result of evaluating today against the user's Fasting Mode settings.
 /// Pure-data; computed by FastingModeEngine; consumed by every surface.
-public struct FastingDayState: Equatable, Codable, Hashable {
+public struct FastingDayState: Equatable, Codable, Hashable, Sendable {
     /// Is today a fasting day (after prohibition filter)?
     public let isActive: Bool
     /// Why today is active. Nil when isActive == false.
@@ -30,7 +30,7 @@ public struct FastingDayState: Equatable, Codable, Hashable {
     }
 }
 
-public enum FastingTriggerKind: String, Codable, Hashable, CaseIterable {
+public enum FastingTriggerKind: String, Codable, Hashable, CaseIterable, Sendable {
     case autoRamadan
     case weeklySchedule
     case ayyamAlBeed
@@ -42,7 +42,7 @@ public enum FastingTriggerKind: String, Codable, Hashable, CaseIterable {
     case mabath
 }
 
-public enum ProhibitedDay: String, Codable, Hashable, CaseIterable {
+public enum ProhibitedDay: String, Codable, Hashable, CaseIterable, Sendable {
     case eidAlFitr // 1 Shawwal
     case eidAlAdha // 10 Dhul-Hijjah
     case tashriq11 // 11 Dhul-Hijjah
@@ -62,7 +62,7 @@ public enum ProhibitedDay: String, Codable, Hashable, CaseIterable {
 
 /// User-configurable Fasting Mode settings, persisted as a single JSON blob
 /// in UserDefaults under Keys.fastingModeSettings and KVS-synced.
-public struct FastingModeSettings: Codable, Equatable {
+public struct FastingModeSettings: Codable, Equatable, Sendable {
     public var enabled: Bool
     public var autoRamadan: Bool
     /// Calendar weekday integers (1=Sun, 2=Mon, …, 7=Sat) per Calendar.component(.weekday).
