@@ -14,7 +14,7 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 | AC           | AC-0357               | AC-0356           |
 | TC           | TC-0044               | TC-0043           |
 | BUG          | BUG-0069              | BUG-0068          |
-| ENH          | ENH-025               | ENH-024           |
+| ENH          | ENH-026               | ENH-025           |
 
 ---
 
@@ -28,4 +28,4 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 ---
 
-**Last Updated:** 2026-05-21 (ENH-001 finish-up — EPIC-0016 + US-0070 promoted; AC-0349 through AC-0356 and TC-0036 through TC-0043 consumed; PrayerActivityAttributes consolidated; watch Option B parity, v1.6 re-detect prompt, dead Views/ cleanup, watch view rename, and CLAUDE.md repo-structure note shipped.)
+**Last Updated:** 2026-05-23 (ENH-025 logged — per-day alert scheduling backlog item from user request.)

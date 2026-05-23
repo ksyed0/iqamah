@@ -34,6 +34,8 @@ struct SettingsSheetView: View {
     @ObservedObject private var settings = SettingsManager.shared
     #if os(macOS)
         @State private var launchAtLogin = false
+        @State private var loginItemError: String?
+        @State private var loginItemInfo: String?
     #endif
     @State private var isDetectingLocation = false
     /// Transient highlight pulse on the Detect button when the user arrives
@@ -255,13 +257,7 @@ struct SettingsSheetView: View {
             }
             .toggleStyle(.switch)
             .onChange(of: launchAtLogin) { _, enabled in
-                do {
-                    if enabled {
-                        try SMAppService.mainApp.register()
-                    } else {
-                        try SMAppService.mainApp.unregister()
-                    }
-                } catch { launchAtLogin = !enabled }
+                handleLaunchAtLoginChange(enabled: enabled)
             }
         #endif
         Picker("Appearance", selection: $selectedAppearance) {
@@ -461,6 +457,10 @@ struct SettingsSheetView: View {
                 }
                 recommendationLabel = CalculationMethod.recommendationLabel(forCountryCode: country.code)
             }
+            .modifier(LaunchAtLoginAlerts(
+                error: $loginItemError,
+                info: $loginItemInfo
+            ))
         #endif
     }
 }
@@ -504,6 +504,28 @@ private extension SettingsSheetView {
         userOverrodeMethod = (currentMethod != suggested)
     }
 
+    #if os(macOS)
+        func handleLaunchAtLoginChange(enabled: Bool) {
+            do {
+                if enabled {
+                    try SMAppService.mainApp.register()
+                    // Re-read status: .requiresApproval is a success state
+                    // awaiting user confirmation in System Settings → Login Items.
+                    if SMAppService.mainApp.status == .requiresApproval {
+                        loginItemInfo = "Iqamah is asking to launch at login. Please approve in System Settings → General → Login Items."
+                    }
+                    // Leave toggle ON regardless of approval state.
+                } else {
+                    try SMAppService.mainApp.unregister()
+                }
+            } catch {
+                print("SMAppService register failed: \(error)")
+                loginItemError = "Couldn't enable start at login: \(error.localizedDescription). Try opening System Settings → General → Login Items to enable Iqamah."
+                launchAtLogin = !enabled
+            }
+        }
+    #endif
+
     func save() {
         guard let city = selectedCity else { return }
         SettingsManager.shared.use24HourTime = use24Hour
@@ -511,6 +533,29 @@ private extension SettingsSheetView {
         onSave(city, selectedMethod, selectedAsrMethod)
     }
 }
+
+// MARK: - Launch at Login alerts modifier (macOS)
+
+#if os(macOS)
+    private struct LaunchAtLoginAlerts: ViewModifier {
+        @Binding var error: String?
+        @Binding var info: String?
+
+        private func presentation(_ value: Binding<String?>) -> Binding<Bool> {
+            Binding(get: { value.wrappedValue != nil }, set: { if !$0 { value.wrappedValue = nil } })
+        }
+
+        func body(content: Content) -> some View {
+            content
+                .alert("Launch at Login", isPresented: presentation($error), presenting: error) { _ in
+                    Button("OK", role: .cancel) { error = nil }
+                } message: { msg in Text(msg) }
+                .alert("Approve in Login Items", isPresented: presentation($info), presenting: info) { _ in
+                    Button("OK", role: .cancel) { info = nil }
+                } message: { msg in Text(msg) }
+        }
+    }
+#endif
 
 // MARK: - Hilal Watch settings (extracted to keep SettingsSheetView under line limit)
 

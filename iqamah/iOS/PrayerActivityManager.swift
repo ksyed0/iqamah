@@ -11,6 +11,7 @@
         private init() {}
 
         private var currentActivity: Activity<PrayerActivityAttributes>?
+        private var rolloverTimer: Timer?
 
         // MARK: - Public API
 
@@ -21,6 +22,12 @@
                 return
             }
             guard let state = buildContentState(settings: settings) else { return }
+
+            // staleDate ~1 minute after the next prayer time so iOS dims the
+            // Live Activity and prompts a refresh once it's passed (avoids
+            // the count-up timer issue where Text(date, style: .timer)
+            // flips to count-up after the target passes).
+            let staleDate = state.nextPrayerTime.addingTimeInterval(60)
 
             // Adopt any surviving activity from a previous session so we never run
             // two concurrent Live Activities (which causes duplicate lock-screen banners).
@@ -38,7 +45,7 @@
             }
 
             if let activity = currentActivity {
-                await activity.update(ActivityContent(state: state, staleDate: nil))
+                await activity.update(ActivityContent(state: state, staleDate: staleDate))
             } else {
                 let attributes = PrayerActivityAttributes(
                     cityName: settings.activeCityName,
@@ -47,19 +54,39 @@
                 do {
                     currentActivity = try Activity.request(
                         attributes: attributes,
-                        content: ActivityContent(state: state, staleDate: nil)
+                        content: ActivityContent(state: state, staleDate: staleDate)
                     )
                 } catch {
                     print("[PrayerActivityManager] Failed to start activity: \(error)")
                 }
             }
+
+            // Schedule a foreground-only rollover so a foregrounded (or recently
+            // backgrounded) app advances to the next prayer +1s after the current
+            // one passes. Full background reliability still requires push-token
+            // LA updates + BGAppRefreshTask (follow-up).
+            scheduleRollover(at: state.nextPrayerTime)
         }
 
         func endActivity() async {
+            rolloverTimer?.invalidate()
+            rolloverTimer = nil
             if let activity = currentActivity {
                 await activity.end(ActivityContent(state: activity.content.state, staleDate: nil), dismissalPolicy: .immediate)
             }
             currentActivity = nil
+        }
+
+        private func scheduleRollover(at fireDate: Date) {
+            rolloverTimer?.invalidate()
+            let delay = max(1, fireDate.timeIntervalSinceNow + 1)
+            let timer = Timer(timeInterval: delay, repeats: false) { [weak self] _ in
+                Task { @MainActor in
+                    await self?.startOrUpdateActivity(settings: SettingsManager.shared)
+                }
+            }
+            rolloverTimer = timer
+            RunLoop.main.add(timer, forMode: .common)
         }
 
         // MARK: - Private
