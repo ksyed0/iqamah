@@ -7,6 +7,7 @@ public enum CalculationMethod: String, CaseIterable, Identifiable {
     case ummAlQura = "umm_al_qura"
     case karachi
     case tehran
+    case jafari
 
     public var id: String { rawValue }
 
@@ -24,6 +25,8 @@ public enum CalculationMethod: String, CaseIterable, Identifiable {
             "University of Islamic Sciences, Karachi"
         case .tehran:
             "Institute of Geophysics, University of Tehran"
+        case .jafari:
+            "Ja'fari (Shia outside Iran)"
         }
     }
 
@@ -36,6 +39,7 @@ public enum CalculationMethod: String, CaseIterable, Identifiable {
         case .ummAlQura: "Umm Al-Qura"
         case .karachi: "Karachi"
         case .tehran: "Tehran"
+        case .jafari: "Ja'fari"
         }
     }
 
@@ -53,6 +57,8 @@ public enum CalculationMethod: String, CaseIterable, Identifiable {
             18.0
         case .tehran:
             17.7
+        case .jafari:
+            16.0
         }
     }
 
@@ -70,6 +76,8 @@ public enum CalculationMethod: String, CaseIterable, Identifiable {
             18.0
         case .tehran:
             14.0
+        case .jafari:
+            14.0
         }
     }
 
@@ -86,6 +94,8 @@ public enum CalculationMethod: String, CaseIterable, Identifiable {
         switch self {
         case .tehran:
             4.5
+        case .jafari:
+            4.0
         default:
             nil
         }
@@ -117,6 +127,12 @@ extension CalculationMethod {
     public static func recommendationLabel(forCountryCode code: String) -> String? {
         let name = Locale.current.localizedString(forRegionCode: code)
         return name.map { "Recommended for \($0)" }
+    }
+
+    /// True for methods rooted in Ja'fari (Shia) jurisprudence.
+    /// Drives tradition-aware UI gating in Fasting Mode.
+    public var isShiaMethod: Bool {
+        self == .tehran || self == .jafari
     }
 }
 

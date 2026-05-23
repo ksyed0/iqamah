@@ -94,6 +94,50 @@ Continued in task sections below.
 
 ---
 
+## Implementation Progress
+
+> Updated 2026-05-22. Next session: resume from Task 3. Worktree
+> `~/Projects/iqamah/iqamah/.claude/worktrees/fasting-mode-foundation`
+> on branch `feature/fasting-mode-foundation` (pushed).
+
+| # | Task | Status | Commit |
+|---|---|---|---|
+| — | Bump to v1.6.0 build 1 | ✅ Done | `4d1c7c7` |
+| 1 | `.jafari` + `isShiaMethod` | ✅ Done | `c4f9164` |
+| 2 | Fasting Mode value types | ✅ Done | `012456d` |
+| 3 | `FastingModeSettings` JSON codec + SettingsManager | 🟡 Pending | — |
+| 4 | Engine — autoRamadan + weeklySchedule | 🟡 Pending | — |
+| 5 | Engine — Hijri-date triggers (4) | 🟡 Pending | — |
+| 6 | Engine — muharramFast | 🟡 Pending | — |
+| 7 | Engine — Shia-gated + prohibition filter | 🟡 Pending | — |
+| 8 | `FastingLabelFormatter` | 🟡 Pending | — |
+| 9 | `FastingNotificationPlanner` | 🟡 Pending | — |
+| 10–21 | UI + notifications + docs + final | 🟡 Pending (PR-2 / PR-3) | — |
+
+**Test count delta so far:** 185 → 195 (+10), all Swift Testing.
+
+**Hand-off notes for the next session:**
+
+1. **Branch base:** This branch was cut from `origin/main` at `5791936`,
+   before PR #131 merged. When #131 lands on main, rebase this branch
+   and bump the newly-added IqamahWatch target `MARKETING_VERSION` /
+   `CURRENT_PROJECT_VERSION` from 1.5.0/14 to 1.6.0/1 as part of the
+   rebase commit.
+2. **Test framework:** Project standard is Swift Testing
+   (`@Suite` / `@Test` / `#expect`). Task 2's implementer initially
+   wrote XCTest and had to migrate. Tell each new implementer up front.
+3. **CI gates per commit:** `swiftlint --strict iqamah/` clean,
+   `swiftformat --lint iqamah/` clean, `cd Packages/IqamahCore && swift test`
+   green, Conventional Commits + `Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>` trailer.
+4. **PR-1 scope:** Open after Task 9. Title:
+   `feat(core): Fasting Mode foundation (Tasks 1–9 of EPIC-0017)`.
+5. **Docs promotion (Task 20) waits for PR-3** — do not touch
+   `docs/ENHANCEMENTS.md` / `docs/RELEASE_PLAN.md` / `docs/TEST_CASES.md` /
+   `docs/ID_REGISTRY.md` until then; the IDs allocated in this plan's
+   header should still be considered reserved.
+
+---
+
 ## Task 1: Add `.jafari` calculation method + `isShiaMethod` helper + picker entry
 
 **Files:**
