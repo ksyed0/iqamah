@@ -48,7 +48,17 @@ public enum FastingModeEngine {
             return FastingDayState(isActive: true, trigger: .firstNineDhulHijjah, prohibition: nil, date: date)
         }
 
-        // (muharramFast — Task 6)
+        // muharramFast — date set adapts to calculation method
+        if settings.muharramFast, hijriMonth == 1 {
+            let firesToday: Bool = if calculationMethod.isShiaMethod {
+                hijriDay == 9
+            } else {
+                hijriDay == 9 || hijriDay == 10
+            }
+            if firesToday {
+                return FastingDayState(isActive: true, trigger: .muharramFast, prohibition: nil, date: date)
+            }
+        }
 
         // ayyamAlBeed
         if settings.ayyamAlBeed, (13...15).contains(hijriDay) {

@@ -232,3 +232,97 @@ struct FastingModeEngineHijriTests {
         #expect(result.trigger == .dayOfArafah)
     }
 }
+
+@Suite("FastingModeEngine — muharramFast tradition-adaptive")
+struct FastingModeEngineMuharramTests {
+    static let hijri = Calendar(identifier: .islamicUmmAlQura)
+    static let tz = TimeZone(identifier: "America/Toronto")!
+
+    static func hijriDate(_ y: Int, _ m: Int, _ d: Int) -> Date {
+        var cal = Calendar(identifier: .islamicUmmAlQura)
+        cal.timeZone = tz
+        return cal.date(from: DateComponents(year: y, month: m, day: d, hour: 12))!
+    }
+
+    @Test("Sunni method: muharramFast fires on 10 Muharram (Ashura)")
+    func sunniDay10() {
+        var s = FastingModeSettings()
+        s.enabled = true
+        s.muharramFast = true
+        let date = Self.hijriDate(1448, 1, 10)
+        let result = FastingModeEngine.evaluate(
+            for: date, settings: s, calculationMethod: .muslimWorldLeague,
+            hijriCalendar: Self.hijri, timezone: Self.tz
+        )
+        #expect(result.isActive == true)
+        #expect(result.trigger == .muharramFast)
+    }
+
+    @Test("Sunni method: muharramFast fires on 9 Muharram (Tasu'a)")
+    func sunniDay9() {
+        var s = FastingModeSettings()
+        s.enabled = true
+        s.muharramFast = true
+        let date = Self.hijriDate(1448, 1, 9)
+        let result = FastingModeEngine.evaluate(
+            for: date, settings: s, calculationMethod: .isna,
+            hijriCalendar: Self.hijri, timezone: Self.tz
+        )
+        #expect(result.isActive == true)
+        #expect(result.trigger == .muharramFast)
+    }
+
+    @Test("Sunni method: muharramFast does NOT fire on 11 Muharram")
+    func sunniDay11Inactive() {
+        var s = FastingModeSettings()
+        s.enabled = true
+        s.muharramFast = true
+        let date = Self.hijriDate(1448, 1, 11)
+        let result = FastingModeEngine.evaluate(
+            for: date, settings: s, calculationMethod: .muslimWorldLeague,
+            hijriCalendar: Self.hijri, timezone: Self.tz
+        )
+        #expect(result.isActive == false)
+    }
+
+    @Test("Shia (tehran): muharramFast fires on 9 Muharram only")
+    func shiaTehranDay9() {
+        var s = FastingModeSettings()
+        s.enabled = true
+        s.muharramFast = true
+        let date = Self.hijriDate(1448, 1, 9)
+        let result = FastingModeEngine.evaluate(
+            for: date, settings: s, calculationMethod: .tehran,
+            hijriCalendar: Self.hijri, timezone: Self.tz
+        )
+        #expect(result.isActive == true)
+        #expect(result.trigger == .muharramFast)
+    }
+
+    @Test("Shia (tehran): muharramFast does NOT fire on 10 Muharram")
+    func shiaTehranDay10Inactive() {
+        var s = FastingModeSettings()
+        s.enabled = true
+        s.muharramFast = true
+        let date = Self.hijriDate(1448, 1, 10)
+        let result = FastingModeEngine.evaluate(
+            for: date, settings: s, calculationMethod: .tehran,
+            hijriCalendar: Self.hijri, timezone: Self.tz
+        )
+        #expect(result.isActive == false)
+    }
+
+    @Test("Shia (jafari): muharramFast fires on 9 Muharram")
+    func shiaJafariDay9() {
+        var s = FastingModeSettings()
+        s.enabled = true
+        s.muharramFast = true
+        let date = Self.hijriDate(1448, 1, 9)
+        let result = FastingModeEngine.evaluate(
+            for: date, settings: s, calculationMethod: .jafari,
+            hijriCalendar: Self.hijri, timezone: Self.tz
+        )
+        #expect(result.isActive == true)
+        #expect(result.trigger == .muharramFast)
+    }
+}
