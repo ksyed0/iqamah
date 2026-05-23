@@ -34,9 +34,15 @@ struct LargeWidgetView: View {
                 let isNext = prayer.name == entry.nextPrayerName
                 let isPast = prayer.time < Date()
                 HStack {
-                    Text(prayer.name)
-                        .font(.system(size: 14, weight: isNext ? .bold : .regular))
-                        .foregroundStyle(isNext ? gold : .primary)
+                    Text(displayedPrayerName(
+                        prayer.name,
+                        prayerTime: prayer.time,
+                        referenceDate: entry.date,
+                        fastingActive: entry.fastingActive,
+                        fastingTriggerRaw: entry.fastingTriggerRaw
+                    ))
+                    .font(.system(size: 14, weight: isNext ? .bold : .regular))
+                    .foregroundStyle(isNext ? gold : .primary)
                     Spacer()
                     Text(prayer.time, style: .time)
                         .font(.system(size: 14, weight: isNext ? .bold : .regular).monospacedDigit())

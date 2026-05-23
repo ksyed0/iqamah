@@ -120,12 +120,24 @@
 
             guard let next = nextPrayer else { return nil }
 
+            // AC-0370: include today's Fasting Mode state so the Live Activity
+            // can render the Suhoor/Iftar relabel within the 2h window.
+            let fastingState = FastingModeEngine.evaluate(
+                for: now,
+                settings: settings.fastingModeSettings,
+                calculationMethod: settings.calculationMethod,
+                hijriCalendar: Calendar(identifier: .islamicUmmAlQura),
+                timezone: timezone
+            )
+
             return PrayerActivityAttributes.ContentState(
                 nextPrayerName: next.name,
                 nextPrayerTime: next.time,
                 followingPrayerName: followingPrayer?.name ?? "",
                 moonPhase: moonPhase(for: now),
-                hijriDateString: hijriDateString(for: now, offset: settings.hijriDayOffset)
+                hijriDateString: hijriDateString(for: now, offset: settings.hijriDayOffset),
+                fastingActive: fastingState.isActive,
+                fastingTriggerRaw: fastingState.trigger?.rawValue
             )
         }
     }

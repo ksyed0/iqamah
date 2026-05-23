@@ -14,7 +14,7 @@ struct RectangularComplicationView: View {
                 .foregroundStyle(.secondary)
                 .widgetAccentable()
             HStack(alignment: .firstTextBaseline, spacing: 4) {
-                Text(entry.nextPrayerName)
+                Text(entry.displayedNextPrayerName)
                     .font(.system(size: 15, weight: .bold))
                 Text(entry.countdown)
                     .font(.system(size: 15, weight: .bold))
@@ -94,7 +94,7 @@ struct InlineComplicationView: View {
     var body: some View {
         let formatter = DateFormatter()
         formatter.timeStyle = .short
-        return Text("\(entry.nextPrayerName) at \(formatter.string(from: entry.nextPrayerTime))")
+        return Text("\(entry.displayedNextPrayerName) at \(formatter.string(from: entry.nextPrayerTime))")
             .widgetAccentable()
     }
 }
