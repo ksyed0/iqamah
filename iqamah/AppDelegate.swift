@@ -197,7 +197,20 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
 
         let formatter = PrayerTimes.timeFormatter(for: timezone, use24Hour: settings.use24HourTime)
-        let displayText = "\(next.name) \(formatter.string(from: next.time))"
+        let fastingState = FastingModeEngine.evaluate(
+            for: now,
+            settings: settings.fastingModeSettings,
+            calculationMethod: settings.calculationMethod,
+            hijriCalendar: Calendar(identifier: .islamicUmmAlQura),
+            timezone: timezone
+        )
+        let labeledName = FastingLabelFormatter.relabel(
+            prayerName: next.name,
+            prayerTime: next.time,
+            currentTime: now,
+            state: fastingState
+        )
+        let displayText = "\(labeledName) \(formatter.string(from: next.time))"
         let minutesUntil = Int(next.time.timeIntervalSince(now) / 60)
 
         let textColor: NSColor = minutesUntil < 10 ? .systemRed : .labelColor
