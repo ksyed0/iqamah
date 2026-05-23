@@ -33,6 +33,10 @@ struct IqamahWatchApp: App {
             .onAppear {
                 locationSetup.start(settings: settings)
                 WatchSessionManager.shared.activate(settings: settings)
+                WatchNotificationScheduler.shared.requestFastingReschedule()
+            }
+            .onChange(of: settings.fastingModeSettings) { _, _ in
+                WatchNotificationScheduler.shared.requestFastingReschedule()
             }
             .onChange(of: settings.hilalNotificationEnabled) { _, enabled in
                 Task {
