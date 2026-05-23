@@ -85,7 +85,7 @@ Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
 **TC-0002 (AC-0170) — macOS app builds clean after extraction**
 Type: Regression · Preconditions: Branch 1 applied
 Steps:
-  1. `xcodebuild -project iqamah.xcodeproj -scheme iqamah -configuration Debug build`
+  1. `xcodebuild -project iqamah.xcodeproj -scheme iqamah -configuration Debug build` (macOS; for iOS use `-scheme iqamah-iOS -destination 'generic/platform=iOS'`)
   2. Compare warning count to pre-extraction baseline
 Expected: BUILD SUCCEEDED, no new warnings introduced by the move
 Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
