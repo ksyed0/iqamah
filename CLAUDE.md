@@ -11,7 +11,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Open `iqamah.xcodeproj` in Xcode and build/run (Cmd+R). Alternatively:
 
 ```bash
+# macOS:
 xcodebuild -project iqamah.xcodeproj -scheme iqamah -configuration Debug build
+# iOS:
+xcodebuild -project iqamah.xcodeproj -scheme iqamah-iOS -configuration Debug -destination 'generic/platform=iOS' build
 ```
 
 There are no external dependencies, package managers, or test targets.

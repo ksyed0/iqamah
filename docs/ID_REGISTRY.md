@@ -14,7 +14,7 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 | AC           | AC-0357               | AC-0356           |
 | TC           | TC-0044               | TC-0043           |
 | BUG          | BUG-0069              | BUG-0068          |
-| ENH          | ENH-026               | ENH-025           |
+| ENH          | ENH-027               | ENH-026           |
 
 ---
 
@@ -28,4 +28,4 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 ---
 
-**Last Updated:** 2026-05-23 (ENH-025 logged — per-day alert scheduling backlog item from user request.)
+**Last Updated:** 2026-05-23 (ENH-026 logged — background-reliable LA updates follow-up from v1.6.0 PR #133.)

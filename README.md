@@ -55,7 +55,10 @@ Press **Cmd+R** in Xcode. No package manager or external dependencies needed.
 From the command line:
 
 ```bash
+# macOS:
 xcodebuild -project iqamah.xcodeproj -scheme iqamah -configuration Debug build
+# iOS:
+xcodebuild -project iqamah.xcodeproj -scheme iqamah-iOS -configuration Debug -destination 'generic/platform=iOS' build
 ```
 
 ---
@@ -113,8 +116,12 @@ iqamah/
 ## Testing
 
 ```bash
+# macOS:
 xcodebuild -project iqamah.xcodeproj -scheme iqamah -configuration Debug test \
   -destination 'platform=macOS'
+# iOS:
+xcodebuild -project iqamah.xcodeproj -scheme iqamah-iOS -configuration Debug test \
+  -destination 'platform=iOS Simulator,name=iPhone 17'
 ```
 
 The test suite covers prayer calculation accuracy, city model validation, Qiblah bearing, Hijri date conversion, settings persistence, Adhaan model, and calculation method country mapping. Target: ≥80% code coverage.
