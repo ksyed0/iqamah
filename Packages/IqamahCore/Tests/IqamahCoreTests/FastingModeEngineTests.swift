@@ -326,3 +326,161 @@ struct FastingModeEngineMuharramTests {
         #expect(result.trigger == .muharramFast)
     }
 }
+
+@Suite("FastingModeEngine — Shia-gated triggers")
+struct FastingModeEngineShiaGatedTests {
+    static let hijri = Calendar(identifier: .islamicUmmAlQura)
+    static let tz = TimeZone(identifier: "America/Toronto")!
+
+    static func hijriDate(_ y: Int, _ m: Int, _ d: Int) -> Date {
+        var cal = Calendar(identifier: .islamicUmmAlQura)
+        cal.timeZone = tz
+        return cal.date(from: DateComponents(year: y, month: m, day: d, hour: 12))!
+    }
+
+    @Test("midShaban fires for Shia method on 15 Sha'ban")
+    func midShabanShiaFires() {
+        var s = FastingModeSettings()
+        s.enabled = true
+        s.midShaban = true
+        let date = Self.hijriDate(1448, 8, 15)
+        let result = FastingModeEngine.evaluate(
+            for: date, settings: s, calculationMethod: .tehran,
+            hijriCalendar: Self.hijri, timezone: Self.tz
+        )
+        #expect(result.trigger == .midShaban)
+    }
+
+    @Test("midShaban suppressed for Sunni method even when toggle is true")
+    func midShabanSunniSuppressed() {
+        var s = FastingModeSettings()
+        s.enabled = true
+        s.midShaban = true
+        let date = Self.hijriDate(1448, 8, 15)
+        let result = FastingModeEngine.evaluate(
+            for: date, settings: s, calculationMethod: .muslimWorldLeague,
+            hijriCalendar: Self.hijri, timezone: Self.tz
+        )
+        #expect(result.isActive == false)
+    }
+
+    @Test("mabath fires for Shia method on 27 Rajab")
+    func mabathShiaFires() {
+        var s = FastingModeSettings()
+        s.enabled = true
+        s.mabath = true
+        let date = Self.hijriDate(1448, 7, 27)
+        let result = FastingModeEngine.evaluate(
+            for: date, settings: s, calculationMethod: .jafari,
+            hijriCalendar: Self.hijri, timezone: Self.tz
+        )
+        #expect(result.trigger == .mabath)
+    }
+
+    @Test("mabath suppressed for Sunni method")
+    func mabathSunniSuppressed() {
+        var s = FastingModeSettings()
+        s.enabled = true
+        s.mabath = true
+        let date = Self.hijriDate(1448, 7, 27)
+        let result = FastingModeEngine.evaluate(
+            for: date, settings: s, calculationMethod: .karachi,
+            hijriCalendar: Self.hijri, timezone: Self.tz
+        )
+        #expect(result.isActive == false)
+    }
+}
+
+@Suite("FastingModeEngine — prohibition filter")
+struct FastingModeEngineProhibitionTests {
+    static let hijri = Calendar(identifier: .islamicUmmAlQura)
+    static let tz = TimeZone(identifier: "America/Toronto")!
+
+    static func hijriDate(_ y: Int, _ m: Int, _ d: Int) -> Date {
+        var cal = Calendar(identifier: .islamicUmmAlQura)
+        cal.timeZone = tz
+        return cal.date(from: DateComponents(year: y, month: m, day: d, hour: 12))!
+    }
+
+    @Test("Eid al-Fitr suppresses sixDaysShawwal trigger")
+    func eidAlFitrSuppressesShawwal() {
+        var s = FastingModeSettings()
+        s.enabled = true
+        s.sixDaysShawwal = true
+        let date = Self.hijriDate(1448, 10, 1)
+        let result = FastingModeEngine.evaluate(
+            for: date, settings: s, calculationMethod: .muslimWorldLeague,
+            hijriCalendar: Self.hijri, timezone: Self.tz
+        )
+        #expect(result.isActive == false)
+        #expect(result.prohibition == .eidAlFitr)
+    }
+
+    @Test("Eid al-Adha suppresses any trigger")
+    func eidAlAdhaSuppresses() {
+        var s = FastingModeSettings()
+        s.enabled = true
+        s.dayOfArafah = true
+        s.firstNineDhulHijjah = true
+        s.weeklyDays = [1, 2, 3, 4, 5, 6, 7]
+        let date = Self.hijriDate(1448, 12, 10)
+        let result = FastingModeEngine.evaluate(
+            for: date, settings: s, calculationMethod: .muslimWorldLeague,
+            hijriCalendar: Self.hijri, timezone: Self.tz
+        )
+        #expect(result.isActive == false)
+        #expect(result.prohibition == .eidAlAdha)
+    }
+
+    @Test("Tashriq 11 suppresses ayyamAlBeed")
+    func tashriq11SuppressesAyyamAlBeed() {
+        var s = FastingModeSettings()
+        s.enabled = true
+        s.ayyamAlBeed = true
+        let date = Self.hijriDate(1448, 12, 11)
+        let result = FastingModeEngine.evaluate(
+            for: date, settings: s, calculationMethod: .muslimWorldLeague,
+            hijriCalendar: Self.hijri, timezone: Self.tz
+        )
+        #expect(result.prohibition == .tashriq11)
+    }
+
+    @Test("Tashriq 12 suppresses any trigger")
+    func tashriq12Suppresses() {
+        var s = FastingModeSettings()
+        s.enabled = true
+        s.weeklyDays = [1, 2, 3, 4, 5, 6, 7]
+        let date = Self.hijriDate(1448, 12, 12)
+        let result = FastingModeEngine.evaluate(
+            for: date, settings: s, calculationMethod: .muslimWorldLeague,
+            hijriCalendar: Self.hijri, timezone: Self.tz
+        )
+        #expect(result.prohibition == .tashriq12)
+    }
+
+    @Test("Tashriq 13 suppresses ayyamAlBeed")
+    func tashriq13SuppressesAyyamAlBeed() {
+        var s = FastingModeSettings()
+        s.enabled = true
+        s.ayyamAlBeed = true
+        let date = Self.hijriDate(1448, 12, 13)
+        let result = FastingModeEngine.evaluate(
+            for: date, settings: s, calculationMethod: .muslimWorldLeague,
+            hijriCalendar: Self.hijri, timezone: Self.tz
+        )
+        #expect(result.prohibition == .tashriq13)
+    }
+
+    @Test("ordinary day with no triggers stays inactive (no prohibition)")
+    func ordinaryDayInactive() {
+        var s = FastingModeSettings()
+        s.enabled = true
+        let date = Self.hijriDate(1448, 6, 20)
+        let result = FastingModeEngine.evaluate(
+            for: date, settings: s, calculationMethod: .muslimWorldLeague,
+            hijriCalendar: Self.hijri, timezone: Self.tz
+        )
+        #expect(result.isActive == false)
+        #expect(result.prohibition == nil)
+    }
+}

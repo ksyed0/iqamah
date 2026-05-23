@@ -28,10 +28,25 @@ public enum FastingModeEngine {
         var hCal = hijriCalendar
         hCal.timeZone = timezone
 
-        // (Future tasks: prohibition filter runs here before triggers.)
-
         let hijriMonth = hCal.component(.month, from: date)
         let hijriDay = hCal.component(.day, from: date)
+
+        // Prohibition filter — always wins over any trigger.
+        if hijriMonth == 10, hijriDay == 1 {
+            return FastingDayState(isActive: false, trigger: nil, prohibition: .eidAlFitr, date: date)
+        }
+        if hijriMonth == 12, hijriDay == 10 {
+            return FastingDayState(isActive: false, trigger: nil, prohibition: .eidAlAdha, date: date)
+        }
+        if hijriMonth == 12, hijriDay == 11 {
+            return FastingDayState(isActive: false, trigger: nil, prohibition: .tashriq11, date: date)
+        }
+        if hijriMonth == 12, hijriDay == 12 {
+            return FastingDayState(isActive: false, trigger: nil, prohibition: .tashriq12, date: date)
+        }
+        if hijriMonth == 12, hijriDay == 13 {
+            return FastingDayState(isActive: false, trigger: nil, prohibition: .tashriq13, date: date)
+        }
 
         // autoRamadan
         if settings.autoRamadan, hijriMonth == 9 {
@@ -70,7 +85,15 @@ public enum FastingModeEngine {
             return FastingDayState(isActive: true, trigger: .sixDaysShawwal, prohibition: nil, date: date)
         }
 
-        // (midShaban + mabath — Task 7)
+        // midShaban — Shia-gated
+        if settings.midShaban, calculationMethod.isShiaMethod, hijriMonth == 8, hijriDay == 15 {
+            return FastingDayState(isActive: true, trigger: .midShaban, prohibition: nil, date: date)
+        }
+
+        // mabath (27 Rajab) — Shia-gated
+        if settings.mabath, calculationMethod.isShiaMethod, hijriMonth == 7, hijriDay == 27 {
+            return FastingDayState(isActive: true, trigger: .mabath, prohibition: nil, date: date)
+        }
 
         // weeklySchedule
         if !settings.weeklyDays.isEmpty {
