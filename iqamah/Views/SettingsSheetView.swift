@@ -457,30 +457,10 @@ struct SettingsSheetView: View {
                 }
                 recommendationLabel = CalculationMethod.recommendationLabel(forCountryCode: country.code)
             }
-            .alert(
-                "Launch at Login",
-                isPresented: Binding(
-                    get: { loginItemError != nil },
-                    set: { if !$0 { loginItemError = nil } }
-                ),
-                presenting: loginItemError
-            ) { _ in
-                Button("OK", role: .cancel) { loginItemError = nil }
-            } message: { msg in
-                Text(msg)
-            }
-            .alert(
-                "Approve in Login Items",
-                isPresented: Binding(
-                    get: { loginItemInfo != nil },
-                    set: { if !$0 { loginItemInfo = nil } }
-                ),
-                presenting: loginItemInfo
-            ) { _ in
-                Button("OK", role: .cancel) { loginItemInfo = nil }
-            } message: { msg in
-                Text(msg)
-            }
+            .modifier(LaunchAtLoginAlerts(
+                error: $loginItemError,
+                info: $loginItemInfo
+            ))
         #endif
     }
 }
@@ -553,6 +533,29 @@ private extension SettingsSheetView {
         onSave(city, selectedMethod, selectedAsrMethod)
     }
 }
+
+// MARK: - Launch at Login alerts modifier (macOS)
+
+#if os(macOS)
+    private struct LaunchAtLoginAlerts: ViewModifier {
+        @Binding var error: String?
+        @Binding var info: String?
+
+        private func presentation(_ value: Binding<String?>) -> Binding<Bool> {
+            Binding(get: { value.wrappedValue != nil }, set: { if !$0 { value.wrappedValue = nil } })
+        }
+
+        func body(content: Content) -> some View {
+            content
+                .alert("Launch at Login", isPresented: presentation($error), presenting: error) { _ in
+                    Button("OK", role: .cancel) { error = nil }
+                } message: { msg in Text(msg) }
+                .alert("Approve in Login Items", isPresented: presentation($info), presenting: info) { _ in
+                    Button("OK", role: .cancel) { info = nil }
+                } message: { msg in Text(msg) }
+        }
+    }
+#endif
 
 // MARK: - Hilal Watch settings (extracted to keep SettingsSheetView under line limit)
 

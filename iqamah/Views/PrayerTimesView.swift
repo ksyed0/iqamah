@@ -166,20 +166,12 @@ struct PrayerTimesView: View {
                         .frame(width: 64, height: 64)
                         .shadow(color: Color.primary.opacity(0.10), radius: 3, x: 0, y: 1)
                 #endif
-
                 Text("Iqamah")
                     .font(.system(size: titleFontSize, weight: .bold, design: .serif))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [
-                                Color.appGoldDim,
-                                Color(red: 0.85, green: 0.65, blue: 0.13),
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-
+                    .foregroundStyle(LinearGradient(
+                        colors: [Color.appGoldDim, Color(red: 0.85, green: 0.65, blue: 0.13)],
+                        startPoint: .topLeading, endPoint: .bottomTrailing
+                    ))
                 VStack(alignment: .leading, spacing: 2) {
                     Text(displayCityName)
                         .font(.title3.weight(.semibold))
@@ -190,52 +182,32 @@ struct PrayerTimesView: View {
                         .foregroundColor(.secondary)
                         .lineLimit(1)
                 }
-
                 Spacer()
-
                 // ── Qiblah / Settings / About — in header on macOS ──
                 #if os(macOS)
                     HStack(spacing: 16) {
-                        Button(action: { showQiblah = true }) {
-                            VStack(spacing: 2) {
-                                Image(systemName: "location.north.line.fill")
-                                    .font(.title3)
-                                Text("Qiblah")
-                                    .font(.caption2)
-                            }
-                        }
-                        .buttonStyle(.plain)
-                        .help("Qiblah direction")
-                        .accessibilityLabel("Show Qiblah direction")
-
-                        Button(action: { showSettings = true }) {
-                            VStack(spacing: 2) {
-                                Image(systemName: "gearshape")
-                                    .font(.title3)
-                                Text("Settings")
-                                    .font(.caption2)
-                            }
-                        }
-                        .buttonStyle(.plain)
-                        .help("Settings")
-                        .accessibilityLabel("Open settings")
-                        .keyboardShortcut(",", modifiers: .command)
-
-                        Button(action: { showAbout = true }) {
-                            VStack(spacing: 2) {
-                                Image(systemName: "info.circle")
-                                    .font(.title3)
-                                Text("About")
-                                    .font(.caption2)
-                            }
-                        }
-                        .buttonStyle(.plain)
-                        .help("About Iqamah")
-                        .accessibilityLabel("About Iqamah")
+                        topBarIconButton(
+                            systemImage: "location.north.line.fill",
+                            label: "Qiblah",
+                            help: "Qiblah direction",
+                            accessibilityLabel: "Show Qiblah direction"
+                        ) { showQiblah = true }
+                        topBarIconButton(
+                            systemImage: "gearshape",
+                            label: "Settings",
+                            help: "Settings",
+                            accessibilityLabel: "Open settings",
+                            keyboardShortcut: ","
+                        ) { showSettings = true }
+                        topBarIconButton(
+                            systemImage: "info.circle",
+                            label: "About",
+                            help: "About Iqamah",
+                            accessibilityLabel: "About Iqamah"
+                        ) { showAbout = true }
                     }
                     .padding(.trailing, 8)
                 #endif
-
                 // Mute button
                 Button(action: { AdhaaanPlayer.shared.toggleMute() }) {
                     VStack(spacing: 2) {
@@ -245,8 +217,7 @@ struct PrayerTimesView: View {
                             .foregroundColor(AdhaaanPlayer.shared.isMuted ? .secondary : .accentColor)
                             .symbolRenderingMode(.hierarchical)
                         #if os(macOS)
-                            Text(AdhaaanPlayer.shared.isMuted ? "Unmute" : "Mute")
-                                .font(.caption2)
+                            Text(AdhaaanPlayer.shared.isMuted ? "Unmute" : "Mute").font(.caption2)
                         #endif
                     }
                 }
@@ -257,39 +228,29 @@ struct PrayerTimesView: View {
             .padding(.horizontal, 22)
             .padding(.top, 16)
             .padding(.bottom, 10)
-            .background {
-                Rectangle().fill(.ultraThinMaterial)
-            }
+            .background { Rectangle().fill(.ultraThinMaterial) }
 
             // Moon phase preview + Hilal Watch entry
             HStack(spacing: 12) {
                 MoonPhaseView(phase: currentMoonPhase, size: 56)
                     .accessibilityLabel(moonPhaseAccessibilityLabel)
-
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(hijriDateLabel)
-                        .font(.subheadline)
+                    Text(hijriDateLabel).font(.subheadline)
                     Text(isHilalWatchEvening ? "Hilal Watch tonight" : moonPhaseSubtitle)
                         .font(.caption)
                         .foregroundStyle(isHilalWatchEvening ? .orange : .secondary)
                 }
-
                 Spacer()
-
-                Button("Hilal Watch ›") {
-                    openHilalWatch()
-                }
-                .buttonStyle(.borderless)
-                .font(.caption.weight(.medium))
-                .foregroundStyle(Color.appGold)
-                // XCUITest identifier (AC-0322, US-0066)
-                .accessibilityIdentifier("hilalWatchButton")
+                Button("Hilal Watch ›") { openHilalWatch() }
+                    .buttonStyle(.borderless)
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(Color.appGold)
+                    // XCUITest identifier (AC-0322, US-0066)
+                    .accessibilityIdentifier("hilalWatchButton")
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 8)
-            .background {
-                Rectangle().fill(.ultraThinMaterial)
-            }
+            .background { Rectangle().fill(.ultraThinMaterial) }
 
             Divider()
 
@@ -298,9 +259,7 @@ struct PrayerTimesView: View {
                 .font(.subheadline.bold())
                 .padding(.vertical, 12)
                 .frame(maxWidth: .infinity)
-                .background {
-                    Rectangle().fill(.ultraThinMaterial.opacity(0.6))
-                }
+                .background { Rectangle().fill(.ultraThinMaterial.opacity(0.6)) }
 
             // Prayer times table — pass the shared expandedRowID so the adhaan
             // picker can open/close on macOS (was using .constant(nil) default).
@@ -411,17 +370,15 @@ struct PrayerTimesView: View {
     }
 
     private var moonPhaseSubtitle: String {
-        let phase = currentMoonPhase
-        switch phase {
-        case 0 ..< 0.03: return "New Moon"
+        switch currentMoonPhase {
+        case 0 ..< 0.03, 0.97...: return "New Moon"
         case 0.03 ..< 0.25: return "Waxing Crescent"
         case 0.25 ..< 0.27: return "First Quarter"
         case 0.27 ..< 0.48: return "Waxing Gibbous"
         case 0.48 ..< 0.52: return "Full Moon"
         case 0.52 ..< 0.73: return "Waning Gibbous"
         case 0.73 ..< 0.75: return "Last Quarter"
-        case 0.75 ..< 0.97: return "Waning Crescent"
-        default: return "New Moon"
+        default: return "Waning Crescent"
         }
     }
 
@@ -463,27 +420,21 @@ struct PrayerTimesView: View {
     private func calculatePrayerTimes() {
         let timezone = TimeZone(identifier: city.timezone) ?? .current
         let calculator = PrayerCalculator(
-            coordinate: city.coordinate,
-            timezone: timezone,
-            method: calculationMethod,
-            asrMethod: asrMethod
+            coordinate: city.coordinate, timezone: timezone,
+            method: calculationMethod, asrMethod: asrMethod
         )
-
         do {
             prayerTimes = try calculator.calculate(for: currentDate)
         } catch {
-            // Log error and show user-friendly message
+            // Log error; in production, show alert to user
             print("Prayer calculation error: \(error.localizedDescription)")
-            // In production, show alert to user
         }
     }
 
     private func updateDate() {
         let newDate = Date()
-        let calendar = Calendar.current
-
         // Check if day has changed
-        if !calendar.isDate(newDate, inSameDayAs: currentDate) {
+        if !Calendar.current.isDate(newDate, inSameDayAs: currentDate) {
             expandedRowID = nil
             currentDate = newDate
             calculatePrayerTimes()
@@ -491,7 +442,6 @@ struct PrayerTimesView: View {
         } else {
             currentDate = newDate
         }
-
         #if os(iOS)
             // Mirror macOS AppDelegate.triggerAdhaanIfNeeded: play the selected adhaan
             // when a prayer time arrives while the app is in the foreground.
@@ -499,6 +449,37 @@ struct PrayerTimesView: View {
         #endif
     }
 }
+
+// MARK: - PrayerTimesView+TopBar (macOS only)
+
+#if os(macOS)
+    private extension PrayerTimesView {
+        @ViewBuilder
+        func topBarIconButton(
+            systemImage: String,
+            label: String,
+            help: String,
+            accessibilityLabel: String,
+            keyboardShortcut: KeyEquivalent? = nil,
+            action: @escaping () -> Void
+        ) -> some View {
+            let button = Button(action: action) {
+                VStack(spacing: 2) {
+                    Image(systemName: systemImage).font(.title3)
+                    Text(label).font(.caption2)
+                }
+            }
+            .buttonStyle(.plain)
+            .help(help)
+            .accessibilityLabel(accessibilityLabel)
+            if let key = keyboardShortcut {
+                button.keyboardShortcut(key, modifiers: .command)
+            } else {
+                button
+            }
+        }
+    }
+#endif
 
 // MARK: - PrayerTimesView+AdhaanTrigger (iOS only)
 
