@@ -76,7 +76,11 @@ struct PrayerTimesView: View {
                             moonPhaseSubtitle: moonPhaseSubtitle,
                             isHilalWatchEvening: isHilalWatchEvening,
                             nextPrayerTime: nextPrayerTime,
-                            onHilalWatch: openHilalWatch
+                            onHilalWatch: openHilalWatch,
+                            fastingPrayerTimes: times,
+                            fastingSettings: SettingsManager.shared.fastingModeSettings,
+                            fastingCalculationMethod: calculationMethod,
+                            fastingTimezone: tz
                         )
                         Text(currentDate.formattedGregorianDate())
                             .font(.subheadline.bold())

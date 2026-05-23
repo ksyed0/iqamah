@@ -19,8 +19,29 @@
         let onToggleMute: () -> Void
 
         @Environment(\.colorScheme) private var colorScheme
+        @ObservedObject private var settings = SettingsManager.shared
         private var gold: Color { colorScheme == .dark ? .appGold : .appGoldDark }
         private var isSunrise: Bool { name == "Sunrise" }
+
+        /// Apply Fasting Mode relabel (Fajr→Suhoor, Maghrib→Iftar with glyph)
+        /// when state.isActive and the prayer is within the 2h window.
+        /// AC-0369 (iOS portion).
+        private var displayedName: String {
+            let timezone = TimeZone(identifier: settings.activeTimezoneIdentifier) ?? .current
+            let state = FastingModeEngine.evaluate(
+                for: Date(),
+                settings: settings.fastingModeSettings,
+                calculationMethod: settings.calculationMethod,
+                hijriCalendar: Calendar(identifier: .islamicUmmAlQura),
+                timezone: timezone
+            )
+            return FastingLabelFormatter.relabel(
+                prayerName: name,
+                prayerTime: time,
+                currentTime: Date(),
+                state: state
+            )
+        }
 
         var body: some View {
             VStack(spacing: 0) {
@@ -54,7 +75,7 @@
 
                     // Prayer name
                     VStack(alignment: .leading, spacing: 1) {
-                        Text(name)
+                        Text(displayedName)
                             .font(isNext ? .body.bold() : .body)
                             .foregroundStyle(isNext ? gold : .primary)
                         if isNext {
