@@ -74,6 +74,13 @@ struct SettingsTab: View {
                 Toggle("Prayer haptics", isOn: $settings.hilalNotificationEnabled)
             }
 
+            Section("Fasting Mode") {
+                Toggle("Enable", isOn: $settings.fastingModeSettings.enabled)
+                Text("Configure triggers + reminders on iPhone or Mac")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+
             Section("Display") {
                 Toggle("24-hour time", isOn: $settings.use24HourTime)
             }

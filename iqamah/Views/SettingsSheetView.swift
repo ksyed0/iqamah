@@ -356,6 +356,7 @@ struct SettingsSheetView: View {
             Section { locationSection } header: { Label("Location", systemImage: "location.fill") }
             Section { calculationSection } header: { Label("Calculation", systemImage: "function") }
             Section { displaySection } header: { Label("Display", systemImage: "display") }
+            FastingModeSection(settings: SettingsManager.shared)
             Section { HilalWatchSettingsSection() } header: { Label("Hilal Watch", systemImage: "moon.haze.fill") }
             Section {
                 adjustmentsSection
