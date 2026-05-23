@@ -43,6 +43,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             object: nil
         )
 
+        // Fasting Mode reminders — schedule at launch + on every settings change
+        // (debounced inside the scheduler). Day-rollover reschedule is wired in
+        // triggerAdhaanIfNeeded where we already detect midnight.
+        FastingNotificationScheduler.shared.requestReschedule()
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             if let window = NSApplication.shared.windows.first {
                 self.mainWindow = window
@@ -55,6 +60,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     @objc private func settingsDidChange() {
         updateStatusBarDisplay()
         resizeWindowForScale()
+        MainActor.assumeIsolated {
+            FastingNotificationScheduler.shared.requestReschedule()
+        }
     }
 
     private func resizeWindowForScale() {
@@ -235,6 +243,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         if !Calendar.current.isDate(now, inSameDayAs: announcedDate) {
             announcedPrayers.removeAll()
             announcedDate = now
+            // Advance the 7-day fasting notification window on day rollover.
+            MainActor.assumeIsolated {
+                FastingNotificationScheduler.shared.requestReschedule()
+            }
         }
 
         let dateKey: (String) -> String = { name in
