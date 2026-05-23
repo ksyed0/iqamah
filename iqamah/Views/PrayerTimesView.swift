@@ -371,14 +371,14 @@ struct PrayerTimesView: View {
 
     private var moonPhaseSubtitle: String {
         switch currentMoonPhase {
-        case 0 ..< 0.03, 0.97...: return "New Moon"
-        case 0.03 ..< 0.25: return "Waxing Crescent"
-        case 0.25 ..< 0.27: return "First Quarter"
-        case 0.27 ..< 0.48: return "Waxing Gibbous"
-        case 0.48 ..< 0.52: return "Full Moon"
-        case 0.52 ..< 0.73: return "Waning Gibbous"
-        case 0.73 ..< 0.75: return "Last Quarter"
-        default: return "Waning Crescent"
+        case 0 ..< 0.03, 0.97...: "New Moon"
+        case 0.03 ..< 0.25: "Waxing Crescent"
+        case 0.25 ..< 0.27: "First Quarter"
+        case 0.27 ..< 0.48: "Waxing Gibbous"
+        case 0.48 ..< 0.52: "Full Moon"
+        case 0.52 ..< 0.73: "Waning Gibbous"
+        case 0.73 ..< 0.75: "Last Quarter"
+        default: "Waning Crescent"
         }
     }
 
