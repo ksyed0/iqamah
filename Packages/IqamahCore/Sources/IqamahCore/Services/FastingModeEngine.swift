@@ -30,27 +30,43 @@ public enum FastingModeEngine {
 
         // (Future tasks: prohibition filter runs here before triggers.)
 
-        if settings.autoRamadan {
-            let hijriMonth = hCal.component(.month, from: date)
-            if hijriMonth == 9 {
-                return FastingDayState(
-                    isActive: true,
-                    trigger: .autoRamadan,
-                    prohibition: nil,
-                    date: date
-                )
-            }
+        let hijriMonth = hCal.component(.month, from: date)
+        let hijriDay = hCal.component(.day, from: date)
+
+        // autoRamadan
+        if settings.autoRamadan, hijriMonth == 9 {
+            return FastingDayState(isActive: true, trigger: .autoRamadan, prohibition: nil, date: date)
         }
 
+        // dayOfArafah — priority over firstNineDhulHijjah on day 9
+        if settings.dayOfArafah, hijriMonth == 12, hijriDay == 9 {
+            return FastingDayState(isActive: true, trigger: .dayOfArafah, prohibition: nil, date: date)
+        }
+
+        // firstNineDhulHijjah
+        if settings.firstNineDhulHijjah, hijriMonth == 12, (1...9).contains(hijriDay) {
+            return FastingDayState(isActive: true, trigger: .firstNineDhulHijjah, prohibition: nil, date: date)
+        }
+
+        // (muharramFast — Task 6)
+
+        // ayyamAlBeed
+        if settings.ayyamAlBeed, (13...15).contains(hijriDay) {
+            return FastingDayState(isActive: true, trigger: .ayyamAlBeed, prohibition: nil, date: date)
+        }
+
+        // sixDaysShawwal
+        if settings.sixDaysShawwal, hijriMonth == 10, (2...7).contains(hijriDay) {
+            return FastingDayState(isActive: true, trigger: .sixDaysShawwal, prohibition: nil, date: date)
+        }
+
+        // (midShaban + mabath — Task 7)
+
+        // weeklySchedule
         if !settings.weeklyDays.isEmpty {
             let weekday = gregCal.component(.weekday, from: date)
             if settings.weeklyDays.contains(weekday) {
-                return FastingDayState(
-                    isActive: true,
-                    trigger: .weeklySchedule,
-                    prohibition: nil,
-                    date: date
-                )
+                return FastingDayState(isActive: true, trigger: .weeklySchedule, prohibition: nil, date: date)
             }
         }
 

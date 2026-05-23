@@ -127,3 +127,108 @@ struct FastingModeEngineBaseTests {
         #expect(a == b)
     }
 }
+
+@Suite("FastingModeEngine — Hijri-date triggers")
+struct FastingModeEngineHijriTests {
+    static let hijri = Calendar(identifier: .islamicUmmAlQura)
+    static let tz = TimeZone(identifier: "America/Toronto")!
+
+    /// Build a Date for the given Hijri Y/M/D in the test timezone, at noon.
+    static func hijriDate(_ y: Int, _ m: Int, _ d: Int) -> Date {
+        var cal = Calendar(identifier: .islamicUmmAlQura)
+        cal.timeZone = tz
+        return cal.date(from: DateComponents(year: y, month: m, day: d, hour: 12))!
+    }
+
+    @Test("ayyamAlBeed fires on day 13 of any Hijri month")
+    func ayyamAlBeed13() {
+        var s = FastingModeSettings()
+        s.enabled = true
+        s.ayyamAlBeed = true
+        let date = Self.hijriDate(1448, 8, 13)
+        let result = FastingModeEngine.evaluate(for: date, settings: s, calculationMethod: .muslimWorldLeague, hijriCalendar: Self.hijri, timezone: Self.tz)
+        #expect(result.isActive == true)
+        #expect(result.trigger == .ayyamAlBeed)
+    }
+
+    @Test("ayyamAlBeed fires on day 14")
+    func ayyamAlBeed14() {
+        var s = FastingModeSettings()
+        s.enabled = true
+        s.ayyamAlBeed = true
+        let date = Self.hijriDate(1448, 8, 14)
+        let result = FastingModeEngine.evaluate(for: date, settings: s, calculationMethod: .muslimWorldLeague, hijriCalendar: Self.hijri, timezone: Self.tz)
+        #expect(result.trigger == .ayyamAlBeed)
+    }
+
+    @Test("ayyamAlBeed does not fire on day 16")
+    func ayyamAlBeedDay16() {
+        var s = FastingModeSettings()
+        s.enabled = true
+        s.ayyamAlBeed = true
+        let date = Self.hijriDate(1448, 8, 16)
+        let result = FastingModeEngine.evaluate(for: date, settings: s, calculationMethod: .muslimWorldLeague, hijriCalendar: Self.hijri, timezone: Self.tz)
+        #expect(result.isActive == false)
+    }
+
+    @Test("sixDaysShawwal fires on day 2 Shawwal")
+    func sixShawwalDay2() {
+        var s = FastingModeSettings()
+        s.enabled = true
+        s.sixDaysShawwal = true
+        let date = Self.hijriDate(1448, 10, 2)
+        let result = FastingModeEngine.evaluate(for: date, settings: s, calculationMethod: .muslimWorldLeague, hijriCalendar: Self.hijri, timezone: Self.tz)
+        #expect(result.trigger == .sixDaysShawwal)
+    }
+
+    @Test("sixDaysShawwal fires on day 7 Shawwal")
+    func sixShawwalDay7() {
+        var s = FastingModeSettings()
+        s.enabled = true
+        s.sixDaysShawwal = true
+        let date = Self.hijriDate(1448, 10, 7)
+        let result = FastingModeEngine.evaluate(for: date, settings: s, calculationMethod: .muslimWorldLeague, hijriCalendar: Self.hijri, timezone: Self.tz)
+        #expect(result.trigger == .sixDaysShawwal)
+    }
+
+    @Test("sixDaysShawwal does not fire on day 8 Shawwal")
+    func sixShawwalDay8Inactive() {
+        var s = FastingModeSettings()
+        s.enabled = true
+        s.sixDaysShawwal = true
+        let date = Self.hijriDate(1448, 10, 8)
+        let result = FastingModeEngine.evaluate(for: date, settings: s, calculationMethod: .muslimWorldLeague, hijriCalendar: Self.hijri, timezone: Self.tz)
+        #expect(result.isActive == false)
+    }
+
+    @Test("dayOfArafah fires on 9 Dhul-Hijjah")
+    func arafahFires() {
+        var s = FastingModeSettings()
+        s.enabled = true
+        s.dayOfArafah = true
+        let date = Self.hijriDate(1448, 12, 9)
+        let result = FastingModeEngine.evaluate(for: date, settings: s, calculationMethod: .muslimWorldLeague, hijriCalendar: Self.hijri, timezone: Self.tz)
+        #expect(result.trigger == .dayOfArafah)
+    }
+
+    @Test("firstNineDhulHijjah fires on day 5")
+    func firstNineDay5() {
+        var s = FastingModeSettings()
+        s.enabled = true
+        s.firstNineDhulHijjah = true
+        let date = Self.hijriDate(1448, 12, 5)
+        let result = FastingModeEngine.evaluate(for: date, settings: s, calculationMethod: .muslimWorldLeague, hijriCalendar: Self.hijri, timezone: Self.tz)
+        #expect(result.trigger == .firstNineDhulHijjah)
+    }
+
+    @Test("on 9 Dhul-Hijjah, dayOfArafah wins over firstNineDhulHijjah")
+    func arafahPriorityOverFirstNine() {
+        var s = FastingModeSettings()
+        s.enabled = true
+        s.dayOfArafah = true
+        s.firstNineDhulHijjah = true
+        let date = Self.hijriDate(1448, 12, 9)
+        let result = FastingModeEngine.evaluate(for: date, settings: s, calculationMethod: .muslimWorldLeague, hijriCalendar: Self.hijri, timezone: Self.tz)
+        #expect(result.trigger == .dayOfArafah)
+    }
+}
