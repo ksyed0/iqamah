@@ -41,13 +41,18 @@ Logged from competitive analysis (May 2026) and product research. Items are grou
 
 ## Ramadan / Seasonal Features
 
-### ENH-002 — Ramadan Mode (Suhoor & Iftar Countdowns)
-**Source:** Competitor gap — 8 of 10 top apps have this; users expect it  
-**Priority:** High — seasonal but high-visibility
+### ENH-002 — Fasting Mode (Suhoor & Iftar Countdowns + Nawafil Triggers) ✅ Implemented (2026-05-21)
+**Status:** ✅ Implemented as EPIC-0017 (US-0071–US-0075 shipped in v1.6). Generalized from Ramadan-only mode to a Fasting Mode covering 9 activation triggers (auto-Ramadan, weekly schedule, Ayyam al-Beed, 6 of Shawwal, Day of Arafah, first 9 of Dhul-Hijjah, Muharram fast, 15 Sha'ban, 27 Rajab). Tradition-aware UI gating driven by `isShiaMethod` helper; Ja'fari calculation method added alongside Tehran. Spec at `docs/superpowers/specs/2026-05-21-fasting-mode-design.md`.
 
-Replace or augment the standard prayer countdown in the menu bar with Suhoor (Fajr) and Iftar (Maghrib) countdowns during Ramadan. Auto-detect Ramadan dates via Hijri calendar. Could show "Suhoor in 2h 14m" or "Iftar in 45m" during the month.
-
-**Effort:** Medium — Hijri calendar logic already present; needs menu bar display logic + Ramadan date range detection
+| Surface | Treatment |
+|---|---|
+| macOS menu bar | Relabel Fajr→Suhoor / Maghrib→Iftar (🌙 Ramadan, 🕗 Nawafil) within 2h window |
+| macOS popover | Banner + relabel |
+| iOS hero card | Banner + relabel |
+| iOS prayer row | Relabel |
+| watchOS prayer tab | Relabel |
+| Widgets | Relabel in entries |
+| Live Activity | Relabel via ContentState fastingActive/fastingTriggerRaw fields |
 
 ---
 
@@ -565,6 +570,23 @@ Path 2 (additional):
 
 **Effort:** Path 1: ~1 week testing + submission. Path 2: ~3–4 weeks on top.
 
+
+---
+
+### ENH-022 — Islamic Holiday Celebration Reminders
+**Source:** Spawned from Fasting Mode brainstorming (2026-05-21) as a sibling concept
+
+**Problem:** Iqamah surfaces fasting practice via Fasting Mode (ENH-002) but does not commemorate non-fasting Islamic holidays. Users miss notifications for Eid al-Fitr, Eid al-Adha, Mawlid an-Nabi, Laylat al-Qadr, Hijri New Year, Ashura commemorations (Shia tradition), Isra wal-Mi'raj, Laylat al-Bara'ah, and Eid al-Ghadir (Shia).
+
+**Solution:** Reuse the FastingModeEngine's Hijri-date evaluation infrastructure to expose celebration notifications. Per-holiday opt-in toggles in Settings. Tradition-aware visibility (some holidays observed primarily in Shia or Sunni tradition).
+
+**Effort:** Medium — engine pattern is established; mainly date data + UI toggles + per-platform notification scheduling.
+
+**Files (when implemented):**
+- `Packages/IqamahCore/Sources/IqamahCore/Services/CelebrationCalendar.swift` (new)
+- `Packages/IqamahCore/Sources/IqamahCore/Services/SettingsManager.swift` (new celebration toggles)
+- Settings UI section (parallel to FastingModeSection)
+- Per-platform notification scheduler extensions
 
 ---
 

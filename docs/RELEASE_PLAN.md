@@ -1729,4 +1729,77 @@ rm adhaan_4_original_backup.mp3
 **Total:** 8 acceptance criteria (AC-0349 – AC-0356), mapped 1:1 to TC-0036 – TC-0043.
 **Estimated effort:** ½ developer-day.
 
-**Last Updated:** 2026-05-21 (EPIC-0016 created — 1 user story, 8 ACs, ENH-001 finish-up)
+---
+
+## EPIC-0017 — Fasting Mode (ENH-002)
+
+**Status:** ✅ Done
+**Version Target:** v1.6
+**Cross-references:** ENH-002 in `docs/ENHANCEMENTS.md`; spec at `docs/superpowers/specs/2026-05-21-fasting-mode-design.md`; plan at `docs/superpowers/plans/2026-05-21-fasting-mode.md`
+
+**Goal:** Generalize Ramadan Mode into a year-round Fasting Mode covering auto-Ramadan + 7 Nawafil triggers with method-gated visibility, dedicated banner + relabel display across all surfaces, configurable Suhoor/Iftar/day-before notifications, and a new Ja'fari calculation method.
+
+---
+
+### US-0071 — FastingModeEngine + settings schema (IqamahCore foundation) ✅ Done
+
+**Acceptance Criteria:**
+- [x] AC-0357: FastingModeSettings struct with 16 default-valued fields; Codable round-trip preserves all; legacy JSON missing fields decodes with defaults
+- [x] AC-0358: FastingModeEngine.evaluate is pure-functional and returns FastingDayState
+- [x] AC-0359: autoRamadan + weeklySchedule triggers fire correctly
+- [x] AC-0360: ayyamAlBeed + sixDaysShawwal triggers
+- [x] AC-0361: dayOfArafah + firstNineDhulHijjah with Arafah priority on day 9
+- [x] AC-0362: muharramFast tradition-adaptive (Sunni 9+10, Shia 9 only)
+- [x] AC-0363: midShaban + mabath suppressed in engine when !isShiaMethod
+- [x] AC-0364: Prohibition filter (Eid×2 + Tashriq×3) always wins over triggers
+
+### US-0072 — UI Surfaces (banner + relabel) ✅ Done
+
+**Acceptance Criteria:**
+- [x] AC-0365: FastingLabelFormatter relabels Fajr↔Suhoor + Maghrib↔Iftar within 2h window with appropriate glyph
+- [x] AC-0366: FastingBanner active-state rendering (Ramadan vs Nawafil tinting)
+- [x] AC-0367: FastingBanner prohibition rendering
+- [x] AC-0368: macOS menu bar + popover wiring
+- [x] AC-0369: iOS hero card + row relabel + watchOS prayer tab relabel
+- [x] AC-0370: Live Activity ContentState backward-compatible with v1.5
+
+### US-0073 — Settings UI + tradition-aware gating ✅ Done
+
+**Acceptance Criteria:**
+- [x] AC-0371: Master toggle hides sub-controls when off
+- [x] AC-0372: Muharram label adaptation + midShaban/mabath visibility driven by isShiaMethod
+- [x] AC-0373: Friday-alone + Saturday-alone warnings
+- [x] AC-0374: Toggle state persists across method changes
+- [x] AC-0375: watchOS Settings shows master toggle + "Configure on iPhone/Mac" hint only
+
+### US-0074 — Notifications + scheduling ✅ Done
+
+**Acceptance Criteria:**
+- [x] AC-0376: Suhoor + Iftar reminders with independent lead times (5–120 min)
+- [x] AC-0377: Day-before reminder fires for Ramadan day 1 and Nawafil days, skipped for Ramadan days 2–30
+- [x] AC-0378: 7-day rolling window with 500ms debounce
+- [x] AC-0379: All reminders suppressed for hard-prohibited days
+- [x] AC-0380: Permission-denied state shows deep link (iOS + macOS)
+
+### US-0075 — Ja'fari calculation method ✅ Done
+
+**Acceptance Criteria:**
+- [x] AC-0381: .jafari case with Fajr 16°, Isha 14°, Maghrib 4° below horizon
+- [x] AC-0382: isShiaMethod returns true for .tehran/.jafari, false otherwise; picker includes Ja'fari row
+
+---
+
+**EPIC-0017 Summary:**
+
+| Story | Surfaces | Effort | AC count |
+|---|---|---|---|
+| US-0071 — Engine + settings | IqamahCore | M | 8 |
+| US-0072 — UI surfaces | All | M | 6 |
+| US-0073 — Settings UI | iOS+macOS+watchOS | M | 5 |
+| US-0074 — Notifications | All | M | 5 |
+| US-0075 — Ja'fari method | IqamahCore + UI | S | 2 |
+
+**Total:** 26 acceptance criteria (AC-0357 – AC-0382), mapped 1:1 to TC-0044 – TC-0072 (plus TC-0073 for multi-platform smoke).
+**Estimated effort:** 2–3 developer-weeks.
+
+**Last Updated:** 2026-05-23 (EPIC-0017 closed — Fasting Mode shipped: 5 user stories, 26 ACs, Ja'fari method, 7-day debounced notification window on macOS/iOS/watchOS)
