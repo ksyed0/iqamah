@@ -396,26 +396,27 @@ The audit showed Iqamah is doing everything correctly within Apple's default con
 
 ---
 
-### ENH-0026 — Background-reliable Live Activity updates
+### ENH-0026 — Background-reliable Live Activity + push-driven notifications
 
-**Status:** Backlog
-**Source:** Follow-up from v1.6.0 LA rollover fix (PR #133, commit 405256a)
+**Status:** Future enhancement (backend infrastructure required)
+**Source:** Follow-up from v1.6.0 LA rollover fix (PR #133)
+**Design spec:** [docs/superpowers/specs/2026-05-24-enh-0026-push-driven-notifications-design.md](superpowers/specs/2026-05-24-enh-0026-push-driven-notifications-design.md)
+**Last reviewed:** 2026-05-24 (design brainstorm completed; implementation deferred)
 
-**Problem:** v1.6.0 ships a foreground/recent-background fix for the Live Activity "stuck on passed prayer" bug — `staleDate` + a `Timer` that re-evaluates the activity state at the next prayer time. If the app is suspended (long-backgrounded, terminated, or memory-pressured), the Timer doesn't fire and the Live Activity / Dynamic Island can drift again until the user reopens the app.
+**Problem.** PR #133's foreground `Timer` + `staleDate` fix covers Live Activity rollover for foreground/recent-background iOS apps. Fully suspended apps still drift until reopened. Full fix requires push-driven updates from a backend that calls APNs HTTP/2 on schedule.
 
-**Proposed solution:** Move from local Activity updates to push-token Live Activities. Each scheduled prayer time becomes a server-pushed `ActivityContent` update via APNs (or a silent local APNs via `Activity<...>.pushToken` if Apple's documentation allows it without a server). Pair with `BGAppRefreshTask` registration so the app can re-arm the next push window on launch / background refresh.
+**Designed solution (parked).** Cloudflare Workers production + local Mac for staging. Devices register settings to CloudKit; backend polls CloudKit every 15 min and on opportunistic LAN POSTs, computes the notification queue, sends APNs pushes. Live Activity updates pushed every 60s when `ContentState` changes. Full detail in the design spec.
 
-**Why backlog (not Epic yet):**
-- Requires a backend (or commitment to a server-light solution like a cheap Cloudflare Worker / Lambda) — design + cost decision.
-- Push payload format + retry strategy needs design.
-- Existing code already produces a `FastingDayState` per evaluation — pure-data side already done.
+**Why deferred:**
 
-**Promotion criteria:** Promote to EPIC + US when the team commits to a notification backend (a separate decision the indie/solo dev cycle will gate on).
+- Requires committing to backend operations (cost, SLA, monitoring) — shift from current client-only identity.
+- ~$5–$10/mo at 100k MAU is the minimum credible cost.
+- Privacy / GDPR implications when settings + location flow through developer infrastructure.
+- ENH-0027 (cross-ecosystem expansion) may change infrastructure decisions.
 
-**References:**
-- `iqamah/iOS/PrayerActivityManager.swift` — current foreground Timer
-- `IqamahLiveActivity/PrayerActivityAttributes.swift` — ContentState struct
-- Apple docs: ActivityKit push-token updates
+**Promotion criteria:** Product decision to commit to backend ops + privacy review + funding model agreed.
+
+**v1.6.0 workaround for end users:** Open Iqamah briefly to refresh the LA. Documented in `RELEASE_NOTES_v1.6.0.md` known limitations.
 
 ---
 

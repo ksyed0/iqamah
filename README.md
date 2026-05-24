@@ -128,6 +128,12 @@ The test suite covers prayer calculation accuracy, city model validation, Qiblah
 
 ---
 
+## Known Limitations
+
+- **Live Activity drift on long-suspended app (iOS)**: if iOS suspends the Iqamah app for several hours, the Dynamic Island Live Activity may briefly show a passed prayer until the app is reopened. Notifications are unaffected. Tracked as [ENH-0026](docs/ENHANCEMENTS.md#enh-0026); see [v1.6.0 release notes](docs/RELEASE_NOTES_v1.6.0.md#known-limitations) for the user-facing workaround.
+
+---
+
 ## Contributing
 
 1. Fork the repo and create a branch from `develop`
