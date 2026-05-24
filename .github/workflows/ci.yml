@@ -220,11 +220,13 @@ jobs:
 
       - name: Run snapshot tests
         run: |
+          rm -rf TestResults.xcresult
           xcodebuild test \
             -project ${{ env.PROJECT }} \
             -scheme ${{ env.SCHEME }} \
             -configuration Debug \
             -destination 'platform=macOS' \
+            -resultBundlePath TestResults.xcresult \
             -only-testing:iqamahTests/MoonPhaseSnapshotTests \
             -only-testing:iqamahTests/QiblahCompassSnapshotTests \
             -only-testing:iqamahTests/PrayerTimesTableSnapshotTests \
