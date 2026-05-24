@@ -15,6 +15,7 @@
 		944B0D992F635A0500EC6A01 /* TestsAdditionalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 944B0D982F635A0500EC6A01 /* TestsAdditionalTests.swift */; };
 		94594CE62FB2C01D00D1AD1C /* IqamahCore in Frameworks */ = {isa = PBXBuildFile; productRef = IC0000000000000000000002 /* IqamahCore */; };
 		94CAD5652F23CBB800E1689F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CAD5642F23CBB800E1689F /* AppDelegate.swift */; };
+		FN000000000000000000001 /* FastingNotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FN000000000000000000001R /* FastingNotificationScheduler.swift */; };
 		94CAD5692F23D23800E1689F /* splash.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 94CAD5682F23D23800E1689F /* splash.jpg */; };
 		94CAD56B2F23D3C800E1689F /* SplashScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CAD56A2F23D3C800E1689F /* SplashScreenView.swift */; };
 		AA0000000000000000000001 /* iqamahApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000011 /* iqamahApp.swift */; };
@@ -265,6 +266,7 @@
 		94594CE82FB2C01D00D1AD1C /* IqamahWatchWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = IqamahWatchWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		94594CE92FB2C01D00D1AD1C /* IqamahWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IqamahWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		94CAD5642F23CBB800E1689F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		FN000000000000000000001R /* FastingNotificationScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastingNotificationScheduler.swift; sourceTree = "<group>"; };
 		94CAD5682F23D23800E1689F /* splash.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = splash.jpg; sourceTree = "<group>"; };
 		94CAD56A2F23D3C800E1689F /* SplashScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashScreenView.swift; sourceTree = "<group>"; };
 		AA0000000000000000000010 /* iqamah.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iqamah.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -518,6 +520,7 @@
 			isa = PBXGroup;
 			children = (
 				94CAD5642F23CBB800E1689F /* AppDelegate.swift */,
+				FN000000000000000000001R /* FastingNotificationScheduler.swift */,
 				AA0000000000000000000011 /* iqamahApp.swift */,
 				AA0000000000000000000012 /* ContentView.swift */,
 				WI000000000000000000001R /* WatchAppIconView.swift */,
@@ -1148,6 +1151,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				94CAD5652F23CBB800E1689F /* AppDelegate.swift in Sources */,
+				FN000000000000000000001 /* FastingNotificationScheduler.swift in Sources */,
 				94CAD56B2F23D3C800E1689F /* SplashScreenView.swift in Sources */,
 				AA0000000000000000000001 /* iqamahApp.swift in Sources */,
 				944B0D992F635A0500EC6A01 /* TestsAdditionalTests.swift in Sources */,
