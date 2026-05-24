@@ -228,6 +228,8 @@ jobs:
             -only-testing:iqamahTests/MoonPhaseSnapshotTests \
             -only-testing:iqamahTests/QiblahCompassSnapshotTests \
             -only-testing:iqamahTests/PrayerTimesTableSnapshotTests \
+            -only-testing:iqamahTests/FastingBannerSnapshotTests \
+            -only-testing:iqamahTests/FastingModeSectionSnapshotTests \
             CODE_SIGNING_ALLOWED=NO \
             | xcpretty --color && exit ${PIPESTATUS[0]}
 

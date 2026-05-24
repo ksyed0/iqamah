@@ -27,6 +27,8 @@ xcodebuild test \
     -only-testing:iqamahTests/MoonPhaseSnapshotTests \
     -only-testing:iqamahTests/QiblahCompassSnapshotTests \
     -only-testing:iqamahTests/PrayerTimesTableSnapshotTests \
+    -only-testing:iqamahTests/FastingBannerSnapshotTests \
+    -only-testing:iqamahTests/FastingModeSectionSnapshotTests \
     CODE_SIGN_IDENTITY="-" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO \
     ENABLE_HARDENED_RUNTIME=NO \
     RECORD_SNAPSHOTS=YES \
