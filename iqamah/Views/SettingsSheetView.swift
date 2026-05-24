@@ -132,10 +132,14 @@ struct SettingsSheetView: View {
             if selectedCountry != nil {
                 Picker("City", selection: $selectedCity) {
                     Text("Select a city").tag(nil as City?)
-                    // GPS-detected city injected at top when country matches
+                    // BUG-0069: surface the GPS-detected (geocoded) city at the top of
+                    // the picker so users can always pick their actual locality even when
+                    // it doesn't exist in cities.json.
                     if let gpsCity = SettingsManager.shared.gpsDetectedCity,
                        gpsCity.countryCode == selectedCountry?.code {
-                        Text("📍 \(gpsCity.name) (GPS)").tag(gpsCity as City?)
+                        Label("Current Location: \(gpsCity.name)", systemImage: "location.fill")
+                            .tag(gpsCity as City?)
+                        Divider()
                     }
                     ForEach(cities) { city in
                         Text(city.name).tag(city as City?)
@@ -145,6 +149,9 @@ struct SettingsSheetView: View {
         } else {
             ProgressView("Loading cities…")
         }
+
+        // BUG-0069: opt-in auto-detect toggle (extracted to AutoDetectMoveToggle).
+        AutoDetectMoveToggle(settings: settings)
     }
 
     private func detectLocation() {

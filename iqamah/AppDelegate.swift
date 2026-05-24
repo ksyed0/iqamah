@@ -18,6 +18,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var announcedPrayers: Set<String> = []
     private var announcedDate = Date()
 
+    // BUG-0069: held strongly so the one-shot CLLocationManager callback fires.
+    // Accessed by the extension below; SwiftLint's strict_fileprivate rule allows
+    // this when the access is needed across same-file extensions.
+    // swiftlint:disable:next strict_fileprivate
+    fileprivate var autoDetectLocationService: LocationService?
+
     func applicationDidFinishLaunching(_: Notification) {
         // Bootstrap UI test state before any other setup so SettingsManager
         // reads the seeded city when ContentView first renders.
@@ -55,6 +61,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 window.center()
             }
         }
+
+        // BUG-0069: launch-time auto-detect (opt-in, one-shot). Skips silently if the
+        // user hasn't completed setup or has disabled the toggle.
+        performAutoDetectMoveCheck()
     }
 
     @objc private func settingsDidChange() {
@@ -509,6 +519,52 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             startUpdateTimer()
         } else {
             updateStatusBarDisplay()
+        }
+    }
+}
+
+// MARK: - BUG-0069 auto-detect (extracted to keep AppDelegate under type_body_length)
+
+extension AppDelegate {
+    @MainActor
+    func performAutoDetectMoveCheck() {
+        let settings = SettingsManager.shared
+        guard settings.hasCompletedSetup, settings.autoDetectOnMove else { return }
+        guard settings.loadCity() != nil else { return }
+
+        let service = LocationService()
+        autoDetectLocationService = service
+        Task { @MainActor in
+            do {
+                let coord = try await service.requestLocationAsync()
+                let outcome = AutoDetectMoveCheck.evaluate(
+                    settings: settings,
+                    currentCoordinate: coord
+                )
+                guard case let .shouldPrompt(distance, savedName) = outcome else {
+                    autoDetectLocationService = nil
+                    return
+                }
+                CLGeocoder().reverseGeocodeLocation(
+                    CLLocation(latitude: coord.latitude, longitude: coord.longitude)
+                ) { placemarks, _ in
+                    let locality = placemarks?.first?.locality
+                        ?? placemarks?.first?.name
+                        ?? ""
+                    DispatchQueue.main.async {
+                        let payload = MoveDetectedPayload(
+                            savedCityName: savedName,
+                            detectedCoordinate: coord,
+                            distanceMeters: distance,
+                            detectedLocality: locality
+                        )
+                        NotificationCenter.default.post(name: .didDetectMove, object: payload)
+                        self.autoDetectLocationService = nil
+                    }
+                }
+            } catch {
+                autoDetectLocationService = nil
+            }
         }
     }
 }

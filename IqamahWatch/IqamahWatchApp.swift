@@ -6,6 +6,7 @@ import SwiftUI
 struct IqamahWatchApp: App {
     @StateObject private var settings = SettingsManager.shared
     @StateObject private var locationSetup = WatchLocationSetup()
+    @StateObject private var moveDetector = WatchMoveDetector()
 
     init() {
         // Pre-seed Toronto / ISNA settings so XCUITests skip location setup (AC-0336, US-0068).
@@ -34,6 +35,27 @@ struct IqamahWatchApp: App {
                 locationSetup.start(settings: settings)
                 WatchSessionManager.shared.activate(settings: settings)
                 WatchNotificationScheduler.shared.requestFastingReschedule()
+                moveDetector.startIfNeeded(settings: settings)
+            }
+            .alert(
+                "Have you moved?",
+                isPresented: Binding(
+                    get: { moveDetector.pendingPayload != nil },
+                    set: { if !$0 { moveDetector.pendingPayload = nil } }
+                ),
+                presenting: moveDetector.pendingPayload
+            ) { payload in
+                Button("Switch") {
+                    moveDetector.applySwitch(payload: payload, settings: settings)
+                }
+                Button("Not now", role: .cancel) {
+                    moveDetector.pendingPayload = nil
+                }
+            } message: { payload in
+                let whereText = payload.detectedLocality.isEmpty
+                    ? "your current location"
+                    : payload.detectedLocality
+                Text("You appear to be in \(whereText), ~\(payload.distanceKmString) from \(payload.savedCityName). Switch?")
             }
             .onChange(of: settings.fastingModeSettings) { _, _ in
                 WatchNotificationScheduler.shared.requestFastingReschedule()
@@ -168,5 +190,81 @@ final class WatchLocationSetup: NSObject, ObservableObject, CLLocationManagerDel
             statusMessage = "Location unavailable — tap to retry"
             isReady = true
         }
+    }
+}
+
+// MARK: - BUG-0069 watch launch-time move detector
+
+@MainActor
+final class WatchMoveDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
+    @Published var pendingPayload: MoveDetectedPayload?
+
+    private let manager = CLLocationManager()
+    private var didStart = false
+    private weak var settingsRef: SettingsManager?
+
+    func startIfNeeded(settings: SettingsManager) {
+        guard !didStart else { return }
+        didStart = true
+        settingsRef = settings
+        guard settings.hasCompletedSetup, settings.autoDetectOnMove else { return }
+        guard settings.loadCity() != nil else { return }
+
+        manager.delegate = self
+        manager.desiredAccuracy = kCLLocationAccuracyKilometer
+        switch manager.authorizationStatus {
+        case .authorizedWhenInUse, .authorizedAlways:
+            manager.requestLocation()
+        default:
+            // Don't badger the user — the main onboarding flow handles permission.
+            return
+        }
+    }
+
+    func applySwitch(payload: MoveDetectedPayload, settings: SettingsManager) {
+        let locality = payload.detectedLocality.isEmpty
+            ? payload.savedCityName
+            : payload.detectedLocality
+        if let newCity = try? City(
+            name: locality,
+            countryCode: settings.loadCity()?.countryCode ?? "US",
+            latitude: payload.detectedCoordinate.latitude,
+            longitude: payload.detectedCoordinate.longitude,
+            timezone: TimeZone.current.identifier
+        ) {
+            settings.saveCity(newCity)
+            settings.locationSource = "gps"
+            settings.saveGPSCoordinates(payload.detectedCoordinate)
+            settings.gpsLocality = payload.detectedLocality
+            settings.gpsDetectedCity = newCity
+        }
+        pendingPayload = nil
+    }
+
+    nonisolated func locationManager(_: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let loc = locations.first else { return }
+        Task { @MainActor in
+            guard let settings = settingsRef else { return }
+            let outcome = AutoDetectMoveCheck.evaluate(
+                settings: settings,
+                currentCoordinate: loc.coordinate
+            )
+            guard case let .shouldPrompt(distance, savedName) = outcome else { return }
+            CLGeocoder().reverseGeocodeLocation(loc) { placemarks, _ in
+                let locality = placemarks?.first?.locality ?? placemarks?.first?.name ?? ""
+                Task { @MainActor in
+                    self.pendingPayload = MoveDetectedPayload(
+                        savedCityName: savedName,
+                        detectedCoordinate: loc.coordinate,
+                        distanceMeters: distance,
+                        detectedLocality: locality
+                    )
+                }
+            }
+        }
+    }
+
+    nonisolated func locationManager(_: CLLocationManager, didFailWithError _: Error) {
+        // Silent — this is opportunistic.
     }
 }

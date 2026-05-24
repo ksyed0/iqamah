@@ -40,6 +40,10 @@ struct SettingsTab: View {
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
                 }
+
+                // BUG-0069
+                Toggle("Auto-detect if I move > 25 km", isOn: $settings.autoDetectOnMove)
+                    .font(.caption2)
             }
 
             Section("Prayer Times") {
@@ -156,12 +160,30 @@ struct WatchCityPicker: View {
 
     var body: some View {
         List {
-            ForEach(filtered) { city in
-                Button(city.name) {
-                    settings.saveCity(city)
-                    settings.locationSource = "manual"
-                    WidgetCenter.shared.reloadAllTimelines()
-                    dismiss()
+            // BUG-0069: surface the GPS-detected city at the top of the watch picker
+            // when its country matches the country the user drilled into.
+            if let gpsCity = SettingsManager.shared.gpsDetectedCity,
+               let firstCity = cities.first,
+               gpsCity.countryCode == firstCity.countryCode {
+                Section("Current Location") {
+                    Button {
+                        settings.saveCity(gpsCity)
+                        settings.locationSource = "gps"
+                        WidgetCenter.shared.reloadAllTimelines()
+                        dismiss()
+                    } label: {
+                        Label(gpsCity.name, systemImage: "location.fill")
+                    }
+                }
+            }
+            Section("All Cities") {
+                ForEach(filtered) { city in
+                    Button(city.name) {
+                        settings.saveCity(city)
+                        settings.locationSource = "manual"
+                        WidgetCenter.shared.reloadAllTimelines()
+                        dismiss()
+                    }
                 }
             }
         }

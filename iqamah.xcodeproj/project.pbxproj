@@ -22,6 +22,8 @@
 		AA0000000000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000012 /* ContentView.swift */; };
 		WI000000000000000000001 /* WatchAppIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WI000000000000000000001R /* WatchAppIconView.swift */; };
 		AA0000000000000000000008 /* LocationSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000018 /* LocationSetupView.swift */; };
+		BUG69A0000000000000000001 /* AutoDetectMoveToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = BUG69A0000000000000000003 /* AutoDetectMoveToggle.swift */; };
+		BUG69A0000000000000000002 /* AutoDetectMoveToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = BUG69A0000000000000000003 /* AutoDetectMoveToggle.swift */; };
 		AA0000000000000000000009 /* CalculationMethodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000019 /* CalculationMethodView.swift */; };
 		AA000000000000000000000A /* PrayerTimesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001A /* PrayerTimesView.swift */; };
 		AA000000000000000000000C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001C /* Assets.xcassets */; };
@@ -274,6 +276,7 @@
 		AA0000000000000000000012 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		WI000000000000000000001R /* WatchAppIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchAppIconView.swift; sourceTree = "<group>"; };
 		AA0000000000000000000018 /* LocationSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationSetupView.swift; sourceTree = "<group>"; };
+		BUG69A0000000000000000003 /* AutoDetectMoveToggle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoDetectMoveToggle.swift; sourceTree = "<group>"; };
 		AA0000000000000000000019 /* CalculationMethodView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculationMethodView.swift; sourceTree = "<group>"; };
 		AA000000000000000000001A /* PrayerTimesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerTimesView.swift; sourceTree = "<group>"; };
 		AA000000000000000000001C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -574,6 +577,7 @@
 			isa = PBXGroup;
 			children = (
 				AA0000000000000000000018 /* LocationSetupView.swift */,
+				BUG69A0000000000000000003 /* AutoDetectMoveToggle.swift */,
 				AA0000000000000000000019 /* CalculationMethodView.swift */,
 				AA000000000000000000001A /* PrayerTimesView.swift */,
 				94CAD56A2F23D3C800E1689F /* SplashScreenView.swift */,
@@ -1165,6 +1169,7 @@
 				FB000000000000000000003 /* FastingModeSection.swift in Sources */,
 				BN000000000000000000BB02 /* AdhaanBannerController.swift in Sources */,
 				AA0000000000000000000008 /* LocationSetupView.swift in Sources */,
+				BUG69A0000000000000000001 /* AutoDetectMoveToggle.swift in Sources */,
 				AA0000000000000000000009 /* CalculationMethodView.swift in Sources */,
 				AA000000000000000000000A /* PrayerTimesView.swift in Sources */,
 				AA000000000000000000000D /* QiblahView.swift in Sources */,
@@ -1264,6 +1269,7 @@
 				iOS0000000000000000000002 /* iOSRootView.swift in Sources */,
 				iOS0000000000000000000003 /* PrayerTimesView.swift in Sources */,
 				iOS0000000000000000000004 /* LocationSetupView.swift in Sources */,
+				BUG69A0000000000000000002 /* AutoDetectMoveToggle.swift in Sources */,
 				iOS0000000000000000000005 /* CalculationMethodView.swift in Sources */,
 				iOS0000000000000000000006 /* SettingsSheetView.swift in Sources */,
 				iOS0000000000000000000007 /* AdhaanBannerView.swift in Sources */,
