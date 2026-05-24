@@ -14,7 +14,7 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 | AC           | AC-0383               | AC-0382           |
 | TC           | TC-0074               | TC-0073           |
 | BUG          | BUG-0071              | BUG-0070          |
-| ENH          | ENH-0028               | ENH-0027           |
+| ENH          | ENH-0030               | ENH-0029           |
 
 ---
 
@@ -28,4 +28,4 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 ---
 
-**Last Updated:** 2026-05-24 (BUG-0070 logged and fixed — AdhaanBanner panel now anchors under menu-bar status item instead of screen-center.)
+**Last Updated:** 2026-05-24 (ENH-0028, ENH-0029 logged — watchOS and iOS test target gaps surfaced by v1.6.0 pre-submission test suite audit. Plus archived 2026-05-03 close-issues-4-5-6 plan doc.)
