@@ -10,7 +10,29 @@ All bugs and defects tracked here with BUG-XXXX identifiers and status.
 **Medium:** 0
 **Low:** 0
 
-> **All bugs BUG-0001 through BUG-0069 resolved as of 2026-05-24.** v1.5 (15) accepted by App Store; v1.6.0 in development.
+> **All bugs BUG-0001 through BUG-0070 resolved as of 2026-05-24.** v1.5 (15) accepted by App Store; v1.6.0 in development.
+
+---
+
+## Session — 2026-05-24 (AdhaanBanner anchor — v1.6.0 dev)
+
+### Resolved
+
+**BUG-0070 (macOS): AdhaanBannerController panel appears center-screen instead of dropping from menu-bar status item**
+
+**Severity:** 🟡 P2 — Medium (visual/UX regression; functionality unaffected)
+**Reported:** 2026-05-24 — internal QA on v1.6.0 dev build
+**Status:** ✅ Fixed — same PR
+**Affected platforms:** macOS
+**Affected versions:** v1.5 (15) and earlier dev builds with the adhaan banner
+
+**Description:** When an adhaan plays and the floating notification panel appears, it animates down from the top of the screen but is horizontally centered on the entire display rather than under the Iqamah menu-bar status item. On wide displays this makes the panel feel disconnected from its origin — users reported it as "appearing in the middle of the screen" rather than "dropping from the menu bar."
+
+**Root cause:** `AdhaanBannerController.positionPanel(_:size:animated:)` computed `centreX = screenFrame.midX - size.width / 2`, completely ignoring the position of the `NSStatusItem` button window.
+
+**Fix:** Thread the status item's screen-coordinate frame (`statusItem.button?.window?.frame`) through a new optional `statusItemFrame:` parameter on `AdhaanBannerController.show(...)`. `positionPanel` now centers the panel under the anchor's midX, clamped to `[screenFrame.minX + 12, screenFrame.maxX - size.width - 12]` so it never spills off a narrow display. When no anchor is provided (status item not yet created, screen disconnected), falls back to the previous screen-center behaviour — guaranteed never to regress.
+
+**Verification:** Trigger an adhaan when the status item is near the far-right of the menu bar; the banner now drops from directly below it rather than from the centre.
 
 ---
 
