@@ -13,7 +13,7 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 | TASK         | TASK-0001             | None              |
 | AC           | AC-0383               | AC-0382           |
 | TC           | TC-0074               | TC-0073           |
-| BUG          | BUG-0070              | BUG-0069          |
+| BUG          | BUG-0071              | BUG-0070          |
 | ENH          | ENH-0028               | ENH-0027           |
 
 ---
@@ -28,4 +28,4 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 ---
 
-**Last Updated:** 2026-05-24 (ENH-0027 logged — Cross-Ecosystem Expansion to Windows/Linux/Android via Rust+UniFFI shared core, golden test-vector contract, and per-platform Claude Code subagents.)
+**Last Updated:** 2026-05-24 (BUG-0070 logged and fixed — AdhaanBanner panel now anchors under menu-bar status item instead of screen-center.)
