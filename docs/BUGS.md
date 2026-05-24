@@ -16,13 +16,13 @@ All bugs and defects tracked here with BUG-XXXX identifiers and status.
 
 ## Session — 2026-05-24 (Location detection feedback — v1.5 build 14)
 
-### Open
+### Resolved
 
 **BUG-0069 (iOS/macOS/watchOS): Location detection cached incorrectly + no auto-detect after first run**
 
 **Severity:** 🟠 P1 — High (user-visible misbehavior; affects prayer-time accuracy in suburbs and after travel)
 **Reported:** 2026-05-24 — user feedback on v1.5 (14)
-**Status:** 🔴 Open
+**Status:** ✅ Fixed — PR #140 (commit 860b028)
 **Affected platforms:** macOS, iOS, watchOS
 **Affected versions:** v1.5 (14) and earlier
 
