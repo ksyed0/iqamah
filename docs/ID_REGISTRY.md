@@ -14,7 +14,7 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 | AC           | AC-0349               | AC-0348           |
 | TC           | TC-0036               | TC-0035           |
 | BUG          | BUG-0068              | BUG-0067          |
-| ENH          | ENH-022               | ENH-021           |
+| ENH          | ENH-023               | ENH-022           |
 
 ---
 
@@ -28,4 +28,4 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 ---
 
-**Last Updated:** 2026-05-20 (BUG-0060–BUG-0067 resolved. v1.5.0 (12) submitted to App Store — iOS first submission + macOS update.)
+**Last Updated:** 2026-05-24 (ENH-022 logged; ENH audit pass — ENH-001 and ENH-004 reconciled as shipped against codebase evidence; ENH-010 marked partial.)
