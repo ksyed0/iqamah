@@ -270,7 +270,7 @@ final class FastingBannerSnapshotTests: XCTestCase {
         onMain(in: self) { exp in
             let view = fastingBannerView(trigger: .autoRamadan, prohibition: nil)
             if let img = render1xImageRenderer(view, width: 320, height: 96, dark: false) {
-                assertSnapshot(of: img, as: .image(precision: 0.93), named: "activeRamadan-light")
+                assertSnapshot(of: img, as: .image(precision: 0.93, perceptualPrecision: 0.93), named: "activeRamadan-light")
             } else { XCTFail("render returned nil") }
             exp.fulfill()
         }
@@ -280,7 +280,7 @@ final class FastingBannerSnapshotTests: XCTestCase {
         onMain(in: self) { exp in
             let view = fastingBannerView(trigger: .autoRamadan, prohibition: nil)
             if let img = render1xImageRenderer(view, width: 320, height: 96, dark: true) {
-                assertSnapshot(of: img, as: .image(precision: 0.93), named: "activeRamadan-dark")
+                assertSnapshot(of: img, as: .image(precision: 0.93, perceptualPrecision: 0.93), named: "activeRamadan-dark")
             } else { XCTFail("render returned nil") }
             exp.fulfill()
         }
@@ -290,7 +290,7 @@ final class FastingBannerSnapshotTests: XCTestCase {
         onMain(in: self) { exp in
             let view = fastingBannerView(trigger: .weeklySchedule, prohibition: nil)
             if let img = render1xImageRenderer(view, width: 320, height: 96, dark: false) {
-                assertSnapshot(of: img, as: .image(precision: 0.93), named: "activeNawafil-light")
+                assertSnapshot(of: img, as: .image(precision: 0.93, perceptualPrecision: 0.93), named: "activeNawafil-light")
             } else { XCTFail("render returned nil") }
             exp.fulfill()
         }
@@ -300,7 +300,7 @@ final class FastingBannerSnapshotTests: XCTestCase {
         onMain(in: self) { exp in
             let view = fastingBannerView(trigger: .weeklySchedule, prohibition: nil)
             if let img = render1xImageRenderer(view, width: 320, height: 96, dark: true) {
-                assertSnapshot(of: img, as: .image(precision: 0.93), named: "activeNawafil-dark")
+                assertSnapshot(of: img, as: .image(precision: 0.93, perceptualPrecision: 0.93), named: "activeNawafil-dark")
             } else { XCTFail("render returned nil") }
             exp.fulfill()
         }
@@ -310,7 +310,7 @@ final class FastingBannerSnapshotTests: XCTestCase {
         onMain(in: self) { exp in
             let view = fastingBannerView(trigger: nil, prohibition: .eidAlFitr)
             if let img = render1xImageRenderer(view, width: 320, height: 96, dark: false) {
-                assertSnapshot(of: img, as: .image(precision: 0.93), named: "prohibitionEidAlFitr-light")
+                assertSnapshot(of: img, as: .image(precision: 0.93, perceptualPrecision: 0.93), named: "prohibitionEidAlFitr-light")
             } else { XCTFail("render returned nil") }
             exp.fulfill()
         }
@@ -320,7 +320,7 @@ final class FastingBannerSnapshotTests: XCTestCase {
         onMain(in: self) { exp in
             let view = fastingBannerView(trigger: nil, prohibition: .eidAlFitr)
             if let img = render1xImageRenderer(view, width: 320, height: 96, dark: true) {
-                assertSnapshot(of: img, as: .image(precision: 0.93), named: "prohibitionEidAlFitr-dark")
+                assertSnapshot(of: img, as: .image(precision: 0.93, perceptualPrecision: 0.93), named: "prohibitionEidAlFitr-dark")
             } else { XCTFail("render returned nil") }
             exp.fulfill()
         }
@@ -330,7 +330,7 @@ final class FastingBannerSnapshotTests: XCTestCase {
         onMain(in: self) { exp in
             let view = fastingBannerView(trigger: nil, prohibition: .tashriq12)
             if let img = render1xImageRenderer(view, width: 320, height: 96, dark: false) {
-                assertSnapshot(of: img, as: .image(precision: 0.93), named: "prohibitionTashriq-light")
+                assertSnapshot(of: img, as: .image(precision: 0.93, perceptualPrecision: 0.93), named: "prohibitionTashriq-light")
             } else { XCTFail("render returned nil") }
             exp.fulfill()
         }
@@ -340,7 +340,7 @@ final class FastingBannerSnapshotTests: XCTestCase {
         onMain(in: self) { exp in
             let view = fastingBannerView(trigger: nil, prohibition: .tashriq12)
             if let img = render1xImageRenderer(view, width: 320, height: 96, dark: true) {
-                assertSnapshot(of: img, as: .image(precision: 0.93), named: "prohibitionTashriq-dark")
+                assertSnapshot(of: img, as: .image(precision: 0.93, perceptualPrecision: 0.93), named: "prohibitionTashriq-dark")
             } else { XCTFail("render returned nil") }
             exp.fulfill()
         }
@@ -356,7 +356,7 @@ final class FastingModeSectionSnapshotTests: XCTestCase {
                                         suiteName: "iqamah.tests.fasting.disabled.light")
             let view = Form { FastingModeSection(settings: s) }
             if let img = render1xImageRenderer(view, width: 420, height: 620, dark: false) {
-                assertSnapshot(of: img, as: .image(precision: 0.92), named: "fastingDisabled-light")
+                assertSnapshot(of: img, as: .image(precision: 0.92, perceptualPrecision: 0.92), named: "fastingDisabled-light")
             } else { XCTFail("render returned nil") }
             exp.fulfill()
         }
@@ -368,7 +368,7 @@ final class FastingModeSectionSnapshotTests: XCTestCase {
                                         suiteName: "iqamah.tests.fasting.disabled.dark")
             let view = Form { FastingModeSection(settings: s) }
             if let img = render1xImageRenderer(view, width: 420, height: 620, dark: true) {
-                assertSnapshot(of: img, as: .image(precision: 0.92), named: "fastingDisabled-dark")
+                assertSnapshot(of: img, as: .image(precision: 0.92, perceptualPrecision: 0.92), named: "fastingDisabled-dark")
             } else { XCTFail("render returned nil") }
             exp.fulfill()
         }
@@ -380,7 +380,7 @@ final class FastingModeSectionSnapshotTests: XCTestCase {
                                         suiteName: "iqamah.tests.fasting.sunni.light")
             let view = Form { FastingModeSection(settings: s) }
             if let img = render1xImageRenderer(view, width: 420, height: 620, dark: false) {
-                assertSnapshot(of: img, as: .image(precision: 0.92), named: "fastingEnabledSunni-light")
+                assertSnapshot(of: img, as: .image(precision: 0.92, perceptualPrecision: 0.92), named: "fastingEnabledSunni-light")
             } else { XCTFail("render returned nil") }
             exp.fulfill()
         }
@@ -392,7 +392,7 @@ final class FastingModeSectionSnapshotTests: XCTestCase {
                                         suiteName: "iqamah.tests.fasting.sunni.dark")
             let view = Form { FastingModeSection(settings: s) }
             if let img = render1xImageRenderer(view, width: 420, height: 620, dark: true) {
-                assertSnapshot(of: img, as: .image(precision: 0.92), named: "fastingEnabledSunni-dark")
+                assertSnapshot(of: img, as: .image(precision: 0.92, perceptualPrecision: 0.92), named: "fastingEnabledSunni-dark")
             } else { XCTFail("render returned nil") }
             exp.fulfill()
         }
@@ -404,7 +404,7 @@ final class FastingModeSectionSnapshotTests: XCTestCase {
                                         suiteName: "iqamah.tests.fasting.shia.light")
             let view = Form { FastingModeSection(settings: s) }
             if let img = render1xImageRenderer(view, width: 420, height: 620, dark: false) {
-                assertSnapshot(of: img, as: .image(precision: 0.92), named: "fastingEnabledShia-light")
+                assertSnapshot(of: img, as: .image(precision: 0.92, perceptualPrecision: 0.92), named: "fastingEnabledShia-light")
             } else { XCTFail("render returned nil") }
             exp.fulfill()
         }
@@ -416,7 +416,7 @@ final class FastingModeSectionSnapshotTests: XCTestCase {
                                         suiteName: "iqamah.tests.fasting.shia.dark")
             let view = Form { FastingModeSection(settings: s) }
             if let img = render1xImageRenderer(view, width: 420, height: 620, dark: true) {
-                assertSnapshot(of: img, as: .image(precision: 0.92), named: "fastingEnabledShia-dark")
+                assertSnapshot(of: img, as: .image(precision: 0.92, perceptualPrecision: 0.92), named: "fastingEnabledShia-dark")
             } else { XCTFail("render returned nil") }
             exp.fulfill()
         }
