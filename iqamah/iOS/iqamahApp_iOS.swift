@@ -1,3 +1,4 @@
+import CoreLocation
 import IqamahCore
 import SwiftUI
 import WatchConnectivity
@@ -7,6 +8,8 @@ import WidgetKit
 struct IqamahiOSApp: App {
     @StateObject private var settings = SettingsManager.shared
     @Environment(\.scenePhase) private var scenePhase
+    // BUG-0069: held strongly so the one-shot CLLocationManager callback fires.
+    @State private var autoDetectLocationService: LocationService?
 
     init() {
         // Pre-seed Toronto / ISNA settings so XCUITests skip setup flow (AC-0326, US-0067).
@@ -41,6 +44,7 @@ struct IqamahiOSApp: App {
                 .onAppear {
                     activateWCSession()
                     NotificationScheduler.shared.requestFastingReschedule()
+                    performAutoDetectMoveCheck()
                 }
                 .onChange(of: settings.fastingModeSettings) { _, _ in
                     NotificationScheduler.shared.requestFastingReschedule()
@@ -95,6 +99,45 @@ struct IqamahiOSApp: App {
                         await PrayerActivityManager.shared.startOrUpdateActivity(settings: settings)
                     }
                 }
+        }
+    }
+
+    /// BUG-0069: launch-time auto-detect (opt-in). Skips silently if disabled or onboarding incomplete.
+    @MainActor
+    private func performAutoDetectMoveCheck() {
+        guard settings.hasCompletedSetup, settings.autoDetectOnMove else { return }
+        guard settings.loadCity() != nil else { return }
+        let service = LocationService()
+        autoDetectLocationService = service
+        Task { @MainActor in
+            do {
+                let coord = try await service.requestLocationAsync()
+                let outcome = AutoDetectMoveCheck.evaluate(
+                    settings: settings,
+                    currentCoordinate: coord
+                )
+                guard case let .shouldPrompt(distance, savedName) = outcome else {
+                    autoDetectLocationService = nil
+                    return
+                }
+                CLGeocoder().reverseGeocodeLocation(
+                    CLLocation(latitude: coord.latitude, longitude: coord.longitude)
+                ) { placemarks, _ in
+                    let locality = placemarks?.first?.locality ?? placemarks?.first?.name ?? ""
+                    DispatchQueue.main.async {
+                        let payload = MoveDetectedPayload(
+                            savedCityName: savedName,
+                            detectedCoordinate: coord,
+                            distanceMeters: distance,
+                            detectedLocality: locality
+                        )
+                        NotificationCenter.default.post(name: .didDetectMove, object: payload)
+                        autoDetectLocationService = nil
+                    }
+                }
+            } catch {
+                autoDetectLocationService = nil
+            }
         }
     }
 

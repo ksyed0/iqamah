@@ -40,6 +40,10 @@ struct SettingsTab: View {
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
                 }
+
+                // BUG-0069
+                Toggle("Auto-detect if I move > 25 km", isOn: $settings.autoDetectOnMove)
+                    .font(.caption2)
             }
 
             Section("Prayer Times") {

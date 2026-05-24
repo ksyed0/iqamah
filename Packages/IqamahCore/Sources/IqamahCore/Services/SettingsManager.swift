@@ -9,6 +9,9 @@ public extension Notification.Name {
     /// Posted when the app returns to foreground so prayer-time views recalculate.
     static let refreshPrayerTimes = Notification.Name("refreshPrayerTimes")
     static let openAbout = Notification.Name("openAbout")
+    /// BUG-0069: posted when the launch-time auto-detect check finds the user has moved
+    /// more than 25 km from their saved city. `object` is `MoveDetectedPayload`.
+    static let didDetectMove = Notification.Name("didDetectMove")
     /// Posted when the v1.6 re-detect prompt's "Re-detect" button is tapped.
     /// PrayerTimesView (macOS) / iOSRootView (iOS) opens the Settings sheet in response.
     static let openSettingsForReDetect = Notification.Name("openSettingsForReDetect")
@@ -88,7 +91,7 @@ public class SettingsManager: ObservableObject {
     /// Distance threshold (meters) above which the launch-time auto-detect check
     /// prompts the user to switch cities. Exposed so callers can reference the
     /// same value used by the prompt logic.
-    public static let autoDetectThresholdMeters: CLLocationDistance = 25_000
+    public static let autoDetectThresholdMeters: CLLocationDistance = 25000
 
     // MARK: - Keys synced via iCloud KVS
 

@@ -149,6 +149,9 @@ struct SettingsSheetView: View {
         } else {
             ProgressView("Loading cities…")
         }
+
+        // BUG-0069: opt-in auto-detect toggle (extracted to AutoDetectMoveToggle).
+        AutoDetectMoveToggle(settings: settings)
     }
 
     private func detectLocation() {

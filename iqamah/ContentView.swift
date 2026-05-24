@@ -12,6 +12,7 @@ struct ContentView: View {
     @StateObject private var settings = SettingsManager.shared
     @State private var currentScreen: AppScreen = .splash
     @State private var showLegacyReDetectPrompt = false
+    @State private var moveDetected: MoveDetectedPayload?
     @State private var selectedCity: City?
     @State private var calculationMethod: CalculationMethod = .muslimWorldLeague
     @State private var asrMethod: AsrJuristicMethod = .standard
@@ -120,6 +121,52 @@ struct ContentView: View {
         } message: {
             Text(
                 "Iqamah v1.6 uses your exact GPS position and authoritative timezone for prayer-time calculations. Re-detect your location now to apply the improvement?"
+            )
+        }
+        // BUG-0069: launch-time auto-detect prompt
+        .onReceive(NotificationCenter.default.publisher(for: .didDetectMove)) { note in
+            if let payload = note.object as? MoveDetectedPayload {
+                moveDetected = payload
+            }
+        }
+        .alert(
+            "Have you moved?",
+            isPresented: Binding(
+                get: { moveDetected != nil },
+                set: { if !$0 { moveDetected = nil } }
+            ),
+            presenting: moveDetected
+        ) { payload in
+            Button("Switch") {
+                let locality = payload.detectedLocality.isEmpty
+                    ? payload.savedCityName
+                    : payload.detectedLocality
+                if let newCity = try? City(
+                    name: locality,
+                    countryCode: settings.loadCity()?.countryCode ?? "US",
+                    latitude: payload.detectedCoordinate.latitude,
+                    longitude: payload.detectedCoordinate.longitude,
+                    timezone: TimeZone.current.identifier
+                ) {
+                    settings.saveCity(newCity)
+                    settings.locationSource = "gps"
+                    settings.saveGPSCoordinates(payload.detectedCoordinate)
+                    settings.gpsLocality = payload.detectedLocality
+                    settings.gpsDetectedCity = newCity
+                    selectedCity = newCity
+                    NotificationCenter.default.post(name: .settingsDidChange, object: nil)
+                }
+                moveDetected = nil
+            }
+            Button("Not now", role: .cancel) {
+                moveDetected = nil
+            }
+        } message: { payload in
+            let whereText = payload.detectedLocality.isEmpty
+                ? "your current location"
+                : payload.detectedLocality
+            Text(
+                "It looks like you're in \(whereText), about \(payload.distanceKmString) from \(payload.savedCityName). Switch your prayer-times city?"
             )
         }
         .preferredColorScheme(settings.appearance.colorScheme)

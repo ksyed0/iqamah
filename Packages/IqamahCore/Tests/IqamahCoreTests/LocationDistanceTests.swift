@@ -25,8 +25,8 @@ struct LocationDistanceTests {
         let mississauga = CLLocationCoordinate2D(latitude: 43.5890, longitude: -79.6441)
         let d = SettingsManager.distance(from: toronto, to: mississauga)
         // CLLocation returns ~21.5 km along the great circle here; allow a wide band.
-        #expect(d > 20_000)
-        #expect(d < 35_000)
+        #expect(d > 20000)
+        #expect(d < 35000)
     }
 
     @Test("threshold predicate returns false just under 25 km")
@@ -49,24 +49,24 @@ struct LocationDistanceTests {
 
     @Test("threshold constant is 25 km")
     func thresholdConstant() {
-        #expect(SettingsManager.autoDetectThresholdMeters == 25_000)
+        #expect(SettingsManager.autoDetectThresholdMeters == 25000)
     }
 
     // MARK: - autoDetectOnMove round-trip
 
     @Test("autoDetectOnMove defaults to true on a fresh suite")
-    func defaultsToTrue() {
+    func defaultsToTrue() throws {
         let suiteName = "test.LocationDistanceTests.default.\(UUID().uuidString)"
-        let suite = UserDefaults(suiteName: suiteName)!
+        let suite = try #require(UserDefaults(suiteName: suiteName))
         defer { suite.removePersistentDomain(forName: suiteName) }
         let settings = SettingsManager(userDefaults: suite)
         #expect(settings.autoDetectOnMove == true)
     }
 
     @Test("autoDetectOnMove round-trips through UserDefaults")
-    func roundTrip() {
+    func roundTrip() throws {
         let suiteName = "test.LocationDistanceTests.roundtrip.\(UUID().uuidString)"
-        let suite = UserDefaults(suiteName: suiteName)!
+        let suite = try #require(UserDefaults(suiteName: suiteName))
         defer { suite.removePersistentDomain(forName: suiteName) }
         let settings = SettingsManager(userDefaults: suite)
         settings.autoDetectOnMove = false
