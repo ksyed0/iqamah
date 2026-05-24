@@ -80,7 +80,15 @@ public class SettingsManager: ObservableObject {
         static let didShowGPSReDetectPromptV16 = "didShowGPSReDetectPromptV16"
         static let fastingModeSettings = "fastingModeSettings"
         static let didShowFastingModePromo = "didShowFastingModePromo"
+        static let autoDetectOnMove = "autoDetectOnMove"
     }
+
+    // MARK: - BUG-0069 constants
+
+    /// Distance threshold (meters) above which the launch-time auto-detect check
+    /// prompts the user to switch cities. Exposed so callers can reference the
+    /// same value used by the prompt logic.
+    public static let autoDetectThresholdMeters: CLLocationDistance = 25_000
 
     // MARK: - Keys synced via iCloud KVS
 
@@ -109,6 +117,7 @@ public class SettingsManager: ObservableObject {
         Keys.hilalNotificationEnabled,
         Keys.liveActivityEnabled,
         Keys.fastingModeSettings,
+        Keys.autoDetectOnMove,
     ]
 
     @Published public var hasCompletedSetup: Bool {
@@ -299,6 +308,19 @@ public class SettingsManager: ObservableObject {
         }
     }
 
+    /// Opt-in preference (BUG-0069). When true, on launch the app checks the device's
+    /// current GPS coordinate against the saved city. If the user has moved more than
+    /// `autoDetectThresholdMeters` (25 km) away, a non-modal prompt asks whether to
+    /// switch the prayer-times city. We never switch silently. KVS-synced so the user's
+    /// preference follows them across devices.
+    @Published public var autoDetectOnMove: Bool {
+        didSet {
+            defaults.set(autoDetectOnMove, forKey: Keys.autoDetectOnMove)
+            guard !isApplyingRemote else { return }
+            kvs.set(autoDetectOnMove, forKey: Keys.autoDetectOnMove)
+        }
+    }
+
     /// True once the first-Ramadan Fasting Mode promo banner has been shown.
     /// NOT KVS-synced — per-device flag.
     @Published public var didShowFastingModePromo: Bool {
@@ -394,6 +416,13 @@ public class SettingsManager: ObservableObject {
             fastingModeSettings = FastingModeSettings()
         }
         didShowFastingModePromo = userDefaults.bool(forKey: Keys.didShowFastingModePromo)
+
+        // BUG-0069: default true when key has never been written.
+        if userDefaults.object(forKey: Keys.autoDetectOnMove) == nil {
+            autoDetectOnMove = true
+        } else {
+            autoDetectOnMove = userDefaults.bool(forKey: Keys.autoDetectOnMove)
+        }
 
         // Start KVS sync: subscribe to remote changes and trigger an initial pull.
         NotificationCenter.default.addObserver(
@@ -520,6 +549,8 @@ public class SettingsManager: ObservableObject {
             hilalNotificationEnabled = kvs.bool(forKey: key)
         case Keys.liveActivityEnabled:
             liveActivityEnabled = kvs.bool(forKey: key)
+        case Keys.autoDetectOnMove:
+            autoDetectOnMove = kvs.bool(forKey: key)
         case Keys.fastingModeSettings:
             if let data = kvs.data(forKey: key),
                let decoded = try? JSONDecoder().decode(FastingModeSettings.self, from: data) {
@@ -687,6 +718,26 @@ public class SettingsManager: ObservableObject {
     public func hasAnyAdjustments() -> Bool {
         let adjustments = defaults.dictionary(forKey: Keys.prayerAdjustments) as? [String: Int] ?? [:]
         return adjustments.values.contains { $0 != 0 }
+    }
+
+    // MARK: - BUG-0069 distance helper
+
+    /// Great-circle distance in meters between two coordinates. Wraps `CLLocation.distance(from:)`
+    /// so callers don't have to construct intermediate `CLLocation` objects.
+    public static func distance(
+        from a: CLLocationCoordinate2D,
+        to b: CLLocationCoordinate2D
+    ) -> CLLocationDistance {
+        CLLocation(latitude: a.latitude, longitude: a.longitude)
+            .distance(from: CLLocation(latitude: b.latitude, longitude: b.longitude))
+    }
+
+    /// Returns true if the two coordinates are more than `autoDetectThresholdMeters` apart.
+    public static func hasMovedBeyondAutoDetectThreshold(
+        from a: CLLocationCoordinate2D,
+        to b: CLLocationCoordinate2D
+    ) -> Bool {
+        distance(from: a, to: b) > autoDetectThresholdMeters
     }
 
     public func resetAdjustments() {
