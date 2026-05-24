@@ -590,6 +590,141 @@ Path 2 (additional):
 
 ---
 
+### ENH-0027 — Cross-Ecosystem Expansion: Windows, Linux, Android
+**Source:** Internal product exploration via Claude conversation (2026-05-24); follow-up to the Apple-only Multi-Platform Migration Assessment below.
+**Priority:** Low-Medium — large addressable audience outside the Apple ecosystem (Android is the largest mobile OS globally; Windows dominates desktop in many Muslim-majority countries), but a non-trivial architectural commitment. Defer until after EPIC-0010, EPIC-0011, EPIC-0012, EPIC-0017, ENH-0019 (i18n), and ENH-0020/0021 (tvOS/visionOS) have stabilised.
+**Release Target:** Post v2.0. Not before the Apple platform matrix is fully shipped, instrumented, and the Hijri/astronomy + FastingModeEngine code in `IqamahCore` is settled.
+
+**Problem:** Iqamah is intentionally Apple-native today. Every UI uses SwiftUI + Material/`.glassEffect()`; every persistence layer uses `UserDefaults` + iCloud KVS; every background mechanism (menu bar, notifications, complications, Live Activities) is Apple-specific. The portable surface (calculation engine, cities database, Hijri/Hilal astronomy, FastingModeEngine) is small, deterministic, and well-tested — but it is currently expressible only as a Swift Package (`IqamahCore`). Reaching Android, Windows, and Linux users requires either (a) a full per-platform rewrite that will inevitably drift in subtle ways (DST handling, "next prayer" selection at midnight, adjustment ordering, Hilal Odeh thresholds, fasting trigger evaluation), or (b) a deliberate, contract-driven architecture in which one shared core enforces correctness and each platform owns only its native UI.
+
+This enhancement scopes option (b): a shared portable core with N native UIs, designed specifically for **solo agentic development via Claude Code**, where the bottleneck is verification and parity enforcement rather than per-platform expertise.
+
+**Why the solo + Claude Code model changes the calculus:**
+The traditional "N codebases to maintain forever" objection assumes human engineering hours. With agentic development, the cost shifts: agents can read 6 codebases simultaneously and apply a contract change consistently in a single session, but humans still pay the *triage and verification* cost per bug, per release, per app store. The existing EPIC/US/AC/BUG/ENH discipline in this repo (see `RELEASE_PLAN.md`, `BUGS.md`, `ID_REGISTRY.md`) is the substrate that makes agentic multi-platform tractable — without it, parity drift would be inevitable inside 3 sprints.
+
+**Solution — five-pillar architecture:**
+
+**Pillar 1: Promote `IqamahCore` to a language-portable core.**
+Two viable paths; pick before any non-Apple platform begins.
+- **1a. Rust + UniFFI (recommended)** — port `IqamahCore` to Rust (~500–1500 LOC of pure math, plus the FastingModeEngine state machine from EPIC-0017), expose via UniFFI to generate Swift, Kotlin, C#, Python, and (via WASM) TypeScript bindings automatically. Same crate consumed by every platform. UniFFI is what Firefox and 1Password use for this exact pattern. Apple targets continue calling the same API shape they call today via the auto-generated Swift wrapper; the existing `IqamahCore` Swift Package becomes a thin shim during transition, then is retired.
+- **1b. Kotlin Multiplatform** — port to Kotlin/Native for iOS/macOS, JVM for Android/desktop. Better ergonomics if the team is mobile-first, less mature on Apple than option 1a. Avoid unless Android is the dominant strategic target.
+- **Out of scope:** TypeScript core (forces a JS runtime everywhere), Flutter (UI framework not a portability layer), Electron (regresses Mac quality).
+
+**Pillar 2: Golden test vector contract.**
+A single `tests/vectors.json` (or `.toml`) committed to the core, containing at minimum:
+- 500+ `(lat, lng, date, timezone, method, asr, adjustments) → expected_prayer_times` cases covering DST transitions, IDL crossings, polar latitudes (with appropriate fallback expectations), edge-of-day boundaries.
+- 50+ Hilal Odeh vector cases (ARCL, ARCV, W → V, zone) cross-checked against the ICOP observation set already used in EPIC-0011.
+- 20+ "next prayer" selection cases covering midnight rollover, day-change behaviour, and per-prayer adjustment ordering.
+- 30+ FastingModeEngine cases covering each of the 9 trigger types (auto-Ramadan, weekly schedule, Ayyam al-Beed, 6 of Shawwal, Day of Arafah, first 9 of Dhul-Hijjah, Muharram fast, 15 Sha'ban, 27 Rajab) with tradition-aware gating.
+Every platform's CI consumes this file. A platform that cannot pass the vectors cannot ship. This is the single most important anti-drift mechanism — it makes correctness mechanically verifiable.
+
+**Pillar 3: Per-platform native UIs.**
+Each platform target owns its UI fully; no shared UI framework is mandated.
+
+| Platform | Recommended UI | Native conventions to honour |
+|---|---|---|
+| macOS | SwiftUI + Material + Liquid Glass (current) | Apple HIG, mac menu bar idioms |
+| iOS / iPadOS / watchOS / tvOS / visionOS | SwiftUI (current + planned) | Apple HIG per platform |
+| Android | Jetpack Compose + Material 3 | Material You dynamic colour, tile API for quick settings, Wear OS tiles if expanded later |
+| Windows | WinUI 3 (preferred) or Avalonia (if cross-desktop UI sharing is desired with Linux) | Fluent Design, system tray via `NotifyIcon`, Windows notification platform |
+| Linux | GTK4 (GNOME-native) or Qt6 (KDE-native) | StatusNotifierItem/AppIndicator for tray; respect XDG conventions; ship Flatpak + native packages |
+
+Each platform's UI converts `core::PrayerTimes` / `core::FastingState` (or platform-binding equivalent) into native widgets. No `#if` matrix; no shared rendering layer.
+
+**Pillar 4: Shared persistence schema, native persistence mechanism.**
+Define `settings.v1.json` schema in the core (extending the existing `SettingsManager` schema including Fasting Mode triggers and tradition gating). Each platform reads/writes its native store (`UserDefaults` on Apple, `SharedPreferences`/DataStore on Android, Registry/`%APPDATA%` on Windows, `~/.config/iqamah/` on Linux per XDG) but the *payload shape* is identical across all of them. Sync is per-ecosystem (iCloud KVS on Apple; Google account sync on Android; no automatic cross-ecosystem sync in v1 — explicit "export settings" / "import settings" is the v1 bridge between ecosystems).
+
+**Pillar 5: Anti-drift governance.**
+- **Tagged ACs in RELEASE_PLAN.md.** Every AC gets a `platforms: [...]` tag and a `deferred: [...]` tag. PRs touching shared behaviour must update all relevant platforms or explicitly defer with justification. Add a `/parity-check` slash command that audits the AC × platform matrix weekly.
+- **Semver on the core.** `IqamahCore 1.x → 2.x` triggers a release-train obligation; all platforms must adopt within N weeks of a minor bump or it becomes a release blocker.
+- **Cross-platform release train.** Releases are gated on *all* shipping platforms reaching the milestone, not the fastest one. Reduces "Mac is on 2.1, Linux is on 1.4" rot.
+- **Per-platform Claude Code subagents.** Define `android-dev`, `windows-dev`, `linux-dev`, `rust-core-dev` in `.claude/agents/`. Each subagent's system prompt holds that platform's conventions (Material 3, Fluent, GNOME HIG, Rust idioms). The main agent dispatches in parallel: "implement [AC-XXXX] on all targets" → N concurrent subagent invocations, each loading only its slice of the monorepo to conserve context.
+- **Screenshot snapshot tests in CI per platform.** Paparazzi (Android), `swift-snapshot-testing` (Apple, already in use — see EPIC-0017's FastingBanner/FastingModeSection snapshot suite), WinAppDriver (Windows), GTK headless rendering (Linux). Claude reads diffs; humans review the visual deltas the agent flags.
+
+**Recommended sequencing — staged validation, not big-bang:**
+| Stage | Scope | Cumulative effort | Decision gate |
+|---|---|---|---|
+| 0 | Extract `IqamahCore` (including FastingModeEngine) → Rust + UniFFI; prove parity in existing Swift apps; existing test suite passes | ~2–3 weeks | Apple builds bit-identical outputs to today |
+| 1 | Add Android (Kotlin + Jetpack Compose); first non-Apple consumer of the core | ~4–6 weeks on top of stage 0 | Contract holds with two ecosystems; vector tests green on both |
+| 2 | Add Linux (GTK4, Flatpak distribution) | ~3–4 weeks on top of stage 1 | Cheapest desktop expansion; Linux users tolerant of rough edges |
+| 3 | Add Windows (WinUI 3, MSIX, Microsoft Store) | ~3–4 weeks on top of stage 2 | Highest polish bar; do last when the contract is battle-tested |
+
+Total scope across all stages: **3–4 months of focused agentic development**, assuming the existing Claude Code workflow continues to drive each platform.
+
+**What is explicitly NOT in scope for ENH-0027:**
+- Web app (separate ENH if pursued — different sync, different distribution, different UI ecosystem)
+- Cross-ecosystem settings sync (rely on per-ecosystem cloud + manual export/import in v1)
+- Adhan audio parity with Apple (each platform's notification system has different limits; document the divergence rather than fight it — ENH-0024's Critical Alerts pattern is Apple-only)
+- Live Activity parity (Apple-only platform feature; Android has its own foreground service notifications that need a separate native implementation)
+- Wear OS, Tizen, KaiOS, or any non-flagship platform
+
+**Risks and mitigations:**
+- **Risk: Rust core becomes a bottleneck for solo iteration.** Mitigation: invest heavily in `cargo` ergonomics, snapshot tests, and `IqamahCore`-side documentation so agents can navigate the Rust crate as fluently as Swift.
+- **Risk: Code signing / store submission overhead multiplies (Apple + Google + Microsoft).** Mitigation: automate via `fastlane`, `bundletool`, `msstore` CLIs; capture the credential ceremony in `docs/RELEASE_RUNBOOK.md`.
+- **Risk: Visual verification can't be fully agentic on platforms you don't own.** Mitigation: snapshot tests in CI per platform; budget for at least one physical device per major ecosystem (used Pixel for Android, used Surface for Windows, any laptop for Linux).
+- **Risk: Bug reports require 6 fixes.** Mitigation: triage stays human; fix application is agentic. The `BUGS.md` register scales linearly; ad-hoc bug handling does not.
+- **Risk: Context window cost balloons holding 6 codebases.** Mitigation: per-platform subagents with per-platform `CLAUDE.md` files; main agent never loads all 6 simultaneously.
+
+**Acceptance criteria (when promoted to an Epic — likely multiple Epics, one per stage):**
+- [ ] `IqamahCore` exists as a Rust crate, exposed via UniFFI, consumed bit-identically by all existing Apple targets (macOS, iOS, watchOS); existing test suite (including the EPIC-0017 FastingModeEngine tests) passes unchanged
+- [ ] `tests/vectors.json` exists with ≥500 prayer-time cases, ≥50 Hilal cases, ≥20 next-prayer cases, ≥30 FastingModeEngine cases; CI on every platform consumes it; failure is a merge-blocker
+- [ ] `RELEASE_PLAN.md` ACs carry `platforms:` and `deferred:` tags; `/parity-check` slash command exists and runs in CI weekly
+- [ ] Android app reaches feature parity with iOS for prayer times, Qibla, settings, notifications, Fasting Mode, and at least one home-screen widget
+- [ ] Linux app reaches feature parity with macOS for prayer times, system tray, notifications, settings, Fasting Mode; ships as Flatpak
+- [ ] Windows app reaches feature parity with macOS for prayer times, system tray, notifications, settings, Fasting Mode; ships via Microsoft Store
+- [ ] Per-platform Claude Code subagents are defined in `.claude/agents/` and used in the standard development workflow
+- [ ] `docs/RELEASE_RUNBOOK.md` documents the cross-platform release-train process and per-store credentialing
+- [ ] No `IqamahCore` minor version goes more than N weeks without adoption by all shipping platforms
+
+**Cross-references:**
+- The existing **Multi-Platform Migration Assessment** (below in this file) covers the *intra-Apple* extraction that is the prerequisite for ENH-0027; ENH-0027 extends rather than replaces it.
+- **EPIC-0010 (iOS)**, **EPIC-0012 (Watch)**, and **EPIC-0017 (Fasting Mode)** validated the `IqamahCore` Swift Package boundary that ENH-0027 promotes to a language-portable contract.
+- **ENH-0019 (i18n)** should ship first; adding a translation per platform is cheaper than adding a platform per language.
+- **ENH-0020 (tvOS)** and **ENH-0021 (visionOS)** complete the Apple matrix and should ship before ENH-0027 begins — they exercise the core contract on platforms with no notifications / no touch input, which surfaces edge cases that would otherwise appear first on Android/Linux.
+- **ENH-0022 (Islamic Holiday Reminders)** should also ship Apple-side first; the celebration calendar then ports cleanly as part of the shared core.
+- **ENH-0024 (Critical Alerts)** and **ENH-0026 (Live Activity)** are explicitly Apple-only and are NOT part of the parity contract.
+- **CLAUDE.md** UI Conventions (Material, Liquid Glass, light/dark parity) apply *only* to Apple targets; each new ecosystem defines its own equivalent conventions in its own `CLAUDE.md` under its target subfolder.
+
+**Effort:** Large — 3–4 months across all stages for solo agentic development. Stage 0 alone (Rust extraction) is 2–3 weeks and unlocks every subsequent stage. Recommend treating each stage as a standalone Epic with explicit go/no-go gates.
+
+**Files (when implemented — illustrative monorepo layout):**
+```
+core/                         # Rust crate, UniFFI-exposed
+  src/
+    prayer_calculator.rs
+    hilal.rs
+    cities.rs
+    fasting_mode.rs           # ported from EPIC-0017
+    settings_schema.rs
+  tests/
+    vectors.json              # the contract
+apps/
+  apple/                      # existing iqamah.xcodeproj, consumes core via auto-generated Swift bindings
+  android/                    # new — Kotlin + Compose
+  windows/                    # new — WinUI 3 or Avalonia
+  linux/                      # new — GTK4 + Flatpak
+.claude/
+  agents/
+    rust-core-dev.md
+    android-dev.md
+    windows-dev.md
+    linux-dev.md
+  commands/
+    parity-check.md
+docs/
+  RELEASE_RUNBOOK.md          # new — per-store credentialing + release-train
+  PARITY_MATRIX.md            # generated by /parity-check
+```
+
+**External references:**
+- UniFFI (Mozilla): [github.com/mozilla/uniffi-rs](https://github.com/mozilla/uniffi-rs)
+- Kotlin Multiplatform: [kotlinlang.org/docs/multiplatform.html](https://kotlinlang.org/docs/multiplatform.html)
+- Signal's shared-core architecture (industry reference for this pattern): [signal.org/blog/](https://signal.org/blog/)
+- WinUI 3: [learn.microsoft.com/en-us/windows/apps/winui/winui3/](https://learn.microsoft.com/en-us/windows/apps/winui/winui3/)
+- Avalonia (cross-desktop alternative): [avaloniaui.net](https://avaloniaui.net)
+
+---
+
 ## Multi-Platform Migration Assessment
 
 ### Overview
