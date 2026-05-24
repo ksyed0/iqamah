@@ -65,6 +65,12 @@
 		FB000000000000000000004 /* FastingModeSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB000000000000000000003R /* FastingModeSection.swift */; };
 		MW00000000000000000050 /* IqamahWidgetMac.appex in Embed Mac Widget Extension */ = {isa = PBXBuildFile; fileRef = MW00000000000000000002 /* IqamahWidgetMac.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		PI000000000000000000BB01 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = PI000000000000000000AA01 /* PrivacyInfo.xcprivacy */; };
+		PI0000000000000000000B02 /* PrivacyInfo.xcprivacy in Resources (iOS) */ = {isa = PBXBuildFile; fileRef = PI0000000000000000000A02 /* PrivacyInfo.xcprivacy (iOS) */; };
+		PI0000000000000000000B03 /* PrivacyInfo.xcprivacy in Resources (Watch) */ = {isa = PBXBuildFile; fileRef = PI0000000000000000000A03 /* PrivacyInfo.xcprivacy (Watch) */; };
+		PI0000000000000000000B04 /* PrivacyInfo.xcprivacy in Resources (Widget) */ = {isa = PBXBuildFile; fileRef = PI0000000000000000000A04 /* PrivacyInfo.xcprivacy (Widget) */; };
+		PI0000000000000000000B05 /* PrivacyInfo.xcprivacy in Resources (Widget Mac) */ = {isa = PBXBuildFile; fileRef = PI0000000000000000000A04 /* PrivacyInfo.xcprivacy (Widget) */; };
+		PI0000000000000000000B06 /* PrivacyInfo.xcprivacy in Resources (LiveActivity) */ = {isa = PBXBuildFile; fileRef = PI0000000000000000000A06 /* PrivacyInfo.xcprivacy (LiveActivity) */; };
+		PI0000000000000000000B07 /* PrivacyInfo.xcprivacy in Resources (WatchWidget) */ = {isa = PBXBuildFile; fileRef = PI0000000000000000000A07 /* PrivacyInfo.xcprivacy (WatchWidget) */; };
 		SH00000000000000000001A /* HilalShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = SH00000000000000000000A /* HilalShareSheet.swift */; };
 		WA000000000000000000011 /* WatchLocationSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000011R /* WatchLocationSetupView.swift */; };
 		WA000000000000000000012 /* PrayerTimesTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = WA000000000000000000012R /* PrayerTimesTab.swift */; };
@@ -320,6 +326,11 @@
 		MW00000000000000000003 /* InfoMac.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = InfoMac.plist; sourceTree = "<group>"; };
 		MW00000000000000000004 /* IqamahWidgetMac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = IqamahWidgetMac.entitlements; sourceTree = "<group>"; };
 		PI000000000000000000AA01 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		PI0000000000000000000A02 /* PrivacyInfo.xcprivacy (iOS) */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		PI0000000000000000000A03 /* PrivacyInfo.xcprivacy (Watch) */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		PI0000000000000000000A04 /* PrivacyInfo.xcprivacy (Widget) */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		PI0000000000000000000A06 /* PrivacyInfo.xcprivacy (LiveActivity) */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		PI0000000000000000000A07 /* PrivacyInfo.xcprivacy (WatchWidget) */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		SH00000000000000000000A /* HilalShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HilalShareSheet.swift; sourceTree = "<group>"; };
 		TT000000000000000000AA01 /* tone_glass.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; path = tone_glass.aiff; sourceTree = "<group>"; };
 		TT000000000000000000AA02 /* tone_ping.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; path = tone_ping.aiff; sourceTree = "<group>"; };
@@ -657,6 +668,7 @@
 			children = (
 				LA000000000000000000010R /* PrayerActivityAttributes.swift */,
 				LA000000000000000000011R /* PrayerLiveActivityView.swift */,
+				PI0000000000000000000A06 /* PrivacyInfo.xcprivacy (LiveActivity) */,
 			);
 			path = IqamahLiveActivity;
 			sourceTree = "<group>";
@@ -672,6 +684,7 @@
 				WA000000000000000000014R /* SettingsTab.swift */,
 				WA000000000000000000015R /* WatchNotificationScheduler.swift */,
 				WA000000000000000000016R /* WatchSessionManager.swift */,
+				PI0000000000000000000A03 /* PrivacyInfo.xcprivacy (Watch) */,
 			);
 			path = IqamahWatch;
 			sourceTree = "<group>";
@@ -688,6 +701,7 @@
 				MW00000000000000000004 /* IqamahWidgetMac.entitlements */,
 				WG000000000000000000012 /* Info.plist */,
 				WG000000000000000000013 /* IqamahWidget.entitlements */,
+				PI0000000000000000000A04 /* PrivacyInfo.xcprivacy (Widget) */,
 			);
 			path = IqamahWidget;
 			sourceTree = "<group>";
@@ -707,6 +721,7 @@
 				WW000000000000000000040R /* PrayerEntry.swift */,
 				WW000000000000000000041R /* PrayerTimelineProvider.swift */,
 				WW000000000000000000032R /* IqamahWatchWidget.swift */,
+				PI0000000000000000000A07 /* PrivacyInfo.xcprivacy (WatchWidget) */,
 			);
 			path = IqamahWatchWidget;
 			sourceTree = "<group>";
@@ -724,6 +739,7 @@
 				HC000000000000000000003 /* PrayerRowMobileView.swift */,
 				iOS0000000000000000000013 /* Info.plist */,
 				iOS0000000000000000000014 /* iqamah-iOS.entitlements */,
+				PI0000000000000000000A02 /* PrivacyInfo.xcprivacy (iOS) */,
 			);
 			path = iOS;
 			sourceTree = "<group>";
@@ -1032,6 +1048,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				PI0000000000000000000B05 /* PrivacyInfo.xcprivacy in Resources (Widget Mac) */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1077,6 +1094,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				PI0000000000000000000B06 /* PrivacyInfo.xcprivacy in Resources (LiveActivity) */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1085,6 +1103,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				WA000000000000000000060 /* Assets.xcassets in Resources */,
+				PI0000000000000000000B03 /* PrivacyInfo.xcprivacy in Resources (Watch) */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1092,6 +1111,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				PI0000000000000000000B04 /* PrivacyInfo.xcprivacy in Resources (Widget) */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1099,6 +1119,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				PI0000000000000000000B07 /* PrivacyInfo.xcprivacy in Resources (WatchWidget) */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1108,6 +1129,7 @@
 			files = (
 				iOS000000000000000000000F /* Assets.xcassets in Resources */,
 				iOS000000000000000000002A /* splash.jpg in Resources (iOS) */,
+				PI0000000000000000000B02 /* PrivacyInfo.xcprivacy in Resources (iOS) */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
