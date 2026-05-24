@@ -295,7 +295,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                         prayerTime: prayer.time,
                         adhaan: adhaan,
                         allPrayers: adjustedPrayers,
-                        timezone: timezone // city's timezone, not device timezone
+                        timezone: timezone, // city's timezone, not device timezone
+                        statusItemFrame: self.statusItem?.button?.window?.frame
                     )
                 }
             }
