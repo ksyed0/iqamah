@@ -1,8 +1,8 @@
-# ENH-001 Finish-Up — Design
+# ENH-0001 Finish-Up — Design
 
 **Date:** 2026-05-21
 **Status:** Draft → ready for plan
-**Tracking:** ENH-001 (docs/ENHANCEMENTS.md)
+**Tracking:** ENH-0001 (docs/ENHANCEMENTS.md)
 **Effort:** ~½ day
 **ACs:** AC-0349 – AC-0356
 
@@ -10,9 +10,9 @@
 
 ## Background
 
-ENH-001 ("Exact GPS Prayer Times via CLGeocoder, Option A+B") was largely shipped during the v1.5.0 cycle. An audit on 2026-05-21 found:
+ENH-0001 ("Exact GPS Prayer Times via CLGeocoder, Option A+B") was largely shipped during the v1.5.0 cycle. An audit on 2026-05-21 found:
 
-| Surface | ENH-001 state | Location |
+| Surface | ENH-0001 state | Location |
 |---|---|---|
 | macOS first-launch setup | ✅ A+B | `iqamah/Views/LocationSetupView.swift:142-260` |
 | iOS first-launch setup | ✅ A+B (shares macOS view via `iOSRootView.swift:103`) | same |
@@ -22,7 +22,7 @@ ENH-001 ("Exact GPS Prayer Times via CLGeocoder, Option A+B") was largely shippe
 | `SettingsManager` schema + iCloud KVS sync | ✅ Done | `Packages/IqamahCore/.../SettingsManager.swift` |
 | Tests for A+B math | ✅ Done | `Packages/IqamahCore/Tests/IqamahCoreTests/ENH001GPSTests.swift` |
 | Legacy-user migration prompt for v1.6 | ❌ Missing | — |
-| ENH-001 status in `docs/ENHANCEMENTS.md` | ❌ Still marked as planned | — |
+| ENH-0001 status in `docs/ENHANCEMENTS.md` | ❌ Still marked as planned | — |
 
 This spec covers the finish-up work plus two related structural cleanups discovered during the audit (dead duplicate files, ambiguous filenames across targets).
 
@@ -31,7 +31,7 @@ This spec covers the finish-up work plus two related structural cleanups discove
 - **GPS label persistence:** Use reverse-geocoded locality from CLGeocoder (Option B). Already implemented on macOS/iOS — extend to watchOS.
 - **Geocoder failure fallback:** Use TimeZone.current + nearest-city label (Option A values stay). Already implemented.
 - **Activation scope:** All GPS flows use the new path. Existing v1.5.0 users get a one-time prompt on v1.6 launch.
-- **Migration prompt audience:** All legacy users whose `locationSource` is unset (cannot reliably distinguish pre-ENH-001 GPS users from manual pickers; let the user decide via the prompt).
+- **Migration prompt audience:** All legacy users whose `locationSource` is unset (cannot reliably distinguish pre-ENH-0001 GPS users from manual pickers; let the user decide via the prompt).
 
 ## Scope (six items)
 
@@ -43,11 +43,11 @@ Add CLGeocoder reverse-geocode to the two watch GPS entry points so the watch ma
 
 **`IqamahWatch/SettingsTab.swift`** — the "Update via GPS" button currently re-runs the same location-manager path; once `IqamahWatchApp` is fixed it inherits the refinement automatically. Verify no separate code path here; add a watchOS-targeted unit test that exercises the refinement.
 
-**Behaviour on failure:** Option A values remain in place (raw coords + TimeZone.current). Log `[ENH-001]` and exit. Matches macOS pattern at `LocationSetupView.swift:240-242`.
+**Behaviour on failure:** Option A values remain in place (raw coords + TimeZone.current). Log `[ENH-0001]` and exit. Matches macOS pattern at `LocationSetupView.swift:240-242`.
 
 ### 2. One-time v1.6 re-detect prompt
 
-Prompt legacy users (whose `locationSource` is unset because they completed setup before ENH-001 schema landed) once on first launch of v1.6.
+Prompt legacy users (whose `locationSource` is unset because they completed setup before ENH-0001 schema landed) once on first launch of v1.6.
 
 **New `SettingsManager` key:**
 ```swift
@@ -76,7 +76,7 @@ hasCompletedSetup == true
 
 ### 3. Doc closeout
 
-- `docs/ENHANCEMENTS.md` — update ENH-001 heading to `✅ Implemented (2026-05-21)`, list which surfaces ship A vs A+B, link the v1.6 PR.
+- `docs/ENHANCEMENTS.md` — update ENH-0001 heading to `✅ Implemented (2026-05-21)`, list which surfaces ship A vs A+B, link the v1.6 PR.
 - `docs/ID_REGISTRY.md` — bump `AC` next-available to AC-0357 after the AC-0349 – AC-0356 in this spec are consumed.
 - No new EPIC/US/ENH/BUG IDs needed.
 
@@ -131,10 +131,10 @@ not the repo root.
 ## Acceptance criteria
 
 - **AC-0349:** watchOS `IqamahWatchApp.locationManager(_:didUpdateLocations:)` invokes `CLGeocoder().reverseGeocodeLocation(...)` after saving raw GPS coordinates; on success, writes `placemark.locality` to `SettingsManager.gpsLocality` and `placemark.timeZone?.identifier` to `SettingsManager.gpsTimezone`. CLGeocoder is short-circuited when the cached coordinate is within 5 km of the new fix and `gpsLocality` is non-empty (mirrors macOS).
-- **AC-0350:** On CLGeocoder failure or no network, watchOS retains the Option-A values (raw coords + `TimeZone.current`). No UI degradation or error surfaced to the user. Failure is logged with the `[ENH-001]` tag.
+- **AC-0350:** On CLGeocoder failure or no network, watchOS retains the Option-A values (raw coords + `TimeZone.current`). No UI degradation or error surfaced to the user. Failure is logged with the `[ENH-0001]` tag.
 - **AC-0351:** First launch of v1.6 on a device with `hasCompletedSetup && locationSource.isEmpty` presents the re-detect `.alert()` exactly once on macOS and on iOS. Watch app does not present a prompt.
 - **AC-0352:** Either alert action sets `SettingsManager.didShowGPSReDetectPromptV16 = true`. "Keep current" also sets `locationSource = "manual"`. The alert never re-presents on subsequent launches.
-- **AC-0353:** `docs/ENHANCEMENTS.md` ENH-001 entry is updated to ✅ Implemented (2026-05-21) with PR references and a surface-by-surface table.
+- **AC-0353:** `docs/ENHANCEMENTS.md` ENH-0001 entry is updated to ✅ Implemented (2026-05-21) with PR references and a surface-by-surface table.
 - **AC-0354:** Repo-root `Views/` directory no longer exists; `LocationSetupView`, `CalculationMethodView`, and `SplashScreenView` exist only in their target-specific locations. Both `iqamah` and `iqamah-iOS` schemes build clean.
 - **AC-0355:** `IqamahWatch/WatchLocationSetupView.swift` exists; the struct is renamed to `WatchLocationSetupView`; the pbxproj path is updated; `IqamahWatchApp.swift` references the new type. `IqamahWatch` scheme builds clean.
 - **AC-0356:** `CLAUDE.md` contains a "Project Structure Conventions" section explaining that filenames recur across targets and pbxproj is authoritative for target membership.
@@ -152,6 +152,6 @@ not the repo root.
 | `Packages/IqamahCore/Tests/IqamahCoreTests/ENH001GPSTests.swift` | Add two new tests |
 | `iqamah.xcodeproj/project.pbxproj` | Update path for `WA000000000000000000011R` |
 | `Views/` (repo root) | Delete entire directory (3 files) |
-| `docs/ENHANCEMENTS.md` | Mark ENH-001 ✅ |
+| `docs/ENHANCEMENTS.md` | Mark ENH-0001 ✅ |
 | `docs/ID_REGISTRY.md` | Bump AC counter to AC-0357 |
 | `CLAUDE.md` | Add Project Structure Conventions section |

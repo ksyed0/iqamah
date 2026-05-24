@@ -14,7 +14,7 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 | AC           | AC-0383               | AC-0382           |
 | TC           | TC-0074               | TC-0073           |
 | BUG          | BUG-0070              | BUG-0069          |
-| ENH          | ENH-027               | ENH-026           |
+| ENH          | ENH-0027               | ENH-0026           |
 
 ---
 
@@ -28,4 +28,4 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 ---
 
-**Last Updated:** 2026-05-24 (BUG-0069 logged — location detection cached incorrectly + no auto-detect after first run; affects iOS/macOS/watchOS.)
+**Last Updated:** 2026-05-24 (ENH IDs renumbered to ENH-XXXX format; BUG-0068 and BUG-0069 closed.)

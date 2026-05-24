@@ -374,9 +374,9 @@ Steps:
 Expected: At most one Live Activity active for the upcoming prayer at any time
 Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
 
-### EPIC-0016 — ENH-001 GPS Accuracy Finish-Up
+### EPIC-0016 — ENH-0001 GPS Accuracy Finish-Up
 
-#### US-0070 — Finish ENH-001 across watchOS + Legacy Migration + Structural Cleanup
+#### US-0070 — Finish ENH-0001 across watchOS + Legacy Migration + Structural Cleanup
 
 **TC-0036 (AC-0349) — Watch CLGeocoder refines locality and timezone**
 Type: Functional · Preconditions: Apple Watch Series 11 simulator; Custom location set to Brampton (43.685, -79.759); fresh watch app install
@@ -392,7 +392,7 @@ Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
 Type: Edge Case · Preconditions: Watch app already has `gpsLocality` populated; new GPS fix within 5 km of cached coordinate
 Steps:
   1. Trigger a new location fix (e.g. tap "Update via GPS" in Settings)
-  2. Inspect debug logs for `[ENH-001]` CLGeocoder invocations
+  2. Inspect debug logs for `[ENH-0001]` CLGeocoder invocations
 Expected: No new CLGeocoder request is made; existing `gpsLocality`/`gpsTimezone` values remain unchanged
 Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
 
@@ -403,7 +403,7 @@ Steps:
   2. Allow location permission
   3. Wait 5 seconds
   4. Inspect `gpsTimezone` and confirm no error UI displayed
-Expected: `gpsTimezone` equals `TimeZone.current.identifier` (Option A fallback); no alert/banner shown to user; failure logged with `[ENH-001]` tag
+Expected: `gpsTimezone` equals `TimeZone.current.identifier` (Option A fallback); no alert/banner shown to user; failure logged with `[ENH-0001]` tag
 Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
 
 **TC-0039 (AC-0351, AC-0352) — Legacy v1.5 user sees prompt once on macOS v1.6**
@@ -429,7 +429,7 @@ Expected: Alert appears once; tapping "Re-detect" switches to Settings tab where
 Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
 
 **TC-0041 (AC-0354) — Dead Views/ deletion does not break any build**
-Type: Regression · Preconditions: ENH-001 finish-up branch checked out
+Type: Regression · Preconditions: ENH-0001 finish-up branch checked out
 Steps:
   1. `xcodebuild -project iqamah.xcodeproj -scheme iqamah build`
   2. `xcodebuild -project iqamah.xcodeproj -scheme iqamah-iOS -destination 'platform=iOS Simulator,name=iPhone 17' build`
@@ -439,7 +439,7 @@ Expected: All three schemes report BUILD SUCCEEDED; `ls Views/` returns "No such
 Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
 
 **TC-0042 (AC-0355) — Watch view rename compiles and is reachable**
-Type: Functional · Preconditions: ENH-001 finish-up branch checked out
+Type: Functional · Preconditions: ENH-0001 finish-up branch checked out
 Steps:
   1. `grep -rn "WatchLocationSetupView" IqamahWatch/`
   2. `grep -rn "struct LocationSetupView" IqamahWatch/` (should return nothing)
@@ -449,17 +449,17 @@ Expected: WatchLocationSetupView is referenced in IqamahWatchApp.swift line 30; 
 Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
 
 **TC-0043 (AC-0353, AC-0356) — Documentation updated**
-Type: Functional · Preconditions: Final commit of ENH-001 finish-up branch
+Type: Functional · Preconditions: Final commit of ENH-0001 finish-up branch
 Steps:
   1. `grep "✅ Implemented (2026-05-21)" docs/ENHANCEMENTS.md`
   2. `grep "Project Structure Conventions" CLAUDE.md`
   3. `grep "AC-0356" docs/ID_REGISTRY.md`
-Expected: All three greps return at least one match; ENHANCEMENTS.md ENH-001 section includes the surface-by-surface implementation table; CLAUDE.md section explains the duplicate-filename + PrayerActivityAttributes patterns
+Expected: All three greps return at least one match; ENHANCEMENTS.md ENH-0001 section includes the surface-by-surface implementation table; CLAUDE.md section explains the duplicate-filename + PrayerActivityAttributes patterns
 Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
 
 ---
 
-### EPIC-0017 — Fasting Mode (ENH-002)
+### EPIC-0017 — Fasting Mode (ENH-0002)
 
 #### US-0071 — FastingModeEngine + settings schema
 
