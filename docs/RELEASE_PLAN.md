@@ -50,9 +50,9 @@ Detailed release plan defining MVP and subsequent milestones. Contains Epics, Us
 
 **Status:** 🔴 Planning  
 **Candidates:**
-- ENH-001: GPS prayer time accuracy (exact coordinate + CLGeocoder timezone)
-- ENH-002: Ramadan mode (Suhoor/Iftar countdown in menu bar)
-- ENH-008: Sunnah prayer times (Tahajjud, Duha)
+- ENH-0001: GPS prayer time accuracy (exact coordinate + CLGeocoder timezone)
+- ENH-0002: Ramadan mode (Suhoor/Iftar countdown in menu bar)
+- ENH-0008: Sunnah prayer times (Tahajjud, Duha)
 - EPIC-0015 execution: XCUITest suites (US-0066–0069)
 
 ---
@@ -60,14 +60,14 @@ Detailed release plan defining MVP and subsequent milestones. Contains Epics, Us
 ### **Release 1.7 (Future)**
 
 **Status:** 🔴 Backlog  
-**Description:** Internationalisation (ENH-019) — Arabic, Urdu, Indonesian first
+**Description:** Internationalisation (ENH-0019) — Arabic, Urdu, Indonesian first
 
 ---
 
 ### **Release 2.0 (Future)**
 
 **Status:** 🔴 Backlog  
-**Description:** Apple TV (ENH-020) and/or visionOS (ENH-021) platform expansion
+**Description:** Apple TV (ENH-0020) and/or visionOS (ENH-0021) platform expansion
 
 ---
 
@@ -1255,7 +1255,7 @@ rm adhaan_4_original_backup.mp3
 
 **Description:** Add a "Hilal Watch" feature that computes and visualises global crescent visibility for the two evenings (29th and 30th of each Hijri month) on which the new Islamic month is determined. Uses the Odeh (2004) visibility criterion, validated against 737 ICOP observations, with a full Meeus lunar ephemeris (±0.01°) ported to Swift. Provides both a global map showing the characteristic S-curve visibility band and a local sighting card showing precise Odeh values (ARCL, ARCV, W, V) for the user's location.
 
-**Promoted from:** ENH-018 (see `docs/ENHANCEMENTS.md`)
+**Promoted from:** ENH-0018 (see `docs/ENHANCEMENTS.md`)
 
 **Release Target:** v1.2 ✅ Shipped
 **Status:** ✅ Implemented — PRs #61–66 (all 5 branches, 174/174 tests)
@@ -1395,7 +1395,7 @@ rm adhaan_4_original_backup.mp3
 
 **Description:** Add a native watchOS app that surfaces the next prayer time as a complication on the watch face, shows a full prayer list on-watch, and delivers a haptic tap at prayer time. Reuses `IqamahCore` for all calculation logic. Settings sync via Watch Connectivity from the iPhone companion app.
 
-**Promoted from:** ENH-016 (see `docs/ENHANCEMENTS.md`)
+**Promoted from:** ENH-0016 (see `docs/ENHANCEMENTS.md`)
 
 **Release Target:** v2.1 ✅ Shipped
 **Status:** ✅ Implemented — PR #67 (7 tests, all targets build)
@@ -1540,7 +1540,7 @@ rm adhaan_4_original_backup.mp3
 
 ---
 
-**Last Updated:** 2026-05-11 (EPIC-0010/0011/0012 all implemented. US-0040–US-0044, US-0046–US-0057 marked ✅. US-0045 deferred. ENH-020/021 added to backlog. Compass iOS-style improvements shipped PR #69.)
+**Last Updated:** 2026-05-11 (EPIC-0010/0011/0012 all implemented. US-0040–US-0044, US-0046–US-0057 marked ✅. US-0045 deferred. ENH-0020/021 added to backlog. Compass iOS-style improvements shipped PR #69.)
 
 
 ---
@@ -1689,19 +1689,19 @@ rm adhaan_4_original_backup.mp3
 
 **Total:** 49 acceptance criteria (AC-0300 – AC-0348)  
 **Estimated effort:** 7–10 developer-days  
-## EPIC-0016 — ENH-001 GPS Accuracy Finish-Up
+## EPIC-0016 — ENH-0001 GPS Accuracy Finish-Up
 
 **Status:** 🟡 Planned
 **Version Target:** v1.6
-**Cross-references:** ENH-001 in `docs/ENHANCEMENTS.md`; spec at `docs/superpowers/specs/2026-05-21-enh-001-finish-up-design.md`; plan at `docs/superpowers/plans/2026-05-21-enh-001-finish-up.md`
+**Cross-references:** ENH-0001 in `docs/ENHANCEMENTS.md`; spec at `docs/superpowers/specs/2026-05-21-enh-001-finish-up-design.md`; plan at `docs/superpowers/plans/2026-05-21-enh-001-finish-up.md`
 
-**Goal:** Close out ENH-001 by adding watchOS CLGeocoder parity (Option B), a one-time v1.6 re-detect prompt for legacy users whose `locationSource` UserDefaults key was never written (i.e. setup completed pre-ENH-001), and two structural cleanups (dead repo-root `Views/` directory deletion + watch view rename for filename disambiguation).
+**Goal:** Close out ENH-0001 by adding watchOS CLGeocoder parity (Option B), a one-time v1.6 re-detect prompt for legacy users whose `locationSource` UserDefaults key was never written (i.e. setup completed pre-ENH-0001), and two structural cleanups (dead repo-root `Views/` directory deletion + watch view rename for filename disambiguation).
 
-**Background:** ENH-001 A+B shipped during v1.5.0 across macOS first-launch, iOS first-launch, and macOS/iOS Settings re-detect. The watchOS path implemented Option A only, and legacy v1.5.0 users never had their stored timezone migrated to the authoritative value. This epic delivers parity and migration.
+**Background:** ENH-0001 A+B shipped during v1.5.0 across macOS first-launch, iOS first-launch, and macOS/iOS Settings re-detect. The watchOS path implemented Option A only, and legacy v1.5.0 users never had their stored timezone migrated to the authoritative value. This epic delivers parity and migration.
 
 ---
 
-### US-0070 — Finish ENH-001 across watchOS + Legacy Migration + Structural Cleanup
+### US-0070 — Finish ENH-0001 across watchOS + Legacy Migration + Structural Cleanup
 
 **Priority:** Medium
 **Effort:** S (½ day)
@@ -1710,10 +1710,10 @@ rm adhaan_4_original_backup.mp3
 **Acceptance Criteria:**
 
 - AC-0349: watchOS `IqamahWatchApp.locationManager(_:didUpdateLocations:)` invokes `CLGeocoder().reverseGeocodeLocation(...)` after saving raw GPS coordinates; on success writes `placemark.locality` to `SettingsManager.gpsLocality` and `placemark.timeZone?.identifier` to `SettingsManager.gpsTimezone`. CLGeocoder is short-circuited when the cached coordinate is within 5 km of the new fix and `gpsLocality` is non-empty (mirrors macOS).
-- AC-0350: On CLGeocoder failure or no network, watchOS retains the Option-A values (raw coords + `TimeZone.current`). Failure is logged with the `[ENH-001]` tag. No UI degradation.
+- AC-0350: On CLGeocoder failure or no network, watchOS retains the Option-A values (raw coords + `TimeZone.current`). Failure is logged with the `[ENH-0001]` tag. No UI degradation.
 - AC-0351: First launch of v1.6 on a device with `hasCompletedSetup && locationSource UserDefaults key absent` presents the re-detect `.alert()` exactly once on macOS and on iOS. Watch app does not present a prompt.
 - AC-0352: Either alert action sets `SettingsManager.didShowGPSReDetectPromptV16 = true`. "Keep current" also sets `locationSource = "manual"`. The alert never re-presents on subsequent launches.
-- AC-0353: `docs/ENHANCEMENTS.md` ENH-001 entry is updated to ✅ Implemented (2026-05-21) with PR references and a surface-by-surface table.
+- AC-0353: `docs/ENHANCEMENTS.md` ENH-0001 entry is updated to ✅ Implemented (2026-05-21) with PR references and a surface-by-surface table.
 - AC-0354: Repo-root `Views/` directory no longer exists; `LocationSetupView`, `CalculationMethodView`, and `SplashScreenView` exist only in their target-specific locations. Both `iqamah` and `iqamah-iOS` schemes build clean.
 - AC-0355: `IqamahWatch/WatchLocationSetupView.swift` exists; the struct is renamed to `WatchLocationSetupView`; the pbxproj path is updated; `IqamahWatchApp.swift` references the new type. `IqamahWatch` scheme builds clean.
 - AC-0356: `CLAUDE.md` contains a "Project Structure Conventions" section explaining that filenames recur across targets and pbxproj is authoritative for target membership; also documents the consolidated PrayerActivityAttributes single-source-of-truth pattern.
@@ -1724,18 +1724,18 @@ rm adhaan_4_original_backup.mp3
 
 | Story | Surfaces | Effort | AC count |
 |---|---|---|---|
-| US-0070 — Finish ENH-001 | watchOS, macOS, iOS, repo hygiene | S | 8 |
+| US-0070 — Finish ENH-0001 | watchOS, macOS, iOS, repo hygiene | S | 8 |
 
 **Total:** 8 acceptance criteria (AC-0349 – AC-0356), mapped 1:1 to TC-0036 – TC-0043.
 **Estimated effort:** ½ developer-day.
 
 ---
 
-## EPIC-0017 — Fasting Mode (ENH-002)
+## EPIC-0017 — Fasting Mode (ENH-0002)
 
 **Status:** ✅ Done
 **Version Target:** v1.6
-**Cross-references:** ENH-002 in `docs/ENHANCEMENTS.md`; spec at `docs/superpowers/specs/2026-05-21-fasting-mode-design.md`; plan at `docs/superpowers/plans/2026-05-21-fasting-mode.md`
+**Cross-references:** ENH-0002 in `docs/ENHANCEMENTS.md`; spec at `docs/superpowers/specs/2026-05-21-fasting-mode-design.md`; plan at `docs/superpowers/plans/2026-05-21-fasting-mode.md`
 
 **Goal:** Generalize Ramadan Mode into a year-round Fasting Mode covering auto-Ramadan + 7 Nawafil triggers with method-gated visibility, dedicated banner + relabel display across all surfaces, configurable Suhoor/Iftar/day-before notifications, and a new Ja'fari calculation method.
 

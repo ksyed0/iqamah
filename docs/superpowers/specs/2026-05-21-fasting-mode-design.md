@@ -1,8 +1,8 @@
-# Fasting Mode (ENH-002) — Design
+# Fasting Mode (ENH-0002) — Design
 
 **Date:** 2026-05-21
 **Status:** Draft → ready for plan
-**Tracking:** ENH-002 (docs/ENHANCEMENTS.md) — expanded from "Ramadan Mode" to generalized "Fasting Mode"
+**Tracking:** ENH-0002 (docs/ENHANCEMENTS.md) — expanded from "Ramadan Mode" to generalized "Fasting Mode"
 **Effort:** Medium (~2–3 weeks development + 1 week QA across all surfaces)
 **Promotion target:** EPIC-0017 / US-0071–US-0075 / AC-0357–AC-0382 / TC-0044–TC-0069
 
@@ -10,7 +10,7 @@
 
 ## Background
 
-ENH-002 was originally specced as "Ramadan Mode (Suhoor & Iftar Countdowns)" — auto-detect Ramadan via Hijri calendar and show Suhoor/Iftar countdowns in the macOS menu bar and iOS header. During brainstorming on 2026-05-21 the scope generalized significantly:
+ENH-0002 was originally specced as "Ramadan Mode (Suhoor & Iftar Countdowns)" — auto-detect Ramadan via Hijri calendar and show Suhoor/Iftar countdowns in the macOS menu bar and iOS header. During brainstorming on 2026-05-21 the scope generalized significantly:
 
 - Renamed to **Fasting Mode** to cover both Ramadan and year-round Nawafil (supererogatory) fasts
 - Activation expanded from "auto-Ramadan" to a set of nine independently-toggleable triggers covering the canonical Sunnah fasting days from authentic hadith
@@ -28,7 +28,7 @@ ENH-002 was originally specced as "Ramadan Mode (Suhoor & Iftar Countdowns)" —
 
 ## Out of scope (deferred to future ENHs)
 
-- **Celebration reminders for Islamic holidays** (Eid al-Fitr, Eid al-Adha, Mawlid, Laylat al-Qadr, Hijri new year, Ashura commemorations) — distinct concept from fasting; tracked as a new ENH-022 stub in `docs/ENHANCEMENTS.md`
+- **Celebration reminders for Islamic holidays** (Eid al-Fitr, Eid al-Adha, Mawlid, Laylat al-Qadr, Hijri new year, Ashura commemorations) — distinct concept from fasting; tracked as a new ENH-0022 stub in `docs/ENHANCEMENTS.md`
 - **Customizable 6-of-Shawwal day selection** — v1 picks 2–7 Shawwal automatically (Eid is day 1, always excluded). A future enhancement could let users pick any 6 days in Shawwal
 - **"Most of Sha'ban" trigger** — the hadith says "most of" without a specific date range. Users can use the weekly schedule to cover Sha'ban Mondays/Thursdays; auto-triggering an arbitrary date range overreaches
 - **Per-prayer Maghrib delay tuning for Ja'fari users** — the Ja'fari calculation method's encoded Maghrib delay is sufficient; manual offsets are already available via the existing `prayerAdjustments` system
@@ -488,7 +488,7 @@ Plus existing `calculationMethod` (already KVS-synced) gains `.jafari` as a vali
 `settings.hijriDayOffset` (already in SettingsManager) is applied to date inputs before trigger evaluation. Tests cover offset = ±1 across Ramadan/Eid boundaries.
 
 ### Timezone changes
-Engine takes `TimeZone` as a parameter; uses `settings.activeTimezoneIdentifier` (from ENH-001). A traveler crossing midnight in their original timezone sees the new day's fasting state at the moment of crossover.
+Engine takes `TimeZone` as a parameter; uses `settings.activeTimezoneIdentifier` (from ENH-0001). A traveler crossing midnight in their original timezone sees the new day's fasting state at the moment of crossover.
 
 ### Midnight rollover
 Each render call passes `Date()`, so the answer naturally updates after midnight. The menu bar / iOS hero are timer-driven (re-render every 60 s) — they'll pick up the new state within one tick. Notifications are re-scheduled at midnight by the existing AppDelegate / NotificationScheduler midnight handlers.
@@ -601,7 +601,7 @@ All trigger logic, exclusion filtering, label formatting, and notification plann
 
 ## EPIC / US / AC / TC Promotion
 
-### EPIC-0017 — Fasting Mode (ENH-002)
+### EPIC-0017 — Fasting Mode (ENH-0002)
 
 **Status:** 🟡 Planned
 **Version Target:** v1.6
@@ -690,7 +690,7 @@ Add the `.jafari` case and the `isShiaMethod` helper that drives tradition gatin
 
 ### ID Registry consumption
 
-After ENH-001 finish-up consumes through AC-0356 and TC-0043, ENH-002 will consume:
+After ENH-0001 finish-up consumes through AC-0356 and TC-0043, ENH-0002 will consume:
 
 | Sequence | First | Last | Count |
 |---|---|---|---|
@@ -707,7 +707,7 @@ Post-implementation `ID_REGISTRY.md` next-available values:
 | US | US-0076 |
 | AC | AC-0383 |
 | TC | TC-0074 |
-| ENH | ENH-023 (ENH-022 stub for celebration reminders added to `docs/ENHANCEMENTS.md` during this work) |
+| ENH | ENH-0023 (ENH-0022 stub for celebration reminders added to `docs/ENHANCEMENTS.md` during this work) |
 
 ---
 
@@ -751,7 +751,7 @@ Post-implementation `ID_REGISTRY.md` next-available values:
 | `IqamahLiveActivity/PrayerLiveActivityView.swift` | Apply relabel |
 | `iqamah/iOS/PrayerActivityManager.swift` | Pass fasting state into ContentState |
 | `iqamah.xcodeproj/project.pbxproj` | Add new file refs + multi-target memberships for FastingBanner + FastingModeSection |
-| `docs/ENHANCEMENTS.md` | Mark ENH-002 ✅; add ENH-022 stub for celebration reminders |
+| `docs/ENHANCEMENTS.md` | Mark ENH-0002 ✅; add ENH-0022 stub for celebration reminders |
 | `docs/RELEASE_PLAN.md` | Add EPIC-0017 + US-0071–US-0075 + AC-0357–AC-0382 |
 | `docs/TEST_CASES.md` | Add TC-0044 — TC-0073 |
 | `docs/ID_REGISTRY.md` | Bump EPIC→0018, US→0076, AC→0383, TC→0074, ENH→0023 |
@@ -760,11 +760,11 @@ Post-implementation `ID_REGISTRY.md` next-available values:
 
 ## Cross-References
 
-- **ENH-002** (this work) supersedes the original Ramadan Mode stub in `docs/ENHANCEMENTS.md`
-- **ENH-022** (Celebration reminders) — new stub to be added during this work
-- **ENH-023** is next available after this spec lands
+- **ENH-0002** (this work) supersedes the original Ramadan Mode stub in `docs/ENHANCEMENTS.md`
+- **ENH-0022** (Celebration reminders) — new stub to be added during this work
+- **ENH-0023** is next available after this spec lands
 - **EPIC-0015** (Test Automation) — once US-0065 (snapshot tests) ships, the FastingBanner snapshot suite slots in naturally
-- **ENH-001** (GPS Accuracy) — already-shipped + finish-up spec. ENH-001's `gpsTimezone` is consumed via `settings.activeTimezoneIdentifier` for engine evaluation
+- **ENH-0001** (GPS Accuracy) — already-shipped + finish-up spec. ENH-0001's `gpsTimezone` is consumed via `settings.activeTimezoneIdentifier` for engine evaluation
 - **`IqamahLiveActivity/PrayerActivityAttributes.swift` consolidation** — completed 2026-05-21 (commit `c5215bd`); the optional Fasting Mode fields are added to the single canonical file with multi-target membership
 
 ---
@@ -780,4 +780,4 @@ Post-implementation `ID_REGISTRY.md` next-available values:
 - ID consumption is explicit (EPIC-0017, US-0071–0075, AC-0357–0382, TC-0044–0073)
 - Visual treatments specified with exact gradient hex values and glyphs
 - Notification cap calculation done explicitly (21 + 35 = 56 < 64)
-- Out-of-scope items called out (celebrations as ENH-022; "most of Sha'ban" deferred)
+- Out-of-scope items called out (celebrations as ENH-0022; "most of Sha'ban" deferred)
