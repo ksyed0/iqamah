@@ -106,77 +106,69 @@ final class WatchNotificationScheduler {
         gregCal.timeZone = timezone
         let now = Date()
 
+        let ctx = FastingScheduleContext(
+            calculator: calculator, fasting: fasting, method: settings.calculationMethod,
+            hijriCalendar: hijriCalendar, gregCal: gregCal, timezone: timezone, now: now
+        )
+
         // Soonest-first: dayOffset 0..<7 prioritizes today/tomorrow under watchOS's quota.
         for dayOffset in 0 ..< 7 {
             guard let day = gregCal.date(byAdding: .day, value: dayOffset, to: now) else { continue }
-            await scheduleFastingSuhoorIftar(
-                for: day, calculator: calculator, fasting: fasting,
-                method: settings.calculationMethod, hijriCalendar: hijriCalendar,
-                timezone: timezone, now: now
-            )
+            await scheduleFastingSuhoorIftar(for: day, ctx: ctx)
             if dayOffset < 6 {
-                await scheduleFastingDayBefore(
-                    offsetFromNow: dayOffset + 1, gregCal: gregCal, now: now,
-                    fasting: fasting, method: settings.calculationMethod,
-                    hijriCalendar: hijriCalendar, timezone: timezone
-                )
+                await scheduleFastingDayBefore(offsetFromNow: dayOffset + 1, ctx: ctx)
             }
         }
     }
 
-    private func scheduleFastingSuhoorIftar(
-        for day: Date,
-        calculator: PrayerCalculator,
-        fasting: FastingModeSettings,
-        method: CalculationMethod,
-        hijriCalendar: Calendar,
-        timezone: TimeZone,
-        now: Date
-    ) async {
+    /// Bundles per-reschedule constants so per-day helpers stay below SwiftLint's parameter cap.
+    private struct FastingScheduleContext {
+        let calculator: PrayerCalculator
+        let fasting: FastingModeSettings
+        let method: CalculationMethod
+        let hijriCalendar: Calendar
+        let gregCal: Calendar
+        let timezone: TimeZone
+        let now: Date
+    }
+
+    private func scheduleFastingSuhoorIftar(for day: Date, ctx: FastingScheduleContext) async {
         let state = FastingModeEngine.evaluate(
-            for: day, settings: fasting, calculationMethod: method,
-            hijriCalendar: hijriCalendar, timezone: timezone
+            for: day, settings: ctx.fasting, calculationMethod: ctx.method,
+            hijriCalendar: ctx.hijriCalendar, timezone: ctx.timezone
         )
-        guard state.isActive, let times = try? calculator.calculate(for: day) else { return }
-        let suhoor = FastingNotificationPlanner.suhoorFireDate(fajr: times.fajr, settings: fasting)
-        let iftar = FastingNotificationPlanner.iftarFireDate(maghrib: times.maghrib, settings: fasting)
+        guard state.isActive, let times = try? ctx.calculator.calculate(for: day) else { return }
+        let suhoor = FastingNotificationPlanner.suhoorFireDate(fajr: times.fajr, settings: ctx.fasting)
+        let iftar = FastingNotificationPlanner.iftarFireDate(maghrib: times.maghrib, settings: ctx.fasting)
         let glyph = state.trigger == .autoRamadan ? "🌙" : "🕗"
-        if suhoor > now {
+        if suhoor > ctx.now {
             await scheduleFasting(
                 at: suhoor,
                 title: "\(glyph) Suhoor reminder",
-                body: "Suhoor ends in \(fasting.suhoorLeadMinutes) min",
-                identifier: FastingNotificationPlanner.identifier(for: day, kind: "suhoor", timezone: timezone)
+                body: "Suhoor ends in \(ctx.fasting.suhoorLeadMinutes) min",
+                identifier: FastingNotificationPlanner.identifier(for: day, kind: "suhoor", timezone: ctx.timezone)
             )
         }
-        if iftar > now {
+        if iftar > ctx.now {
             await scheduleFasting(
                 at: iftar,
                 title: "\(glyph) Iftar approaches",
-                body: "Iftar in \(fasting.iftarLeadMinutes) min",
-                identifier: FastingNotificationPlanner.identifier(for: day, kind: "iftar", timezone: timezone)
+                body: "Iftar in \(ctx.fasting.iftarLeadMinutes) min",
+                identifier: FastingNotificationPlanner.identifier(for: day, kind: "iftar", timezone: ctx.timezone)
             )
         }
     }
 
-    private func scheduleFastingDayBefore(
-        offsetFromNow: Int,
-        gregCal: Calendar,
-        now: Date,
-        fasting: FastingModeSettings,
-        method: CalculationMethod,
-        hijriCalendar: Calendar,
-        timezone: TimeZone
-    ) async {
-        guard let tomorrow = gregCal.date(byAdding: .day, value: offsetFromNow, to: now) else { return }
+    private func scheduleFastingDayBefore(offsetFromNow: Int, ctx: FastingScheduleContext) async {
+        guard let tomorrow = ctx.gregCal.date(byAdding: .day, value: offsetFromNow, to: ctx.now) else { return }
         let tState = FastingModeEngine.evaluate(
-            for: tomorrow, settings: fasting, calculationMethod: method,
-            hijriCalendar: hijriCalendar, timezone: timezone
+            for: tomorrow, settings: ctx.fasting, calculationMethod: ctx.method,
+            hijriCalendar: ctx.hijriCalendar, timezone: ctx.timezone
         )
         guard let plan = FastingNotificationPlanner.dayBefore(
-            tomorrow: tomorrow, tomorrowState: tState, settings: fasting,
-            hijriCalendar: hijriCalendar, timezone: timezone
-        ), plan.fireDate > now else { return }
+            tomorrow: tomorrow, tomorrowState: tState, settings: ctx.fasting,
+            hijriCalendar: ctx.hijriCalendar, timezone: ctx.timezone
+        ), plan.fireDate > ctx.now else { return }
         await scheduleFasting(at: plan.fireDate, title: plan.title, body: plan.body, identifier: plan.identifier)
     }
 
