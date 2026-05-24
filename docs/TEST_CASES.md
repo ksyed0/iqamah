@@ -41,8 +41,8 @@ Human-readable test cases (TC-XXXX) linked to user stories and acceptance criter
 
 ## Test Case Registry
 
-**Total Test Cases:** 43
-**Status:** 🟡 EPIC-0010 and EPIC-0016 covered (TC-0001 through TC-0043); EPIC-0001 through EPIC-0009 and EPIC-0011 through EPIC-0015 still pending TC backfill
+**Total Test Cases:** 73
+**Status:** 🟡 EPIC-0010, EPIC-0016, and EPIC-0017 covered (TC-0001 through TC-0073); EPIC-0001 through EPIC-0009 and EPIC-0011 through EPIC-0015 still pending TC backfill
 
 ---
 
@@ -459,19 +459,284 @@ Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
 
 ---
 
+### EPIC-0017 — Fasting Mode (ENH-002)
+
+#### US-0071 — FastingModeEngine + settings schema
+
+**TC-0044 (AC-0357) — FastingModeSettings round-trip preserves all fields**
+Type: Functional · Preconditions: IqamahCore tests building
+Steps:
+  1. `cd Packages/IqamahCore && swift test --filter FastingModeSettingsCodecTests`
+Expected: All 8 codec tests pass (default round-trip, populated round-trip, forward-compat decode, both warning helpers)
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0045 (AC-0357) — Forward-compat decode applies defaults for missing fields**
+Type: Edge Case
+Steps:
+  1. Decode legacy JSON that omits midShaban/mabath/dayBeforeMinute
+  2. Verify decoded struct has expected default values
+Expected: Decoded struct.midShaban == false; struct.mabath == false; struct.dayBeforeMinute == 0
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0046 (AC-0358) — FastingModeEngine.evaluate is pure**
+Type: Functional
+Steps:
+  1. Call evaluate twice with identical input
+Expected: Two calls return equal FastingDayState
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0047 (AC-0359) — autoRamadan + weeklySchedule fire correctly**
+Type: Functional
+Steps:
+  1. With autoRamadan=true, evaluate a Ramadan date → trigger should be .autoRamadan
+  2. With weeklyDays=[2] (Mon), evaluate a Monday → trigger should be .weeklySchedule
+Expected: Both behaviors per spec
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0048 (AC-0360) — Ayyam al-Beed + 6 Shawwal fire correctly**
+Type: Functional
+Steps:
+  1. With ayyamAlBeed=true, evaluate 13/14/15 of a non-Ramadan Hijri month → active
+  2. With sixDaysShawwal=true, evaluate 2-7 Shawwal → active; day 8 → inactive
+Expected: Both behaviors per spec
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0049 (AC-0361) — Arafah priority over firstNineDhulHijjah on day 9**
+Type: Edge Case
+Steps:
+  1. Set dayOfArafah=true and firstNineDhulHijjah=true
+  2. Evaluate 9 Dhul-Hijjah
+Expected: state.trigger == .dayOfArafah (Arafah wins)
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0050 (AC-0362) — muharramFast Sunni fires on 9+10 Muharram**
+Type: Functional
+Steps:
+  1. With method=.muslimWorldLeague and muharramFast=true, evaluate 9 Muharram → active
+  2. Same setup, evaluate 10 Muharram → active
+  3. Same setup, evaluate 11 Muharram → inactive
+Expected: 9 and 10 active; 11 inactive
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0051 (AC-0362) — muharramFast Shia fires on 9 Muharram only**
+Type: Functional
+Steps:
+  1. With method=.tehran and muharramFast=true, evaluate 9 Muharram → active
+  2. Same setup, evaluate 10 Muharram → inactive
+Expected: 9 active, 10 inactive
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0052 (AC-0363) — midShaban visible+active for Shia methods**
+Type: Functional
+Steps:
+  1. With method=.tehran and midShaban=true, evaluate 15 Sha'ban
+Expected: state.trigger == .midShaban
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0053 (AC-0363) — midShaban suppressed for Sunni methods even when toggle is true**
+Type: Functional
+Steps:
+  1. With method=.muslimWorldLeague and midShaban=true (stored), evaluate 15 Sha'ban
+Expected: state.isActive == false (suppressed even though toggle is true)
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0054 (AC-0364) — Eid al-Fitr suppresses sixDaysShawwal**
+Type: Edge Case
+Steps:
+  1. With sixDaysShawwal=true, evaluate 1 Shawwal
+Expected: state.isActive == false; state.prohibition == .eidAlFitr
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0055 (AC-0364) — Tashriq days 11-13 suppress ayyamAlBeed**
+Type: Edge Case
+Steps:
+  1. With ayyamAlBeed=true, evaluate 11, 12, and 13 Dhul-Hijjah
+Expected: All three return prohibition matching the day; isActive=false
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+#### US-0072 — UI Surfaces
+
+**TC-0056 (AC-0365) — FastingLabelFormatter relabels within 2h, passes through outside**
+Type: Functional
+Steps:
+  1. Active Ramadan state, Fajr 42 min away → "🌙 Suhoor"
+  2. Active Ramadan state, Fajr 3 hours away → "Fajr" (passthrough)
+  3. Active Nawafil state, Fajr 42 min away → "🕗 Suhoor"
+Expected: All three behaviors per spec
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0057 (AC-0366) — FastingBanner renders active state with correct tinting**
+Type: Functional · Preconditions: iOS or macOS app with Fasting Mode enabled
+Steps:
+  1. Trigger an active autoRamadan day; view PrayerHeroCard
+  2. Trigger an active weeklySchedule day; view PrayerHeroCard
+Expected: Ramadan day shows 🌙 + purple gradient; Nawafil day shows 🕗 + teal gradient
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0058 (AC-0367) — FastingBanner renders prohibition state in grey**
+Type: Functional
+Steps:
+  1. Trigger a prohibition-day evaluation (Eid)
+Expected: Banner shows ⚠️ + grey gradient + "Fasting is forbidden today" text
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0059 (AC-0368) — macOS menu bar relabel + popover banner**
+Type: Functional · Preconditions: macOS app with Fasting Mode enabled, today is a fasting day
+Steps:
+  1. Verify menu bar shows "🌙 Suhoor" or "🕗 Suhoor" relabel when within 2h of Fajr
+  2. Open popover; verify FastingBanner renders above prayer list
+Expected: Relabel visible in menu bar; banner visible in popover
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0060 (AC-0369) — iOS hero banner + iOS row relabel + watch row relabel**
+Type: Functional
+Steps:
+  1. iOS: verify FastingBanner above PrayerHeroCard on a fasting day
+  2. iOS: verify PrayerRowMobileView shows relabel within 2h window
+  3. watchOS: verify PrayerTimesTab row shows relabel within 2h window
+Expected: All three surfaces behave correctly
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0061 (AC-0370) — Live Activity ContentState backward decode**
+Type: Regression
+Steps:
+  1. Start a Live Activity on v1.5 ContentState (no fasting fields)
+  2. Upgrade to v1.6
+  3. Verify the in-flight activity does not crash; new fastingActive == nil
+Expected: No crash; relabel does not apply (defaults to standard countdown)
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+#### US-0073 — Settings UI
+
+**TC-0062 (AC-0371) — Master toggle hides sub-controls when off**
+Type: Functional
+Steps:
+  1. Open Settings → Fasting Mode section
+  2. Toggle master OFF
+Expected: All sub-controls disappear; only the master toggle remains visible
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0063 (AC-0372) — Tradition gating + Muharram label adaptation**
+Type: Functional
+Steps:
+  1. Switch to Tehran method → Settings shows "Tasu'a (9 Muharram)" + Shia subtitle; 15 Sha'ban + 27 Rajab toggles appear
+  2. Switch to MWL → label changes to "Ashura (9+10 Muharram)" + Sunni subtitle; Shia toggles disappear
+Expected: Both adaptations per spec
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0064 (AC-0373) — Friday-alone + Saturday-alone warnings**
+Type: Functional
+Steps:
+  1. Select only Friday in weekly picker → warning appears
+  2. Add Thursday → warning clears
+  3. Remove Thursday, add Saturday → warning clears
+  4. Select only Saturday → Saturday-alone warning appears
+  5. Add Friday → warning clears
+Expected: All warning transitions per spec
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0065 (AC-0374) — Toggle persistence across method changes**
+Type: Regression
+Steps:
+  1. With Tehran method, enable midShaban
+  2. Switch to MWL → midShaban toggle hidden
+  3. Inspect SettingsManager.fastingModeSettings.midShaban → still true
+  4. Switch back to Tehran → midShaban toggle reappears, still on
+Expected: Stored value preserved through method swap
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0066 (AC-0375) — watch Settings minimal UI**
+Type: Functional
+Steps:
+  1. Open IqamahWatch Settings tab
+Expected: Fasting Mode section shows master toggle + "Configure on iPhone/Mac" hint only; no sub-controls
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+#### US-0074 — Notifications
+
+**TC-0067 (AC-0376) — Suhoor + Iftar lead-time arithmetic + range**
+Type: Functional
+Steps:
+  1. Set suhoorLeadMinutes=30, schedule for Fajr=05:12 → notification fires at 04:42
+  2. Set suhoorLeadMinutes=120 → notification fires at 03:12
+  3. Set iftarLeadMinutes=15, Maghrib=20:32 → notification fires at 20:17
+Expected: Fire dates match arithmetic
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0068 (AC-0377) — Day-before logic per Ramadan/Nawafil/prohibition**
+Type: Functional
+Steps:
+  1. Tomorrow is 1 Ramadan → plan != nil
+  2. Tomorrow is 2 Ramadan → plan == nil (skipped)
+  3. Tomorrow is a scheduled Nawafil Monday → plan != nil
+  4. Tomorrow is Eid → plan == nil
+Expected: All four cases per spec
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0069 (AC-0378) — 7-day rolling window + 500ms debounce**
+Type: Functional
+Steps:
+  1. Enable Fasting Mode + weekly = [2,5]
+  2. Rapidly toggle additional weekdays (5 changes in 1 second)
+  3. Wait 1 second
+  4. Inspect pending notifications
+Expected: Notifications reflect final state only (one reschedule occurred, not 5)
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0070 (AC-0380) — Permission-denied deep link UI**
+Type: Negative · Preconditions: Notifications denied in System Settings
+Steps:
+  1. Open Settings → Fasting Mode → Send system notifications row
+  2. Tap "Enable in System Settings" link
+Expected: Deep link opens Notifications preferences on the appropriate platform (iOS: Iqamah notification settings; macOS: System Settings Notifications pane)
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+#### US-0075 — Ja'fari calculation method
+
+**TC-0071 (AC-0381) — Ja'fari Maghrib timing matches reference**
+Type: Functional
+Steps:
+  1. With method=.jafari, compute prayer times for Toronto on 2026-06-21 (summer solstice)
+  2. Compare Maghrib to PrayTimes.org Ja'fari reference output for same coordinates/date
+Expected: Maghrib time within ±1 minute of reference
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+**TC-0072 (AC-0382) — isShiaMethod returns expected for all 7 methods**
+Type: Functional
+Steps:
+  1. `cd Packages/IqamahCore && swift test --filter CalculationMethodJafariTests`
+Expected: All Jafari tests pass — only .tehran and .jafari return true; all other methods return false
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+#### Multi-platform smoke
+
+**TC-0073 — All schemes build clean after Fasting Mode merge**
+Type: Regression
+Steps:
+  1. `cd Packages/IqamahCore && swift test`
+  2. `xcodebuild -project iqamah.xcodeproj -scheme iqamah build`
+  3. `xcodebuild -project iqamah.xcodeproj -scheme iqamah-iOS -destination 'generic/platform=iOS' build`
+  4. `xcodebuild -project iqamah.xcodeproj -scheme IqamahWatch -destination 'generic/platform=watchOS' build`
+  5. `xcodebuild -project iqamah.xcodeproj -scheme IqamahLiveActivity -destination 'generic/platform=iOS' build`
+  6. `xcodebuild -project iqamah.xcodeproj -scheme IqamahWidget -destination 'generic/platform=iOS' build`
+Expected: All commands succeed with BUILD SUCCEEDED / Test Suite passed
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+
+---
+
 ## Test Cases by Type
 
 ### Functional Tests
-TC-0001, 0006, 0007, 0008, 0009, 0010, 0011, 0012, 0013, 0014, 0015, 0017, 0019, 0020, 0021, 0022, 0023, 0025, 0026, 0027, 0028, 0029, 0030, 0031, 0032, 0033, 0036, 0039, 0040, 0042, 0043
+TC-0001, 0006, 0007, 0008, 0009, 0010, 0011, 0012, 0013, 0014, 0015, 0017, 0019, 0020, 0021, 0022, 0023, 0025, 0026, 0027, 0028, 0029, 0030, 0031, 0032, 0033, 0036, 0039, 0040, 0042, 0043, 0044, 0046, 0047, 0048, 0050, 0051, 0052, 0053, 0056, 0057, 0058, 0059, 0060, 0062, 0063, 0064, 0066, 0067, 0068, 0069, 0071, 0072
 
 ### Regression Tests
-TC-0002, 0003, 0005, 0018, 0024, 0041
+TC-0002, 0003, 0005, 0018, 0024, 0041, 0061, 0065, 0073
 
 ### Edge Case Tests
-TC-0035, 0037
+TC-0035, 0037, 0045, 0049, 0054, 0055
 
 ### Negative Tests
-TC-0016, 0034, 0038
+TC-0016, 0034, 0038, 0070
 
 ### Accessibility Tests
 *[To be created — recommend covering VoiceOver labels for new iOS surfaces in a follow-up]*
@@ -493,4 +758,4 @@ TC-0016, 0034, 0038
 
 ---
 
-**Last Updated:** 2026-05-21 (TC-0036 through TC-0043 added covering EPIC-0016 / US-0070 acceptance criteria)
+**Last Updated:** 2026-05-23 (TC-0044 through TC-0073 added covering EPIC-0017 / US-0071–US-0075 acceptance criteria)

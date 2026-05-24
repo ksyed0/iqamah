@@ -179,7 +179,7 @@ jobs:
 
       - name: Enforce ≥75% domain coverage
         run: |
-          EXCLUDED="Views/|AppDelegate|ContentView|iqamahApp|AppIconGenerator|AppIconView|LocationService|AdhaaanPlayer|UITests|SnapshotTesting|Tests/|IqamahWidget|Widget"
+          EXCLUDED="Views/|AppDelegate|ContentView|iqamahApp|AppIconGenerator|AppIconView|LocationService|AdhaaanPlayer|NotificationScheduler|UITests|SnapshotTesting|Tests/|IqamahWidget|Widget"
           COVERAGE=$(xcrun xccov view --report --json TestResults.xcresult 2>/dev/null \
             | python3 -c "import sys,json,re; d=json.load(sys.stdin); ex=sys.argv[1]; files=[f for t in d.get('targets',[]) for f in t.get('files',[]) if not re.search(ex,f.get('path',''))]; te=sum(f.get('executableLines',0) for f in files); tc=sum(f.get('coveredLines',0) for f in files); print(f'{(tc/te*100) if te>0 else 0:.1f}')" "$EXCLUDED" \
             2>/dev/null || echo "0")

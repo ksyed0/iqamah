@@ -8,11 +8,11 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 | **Sequence** | **Next Available ID** | **Last Assigned** |
 |--------------|-----------------------|-------------------|
-| EPIC         | EPIC-0017             | EPIC-0016         |
-| US           | US-0071               | US-0070           |
+| EPIC         | EPIC-0018             | EPIC-0017         |
+| US           | US-0076               | US-0075           |
 | TASK         | TASK-0001             | None              |
-| AC           | AC-0357               | AC-0356           |
-| TC           | TC-0044               | TC-0043           |
+| AC           | AC-0383               | AC-0382           |
+| TC           | TC-0074               | TC-0073           |
 | BUG          | BUG-0069              | BUG-0068          |
 | ENH          | ENH-027               | ENH-026           |
 
@@ -28,4 +28,4 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 ---
 
-**Last Updated:** 2026-05-23 (ENH-026 logged — background-reliable LA updates follow-up from v1.6.0 PR #133.)
+**Last Updated:** 2026-05-23 (EPIC-0017 closed — Fasting Mode: US-0071–US-0075, AC-0357–AC-0382, TC-0044–TC-0073 consumed; ENH-022 stub for celebration reminders backfilled.)
