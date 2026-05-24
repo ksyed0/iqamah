@@ -4,13 +4,46 @@ All bugs and defects tracked here with BUG-XXXX identifiers and status.
 
 ---
 
-**Total Active Bugs:** 1
+**Total Active Bugs:** 2
 **Critical:** 1
-**High:** 0
+**High:** 1
 **Medium:** 0
 **Low:** 0
 
-> **All bugs BUG-0001 through BUG-0067 resolved as of 2026-05-20.** One open bug (BUG-0068) blocking App Store approval of v1.5 (13) submission.
+> **All bugs BUG-0001 through BUG-0067 resolved as of 2026-05-20.** One open bug (BUG-0068) blocking App Store approval of v1.5 (13) submission; BUG-0069 (location detect) reported on v1.5 build 14.
+
+---
+
+## Session — 2026-05-24 (Location detection feedback — v1.5 build 14)
+
+### Open
+
+**BUG-0069 (iOS/macOS/watchOS): Location detection cached incorrectly + no auto-detect after first run**
+
+**Severity:** 🟠 P1 — High (user-visible misbehavior; affects prayer-time accuracy in suburbs and after travel)
+**Reported:** 2026-05-24 — user feedback on v1.5 (14)
+**Status:** 🔴 Open
+**Affected platforms:** macOS, iOS, watchOS
+**Affected versions:** v1.5 (14) and earlier
+
+**Description:** Three layered gaps in the location-detection flow combine to make Iqamah show the wrong city for users in suburbs and after travel:
+
+1. **Catalog snap masks actual locality.** `LocationSetupView.detectClosestCity()` snaps the picker to the nearest entry in `cities.json` (e.g. "Calgary") even when GPS reports a different suburb (e.g. "Airdrie"). `reverseGeocodeAndUpdate()` exists but runs *after* the user taps Continue, so the picker always shows the catalog name during selection.
+2. **Detected city is not in the picker's list.** The user's actual GPS-detected locality is persisted to `SettingsManager.selectedCity*` keys but never appears as a selectable entry in the City picker. Opening the picker later in Settings shows only catalog cities; switching away and back loses the GPS context.
+3. **No auto-detect after first launch.** `ContentView` (macOS) and `iOSRootView` skip `LocationSetupView` once `hasCompletedSetup == true`, so re-opening the app in a new city does nothing. The picker continues showing whatever was saved on first run even when the device's GPS reports a clearly different location.
+
+**Reproduction (gap 1):** Install fresh in Airdrie, AB. Tap through onboarding — picker shows "Calgary" despite GPS coordinates being in Airdrie.
+
+**Reproduction (gap 3):** Complete onboarding in Toronto. Travel to Calgary. Re-open the app — still shows Toronto with no prompt to re-detect.
+
+**Fix scope:**
+1. Surface a "Current Location" entry at the top of the city picker (macOS+iOS shared `LocationSetupView`, `SettingsSheetView`, and watchOS `SettingsTab`) showing the geocoded locality with the `location.fill` icon. Selecting it persists the refined `City` (locality name + raw GPS coords + geocoded timezone).
+2. Pre-resolve `CLGeocoder` immediately when GPS resolves (in the `onChange` handler, not the Continue handler), so the picker shows the refined name before the user interacts.
+3. Cache the refined city on `SettingsManager.gpsDetectedCity` (already wired) and read it from every picker.
+4. Add an opt-in `autoDetectOnMove` toggle (default `true`, KVS-synced). On launch, if the user has moved > 25 km from their saved city, prompt to switch — never auto-switch silently. Uses one-shot `requestLocation()`, NOT `significantLocationChanges`, and does NOT request "Always" permission.
+5. Surface the toggle in `SettingsSheetView` (macOS+iOS) and `SettingsTab` (watchOS) under the Location section.
+
+**Out of scope (follow-ups):** snapshot tests for the new picker UI; significant-location-change monitoring (intentionally one-shot only).
 
 ---
 
