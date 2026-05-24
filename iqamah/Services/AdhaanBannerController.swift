@@ -26,7 +26,8 @@ final class AdhaanBannerController {
         prayerTime: Date,
         adhaan: Adhaan,
         allPrayers: [(name: String, time: Date)],
-        timezone: TimeZone
+        timezone: TimeZone,
+        statusItemFrame: NSRect? = nil
     ) {
         // Dismiss any existing banner first
         hide(animated: false)
@@ -68,7 +69,7 @@ final class AdhaanBannerController {
         newPanel.contentView = hosting
         newPanel.collectionBehavior = [.canJoinAllSpaces, .stationary]
 
-        positionPanel(newPanel, size: bannerSize, animated: true)
+        positionPanel(newPanel, size: bannerSize, anchor: statusItemFrame, animated: true)
         panel = newPanel
 
         // Auto-transition to CLOSE when playback ends naturally
@@ -119,19 +120,33 @@ final class AdhaanBannerController {
 
     // MARK: - Private
 
-    private func positionPanel(_ panel: NSPanel, size: CGSize, animated: Bool) {
+    private func positionPanel(_ panel: NSPanel, size: CGSize, anchor: NSRect?, animated: Bool) {
         guard let screen = NSScreen.main else { return }
 
         let screenFrame = screen.frame
         let menuBarHeight: CGFloat = screenFrame.height - screen.visibleFrame.height
             - screen.visibleFrame.origin.y
 
-        let centreX = screenFrame.midX - size.width / 2
+        // Horizontal: anchor under the menu-bar status item when available,
+        // clamped to screen edges so the panel never spills off-screen on narrow displays.
+        // Falls back to screen-center when no anchor is provided (status item not yet
+        // ready or screen disconnected) — preserves previous behaviour in edge cases.
+        let edgePad: CGFloat = 12
+        let anchorX: CGFloat
+        if let anchor {
+            let ideal = anchor.midX - size.width / 2
+            let minX = screenFrame.minX + edgePad
+            let maxX = screenFrame.maxX - size.width - edgePad
+            anchorX = min(max(ideal, minX), maxX)
+        } else {
+            anchorX = screenFrame.midX - size.width / 2
+        }
+
         let finalY = screenFrame.maxY - menuBarHeight - size.height - 12
         let startY = screenFrame.maxY + 10 // above screen, hidden
 
         panel.setFrame(
-            NSRect(x: centreX, y: startY, width: size.width, height: size.height),
+            NSRect(x: anchorX, y: startY, width: size.width, height: size.height),
             display: false
         )
         panel.orderFront(nil)
@@ -141,13 +156,13 @@ final class AdhaanBannerController {
                 ctx.duration = 0.45
                 ctx.timingFunction = CAMediaTimingFunction(controlPoints: 0.34, 1.56, 0.64, 1)
                 panel.animator().setFrame(
-                    NSRect(x: centreX, y: finalY, width: size.width, height: size.height),
+                    NSRect(x: anchorX, y: finalY, width: size.width, height: size.height),
                     display: true
                 )
             }
         } else {
             panel.setFrame(
-                NSRect(x: centreX, y: finalY, width: size.width, height: size.height),
+                NSRect(x: anchorX, y: finalY, width: size.width, height: size.height),
                 display: true
             )
         }
