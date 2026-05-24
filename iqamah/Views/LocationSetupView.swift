@@ -109,6 +109,19 @@ struct LocationSetupView: View {
                                 Text("City").font(.headline)
                                 Picker("City", selection: $selectedCity) {
                                     Text("Select a city").tag(nil as City?)
+                                    // BUG-0069: surface the GPS-detected (and CLGeocoder-refined)
+                                    // city at the top of the picker so the user can confirm the
+                                    // exact locality (e.g. "Airdrie") instead of a nearest-catalog
+                                    // snap (e.g. "Calgary").
+                                    if let gpsCity = SettingsManager.shared.gpsDetectedCity,
+                                       gpsCity.countryCode == selectedCountry?.code {
+                                        Label(
+                                            "Current Location: \(gpsCity.name)",
+                                            systemImage: "location.fill"
+                                        )
+                                        .tag(gpsCity as City?)
+                                        Divider()
+                                    }
                                     ForEach(database.cities(forCountryCode: selectedCountry?.code ?? "")) { city in
                                         Text(city.name).tag(city as City?)
                                     }
@@ -139,22 +152,30 @@ struct LocationSetupView: View {
                 Spacer()
                 Button(action: {
                     guard let city = selectedCity else { return }
-                    if hasDetectedLocation, let coord = rawGPSCoordinate {
-                        // ENH-001 Option A: use raw GPS coords + TimeZone.current
+                    // BUG-0069: if the user selected the "Current Location" row (which is
+                    // the cached gpsDetectedCity), treat it as GPS source. Otherwise this
+                    // is a manual selection from the catalog.
+                    let isGPSChoice = hasDetectedLocation
+                        && SettingsManager.shared.gpsDetectedCity?.name == city.name
+                    if isGPSChoice, let coord = rawGPSCoordinate {
                         SettingsManager.shared.locationSource = "gps"
                         SettingsManager.shared.saveGPSCoordinates(coord)
-                        SettingsManager.shared.gpsTimezone = TimeZone.current.identifier
-                        guard let gpsCity = try? City(
+                        // Use the geocoded timezone if available, else fall back to system.
+                        let tz = SettingsManager.shared.gpsTimezone.isEmpty
+                            ? TimeZone.current.identifier
+                            : SettingsManager.shared.gpsTimezone
+                        SettingsManager.shared.gpsTimezone = tz
+                        let gpsCity = (try? City(
                             name: city.name,
                             countryCode: city.countryCode,
                             latitude: coord.latitude,
                             longitude: coord.longitude,
-                            timezone: TimeZone.current.identifier
-                        ) else { return }
+                            timezone: tz
+                        )) ?? city
+                        SettingsManager.shared.gpsDetectedCity = gpsCity
                         onLocationConfirmed(gpsCity)
-                        reverseGeocodeAndUpdate(coordinate: coord)
                     } else {
-                        // ENH-001 manual path
+                        // Manual catalog selection — clear GPS source.
                         SettingsManager.shared.locationSource = "manual"
                         onLocationConfirmed(city)
                     }
@@ -215,19 +236,41 @@ struct LocationSetupView: View {
             selectedCountry = database.country(forCode: closestCity.countryCode)
             hasDetectedLocation = true
             rawGPSCoordinate = coordinate // ENH-001: capture raw GPS coordinate
+
+            // BUG-0069: seed gpsDetectedCity immediately so the picker's "Current Location"
+            // row appears (initially with the catalog name + GPS coordinates). The geocoder
+            // then refines it to the actual locality (e.g. "Airdrie" instead of "Calgary").
+            let seededCity = (try? City(
+                name: closestCity.name,
+                countryCode: closestCity.countryCode,
+                latitude: coordinate.latitude,
+                longitude: coordinate.longitude,
+                timezone: TimeZone.current.identifier
+            )) ?? closestCity
+            SettingsManager.shared.gpsDetectedCity = seededCity
+
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                selectedCity = closestCity
+                selectedCity = seededCity
                 withAnimation(.spring(response: 0.4)) {
                     showDetectedBadge = true
                 }
             }
+
+            // BUG-0069: pre-resolve geocoder right after GPS so picker shows the
+            // refined locality BEFORE the user taps Continue.
+            reverseGeocodeAndUpdate(coordinate: coordinate)
         }
     }
 
-    // ENH-001 Option B: CLGeocoder refines locality and timezone asynchronously
+    // ENH-001 Option B / BUG-0069: CLGeocoder refines locality and timezone asynchronously.
+    // Now invoked BEFORE the user taps Continue so the "Current Location" picker entry
+    // displays the refined locality name (e.g. "Airdrie") rather than the nearest catalog
+    // city name (e.g. "Calgary").
     private func reverseGeocodeAndUpdate(coordinate: CLLocationCoordinate2D) {
-        // Skip if same location as cache (within 5 km)
-        if let cached = SettingsManager.shared.cachedGPSCoordinate() {
+        // Skip if same location as cache (within 5 km) — BUT only if we already have a
+        // gpsDetectedCity from a prior run. On first detect we always want to refine.
+        if let cached = SettingsManager.shared.cachedGPSCoordinate(),
+           SettingsManager.shared.gpsDetectedCity != nil {
             let cachedLoc = CLLocation(latitude: cached.latitude, longitude: cached.longitude)
             let newLoc = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
             if cachedLoc.distance(from: newLoc) < 5000,
@@ -238,28 +281,37 @@ struct LocationSetupView: View {
             CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
         ) { placemarks, error in
             guard error == nil, let placemark = placemarks?.first else {
-                print("[ENH-001] CLGeocoder failed: \(error?.localizedDescription ?? "unknown")")
+                print("[BUG-0069] CLGeocoder failed: \(error?.localizedDescription ?? "unknown")")
                 return
             }
             let locality = placemark.locality ?? placemark.name ?? SettingsManager.shared.gpsLocality
             let timezone = placemark.timeZone?.identifier ?? TimeZone.current.identifier
+            let countryCode = placemark.isoCountryCode
+                ?? SettingsManager.shared.gpsDetectedCity?.countryCode
+                ?? SettingsManager.shared.loadCity()?.countryCode
+                ?? "US"
 
             DispatchQueue.main.async {
-                // Single source of truth: same helper used by IqamahWatchApp.refineWithCLGeocoder.
+                // Single source of truth for the locality/timezone fields.
                 SettingsManager.shared.applyGeocodingRefinement(
                     locality: locality,
                     timezoneIdentifier: timezone
                 )
-                // Refine the saved city name and timezone with authoritative values
-                if let city = SettingsManager.shared.loadCity(),
-                   let refined = try? City(
-                       name: locality,
-                       countryCode: city.countryCode,
-                       latitude: coordinate.latitude,
-                       longitude: coordinate.longitude,
-                       timezone: timezone
-                   ) {
-                    SettingsManager.shared.saveCity(refined)
+                // BUG-0069: update the cached GPS city with the refined locality so the
+                // picker's "Current Location" row reflects the geocoder result.
+                if let refined = try? City(
+                    name: locality,
+                    countryCode: countryCode,
+                    latitude: coordinate.latitude,
+                    longitude: coordinate.longitude,
+                    timezone: timezone
+                ) {
+                    SettingsManager.shared.gpsDetectedCity = refined
+                    // If the user hasn't manually overridden their selection, update
+                    // the picker selection to the refined city as well.
+                    if hasDetectedLocation {
+                        selectedCity = refined
+                    }
                 }
             }
         }
