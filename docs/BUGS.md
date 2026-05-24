@@ -4,13 +4,13 @@ All bugs and defects tracked here with BUG-XXXX identifiers and status.
 
 ---
 
-**Total Active Bugs:** 2
-**Critical:** 1
-**High:** 1
+**Total Active Bugs:** 0
+**Critical:** 0
+**High:** 0
 **Medium:** 0
 **Low:** 0
 
-> **All bugs BUG-0001 through BUG-0070 resolved as of 2026-05-24.** v1.5 (15) accepted by App Store; v1.6.0 in development.
+> **All bugs BUG-0001 through BUG-0070 resolved as of 2026-05-24.** v1.5 (15) accepted by App Store; v1.6.0 in development. No open defects blocking v1.6.0 (15) submission.
 
 ---
 
