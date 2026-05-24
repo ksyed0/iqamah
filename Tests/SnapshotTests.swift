@@ -56,6 +56,28 @@ private func onMain(in test: XCTestCase,
     test.waitForExpectations(timeout: 10)
 }
 
+/// Render a SwiftUI view into an NSImage at exactly 1× scale using SwiftUI's
+/// native `ImageRenderer` (macOS 13+). Triggers a full layout pass so Text,
+/// Toggle, Form, and other content-bearing views render their actual content
+/// rather than coming back empty (which `NSHostingView.draw(_:)` produces
+/// when no window is attached).
+/// MUST be called from DispatchQueue.main — use `onMain(in:)` to ensure this.
+@available(macOS 13.0, *)
+private func render1xImageRenderer(_ view: some View, width: CGFloat, height: CGFloat, dark: Bool) -> NSImage? {
+    // Caller dispatches via `onMain`, so we're already on the main queue.
+    // `ImageRenderer.nsImage` is @MainActor; assume isolation to silence the
+    // compiler check.
+    MainActor.assumeIsolated {
+        let sized = view
+            .frame(width: width, height: height)
+            .environment(\.colorScheme, dark ? .dark : .light)
+            .background(dark ? Color(white: 0.12) : Color(white: 0.97))
+        let renderer = ImageRenderer(content: sized)
+        renderer.scale = 1.0
+        return renderer.nsImage
+    }
+}
+
 /// Render a SwiftUI view into an NSImage at exactly 1× scale.
 /// MUST be called from DispatchQueue.main — use `onMain(in:)` to ensure this.
 private func render1x(_ view: some View, width: CGFloat, height: CGFloat, dark: Bool) -> NSImage? {
@@ -187,3 +209,216 @@ final class PrayerTimesTableSnapshotTests: XCTestCase {
 //
 // HilalExportCard and PrayerRowMobileView are #if os(iOS) types.
 // CI wiring deferred to US-0067.
+
+// MARK: - Fasting helpers
+
+/// A fixed reference date used for Fasting banner snapshots so the formatted
+/// times in the rendered image are deterministic across machines / locales.
+private func fastingFixedDate() -> Date {
+    var cal = Calendar(identifier: .gregorian)
+    cal.timeZone = toronto
+    return cal.date(from: DateComponents(year: 2026, month: 3, day: 1))!
+}
+
+private func fastingFajr() -> Date {
+    var cal = Calendar(identifier: .gregorian)
+    cal.timeZone = toronto
+    return cal.date(from: DateComponents(year: 2026, month: 3, day: 2, hour: 4, minute: 30))!
+}
+
+private func fastingMaghrib() -> Date {
+    var cal = Calendar(identifier: .gregorian)
+    cal.timeZone = toronto
+    return cal.date(from: DateComponents(year: 2026, month: 3, day: 1, hour: 20, minute: 30))!
+}
+
+/// Build a Fasting banner ready for rendering at fixed size 320×96.
+private func fastingBannerView(trigger: FastingTriggerKind?,
+                               prohibition: ProhibitedDay?) -> some View {
+    let state = FastingDayState(
+        isActive: prohibition == nil,
+        trigger: trigger,
+        prohibition: prohibition,
+        date: fastingFixedDate()
+    )
+    return FastingBanner(
+        state: state,
+        fajrTime: fastingFajr(),
+        maghribTime: fastingMaghrib(),
+        isShiaMethod: false
+    )
+    .padding(8)
+}
+
+/// Build a fresh, isolated SettingsManager backed by a unique in-memory
+/// UserDefaults suite so tests never read or mutate user state.
+private func makeFastingSettings(enabled: Bool, shia: Bool, suiteName: String) -> SettingsManager {
+    let suite = UserDefaults(suiteName: suiteName)!
+    suite.removePersistentDomain(forName: suiteName)
+    let mgr = SettingsManager(userDefaults: suite)
+    mgr.calculationMethod = shia ? .jafari : .muslimWorldLeague
+    var s = mgr.fastingModeSettings
+    s.enabled = enabled
+    mgr.fastingModeSettings = s
+    return mgr
+}
+
+// MARK: - FastingBanner snapshots
+
+final class FastingBannerSnapshotTests: XCTestCase {
+    func testActiveRamadan_light() {
+        onMain(in: self) { exp in
+            let view = fastingBannerView(trigger: .autoRamadan, prohibition: nil)
+            if let img = render1xImageRenderer(view, width: 320, height: 96, dark: false) {
+                assertSnapshot(of: img, as: .image(precision: 0.5, perceptualPrecision: 0.85), named: "activeRamadan-light")
+            } else { XCTFail("render returned nil") }
+            exp.fulfill()
+        }
+    }
+
+    func testActiveRamadan_dark() {
+        onMain(in: self) { exp in
+            let view = fastingBannerView(trigger: .autoRamadan, prohibition: nil)
+            if let img = render1xImageRenderer(view, width: 320, height: 96, dark: true) {
+                assertSnapshot(of: img, as: .image(precision: 0.5, perceptualPrecision: 0.85), named: "activeRamadan-dark")
+            } else { XCTFail("render returned nil") }
+            exp.fulfill()
+        }
+    }
+
+    func testActiveNawafil_light() {
+        onMain(in: self) { exp in
+            let view = fastingBannerView(trigger: .weeklySchedule, prohibition: nil)
+            if let img = render1xImageRenderer(view, width: 320, height: 96, dark: false) {
+                assertSnapshot(of: img, as: .image(precision: 0.5, perceptualPrecision: 0.85), named: "activeNawafil-light")
+            } else { XCTFail("render returned nil") }
+            exp.fulfill()
+        }
+    }
+
+    func testActiveNawafil_dark() {
+        onMain(in: self) { exp in
+            let view = fastingBannerView(trigger: .weeklySchedule, prohibition: nil)
+            if let img = render1xImageRenderer(view, width: 320, height: 96, dark: true) {
+                assertSnapshot(of: img, as: .image(precision: 0.5, perceptualPrecision: 0.85), named: "activeNawafil-dark")
+            } else { XCTFail("render returned nil") }
+            exp.fulfill()
+        }
+    }
+
+    func testProhibitionEidAlFitr_light() {
+        onMain(in: self) { exp in
+            let view = fastingBannerView(trigger: nil, prohibition: .eidAlFitr)
+            if let img = render1xImageRenderer(view, width: 320, height: 96, dark: false) {
+                assertSnapshot(of: img, as: .image(precision: 0.5, perceptualPrecision: 0.85), named: "prohibitionEidAlFitr-light")
+            } else { XCTFail("render returned nil") }
+            exp.fulfill()
+        }
+    }
+
+    func testProhibitionEidAlFitr_dark() {
+        onMain(in: self) { exp in
+            let view = fastingBannerView(trigger: nil, prohibition: .eidAlFitr)
+            if let img = render1xImageRenderer(view, width: 320, height: 96, dark: true) {
+                assertSnapshot(of: img, as: .image(precision: 0.5, perceptualPrecision: 0.85), named: "prohibitionEidAlFitr-dark")
+            } else { XCTFail("render returned nil") }
+            exp.fulfill()
+        }
+    }
+
+    func testProhibitionTashriq_light() {
+        onMain(in: self) { exp in
+            let view = fastingBannerView(trigger: nil, prohibition: .tashriq12)
+            if let img = render1xImageRenderer(view, width: 320, height: 96, dark: false) {
+                assertSnapshot(of: img, as: .image(precision: 0.5, perceptualPrecision: 0.85), named: "prohibitionTashriq-light")
+            } else { XCTFail("render returned nil") }
+            exp.fulfill()
+        }
+    }
+
+    func testProhibitionTashriq_dark() {
+        onMain(in: self) { exp in
+            let view = fastingBannerView(trigger: nil, prohibition: .tashriq12)
+            if let img = render1xImageRenderer(view, width: 320, height: 96, dark: true) {
+                assertSnapshot(of: img, as: .image(precision: 0.5, perceptualPrecision: 0.85), named: "prohibitionTashriq-dark")
+            } else { XCTFail("render returned nil") }
+            exp.fulfill()
+        }
+    }
+}
+
+// MARK: - FastingModeSection snapshots
+
+final class FastingModeSectionSnapshotTests: XCTestCase {
+    func testFastingDisabled_light() {
+        onMain(in: self) { exp in
+            let s = makeFastingSettings(enabled: false, shia: false,
+                                        suiteName: "iqamah.tests.fasting.disabled.light")
+            let view = Form { FastingModeSection(settings: s) }
+            if let img = render1xImageRenderer(view, width: 420, height: 620, dark: false) {
+                assertSnapshot(of: img, as: .image(precision: 0.5, perceptualPrecision: 0.85), named: "fastingDisabled-light")
+            } else { XCTFail("render returned nil") }
+            exp.fulfill()
+        }
+    }
+
+    func testFastingDisabled_dark() {
+        onMain(in: self) { exp in
+            let s = makeFastingSettings(enabled: false, shia: false,
+                                        suiteName: "iqamah.tests.fasting.disabled.dark")
+            let view = Form { FastingModeSection(settings: s) }
+            if let img = render1xImageRenderer(view, width: 420, height: 620, dark: true) {
+                assertSnapshot(of: img, as: .image(precision: 0.5, perceptualPrecision: 0.85), named: "fastingDisabled-dark")
+            } else { XCTFail("render returned nil") }
+            exp.fulfill()
+        }
+    }
+
+    func testFastingEnabledSunni_light() {
+        onMain(in: self) { exp in
+            let s = makeFastingSettings(enabled: true, shia: false,
+                                        suiteName: "iqamah.tests.fasting.sunni.light")
+            let view = Form { FastingModeSection(settings: s) }
+            if let img = render1xImageRenderer(view, width: 420, height: 620, dark: false) {
+                assertSnapshot(of: img, as: .image(precision: 0.5, perceptualPrecision: 0.85), named: "fastingEnabledSunni-light")
+            } else { XCTFail("render returned nil") }
+            exp.fulfill()
+        }
+    }
+
+    func testFastingEnabledSunni_dark() {
+        onMain(in: self) { exp in
+            let s = makeFastingSettings(enabled: true, shia: false,
+                                        suiteName: "iqamah.tests.fasting.sunni.dark")
+            let view = Form { FastingModeSection(settings: s) }
+            if let img = render1xImageRenderer(view, width: 420, height: 620, dark: true) {
+                assertSnapshot(of: img, as: .image(precision: 0.5, perceptualPrecision: 0.85), named: "fastingEnabledSunni-dark")
+            } else { XCTFail("render returned nil") }
+            exp.fulfill()
+        }
+    }
+
+    func testFastingEnabledShia_light() {
+        onMain(in: self) { exp in
+            let s = makeFastingSettings(enabled: true, shia: true,
+                                        suiteName: "iqamah.tests.fasting.shia.light")
+            let view = Form { FastingModeSection(settings: s) }
+            if let img = render1xImageRenderer(view, width: 420, height: 620, dark: false) {
+                assertSnapshot(of: img, as: .image(precision: 0.5, perceptualPrecision: 0.85), named: "fastingEnabledShia-light")
+            } else { XCTFail("render returned nil") }
+            exp.fulfill()
+        }
+    }
+
+    func testFastingEnabledShia_dark() {
+        onMain(in: self) { exp in
+            let s = makeFastingSettings(enabled: true, shia: true,
+                                        suiteName: "iqamah.tests.fasting.shia.dark")
+            let view = Form { FastingModeSection(settings: s) }
+            if let img = render1xImageRenderer(view, width: 420, height: 620, dark: true) {
+                assertSnapshot(of: img, as: .image(precision: 0.5, perceptualPrecision: 0.85), named: "fastingEnabledShia-dark")
+            } else { XCTFail("render returned nil") }
+            exp.fulfill()
+        }
+    }
+}
