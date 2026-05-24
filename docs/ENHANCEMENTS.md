@@ -844,3 +844,59 @@ IqamahCore/
 All four app targets (macOS, iOS, watchOS, visionOS) import `IqamahCore`. Platform-specific code (AppDelegate, status bar, notification scheduling, complications) lives in each target separately. This prevents the codebase from becoming a sea of `#if os(macOS)` conditionals and makes the boundaries explicit.
 
 **Estimated total effort across all platforms:** 12–18 weeks of focused development, assuming one developer.
+
+---
+
+## Testing & Quality Infrastructure
+
+### ENH-0028 — Add watchOS test target to IqamahWatch scheme
+**Source:** Multi-platform test suite run, 2026-05-24 (v1.6.0 pre-submission audit)
+**Priority:** Medium — coverage gap rather than user-visible defect
+
+**Problem:** The `IqamahWatch` xcodebuild scheme has no XCTest bundle attached. Running `xcodebuild test -scheme IqamahWatch` reports `Executed 0 tests`. All watch-app confidence today comes indirectly from (a) IqamahCore unit tests (which the watch target links) and (b) the fact that the watch app compiles cleanly on the simulator. Watch-specific code paths — Watch Connectivity messages, complications, `WKExtendedRuntimeSession`, watchOS-only UI like `SettingsTab` and `WatchLocationSetupView` — have zero automated coverage.
+
+**Proposed solution:** Add a new `IqamahWatchTests` target to `iqamah.xcodeproj` and attach it to the `IqamahWatch` scheme's Test action. Initial test set should cover:
+- The `SettingsTab` Fasting Mode section state transitions
+- `WatchLocationSetupView` GPS timeout simulation
+- `WatchNotificationScheduler` reschedule debouncing (parallel to the iOS scheduler test we'd add in ENH-0029)
+- `PrayerTimesTab` row relabel via `FastingLabelFormatter` (matching the macOS snapshot test pattern)
+
+**Why backlog (not Epic yet):**
+- Adding a new xcodebuild target requires careful pbxproj edits and CI workflow updates (the `Snapshot Tests` and `Test & Coverage` CI jobs would need to invoke the watch scheme too)
+- Watch simulator test runs are slow (~50s per scheme just to build); CI cost adds up
+- No watch-specific defect is currently driving the need — gap was discovered via audit, not user report
+
+**Promotion criteria:** Promote to EPIC + US when (a) a watchOS-only bug ships that would have been caught by such tests, OR (b) a planned watchOS feature (e.g., complications redesign) reaches design phase and we want test coverage before shipping.
+
+**References:**
+- `IqamahWatch/` (target source)
+- `iqamah.xcodeproj/project.pbxproj` (target wiring)
+- `.github/workflows/ci.yml` (CI test runner — `Snapshot Tests` and `Test & Coverage` jobs would extend to invoke watch tests)
+- 2026-05-24 multi-platform test suite report (the discovery)
+
+---
+
+### ENH-0029 — Add iOS-specific unit test target to iqamah-iOS scheme
+**Source:** Multi-platform test suite run, 2026-05-24 (v1.6.0 pre-submission audit)
+**Priority:** Medium — coverage gap rather than user-visible defect
+
+**Problem:** The `iqamah-iOS` xcodebuild scheme runs only the `IqamahiOSUITests` target (8 UI tests, ~9 min wall time including simulator boot). There is no `iqamah-iOSTests` unit test bundle. iOS-specific runtime code — UIKit lifecycle in `iqamahApp_iOS`, `BGAppRefreshTask` registration, `NotificationScheduler` extension methods, iOS-only views like `PrayerHeroCard` and `PrayerRowMobileView` — has no fast unit coverage. UI tests catch end-to-end regressions but are slow and brittle for logic-level assertions.
+
+**Proposed solution:** Add an `iqamah-iOSTests` target and attach it to the iOS scheme's Test action. Initial test set should cover:
+- `PrayerHeroCard` state machine (active fasting / prohibition / inactive)
+- iOS `NotificationScheduler.scheduleFastingReminders(...)` debounce + cancellation (parallel to watchOS scheduler tests in ENH-0028)
+- `PrayerActivityManager` Live Activity start/update/end lifecycle (mocking `ActivityKit` where needed)
+- `iOSRootView` onboarding flow state transitions
+
+**Why backlog (not Epic yet):**
+- Same as ENH-0028: pbxproj wiring + CI workflow updates
+- iOS-specific code today is intentionally thin (most logic lives in IqamahCore); the gap is real but not large
+- No iOS-only defect is currently driving the need
+
+**Promotion criteria:** Promote to EPIC + US when (a) an iOS-only bug ships that would have been caught by such tests, OR (b) iOS-only code grows substantially (e.g., a new iOS-only feature in v1.7+).
+
+**References:**
+- `iqamah/iOS/` (target source)
+- `iqamah.xcodeproj/project.pbxproj` (target wiring)
+- `.github/workflows/ci.yml` (CI test runner)
+- 2026-05-24 multi-platform test suite report (the discovery)
