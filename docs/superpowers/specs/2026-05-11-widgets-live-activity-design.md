@@ -1,8 +1,8 @@
 # Widgets + Live Activity Design Spec
 **Date:** 2026-05-11
 **Status:** Draft — approved for implementation planning
-**Scope:** US-0045 (Live Activity / Dynamic Island) + iOS widget expansion + macOS Notification Center widget (ENH-004)
-**Promotions from:** US-0045 (deferred from EPIC-0010), ENH-004 (macOS widget backlog)
+**Scope:** US-0045 (Live Activity / Dynamic Island) + iOS widget expansion + macOS Notification Center widget (ENH-0004)
+**Promotions from:** US-0045 (deferred from EPIC-0010), ENH-0004 (macOS widget backlog)
 
 ---
 

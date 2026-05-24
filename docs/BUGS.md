@@ -10,19 +10,19 @@ All bugs and defects tracked here with BUG-XXXX identifiers and status.
 **Medium:** 0
 **Low:** 0
 
-> **All bugs BUG-0001 through BUG-0067 resolved as of 2026-05-20.** One open bug (BUG-0068) blocking App Store approval of v1.5 (13) submission; BUG-0069 (location detect) reported on v1.5 build 14.
+> **All bugs BUG-0001 through BUG-0069 resolved as of 2026-05-24.** v1.5 (15) accepted by App Store; v1.6.0 in development.
 
 ---
 
 ## Session — 2026-05-24 (Location detection feedback — v1.5 build 14)
 
-### Open
+### Resolved
 
 **BUG-0069 (iOS/macOS/watchOS): Location detection cached incorrectly + no auto-detect after first run**
 
 **Severity:** 🟠 P1 — High (user-visible misbehavior; affects prayer-time accuracy in suburbs and after travel)
 **Reported:** 2026-05-24 — user feedback on v1.5 (14)
-**Status:** 🔴 Open
+**Status:** ✅ Fixed — PR #140 (commit 860b028)
 **Affected platforms:** macOS, iOS, watchOS
 **Affected versions:** v1.5 (14) and earlier
 
@@ -49,13 +49,13 @@ All bugs and defects tracked here with BUG-XXXX identifiers and status.
 
 ## Session — 2026-05-21 (App Store rejection — v1.5 build 13)
 
-### Open
+### Resolved
 
 **BUG-0068 (watchOS): Watch app icon black background — App Store rejection (Guideline 4 — Design)**
 
 **Severity:** 🔴 Critical (blocks App Store approval of v1.5 (13) submission)
 **Discovered:** 2026-05-21 — App Store review feedback
-**Status:** 🔴 Open
+**Status:** ✅ Fixed — accepted in App Store v1.5 (15)
 **Submission ID:** b0de0a72-84bc-4693-81df-4d8f7bfac818
 **Review device:** Apple Watch and iPhone 17 Pro Max
 **Version reviewed:** 1.5 (13)

@@ -2,7 +2,7 @@
 **Date:** 2026-05-10
 **Status:** Draft — under review
 **Scope:** EPIC-0011 (US-0046 – US-0052, AC-0204 – AC-0251)
-**Promoted from:** ENH-018
+**Promoted from:** ENH-0018
 **Preview standard:** All new UI reviewed in 4 variants — Materials Glass Light/Dark + Liquid Glass Light/Dark (per `CLAUDE.md` § UI Conventions)
 
 ---
@@ -426,16 +426,16 @@ struct HilalCellRenderer {
 
 ## 12.5 Internationalisation readiness
 
-Full app-wide multilingual support is tracked separately as **ENH-019** (see `docs/ENHANCEMENTS.md`). EPIC-0011 does **not** include translations, but it must be **i18n-ready** so ENH-019 only needs to add translations, not refactor:
+Full app-wide multilingual support is tracked separately as **ENH-0019** (see `docs/ENHANCEMENTS.md`). EPIC-0011 does **not** include translations, but it must be **i18n-ready** so ENH-0019 only needs to add translations, not refactor:
 
 - Every user-visible string in Hilal Watch goes through `String(localized:)` (Swift 5.7+) — no hardcoded English `Text("…")` literals in any view.
 - Hijri month names are sourced from Foundation's `Calendar(identifier:)` localisation — no hardcoded English month names.
-- Numbers (degrees, arcminutes, V-score) are formatted via `Measurement.FormatStyle` / `Number.FormatStyle` so locale formatting is automatic when ENH-019 lands.
-- The notification body uses a parametric format string with the zone letter as `%@` — when ENH-019 lands, only the format string needs translating, not the formatting logic.
+- Numbers (degrees, arcminutes, V-score) are formatted via `Measurement.FormatStyle` / `Number.FormatStyle` so locale formatting is automatic when ENH-0019 lands.
+- The notification body uses a parametric format string with the zone letter as `%@` — when ENH-0019 lands, only the format string needs translating, not the formatting logic.
 - All horizontal layouts use SwiftUI `HStack` (which respects `Locale.LanguageDirection`) — RTL works out of the box once translations are added.
 - `MoonPhaseView` does **not** flip in RTL (astronomy is direction-neutral); the Hilal map does **not** flip (geography is fixed). Both are documented as RTL-exempt in the renderer comments.
 
-**Net effect:** when ENH-019 ships, Hilal Watch becomes multilingual with no view-layer rework — only `Localizable.xcstrings` additions and review.
+**Net effect:** when ENH-0019 ships, Hilal Watch becomes multilingual with no view-layer rework — only `Localizable.xcstrings` additions and review.
 
 ---
 
@@ -508,8 +508,8 @@ The two platform targets ideally share these files via Xcode group membership. W
 
 ## 14. Out of scope (v1)
 
-- **Apple Watch complication** — defer to a separate epic alongside the larger watchOS port (ENH-016)
-- **macOS Notification Center widget** — defer to ENH-004 (existing enhancement)
+- **Apple Watch complication** — defer to a separate epic alongside the larger watchOS port (ENH-0016)
+- **macOS Notification Center widget** — defer to ENH-0004 (existing enhancement)
 - **visionOS 3D moon volume** — premature; revisit after a v1 visionOS app exists
 - **Automated cross-reference against moonsighting.com's published maps as a CI test** — manual QA only for v1; their HTML is unstable to scrape
 - **Real-time crescent-age countdown** — the static "tonight" label is sufficient
@@ -528,7 +528,7 @@ The two platform targets ideally share these files via Xcode group membership. W
 6. **AC-0245 share dialog UI on macOS** — ✅ Resolved 2026-05-10: small pre-share dialog with the resolution toggle, then invoke `NSSharingServicePicker` with the chosen resolution.
 7. **Performance benchmark methodology** — ✅ Resolved 2026-05-10: XCTest performance test running `HilalCalculator.computeGrid` 100× on a known date in a representative criterion, measuring p50 / p95.
 8. **MapKit polygon-overlay scaling spike** — ⏳ To execute at Branch 3 kickoff. Hardware: iPhone XR (oldest accessible) for a conservative gate of ≥ 30 fps; Mobitru iPhone 12 for the AC-0217 reference gate of ≥ 50 fps. If either fails, pivot to `MKTileOverlay` (Branch 3 Task 3.7).
-9. **Arabic / multilingual rollout** — ✅ Resolved 2026-05-10: handled by ENH-019 (App-wide Multilingual Support), not in EPIC-0011 scope. EPIC-0011 only commits to being i18n-ready (§12.5).
+9. **Arabic / multilingual rollout** — ✅ Resolved 2026-05-10: handled by ENH-0019 (App-wide Multilingual Support), not in EPIC-0011 scope. EPIC-0011 only commits to being i18n-ready (§12.5).
 10. **Cell `accessibilityLabel` density** — ✅ Resolved 2026-05-10: VoiceOver labels exposed only at MapKit zoom level ≥ 4. At lower zoom levels the map view as a whole has a single summary label ("Hilal visibility map for [Month] [Year], [N] regions visible").
 
 ---
@@ -547,7 +547,7 @@ The two platform targets ideally share these files via Xcode group membership. W
 | §11 Share / export | AC-0244, 0245, 0246, 0247, 0248 |
 | §12 UI conventions | AC-0249, 0250, 0251 |
 | §12.4 Accessibility | AC-0060 – AC-0065 (existing US-0012 contract; Hilal Watch must comply) |
-| §12.5 Internationalisation readiness | (translations themselves: ENH-019) |
+| §12.5 Internationalisation readiness | (translations themselves: ENH-0019) |
 | §12.6 Error handling | implicit — no user-visible crashes or hangs |
 | §local sighting card | AC-0221, 0222, 0223, 0224, 0225 |
 

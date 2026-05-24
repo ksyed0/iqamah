@@ -3,18 +3,18 @@
 Logged from competitive analysis (May 2026) and product research. Items are grouped by theme, not priority. See competitive-analysis.md for the feature gap matrix these derive from.
 
 **Implementation status as of 2026-05-20:**
-- ENH-015 (iPhone/iPad) → ✅ Implemented as EPIC-0010 (PRs #56–60). Submitted to App Store 2026-05-20.
-- ENH-016 (Apple Watch) → ✅ Implemented as EPIC-0012 (PR #67). Submitted to App Store 2026-05-20.
-- ENH-018 (Hilal Watch) → ✅ Implemented as EPIC-0011 (PRs #61–66). Submitted to App Store 2026-05-20.
-- ENH-019 (i18n) → 🔵 Planned — not yet started
-- ENH-020 (Apple TV) → 🔵 Backlog — see Platform Expansion section
-- ENH-021 (visionOS) → 🔵 Backlog — see Platform Expansion section
+- ENH-0015 (iPhone/iPad) → ✅ Implemented as EPIC-0010 (PRs #56–60). Submitted to App Store 2026-05-20.
+- ENH-0016 (Apple Watch) → ✅ Implemented as EPIC-0012 (PR #67). Submitted to App Store 2026-05-20.
+- ENH-0018 (Hilal Watch) → ✅ Implemented as EPIC-0011 (PRs #61–66). Submitted to App Store 2026-05-20.
+- ENH-0019 (i18n) → 🔵 Planned — not yet started
+- ENH-0020 (Apple TV) → 🔵 Backlog — see Platform Expansion section
+- ENH-0021 (visionOS) → 🔵 Backlog — see Platform Expansion section
 
 ---
 
 ## Location Accuracy
 
-### ENH-001 — Exact GPS Prayer Times via CLGeocoder (Option A + B) ✅ Implemented (2026-05-21)
+### ENH-0001 — Exact GPS Prayer Times via CLGeocoder (Option A + B) ✅ Implemented (2026-05-21)
 **Status:** ✅ Fully implemented across all platforms. A+B shipped during v1.5.0 (macOS/iOS first-launch and Settings re-detect); watchOS Option B parity, a one-time v1.6 re-detect prompt for legacy users, and structural cleanups landed in the v1.6 cycle (see docs/superpowers/specs/2026-05-21-enh-001-finish-up-design.md).
 
 | Surface | Option | Location |
@@ -41,7 +41,7 @@ Logged from competitive analysis (May 2026) and product research. Items are grou
 
 ## Ramadan / Seasonal Features
 
-### ENH-002 — Fasting Mode (Suhoor & Iftar Countdowns + Nawafil Triggers) ✅ Implemented (2026-05-21)
+### ENH-0002 — Fasting Mode (Suhoor & Iftar Countdowns + Nawafil Triggers) ✅ Implemented (2026-05-21)
 **Status:** ✅ Implemented as EPIC-0017 (US-0071–US-0075 shipped in v1.6). Generalized from Ramadan-only mode to a Fasting Mode covering 9 activation triggers (auto-Ramadan, weekly schedule, Ayyam al-Beed, 6 of Shawwal, Day of Arafah, first 9 of Dhul-Hijjah, Muharram fast, 15 Sha'ban, 27 Rajab). Tradition-aware UI gating driven by `isShiaMethod` helper; Ja'fari calculation method added alongside Tehran. Spec at `docs/superpowers/specs/2026-05-21-fasting-mode-design.md`.
 
 | Surface | Treatment |
@@ -56,7 +56,7 @@ Logged from competitive analysis (May 2026) and product research. Items are grou
 
 ---
 
-### ENH-003 — Hijri Calendar Events (Islamic Holidays)
+### ENH-0003 — Hijri Calendar Events (Islamic Holidays)
 **Source:** Competitor gap — 8 of 10 top apps surface Islamic calendar events  
 
 Display upcoming Islamic dates (Eid al-Fitr, Eid al-Adha, Mawlid, etc.) in the prayer times view or a dedicated calendar panel. Use `Calendar(identifier: .islamicUmmAlQura)` which is already imported.
@@ -67,7 +67,7 @@ Display upcoming Islamic dates (Eid al-Fitr, Eid al-Adha, Mawlid, etc.) in the p
 
 ## Localisation & Internationalisation
 
-### ENH-019 — App-wide Multilingual Support (i18n + l10n)
+### ENH-0019 — App-wide Multilingual Support (i18n + l10n)
 **Source:** Internal — project has been English-only since inception; see also deferred US-0016 in `RELEASE_PLAN.md`.
 **Priority:** Medium — large global Muslim audience speaks Arabic, Urdu, Indonesian, Turkish, French, Bengali, Bahasa Melayu, Persian, etc. as a first language. English-only excludes most users from a fluent UX.
 
@@ -133,7 +133,7 @@ Per-language acceptance criterion: **a native speaker has reviewed every string 
 
 ## Astronomy & Calendar
 
-### ENH-018 — Hilal Watch: Global Crescent Sighting Map ✅ Implemented (2026-05-11)
+### ENH-0018 — Hilal Watch: Global Crescent Sighting Map ✅ Implemented (2026-05-11)
 **Status:** ✅ Fully implemented — EPIC-0011 shipped in PRs #61–66. All 5 branches landed: astronomy port (Meeus/Odeh/Yallop/HMNAO), 16,200-cell grid calculator, macOS MapKit UI, iOS sheet, d29 notification. 174/174 tests passing.
 **Source:** Internal product exploration via Claude conversation (May 2026); cross-checked against moonsighting.com / OmegaHilalSighting
 **Priority:** Medium — distinctive feature; 0/10 surveyed competitors offer this
@@ -192,7 +192,7 @@ Per-language acceptance criterion: **a native speaker has reviewed every string 
 
 ## macOS-Native Enhancements
 
-### ENH-004 — macOS Menu Bar Widget / Notification Center Widget
+### ENH-0004 — macOS Menu Bar Widget / Notification Center Widget
 **Source:** Competitor gap — 7 of 10 apps have home/lock screen widgets  
 
 Add a macOS Notification Center widget (WidgetKit) showing today's prayer times and next prayer countdown. The menu bar already computes this data every 60 seconds — the widget would consume the same output.
@@ -201,7 +201,7 @@ Add a macOS Notification Center widget (WidgetKit) showing today's prayer times 
 
 ---
 
-### ENH-005 — Silent / Do Not Disturb Mode
+### ENH-0005 — Silent / Do Not Disturb Mode
 **Source:** Competitor gap — Guidance had this; users loved it; no current macOS competitor offers it  
 
 Allow the adhan sound to be suppressed globally (visual indicator only) without per-prayer muting. Distinct from the existing per-prayer mute — this is a global "I'm in a meeting" toggle accessible from the menu bar right-click menu.
@@ -210,7 +210,7 @@ Allow the adhan sound to be suppressed globally (visual indicator only) without 
 
 ---
 
-### ENH-006 — Adhan Banner Dismiss Timeout Configuration
+### ENH-0006 — Adhan Banner Dismiss Timeout Configuration
 **Source:** Internal UX  
 
 Let users set how long the adhan banner stays on screen before auto-dismissing. Currently hardcoded.
@@ -221,7 +221,7 @@ Let users set how long the adhan banner stays on screen before auto-dismissing. 
 
 ## Prayer Tracking
 
-### ENH-007 — Prayer Check-in / Habit Tracker
+### ENH-0007 — Prayer Check-in / Habit Tracker
 **Source:** Competitor gap — Just Pray (4.9★) built an entire app around this  
 
 Allow users to mark each prayer as prayed on time, prayed late, or missed. Show a simple streak counter in the main view. Store history in UserDefaults or a local SQLite database.
@@ -230,7 +230,7 @@ Allow users to mark each prayer as prayed on time, prayed late, or missed. Show 
 
 ---
 
-### ENH-008 — Sunnah Prayer Times (Tahajjud, Duha)
+### ENH-0008 — Sunnah Prayer Times (Tahajjud, Duha)
 **Source:** Competitor gap — IslamApp surfaces these  
 
 Display optional Sunnah prayer windows (Tahajjud: last third of night; Duha: 15–45 min after sunrise). These are calculated from existing Fajr/Sunrise/Dhuhr times already computed.
@@ -241,7 +241,7 @@ Display optional Sunnah prayer windows (Tahajjud: last third of night; Duha: 15�
 
 ## Qibla
 
-### ENH-009 — Augmented Reality Qibla
+### ENH-0009 — Augmented Reality Qibla
 **Source:** Competitor gap — Athan Pro offers AR Qibla  
 
 Overlay the Qibla direction on a live camera view using ARKit/RealityKit. The compass bearing is already calculated; AR adds a visual layer.
@@ -252,7 +252,7 @@ Overlay the Qibla direction on a live camera view using ARKit/RealityKit. The co
 
 ## Audio & Adhan
 
-### ENH-010 — Additional Adhan Voices
+### ENH-0010 — Additional Adhan Voices
 **Source:** Competitor feature — Namaz offers "multiple maqams from famous mosques"  
 
 Expand the adhan library beyond the current 5 regular + 3 Fajr. Potential additions: Makkah (Sheikh Sudais), Madinah, Al-Aqsa.
@@ -261,7 +261,7 @@ Expand the adhan library beyond the current 5 regular + 3 Fajr. Potential additi
 
 ---
 
-### ENH-011 — Per-Prayer Adhan Preview in Settings
+### ENH-0011 — Per-Prayer Adhan Preview in Settings
 **Source:** UX gap — users cannot audition an adhan before committing to it  
 
 Add a play/preview button next to each adhan option in the settings sheet so users can hear a short clip before selecting.
@@ -270,14 +270,14 @@ Add a play/preview button next to each adhan option in the settings sheet so use
 
 ---
 
-### ENH-023 — Adhaan Surround Mode (Spatial Multi-Muezzin)
+### ENH-0023 — Adhaan Surround Mode (Spatial Multi-Muezzin)
 **Source:** User suggestion (2026-05-21)
 **Priority:** Medium — distinctive feature; emotionally meaningful for users from Muslim-majority countries
 
 **Problem:** Iqamah plays a single adhaan at prayer time. Users who grew up in Muslim-majority countries — Egypt, Saudi Arabia, Pakistan, Indonesia, Malaysia, Turkey, the Levant — describe the experience of hearing multiple mosques start the adhaan within a 5–15 second window, each from a different direction, as one of the most emotionally evocative aspects of daily prayer life. The single-source adhaan in apps misses this sensory dimension entirely.
 
 **Solution:** "Surround Mode" that:
-1. Lets the user select 2–5 different adhaan recordings simultaneously (existing 5 regular + 3 Fajr library plus any added via ENH-010)
+1. Lets the user select 2–5 different adhaan recordings simultaneously (existing 5 regular + 3 Fajr library plus any added via ENH-0010)
 2. Plays them with staggered start times — small natural jitter (e.g. 0s / +3s / +8s / +12s) to mimic real-world multi-mosque overlap
 3. Positions each in 3D space using `AVAudioEnvironmentNode` — different azimuth/distance per source so the listener perceives mosques in different directions and at different perceived distances
 4. Master volume + per-source mix balance so overlapping playback doesn't clip
@@ -322,8 +322,8 @@ player.scheduleFile(file, at: AVAudioTime(sampleTime: offset, atRate: rate))
 - [ ] watchOS and tvOS gracefully ignore the setting (Surround Mode unavailable badge in settings)
 
 **Cross-references:**
-- ENH-010 (Additional Adhaan Voices) — synergistic; more voices = more variety
-- ENH-021 (Vision Pro Path 2) — spatial Qibla mentioned; Surround Mode is a natural pair
+- ENH-0010 (Additional Adhaan Voices) — synergistic; more voices = more variety
+- ENH-0021 (Vision Pro Path 2) — spatial Qibla mentioned; Surround Mode is a natural pair
 
 **Effort:** Medium (1–2 weeks). Audio engine code is the main lift; `AVAudioEnvironmentNode` has a learning curve but standard Apple sample code covers it.
 
@@ -334,7 +334,7 @@ player.scheduleFile(file, at: AVAudioTime(sampleTime: offset, atRate: rate))
 
 ---
 
-### ENH-024 — Adhaan Bypasses iPhone Silent Switch (Critical Alerts Entitlement)
+### ENH-0024 — Adhaan Bypasses iPhone Silent Switch (Critical Alerts Entitlement)
 **Source:** User request (2026-05-21); audit completed same day
 **Priority:** Medium-High — religiously significant; affects a substantial fraction of daily-use scenarios
 
@@ -385,7 +385,7 @@ player.scheduleFile(file, at: AVAudioTime(sampleTime: offset, atRate: rate))
 
 **Cross-references:**
 - BUG-0066 (resolved) — `.timeSensitive` interruption level for Focus / DND bypass. Silent-switch bypass is a separate (lower) layer.
-- ENH-023 (Surround Mode) — Critical Alerts grant would let Surround Mode also play through silent.
+- ENH-0023 (Surround Mode) — Critical Alerts grant would let Surround Mode also play through silent.
 
 **Effort:** Small-Medium for the code (~30 lines + Settings toggle). Large for the entitlement application — Apple's response time is days-to-weeks, may require iteration, and there's a non-zero chance of denial. Ship the code path behind a runtime entitlement check so it's ready to flip when approval arrives.
 
@@ -396,7 +396,7 @@ The audit showed Iqamah is doing everything correctly within Apple's default con
 
 ---
 
-### ENH-026 — Background-reliable Live Activity updates
+### ENH-0026 — Background-reliable Live Activity updates
 
 **Status:** Backlog
 **Source:** Follow-up from v1.6.0 LA rollover fix (PR #133, commit 405256a)
@@ -419,7 +419,7 @@ The audit showed Iqamah is doing everything correctly within Apple's default con
 
 ---
 
-### ENH-025 — Per-day Alert Scheduling
+### ENH-0025 — Per-day Alert Scheduling
 **Source:** User request (2026-05-23)
 **Priority:** Medium — quality-of-life refinement on top of existing notification system
 
@@ -443,7 +443,7 @@ The audit showed Iqamah is doing everything correctly within Apple's default con
 
 ## Content & Information
 
-### ENH-012 — Hadith of the Day
+### ENH-0012 — Hadith of the Day
 **Source:** Competitor gap — 4 of 10 apps surface a daily Hadith  
 
 Show a rotating Hadith in the main view or as a menu bar tooltip. Could be a static bundled JSON of curated Hadith to avoid network dependency.
@@ -452,7 +452,7 @@ Show a rotating Hadith in the main view or as a menu bar tooltip. Could be a sta
 
 ---
 
-### ENH-013 — Tasbih / Dhikr Counter
+### ENH-0013 — Tasbih / Dhikr Counter
 **Source:** Competitor gap — Muslim Pro and Athan have this  
 
 A simple tap counter for post-prayer dhikr. Could live as a popover from the main view.
@@ -461,7 +461,7 @@ A simple tap counter for post-prayer dhikr. Could live as a popover from the mai
 
 ---
 
-### ENH-014 — Zakat Calculator
+### ENH-0014 — Zakat Calculator
 **Source:** Competitor feature — Muslim Pro, Athan  
 
 A one-time calculator for annual Zakat based on nisab. Could be a modal or separate screen.
@@ -472,19 +472,19 @@ A one-time calculator for annual Zakat based on nisab. Could be a modal or separ
 
 ## Platform Expansion
 
-### ENH-015 — iPhone & iPad App ✅ Implemented via EPIC-0010 (2026-05-10)
+### ENH-0015 — iPhone & iPad App ✅ Implemented via EPIC-0010 (2026-05-10)
 See the multi-platform migration assessment in this file (below).
 **Status:** Implemented → EPIC-0010 (US-0040–US-0044 shipped in PRs #56–60). IqamahCore extracted, iOS target live, iCloud KVS sync, notifications, widget. US-0045 (Live Activity) deferred to v2.1.
 
-### ENH-016 — Apple Watch App ✅ Implemented via EPIC-0012 (2026-05-11)
+### ENH-0016 — Apple Watch App ✅ Implemented via EPIC-0012 (2026-05-11)
 See the multi-platform migration assessment in this file (below).
 **Status:** Implemented → EPIC-0012 (US-0053–US-0057, AC-0252–AC-0275, PR #67). Prayer times list, Qibla, settings on-watch, 4 WidgetKit complications, haptic notifications, WCSession sync.
 
-### ENH-017 — Apple Vision Pro App
-See ENH-021 below (expanded from this placeholder).
+### ENH-0017 — Apple Vision Pro App
+See ENH-0021 below (expanded from this placeholder).
 
 
-### ENH-020 — Apple TV App (tvOS)
+### ENH-0020 — Apple TV App (tvOS)
 **Source:** Product exploration — prayer times on a shared family screen; strong use case during Ramadan (Suhoor/Iftar countdowns on living-room TV)
 **Priority:** Low-Medium — niche but zero competitors offer it on tvOS
 **Release Target:** Post EPIC-0012 (Watch app must ship first; Watch Connectivity pattern established)
@@ -522,8 +522,8 @@ See ENH-021 below (expanded from this placeholder).
 
 ---
 
-### ENH-021 — Apple Vision Pro App (visionOS)
-**Source:** ENH-017 placeholder expanded
+### ENH-0021 — Apple Vision Pro App (visionOS)
+**Source:** ENH-0017 placeholder expanded
 **Priority:** Medium — "designed for iPad" path is nearly free; native path is a strong press story
 **Release Target:** Path 1 immediately after EPIC-0010 (iOS app) ships; Path 2 as optional EPIC
 
@@ -573,10 +573,10 @@ Path 2 (additional):
 
 ---
 
-### ENH-022 — Islamic Holiday Celebration Reminders
+### ENH-0022 — Islamic Holiday Celebration Reminders
 **Source:** Spawned from Fasting Mode brainstorming (2026-05-21) as a sibling concept
 
-**Problem:** Iqamah surfaces fasting practice via Fasting Mode (ENH-002) but does not commemorate non-fasting Islamic holidays. Users miss notifications for Eid al-Fitr, Eid al-Adha, Mawlid an-Nabi, Laylat al-Qadr, Hijri New Year, Ashura commemorations (Shia tradition), Isra wal-Mi'raj, Laylat al-Bara'ah, and Eid al-Ghadir (Shia).
+**Problem:** Iqamah surfaces fasting practice via Fasting Mode (ENH-0002) but does not commemorate non-fasting Islamic holidays. Users miss notifications for Eid al-Fitr, Eid al-Adha, Mawlid an-Nabi, Laylat al-Qadr, Hijri New Year, Ashura commemorations (Shia tradition), Isra wal-Mi'raj, Laylat al-Bara'ah, and Eid al-Ghadir (Shia).
 
 **Solution:** Reuse the FastingModeEngine's Hijri-date evaluation infrastructure to expose celebration notifications. Per-holiday opt-in toggles in Settings. Tradition-aware visibility (some holidays observed primarily in Shia or Sunni tradition).
 
