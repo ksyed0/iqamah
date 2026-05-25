@@ -1,0 +1,60 @@
+# GitHub Pages site configuration for Iqamah.
+#
+# Iqamah doesn't run a deliberate Jekyll site — GitHub Pages auto-publishes
+# Markdown rendered with the default theme from the repo root and docs/.
+# This config restricts what gets rendered so developer-only documentation
+# doesn't break the site build.
+#
+# Background: Jekyll renders Markdown through Liquid before passing to the
+# Markdown renderer. Liquid interprets {{ ... }} as variable substitution
+# and {% ... %} as tag invocation. Plan and spec documents in this repo
+# contain pbxproj fragments, shell command examples with bash variable
+# expansion, and Swift template snippets — all of which use brace syntax
+# that breaks Liquid parsing. Rather than wrap every offending snippet in
+# {% raw %} ... {% endraw %} tags (and require every future plan author to
+# remember to do the same), we exclude those directories from the Pages
+# build entirely.
+#
+# What this means in practice:
+#   - The Pages site shows: README, Privacy_Policy, AGENTS, CLAUDE, and the
+#     user-readable docs (BUGS, ENHANCEMENTS, RELEASE_PLAN, etc.) at
+#     docs/*.md and AGE_RATING/APP_STORE_LISTING/etc.
+#   - The Pages site does NOT show: implementation plans, design specs,
+#     App Store Connect copy drafts, plus all source/build/worktree
+#     directories.
+#
+# To add a new exclusion in the future: add the directory to the `exclude`
+# list below. To temporarily render an excluded directory locally, run
+# `bundle exec jekyll serve` without this config.
+
+theme: jekyll-theme-primer
+
+# Directories Jekyll should not process. The default GitHub Pages exclude
+# list already covers vendor/, node_modules/, etc. — we add Iqamah-specific
+# directories that either contain non-content (source code, build
+# artifacts) or Markdown with Liquid-conflicting syntax.
+exclude:
+  # Developer-only docs with Liquid-conflicting syntax (pbxproj fragments,
+  # bash variable expansion, Swift template snippets).
+  - docs/superpowers/
+
+  # App Store Connect copy drafts — meant for paste into App Store Connect,
+  # not for public website rendering.
+  - docs/app-store/
+
+  # Session / worktree / agent metadata.
+  - .claude/
+
+  # Build artifacts and caches.
+  - .build/
+  - build/
+  - Build/
+  - DerivedData/
+
+  # Xcode project file is a directory containing pbxproj XML; Jekyll
+  # shouldn't try to walk into it.
+  - iqamah.xcodeproj/
+
+  # Snapshot test baselines (PNGs, not Markdown — Jekyll ignores them
+  # anyway, but explicit exclusion keeps the build log clean).
+  - Tests/__Snapshots__/
