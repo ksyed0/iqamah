@@ -4,13 +4,46 @@ All bugs and defects tracked here with BUG-XXXX identifiers and status.
 
 ---
 
-**Total Active Bugs:** 0
+**Total Active Bugs:** 1
 **Critical:** 0
 **High:** 0
 **Medium:** 0
-**Low:** 0
+**Low:** 1
 
-> **All bugs BUG-0001 through BUG-0070 resolved as of 2026-05-24.** v1.5 (15) accepted by App Store; v1.6.0 in development. No open defects blocking v1.6.0 (15) submission.
+> **BUG-0001 through BUG-0070 resolved as of 2026-05-24.** v1.6.0 (15) submitted to App Store 2026-05-25; awaiting review. One non-blocking flake (BUG-0071, LocationServiceTests) logged 2026-05-25 — does not block submission.
+
+---
+
+## Session — 2026-05-25 (Post-submission audit — v1.6.0 in review)
+
+### Open
+
+**BUG-0071 (macOS): `LocationServiceTests.testInitialization()` intermittently fails on CI**
+
+**Severity:** 🟢 P3 — Low (CI flake; does not affect shipping product)
+**Reported:** 2026-05-25 — surfaced by CI on PR #153 (Pages fix) which made zero changes to Swift code
+**Status:** 🟢 Open
+**Affected platforms:** macOS (test target only)
+**Affected versions:** Test infrastructure as of v1.6.0 (15); not a runtime regression
+
+**Description:** `iqamahTests/LocationServiceTests.testInitialization()` fails intermittently on the `macos-latest` CI runner. Same test passed in two consecutive runs on identical Swift code (PRs #151 and #152), then failed on PR #153 (which only added a `_config.yml` file). A manual rerun of the same job on PR #153 passed. Three runs, two pass, one fail — definitive flake.
+
+**Root-cause hypothesis:** the test exercises `CLLocationManager.locationServicesEnabled()` or similar `CLLocationManager` state queries on first launch. macOS simulator location-permission state is not always deterministic across test bundle launches — the first test in a fresh xcresult bundle sometimes sees stale authorization status before the simulator finishes its first-launch dance.
+
+**Reproduction:** Run `xcodebuild test -scheme iqamah -destination 'platform=macOS' -only-testing:iqamahTests/LocationServiceTests/testInitialization` ~5 times in a fresh DerivedData; expect 1 failure out of 5.
+
+**Impact:** Every PR that goes through CI has a small probability of needing a manual job rerun. No impact on shipping app — test target only.
+
+**Fix scope (not yet implemented):**
+1. Inject a `LocationServicing` protocol so `testInitialization()` can use a deterministic stub instead of the real `CLLocationManager`.
+2. Move the actual `CLLocationManager` integration test into a separate suite that's tolerant of simulator flakiness (e.g., retries internally, or runs only on physical devices).
+3. Alternatively: keep the test as-is and add CI-level auto-rerun for this specific test class (see existing PR #133 / #135 / #150 / #153 history — manual rerun has been the workaround).
+
+**Workaround in the meantime:** if Test & Coverage fails on what looks like a doc-only or unrelated PR, check the failure log for `LocationServiceTests.testInitialization()` and rerun the failed job via `gh run rerun <run-id> --failed`.
+
+**Related work:**
+- Surfaced by the v1.6.0 submission-readiness multi-platform test suite audit (2026-05-24, see PARA daily note for that day).
+- Three CI rerun cycles consumed today (PRs #149, #150, #153) — single-digit-minutes each, but adds up.
 
 ---
 

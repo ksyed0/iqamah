@@ -14,23 +14,57 @@ Detailed release plan defining MVP and subsequent milestones. Contains Epics, Us
 
 ## Release Status
 
-**Status:** 🟢 **v1.5.0 SUBMITTED TO APP STORE** — 2026-05-20
+**Status:** 🟢 **v1.6.0 (15) SUBMITTED TO APP STORE** — 2026-05-25
 
 | Platform | Status | Notes |
 |---|---|---|
-| macOS | ✅ v1.5.0 update submitted | Build 12, under review |
-| iOS | ✅ First submission | Build 12, under review |
-| iPadOS | ✅ First submission | Same binary as iOS |
-| watchOS | ✅ First submission | Embedded in iOS binary |
+| macOS | ✅ v1.6.0 update submitted | Build 15, under review |
+| iOS | ✅ v1.6.0 update submitted | Build 15, under review (separate platform listing under Universal Purchase) |
+| iPadOS | ✅ v1.6.0 update submitted | Same binary as iOS |
+| watchOS | ✅ v1.6.0 update submitted | Embedded in iOS binary |
+
+**Last public release:** v1.5 build 15 — accepted by App Store before 2026-05-25.
 
 ---
 
 ## Shipped Releases
 
-### **v1.5.0 — Multi-Platform + Bug Fix Release** *(Submitted 2026-05-20)*
+### **v1.6.0 — Fasting Mode + Location Detect + Polish Release** *(Submitted 2026-05-25)*
 
-**Build:** 12  
-**Status:** 🟡 Under App Store Review  
+**Build:** 15
+**Status:** 🟡 Under App Store Review (both iOS/watchOS and macOS platform listings)
+**Platforms:** macOS 14+, iOS 17+, iPadOS 17+, watchOS 26+
+
+**What shipped:**
+- **EPIC-0017: Fasting Mode (ENH-0002)** — comprehensive Islamic fasting support across all 4 Apple platforms. 9 trigger types (autoRamadan, weeklySchedule, ayyamAlBeed, sixDaysShawwal, dayOfArafah, firstNineDhulHijjah, muharramFast, midShaban, mabath); 5 prohibition days (eidAlFitr, eidAlAdha, tashriq11/12/13). Suhoor/Iftar/day-before reminders with configurable lead times. Beautiful Live Activity / Dynamic Island treatment (🌙 Ramadan purple; 🕗 Nawafil teal). Full settings UI on macOS+iOS, simpler master toggle on watchOS. Shipped across PRs #132 (foundation, Tasks 1–9), #136 (UI wiring, Tasks 10–14), #137 (settings UI, Tasks 15–16), #138 (per-platform schedulers + close-out, Tasks 17–21), #139 (snapshot coverage).
+- **BUG-0069 fix**: location detection rebuilt with "Current Location" picker row, pre-resolved CLGeocoder, opt-in 25 km auto-detect on launch (PR #140).
+- **BUG-0070 fix**: AdhaanBanner panel now anchors under the menu-bar status item instead of screen-center (PR #146).
+- **Live Activity rollover fix**: foreground Timer + staleDate so the LA advances past a passed prayer (PR #133, commit `405256a`). Known limitation: full background reliability requires push-driven updates (ENH-0026, deferred).
+- **macOS Start-on-Login fix**: toggle now surfaces actual error messages + handles `.requiresApproval` correctly (PR #133).
+- **macOS toolbar polish**: top-bar buttons (Qiblah, Settings, About, Mute) have helpful labels and 16pt spacing (PR #133).
+- **iOS CFBundleVersion substitution** fix: parent app + extensions now atomic at build 15 (PR #134) — prevents App Store `ITMS-90362` rejection.
+- **Privacy Manifest** declared for all 7 shipping targets (PR #149) — prevents App Store `ITMS-91070` rejection.
+- **GitHub Pages publishing** restored after ~2 weeks of silent failure on every push (PR #153, `_config.yml`).
+- **Git Flow restoration**: `develop` synced to `main` (PR #152). Future feature/docs PRs target develop.
+- **Test infrastructure**: 195 → 258 IqamahCore tests; 9 → 23 snapshot tests. 322 tests total passing across all targets that have tests.
+- **TC backfill**: 49 EPIC-0015 Test Automation test case entries cherry-picked + renumbered from orphan PR #131 into TC-0074–0122 (PR #154, develop-only).
+- **App Store submission copy**: tailored iOS + macOS Promo / What's New / Description drafts saved in repo at `docs/app-store/v1.6.0-build15/` for paste into App Store Connect.
+
+**ENHs newly logged in this cycle:**
+- ENH-0025 — Per-day alert scheduling
+- ENH-0026 — Background-reliable Live Activity + push-driven notifications (full design spec at `docs/superpowers/specs/2026-05-24-enh-0026-push-driven-notifications-design.md`; deferred pending backend ops commitment)
+- ENH-0027 — Cross-Ecosystem Expansion: Windows, Linux, Android (5-pillar architecture; post-v2.0)
+- ENH-0028 — Add watchOS test target to IqamahWatch scheme (gap surfaced by today's audit)
+- ENH-0029 — Add iOS-specific unit test target to iqamah-iOS scheme (same audit)
+
+**Known limitation in this release:** Live Activity / Dynamic Island (iOS) may briefly show a passed prayer if the app has been fully suspended for several hours. Opening the app refreshes within ~2 seconds. Documented in `docs/RELEASE_NOTES_v1.6.0.md`. Full fix tracked as ENH-0026.
+
+---
+
+### **v1.5.0 — Multi-Platform + Bug Fix Release** *(Accepted by App Store as v1.5 build 15)*
+
+**Build:** 15 (last accepted)
+**Status:** ✅ Released
 **Platforms:** macOS, iOS, iPadOS, watchOS
 
 **What shipped:**
@@ -40,34 +74,41 @@ Detailed release plan defining MVP and subsequent milestones. Contains Epics, Us
 - EPIC-0013: WidgetKit platform — iOS/macOS widgets (small, medium, large, Lock Screen)
 - EPIC-0014: Adaptive layout — iPad two-column landscape, macOS resize
 - EPIC-0015: Test automation — smoke tests, snapshot tests, nightly CI gate
+- EPIC-0016: ENH-0001 GPS prayer time accuracy finish-up
 - BUG-0060–0067: App Store validation fixes, duplicate Live Activity, DND bypass, GPS city names, watchOS GPS
+- BUG-0068 fix (watch icon black background) — accepted in build 15 after build 13 rejection
 
 ---
 
 ## Planned Releases
 
-### **Release 1.6 (Next)**
+### **Release 1.7 (Next)**
 
-**Status:** 🔴 Planning  
-**Candidates:**
-- ENH-0001: GPS prayer time accuracy (exact coordinate + CLGeocoder timezone)
-- ENH-0002: Ramadan mode (Suhoor/Iftar countdown in menu bar)
-- ENH-0008: Sunnah prayer times (Tahajjud, Duha)
-- EPIC-0015 execution: XCUITest suites (US-0066–0069)
-
----
-
-### **Release 1.7 (Future)**
-
-**Status:** 🔴 Backlog  
-**Description:** Internationalisation (ENH-0019) — Arabic, Urdu, Indonesian first
+**Status:** 🔴 Planning
+**Candidates (to be decided when Apple review of v1.6.0 lands):**
+- **ENH-0019 — i18n / l10n Phase 1**: convert all user-visible strings to `String(localized:)`, ship English baseline + Arabic (8 languages planned total). Estimated 3–4 weeks (original ENH says 2–3 weeks; Fasting Mode + BUG-0069 added ~30–50 string keys not in the original audit).
+- **EPIC-0015 XCUITest implementation**: write the 49 test cases now documented in TC-0074–0122 (PR #154 added the documentation; tests themselves not yet written).
+- **ENH-0008 — Sunnah prayer times (Tahajjud, Duha)**: pure feature add, ~1–2 weeks.
+- **BUG-0071 fix**: deterministic stub for `LocationServiceTests.testInitialization()` so CI flake stops requiring manual reruns.
+- **ENH-0028 / ENH-0029**: add watchOS + iOS unit test targets to close the test-infrastructure gaps surfaced by the v1.6.0 audit.
+- **Stray test file cleanup**: delete `testsIqamahTests.swift` and `testsIqamahTests_FIXED.swift` at repo root (orphans from an old refactor).
 
 ---
 
 ### **Release 2.0 (Future)**
 
-**Status:** 🔴 Backlog  
-**Description:** Apple TV (ENH-0020) and/or visionOS (ENH-0021) platform expansion
+**Status:** 🔴 Backlog
+**Description:** Apple-platform matrix completion + push-driven notifications.
+- **ENH-0020 — Apple TV (tvOS) app**: prayer times for shared family screen.
+- **ENH-0021 — visionOS app**: prayer times in Vision Pro environment.
+- **ENH-0026 — Background-reliable Live Activity + push notifications**: only if backend ops commitment is made; otherwise stays deferred. Full design spec already exists; ready to implement when product decision allows.
+
+---
+
+### **Release 3.0+ (Future)**
+
+**Status:** 🔴 Backlog
+**Description:** Cross-ecosystem expansion (ENH-0027). Rust + UniFFI shared core; native UIs for Android, Linux, Windows. Post-v2.0; prerequisite is Apple matrix complete + i18n shipped. 3–4 months of focused work. Self-contained spec lives in `docs/ENHANCEMENTS.md` under "ENH-0027 — Cross-Ecosystem Expansion: Windows, Linux, Android"; export for sharing with reviewers at `~/Downloads/ENH-0027-cross-ecosystem-expansion.md`.
 
 ---
 
