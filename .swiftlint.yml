@@ -50,7 +50,7 @@ line_length:
   ignores_interpolated_strings: true
 
 type_body_length:
-  warning: 410
+  warning: 420
   error: 600
 
 file_length:
