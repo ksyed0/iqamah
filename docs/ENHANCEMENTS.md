@@ -230,12 +230,14 @@ Allow users to mark each prayer as prayed on time, prayed late, or missed. Show 
 
 ---
 
-### ENH-0008 — Sunnah Prayer Times (Tahajjud, Duha)
+### ENH-0008 — Sunnah Prayer Times (Tahajjud, Duha) ✅ Implemented (v1.7)
 **Source:** Competitor gap — IslamApp surfaces these  
 
 Display optional Sunnah prayer windows (Tahajjud: last third of night; Duha: 15–45 min after sunrise). These are calculated from existing Fajr/Sunrise/Dhuhr times already computed.
 
 **Effort:** Small — calculation is trivial; UI is a toggle to show/hide extra rows
+
+**Implementation:** `SunnahTimes` struct + `PrayerTimes.sunnahTimes(nextFajr:)` in IqamahCore; `SunnahSection` (collapsible) + `SunnahRow` (compact range card) in PrayerTimesComponents; `showSunnahTimes` setting in SettingsManager (default on, iCloud KVS synced); injected on macOS, iOS portrait, iPad landscape; watchOS "Sunnah Times ›" NavigationLink → `SunnahTimesWatchView`. Tahajjud = Isha → last third to next Fajr; Duha = Sunrise+15min → Dhuhr-15min.
 
 ---
 

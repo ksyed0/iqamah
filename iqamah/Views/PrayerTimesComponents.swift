@@ -647,3 +647,118 @@ struct PrayerTimeRow: View {
         }
     }
 }
+
+// MARK: - Sunnah Section (ENH-0008)
+
+/// Collapsible disclosure section showing Tahajjud and Duha prayer windows.
+struct SunnahSection: View {
+    let sunnahTimes: SunnahTimes
+    let formatter: DateFormatter
+
+    @State private var isExpanded = true
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Button(action: {
+                withAnimation(.easeInOut(duration: 0.18)) { isExpanded.toggle() }
+            }) {
+                HStack(spacing: 6) {
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                    Text("Sunnah Times")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
+                        .tracking(0.5)
+                    Spacer()
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                        .font(.system(size: 9, weight: .semibold))
+                        .foregroundStyle(.tertiary)
+                }
+                .padding(.horizontal, 4)
+                .padding(.vertical, 10)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(isExpanded ? "Sunnah Times, expanded. Tap to collapse." : "Sunnah Times, collapsed. Tap to expand.")
+
+            if isExpanded {
+                VStack(spacing: 6) {
+                    SunnahRow(
+                        name: "Tahajjud",
+                        subtitle: "Night Prayer",
+                        icon: "moon.zzz.fill",
+                        iconColor: Color.indigo,
+                        start: sunnahTimes.tahajjudStart,
+                        end: sunnahTimes.tahajjudEnd,
+                        formatter: formatter
+                    )
+                    SunnahRow(
+                        name: "Duha",
+                        subtitle: "Morning Prayer",
+                        icon: "sun.haze.fill",
+                        iconColor: Color.orange,
+                        start: sunnahTimes.duhaStart,
+                        end: sunnahTimes.duhaEnd,
+                        formatter: formatter
+                    )
+                }
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+    }
+}
+
+struct SunnahRow: View {
+    let name: String
+    let subtitle: String
+    let icon: String
+    let iconColor: Color
+    let start: Date
+    let end: Date
+    let formatter: DateFormatter
+
+    var body: some View {
+        HStack(spacing: 14) {
+            ZStack {
+                Circle()
+                    .fill(iconColor.opacity(0.10))
+                    .frame(width: 36, height: 36)
+                Image(systemName: icon)
+                    .font(.callout.weight(.medium))
+                    .foregroundStyle(iconColor.opacity(0.80))
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(name)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.primary.opacity(0.85))
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            Text("\(formatter.string(from: start)) – \(formatter.string(from: end))")
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(.secondary)
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .strokeBorder(Color.white.opacity(0.08), lineWidth: 1)
+                )
+        )
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(name), \(subtitle). Window: \(formatter.string(from: start)) to \(formatter.string(from: end))")
+    }
+}

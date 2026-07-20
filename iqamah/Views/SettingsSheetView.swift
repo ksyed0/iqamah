@@ -254,6 +254,14 @@ struct SettingsSheetView: View {
             }
         }
         .toggleStyle(.switch)
+        Toggle(isOn: $settings.showSunnahTimes) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Show Sunnah Times")
+                Text("Tahajjud and Duha prayer windows")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+        }
+        .toggleStyle(.switch)
         #if os(macOS)
             Toggle(isOn: $launchAtLogin) {
                 VStack(alignment: .leading, spacing: 2) {
