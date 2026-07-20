@@ -115,7 +115,9 @@
                         break
                     }
                 }
-                if followingPrayer != nil { break }
+                if followingPrayer != nil {
+                    break
+                }
             }
 
             guard let next = nextPrayer else { return nil }

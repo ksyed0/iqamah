@@ -79,7 +79,11 @@
                 // ActivityController presented as a SwiftUI sheet — avoids UIKit VC traversal
                 .sheet(isPresented: Binding(
                     get: { exportItems != nil },
-                    set: { if !$0 { exportItems = nil; isExporting = false } }
+                    set: {
+                        if !$0 {
+                            exportItems = nil; isExporting = false
+                        }
+                    }
                 )) {
                     if let items = exportItems {
                         ActivityController(activityItems: items)
@@ -226,7 +230,9 @@
             // 4. Build share payload — image + text fallback
             let text = "Hilal Watch · \(evening) · \(String(format: "%.0f%%", Double(aCount) / Double(total) * 100)) of globe easily visible · via Iqamah"
             var items: [Any] = [text]
-            if let img = image { items.insert(img, at: 0) }
+            if let img = image {
+                items.insert(img, at: 0)
+            }
             exportItems = items
         }
     }

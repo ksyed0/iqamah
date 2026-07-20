@@ -187,8 +187,12 @@
         /// Delegates to IqamahCore canonical lists so AdhaanChipTray stays in sync with
         /// Adhaan.availableForSunrise / availableForFajr / available automatically.
         private var allOptions: [Adhaan] {
-            if isSunrise { return Adhaan.availableForSunrise }
-            if prayerName == "Fajr" { return Adhaan.availableForFajr }
+            if isSunrise {
+                return Adhaan.availableForSunrise
+            }
+            if prayerName == "Fajr" {
+                return Adhaan.availableForFajr
+            }
             return Adhaan.available
         }
 
@@ -278,7 +282,9 @@
                     ForEach(chips) { adhaan in
                         let isSelected = selectedAdhaan.id == adhaan.id
                         let displayName: String = {
-                            if adhaan.id == "silent" { return silentLabel ?? "No adhaan" }
+                            if adhaan.id == "silent" {
+                                return silentLabel ?? "No adhaan"
+                            }
                             return adhaan.shortName
                         }()
                         Button(action: {

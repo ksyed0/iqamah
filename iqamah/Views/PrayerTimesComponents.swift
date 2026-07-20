@@ -359,9 +359,15 @@ struct PrayerTimeRow: View {
 
     private var accessibilityDescription: String {
         var parts = ["\(name) at \(formatter.string(from: time))"]
-        if adjustment != 0 { parts.append("adjusted \(adjustment) min") }
-        if isPrayerMuted { parts.append("muted") }
-        if isHighlighted { parts.append("next prayer") }
+        if adjustment != 0 {
+            parts.append("adjusted \(adjustment) min")
+        }
+        if isPrayerMuted {
+            parts.append("muted")
+        }
+        if isHighlighted {
+            parts.append("next prayer")
+        }
         return parts.joined(separator: ", ")
     }
 
@@ -628,7 +634,9 @@ struct PrayerTimeRow: View {
         .background { rowBackground }
         .contentShape(Rectangle())
         .onKeyPress(.escape) {
-            if isPickerExpanded { onTogglePicker() }
+            if isPickerExpanded {
+                onTogglePicker()
+            }
             return isPickerExpanded ? .handled : .ignored
         }
         .accessibilityElement(children: .contain)

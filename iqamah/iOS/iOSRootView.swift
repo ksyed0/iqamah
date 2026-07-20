@@ -56,7 +56,11 @@ struct IOSRootView: View {
                     "Have you moved?",
                     isPresented: Binding(
                         get: { moveDetected != nil },
-                        set: { if !$0 { moveDetected = nil } }
+                        set: {
+                            if !$0 {
+                                moveDetected = nil
+                            }
+                        }
                     ),
                     presenting: moveDetected
                 ) { payload in

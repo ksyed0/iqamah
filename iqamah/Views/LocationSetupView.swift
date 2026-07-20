@@ -274,7 +274,9 @@ struct LocationSetupView: View {
             let cachedLoc = CLLocation(latitude: cached.latitude, longitude: cached.longitude)
             let newLoc = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
             if cachedLoc.distance(from: newLoc) < 5000,
-               !SettingsManager.shared.gpsLocality.isEmpty { return }
+               !SettingsManager.shared.gpsLocality.isEmpty {
+                return
+            }
         }
 
         CLGeocoder().reverseGeocodeLocation(

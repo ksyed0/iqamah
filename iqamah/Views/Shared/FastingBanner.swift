@@ -21,14 +21,12 @@ public struct FastingBanner: View {
     }
 
     public var body: some View {
-        Group {
-            if let prohibition = state.prohibition {
-                prohibitionBanner(prohibition)
-            } else if state.isActive {
-                activeBanner
-            } else {
-                EmptyView() // caller should not have rendered us
-            }
+        if let prohibition = state.prohibition {
+            prohibitionBanner(prohibition)
+        } else if state.isActive {
+            activeBanner
+        } else {
+            EmptyView() // caller should not have rendered us
         }
     }
 

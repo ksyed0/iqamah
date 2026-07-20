@@ -28,7 +28,9 @@
             let criterionID = criterionChoice.id
 
             // Skip if already cached for same params
-            if cachedEvening == evening, cachedCriterion == criterionID, isReady { return }
+            if cachedEvening == evening, cachedCriterion == criterionID, isReady {
+                return
+            }
 
             activeTask?.cancel()
             isReady = false

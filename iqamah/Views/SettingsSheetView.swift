@@ -197,7 +197,9 @@ struct SettingsSheetView: View {
                     let tz = placemark.timeZone?.identifier ?? TimeZone.current.identifier
                     DispatchQueue.main.async {
                         let finalName = locality ?? SettingsManager.shared.gpsLocality
-                        if let locality { SettingsManager.shared.gpsLocality = locality }
+                        if let locality {
+                            SettingsManager.shared.gpsLocality = locality
+                        }
                         SettingsManager.shared.gpsTimezone = tz
                         // Update GPS city cache with refined name and timezone
                         if let db = database,
@@ -411,7 +413,9 @@ struct SettingsSheetView: View {
                 .onAppear { loadInitialState() }
                 .onChange(of: selectedCountry) { _, newCountry in
                     guard let country = newCountry else { return }
-                    if selectedCity?.countryCode != country.code { selectedCity = nil }
+                    if selectedCity?.countryCode != country.code {
+                        selectedCity = nil
+                    }
                     if !userOverrodeMethod {
                         selectedMethod = CalculationMethod.suggested(forCountryCode: country.code)
                     }
@@ -558,7 +562,11 @@ private extension SettingsSheetView {
         @Binding var info: String?
 
         private func presentation(_ value: Binding<String?>) -> Binding<Bool> {
-            Binding(get: { value.wrappedValue != nil }, set: { if !$0 { value.wrappedValue = nil } })
+            Binding(get: { value.wrappedValue != nil }, set: {
+                if !$0 {
+                    value.wrappedValue = nil
+                }
+            })
         }
 
         func body(content: Content) -> some View {
