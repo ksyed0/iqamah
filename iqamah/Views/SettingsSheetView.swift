@@ -1,3 +1,4 @@
+// swiftlint:disable file_length
 import SwiftUI
 #if os(macOS)
     import ServiceManagement
@@ -197,7 +198,9 @@ struct SettingsSheetView: View {
                     let tz = placemark.timeZone?.identifier ?? TimeZone.current.identifier
                     DispatchQueue.main.async {
                         let finalName = locality ?? SettingsManager.shared.gpsLocality
-                        if let locality { SettingsManager.shared.gpsLocality = locality }
+                        if let locality {
+                            SettingsManager.shared.gpsLocality = locality
+                        }
                         SettingsManager.shared.gpsTimezone = tz
                         // Update GPS city cache with refined name and timezone
                         if let db = database,
@@ -250,6 +253,14 @@ struct SettingsSheetView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("24-Hour Time")
                 Text(use24Hour ? "e.g. 13:30" : "e.g. 1:30 PM")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+        }
+        .toggleStyle(.switch)
+        Toggle(isOn: $settings.showSunnahTimes) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Show Sunnah Times")
+                Text("Tahajjud and Duha prayer windows")
                     .font(.caption).foregroundStyle(.secondary)
             }
         }
@@ -403,7 +414,9 @@ struct SettingsSheetView: View {
                 .onAppear { loadInitialState() }
                 .onChange(of: selectedCountry) { _, newCountry in
                     guard let country = newCountry else { return }
-                    if selectedCity?.countryCode != country.code { selectedCity = nil }
+                    if selectedCity?.countryCode != country.code {
+                        selectedCity = nil
+                    }
                     if !userOverrodeMethod {
                         selectedMethod = CalculationMethod.suggested(forCountryCode: country.code)
                     }
@@ -550,7 +563,11 @@ private extension SettingsSheetView {
         @Binding var info: String?
 
         private func presentation(_ value: Binding<String?>) -> Binding<Bool> {
-            Binding(get: { value.wrappedValue != nil }, set: { if !$0 { value.wrappedValue = nil } })
+            Binding(get: { value.wrappedValue != nil }, set: {
+                if !$0 {
+                    value.wrappedValue = nil
+                }
+            })
         }
 
         func body(content: Content) -> some View {

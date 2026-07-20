@@ -5,31 +5,52 @@ struct PrayerTimesTab: View {
     @EnvironmentObject private var settings: SettingsManager
     @State private var prayers: [(name: String, time: Date)] = []
     @State private var nextPrayerName: String = ""
+    @State private var sunnahTimes: SunnahTimes?
 
     private let gold = Color(red: 1.0, green: 0.839, blue: 0.039)
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                Text(hijriHeader)
-                    .font(.system(size: 9, weight: .semibold))
-                    .foregroundStyle(.secondary)
-                    .textCase(.uppercase)
-                    .padding(.bottom, 8)
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 0) {
+                    Text(hijriHeader)
+                        .font(.system(size: 9, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
+                        .padding(.bottom, 8)
 
-                VStack(spacing: 2) {
-                    ForEach(prayers, id: \.name) { prayer in
-                        PrayerRow(
-                            prayer: prayer,
-                            isNext: prayer.name == nextPrayerName,
-                            gold: gold,
-                            timeString: formattedTime(prayer.time),
-                            displayName: displayName(for: prayer)
-                        )
+                    VStack(spacing: 2) {
+                        ForEach(prayers, id: \.name) { prayer in
+                            PrayerRow(
+                                prayer: prayer,
+                                isNext: prayer.name == nextPrayerName,
+                                gold: gold,
+                                timeString: formattedTime(prayer.time),
+                                displayName: displayName(for: prayer)
+                            )
+                        }
+                    }
+
+                    if settings.showSunnahTimes, let sunnah = sunnahTimes {
+                        NavigationLink(destination: SunnahTimesWatchView(sunnahTimes: sunnah, use24Hour: settings.use24HourTime)) {
+                            HStack {
+                                Text("Sunnah Times")
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundStyle(gold.opacity(0.85))
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 10, weight: .semibold))
+                                    .foregroundStyle(.tertiary)
+                            }
+                            .padding(.vertical, 10)
+                            .padding(.horizontal, 6)
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.top, 6)
                     }
                 }
+                .padding(.horizontal, 4)
             }
-            .padding(.horizontal, 4)
         }
         .onAppear { loadPrayers() }
         .onChange(of: settings.calculationMethod) { _, _ in loadPrayers() }
@@ -89,6 +110,11 @@ struct PrayerTimesTab: View {
         prayers = times.prayers
         nextPrayerName = times.prayers
             .first(where: { $0.time > Date() && $0.name != "Sunrise" })?.name ?? ""
+
+        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
+        if let tomorrowTimes = try? calc.calculate(for: tomorrow) {
+            sunnahTimes = times.sunnahTimes(nextFajr: tomorrowTimes.fajr)
+        }
     }
 }
 
@@ -119,5 +145,66 @@ private struct PrayerRow: View {
             gold.opacity(0.12)
                 .clipShape(RoundedRectangle(cornerRadius: 6))
         }
+    }
+}
+
+// MARK: - Sunnah Times Watch View
+
+struct SunnahTimesWatchView: View {
+    let sunnahTimes: SunnahTimes
+    let use24Hour: Bool
+
+    private var formatter: DateFormatter {
+        let f = DateFormatter()
+        f.dateFormat = use24Hour ? "HH:mm" : "h:mm"
+        return f
+    }
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 8) {
+                SunnahWatchRow(
+                    name: "Tahajjud",
+                    icon: "moon.zzz.fill",
+                    start: sunnahTimes.tahajjudStart,
+                    end: sunnahTimes.tahajjudEnd,
+                    formatter: formatter
+                )
+                SunnahWatchRow(
+                    name: "Duha",
+                    icon: "sun.haze.fill",
+                    start: sunnahTimes.duhaStart,
+                    end: sunnahTimes.duhaEnd,
+                    formatter: formatter
+                )
+            }
+            .padding(.horizontal, 4)
+        }
+        .navigationTitle("Sunnah")
+    }
+}
+
+private struct SunnahWatchRow: View {
+    let name: String
+    let icon: String
+    let start: Date
+    let end: Date
+    let formatter: DateFormatter
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Label(name, systemImage: icon)
+                .font(.system(size: 13, weight: .semibold))
+            Text("\(formatter.string(from: start)) – \(formatter.string(from: end))")
+                .font(.system(size: 12))
+                .foregroundStyle(.secondary)
+                .monospacedDigit()
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(10)
+        .background(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(Color.secondary.opacity(0.15))
+        )
     }
 }

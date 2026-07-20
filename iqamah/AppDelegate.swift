@@ -338,7 +338,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     private func showPopover() {
         guard let button = statusItem?.button else { return }
-        if popover == nil { popover = makePopover() }
+        if popover == nil {
+            popover = makePopover()
+        }
         guard let pop = popover else { return }
         if pop.isShown {
             pop.close()
@@ -410,7 +412,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     /// Falls back to searching all windows so we never confuse the two.
     private var resolvedMainWindow: NSWindow? {
         // 1. Use the cached reference if it's still the right window.
-        if let w = mainWindow, w.title != Self.hilalWatchWindowTitle { return w }
+        if let w = mainWindow, w.title != Self.hilalWatchWindowTitle {
+            return w
+        }
         // 2. Search for the first non-Hilal-Watch, non-panel window.
         let candidate = NSApplication.shared.windows.first {
             !($0 is NSPanel) && $0.title != Self.hilalWatchWindowTitle
@@ -429,7 +433,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         NSApplication.shared.setActivationPolicy(.regular)
         if let window = resolvedMainWindow {
             // Un-minimise if needed — makeKeyAndOrderFront alone doesn't restore from Dock
-            if window.isMiniaturized { window.deminiaturize(nil) }
+            if window.isMiniaturized {
+                window.deminiaturize(nil)
+            }
             window.makeKeyAndOrderFront(nil)
         }
         NSApplication.shared.activate(ignoringOtherApps: true)
@@ -463,12 +469,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
 
     @objc func openSupport() {
-        // swiftlint:disable:next force_unwrapping
         NSWorkspace.shared.open(URL(string: "https://www.fablesoft.biz/products/iqamah/support")!)
     }
 
     @objc func openPrivacy() {
-        // swiftlint:disable:next force_unwrapping
         NSWorkspace.shared.open(URL(string: "https://www.fablesoft.biz/products/iqamah/privacy")!)
     }
 
@@ -500,7 +504,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
 
     func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        if !flag { showWindow() }
+        if !flag {
+            showWindow()
+        }
         return true
     }
 

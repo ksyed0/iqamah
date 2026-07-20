@@ -84,6 +84,7 @@ public class SettingsManager: ObservableObject {
         static let fastingModeSettings = "fastingModeSettings"
         static let didShowFastingModePromo = "didShowFastingModePromo"
         static let autoDetectOnMove = "autoDetectOnMove"
+        static let showSunnahTimes = "showSunnahTimes"
     }
 
     // MARK: - BUG-0069 constants
@@ -121,6 +122,7 @@ public class SettingsManager: ObservableObject {
         Keys.liveActivityEnabled,
         Keys.fastingModeSettings,
         Keys.autoDetectOnMove,
+        Keys.showSunnahTimes,
     ]
 
     @Published public var hasCompletedSetup: Bool {
@@ -301,6 +303,15 @@ public class SettingsManager: ObservableObject {
         }
     }
 
+    /// Controls whether the Sunnah Times section (Tahajjud, Duha) is visible below the prayer table.
+    @Published public var showSunnahTimes: Bool {
+        didSet {
+            defaults.set(showSunnahTimes, forKey: Keys.showSunnahTimes)
+            guard !isApplyingRemote else { return }
+            kvs.set(showSunnahTimes, forKey: Keys.showSunnahTimes)
+        }
+    }
+
     /// Fasting Mode user-configurable settings. Persisted as JSON blob; KVS-synced.
     @Published public var fastingModeSettings: FastingModeSettings {
         didSet {
@@ -411,6 +422,7 @@ public class SettingsManager: ObservableObject {
         selectedCriterion = userDefaults.string(forKey: Keys.selectedCriterion) ?? "odeh"
         hilalNotificationEnabled = userDefaults.bool(forKey: Keys.hilalNotificationEnabled)
         liveActivityEnabled = userDefaults.bool(forKey: Keys.liveActivityEnabled)
+        showSunnahTimes = userDefaults.object(forKey: Keys.showSunnahTimes) as? Bool ?? true
 
         if let data = userDefaults.data(forKey: Keys.fastingModeSettings),
            let decoded = try? JSONDecoder().decode(FastingModeSettings.self, from: data) {
@@ -559,6 +571,8 @@ public class SettingsManager: ObservableObject {
                let decoded = try? JSONDecoder().decode(FastingModeSettings.self, from: data) {
                 fastingModeSettings = decoded
             }
+        case Keys.showSunnahTimes:
+            showSunnahTimes = kvs.bool(forKey: key)
         default:
             break
         }

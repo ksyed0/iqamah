@@ -1,3 +1,4 @@
+// swiftlint:disable file_length
 import SwiftUI
 import CoreLocation
 import Combine
@@ -95,7 +96,16 @@ struct PrayerTimesView: View {
                             now: currentDate
                         )
                         .padding(.horizontal, 12)
-                        .padding(.bottom, 16)
+                        .padding(.bottom, settingsStore.showSunnahTimes ? 8 : 16)
+
+                        if settingsStore.showSunnahTimes, let nextFajr = tomorrowPrayerTimes?.fajr {
+                            SunnahSection(
+                                sunnahTimes: times.sunnahTimes(nextFajr: nextFajr),
+                                formatter: PrayerTimes.timeFormatter(for: tz, use24Hour: settingsStore.use24HourTime)
+                            )
+                            .padding(.horizontal, 12)
+                            .padding(.bottom, 16)
+                        }
                     } else {
                         ProgressView().padding(.vertical, 40)
                     }
@@ -268,14 +278,24 @@ struct PrayerTimesView: View {
             // Prayer times table — pass the shared expandedRowID so the adhaan
             // picker can open/close on macOS (was using .constant(nil) default).
             if let prayerTimes {
+                let tz = TimeZone(identifier: city.timezone) ?? .current
                 PrayerTimesTable(
                     prayerTimes: prayerTimes,
-                    timezone: TimeZone(identifier: city.timezone) ?? .current,
+                    timezone: tz,
                     expandedRowID: $expandedRowID,
                     now: currentDate
                 )
                 .padding(.horizontal, 24)
-                .padding(.bottom, 24)
+                .padding(.bottom, settingsStore.showSunnahTimes ? 8 : 24)
+
+                if settingsStore.showSunnahTimes, let nextFajr = tomorrowPrayerTimes?.fajr {
+                    SunnahSection(
+                        sunnahTimes: prayerTimes.sunnahTimes(nextFajr: nextFajr),
+                        formatter: PrayerTimes.timeFormatter(for: tz, use24Hour: settingsStore.use24HourTime)
+                    )
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 16)
+                }
             } else {
                 ProgressView()
                     .padding(.vertical, 40)
@@ -283,7 +303,7 @@ struct PrayerTimesView: View {
 
             Spacer(minLength: 0)
         }
-        .frame(minWidth: 580, idealWidth: 620, minHeight: 640, idealHeight: 680)
+        .frame(minWidth: 580, idealWidth: 620, minHeight: 700, idealHeight: 760)
         .sheet(isPresented: $showQiblah) {
             QiblahView(latitude: city.latitude, longitude: city.longitude, cityName: displayCityName)
         }
@@ -304,6 +324,7 @@ struct PrayerTimesView: View {
         }
         .onAppear {
             calculatePrayerTimes()
+            calculateTomorrowPrayerTimes()
             timerSubscription = timer.connect()
         }
         .onDisappear {
@@ -335,6 +356,7 @@ struct PrayerTimesView: View {
         .onReceive(NotificationCenter.default.publisher(for: .refreshPrayerTimes)) { _ in
             currentDate = Date()
             calculatePrayerTimes()
+            calculateTomorrowPrayerTimes()
             timerSubscription?.cancel()
             timerSubscription = timer.connect()
         }

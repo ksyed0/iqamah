@@ -78,7 +78,6 @@ struct AboutView: View {
 
                 // Links — literal URL strings cannot fail to parse
                 HStack(spacing: 20) {
-                    // swiftlint:disable:next force_unwrapping
                     Link(destination: URL(string: "https://github.com/ksyed0/iqamah")!) {
                         HStack(spacing: 5) {
                             Image(systemName: "chevron.left.forwardslash.chevron.right")
@@ -92,7 +91,6 @@ struct AboutView: View {
 
                     Text("·").foregroundColor(.secondary)
 
-                    // swiftlint:disable:next force_unwrapping
                     Link(destination: URL(string: "https://www.fablesoft.biz/products/iqamah/support")!) {
                         HStack(spacing: 5) {
                             Image(systemName: "questionmark.circle")
@@ -106,7 +104,6 @@ struct AboutView: View {
 
                     Text("·").foregroundColor(.secondary)
 
-                    // swiftlint:disable:next force_unwrapping
                     Link(destination: URL(string: "https://www.fablesoft.biz/products/iqamah/privacy")!) {
                         HStack(spacing: 5) {
                             Image(systemName: "lock.shield")

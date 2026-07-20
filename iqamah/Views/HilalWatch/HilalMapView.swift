@@ -92,7 +92,9 @@ private extension HilalMapView {
                         guard r < HilalCalculator.latitudeBands,
                               c < HilalCalculator.longitudeBands else { continue }
                         let v = grid[r * HilalCalculator.longitudeBands + c]
-                        if v > best { best = v }
+                        if v > best {
+                            best = v
+                        }
                     }
                 }
                 let size = Double(step) * 2.0
