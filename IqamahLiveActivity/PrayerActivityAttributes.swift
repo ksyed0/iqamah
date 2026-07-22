@@ -1,3 +1,4 @@
+#if canImport(ActivityKit)
 import ActivityKit
 import Foundation
 
@@ -57,3 +58,4 @@ struct PrayerActivityAttributes: ActivityAttributes {
         }
     }
 }
+#endif

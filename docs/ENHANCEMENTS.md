@@ -528,7 +528,11 @@ See ENH-0021 below (expanded from this placeholder).
 ### ENH-0021 — Apple Vision Pro App (visionOS)
 **Source:** ENH-0017 placeholder expanded
 **Priority:** Medium — "designed for iPad" path is nearly free; native path is a strong press story
-**Release Target:** Path 1 immediately after EPIC-0010 (iOS app) ships; Path 2 as optional EPIC
+**Release Target:** Path 1 immediately after EPIC-0010 (iOS app) ships; Path 2 as EPIC-0018
+**Design spec:** [docs/superpowers/specs/2026-07-20-enh-0021-visionos-design.md](superpowers/specs/2026-07-20-enh-0021-visionos-design.md)
+**Last reviewed:** 2026-07-20 (full design brainstorm complete; Path 1 AC-0383 implemented)
+
+**Path 1 status: ✅ AC-0383 done (2026-07-20)** — `UIRequiresFullScreen = NO` added to `iqamah/iOS/Info.plist`. Gate: verify on visionOS 26.5 simulator, then enable visionOS platform in App Store Connect.
 
 **Problem:** visionOS is growing and no Islamic prayer app has a native spatial experience. The "designed for iPad" compatibility path gets Iqamah on Vision Pro at near-zero cost.
 

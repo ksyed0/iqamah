@@ -1,3 +1,4 @@
+#if canImport(ActivityKit)
 import ActivityKit
 import SwiftUI
 import WidgetKit
@@ -234,3 +235,4 @@ private struct LockScreenLiveActivityView: View {
         return "\(parts[0]) \(parts[1])\n\(parts[2])"
     }
 }
+#endif

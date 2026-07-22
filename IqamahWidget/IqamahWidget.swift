@@ -198,12 +198,14 @@ struct IqamahWidgetView: View {
             #else
                 LargeWidgetView(entry: entry)
             #endif
+        #if !os(visionOS)
         case .accessoryRectangular:
             lockScreenView
         case .accessoryCircular:
             CircularWidgetView(entry: entry)
         case .accessoryInline:
             InlineWidgetView(entry: entry)
+        #endif
         default:
             smallView
         }
@@ -342,7 +344,7 @@ struct IqamahWidget: Widget {
     // macOS Notification Center supports systemSmall/Medium/Large only.
     // iOS/iPadOS also support ExtraLarge and lock-screen accessory families.
     private static var supportedFamilies: [WidgetFamily] {
-        #if os(macOS)
+        #if os(macOS) || os(visionOS)
             return [.systemSmall, .systemMedium, .systemLarge]
         #else
             return [

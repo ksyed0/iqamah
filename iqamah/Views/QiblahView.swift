@@ -39,6 +39,8 @@ struct QiblahView: View {
         @Environment(\.horizontalSizeClass) private var hSizeClass
         // Live compass heading — rotates the ring so the Mecca marker tracks physical direction
         @StateObject private var headingObserver = QiblahHeadingObserver()
+    #elseif os(visionOS)
+        @Environment(\.openWindow) private var openWindow
     #endif
 
     var body: some View {
@@ -84,6 +86,8 @@ struct QiblahView: View {
             .background { Rectangle().fill(.regularMaterial) }
             .onAppear { headingObserver.start() }
             .onDisappear { headingObserver.stop() }
+        #elseif os(visionOS)
+            visionOSQibla
         #else
             macOSQibla
         #endif
@@ -205,6 +209,37 @@ struct QiblahView: View {
                     .padding(.top, 8)
             }
             .frame(minWidth: 380, minHeight: 480)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background { Rectangle().fill(.regularMaterial) }
+        }
+    #endif
+
+    #if os(visionOS)
+        private var visionOSQibla: some View {
+            VStack(spacing: 20) {
+                Image(systemName: "location.north.fill")
+                    .font(.system(size: 48))
+                    .foregroundStyle(Color.appGold)
+                Text("Qiblah Direction")
+                    .font(.title2.bold())
+                    .accessibilityAddTraits(.isHeader)
+                Text(String(format: "%.1f° %@", qiblahBearing, cardinalDirection))
+                    .font(.title3)
+                    .foregroundStyle(.secondary)
+                if !cityName.isEmpty {
+                    Text("from \(cityName)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Button {
+                    openWindow(id: VisionSceneIDs.qiblaVolume)
+                } label: {
+                    Label("Open 3D Qibla", systemImage: "arrow.up.forward.app")
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(Color.appGold)
+                .accessibilityIdentifier("open3DQiblaButton")
+            }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background { Rectangle().fill(.regularMaterial) }
         }

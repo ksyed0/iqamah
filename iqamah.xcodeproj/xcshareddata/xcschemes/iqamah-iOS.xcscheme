@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "2620"
+   LastUpgradeVersion = "2660"
    version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -51,6 +51,17 @@
                BlueprintIdentifier = "iOSUITests0000000000000A"
                BuildableName = "iqamahiOSUITests.xctest"
                BlueprintName = "iqamahiOSUITests"
+               ReferencedContainer = "container:iqamah.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "947E50E7300EADB500CD805D"
+               BuildableName = "IqamahvisionOSUITests.xctest"
+               BlueprintName = "IqamahvisionOSUITests"
                ReferencedContainer = "container:iqamah.xcodeproj">
             </BuildableReference>
          </TestableReference>
