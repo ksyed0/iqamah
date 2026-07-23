@@ -2,13 +2,14 @@
 
 Logged from competitive analysis (May 2026) and product research. Items are grouped by theme, not priority. See competitive-analysis.md for the feature gap matrix these derive from.
 
-**Implementation status as of 2026-05-20:**
-- ENH-0015 (iPhone/iPad) → ✅ Implemented as EPIC-0010 (PRs #56–60). Submitted to App Store 2026-05-20.
-- ENH-0016 (Apple Watch) → ✅ Implemented as EPIC-0012 (PR #67). Submitted to App Store 2026-05-20.
-- ENH-0018 (Hilal Watch) → ✅ Implemented as EPIC-0011 (PRs #61–66). Submitted to App Store 2026-05-20.
+**Implementation status as of 2026-07-23:**
+- ENH-0008 (Sunnah prayer times) → ✅ Implemented — PR #156, merged 2026-07-20; develop branch
+- ENH-0015 (iPhone/iPad) → ✅ Implemented as EPIC-0010 (PRs #56–60). Released v1.5.0.
+- ENH-0016 (Apple Watch) → ✅ Implemented as EPIC-0012 (PR #67). Released v1.5.0.
+- ENH-0018 (Hilal Watch) → ✅ Implemented as EPIC-0011 (PRs #61–66). Released v1.5.0.
 - ENH-0019 (i18n) → 🔵 Planned — not yet started
 - ENH-0020 (Apple TV) → 🔵 Backlog — see Platform Expansion section
-- ENH-0021 (visionOS) → 🔵 Backlog — see Platform Expansion section
+- ENH-0021 (visionOS) → ✅ Implemented as EPIC-0018 — commit 38e1389 on develop, 2026-07-23; Path 1 compat verified on visionOS 26.5 sim; Path 2 scaffold complete (hardware verification pending)
 
 ---
 

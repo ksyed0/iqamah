@@ -28,4 +28,4 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 ---
 
-**Last Updated:** 2026-07-20 (EPIC-0018 implementation complete. TC-0123–TC-0137 assigned for IqamahvisionOSUITests.)
+**Last Updated:** 2026-07-23 (EPIC-0018 commit 38e1389 on develop. TC-0123–TC-0137 visionOS UI test suite: 11 pass, 4 skip, 0 fail. ENH-0021 Path 1 verified on visionOS 26.5 sim.)

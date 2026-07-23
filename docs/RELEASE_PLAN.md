@@ -6,24 +6,25 @@ Detailed release plan defining MVP and subsequent milestones. Contains Epics, Us
 
 ## Project Overview
 
-**Project:** Iqamah — Multi-Platform Islamic Prayer Times App (macOS · iOS · iPadOS · watchOS)
-**Current Version:** 1.5.0 (build 14) — bumped from 12 after v1.5 (13) was rejected (BUG-0068 watch icon)
-**App Store Status:** 🟢 **SUBMITTED** — iOS first submission + macOS v1.5.0 update sent 2026-05-20
+**Project:** Iqamah — Multi-Platform Islamic Prayer Times App (macOS · iOS · iPadOS · watchOS · visionOS)
+**Current Version:** 1.6.0 (build 15)
+**App Store Status:** ✅ **RELEASED** — v1.6.0 live on App Store
 
 ---
 
 ## Release Status
 
-**Status:** 🟢 **v1.6.0 (15) SUBMITTED TO APP STORE** — 2026-05-25
+**Status:** ✅ **v1.6.0 (15) RELEASED** — develop branch has v1.7 candidates queued
 
 | Platform | Status | Notes |
 |---|---|---|
-| macOS | ✅ v1.6.0 update submitted | Build 15, under review |
-| iOS | ✅ v1.6.0 update submitted | Build 15, under review (separate platform listing under Universal Purchase) |
-| iPadOS | ✅ v1.6.0 update submitted | Same binary as iOS |
-| watchOS | ✅ v1.6.0 update submitted | Embedded in iOS binary |
+| macOS | ✅ v1.6.0 released | Build 15 |
+| iOS | ✅ v1.6.0 released | Build 15 |
+| iPadOS | ✅ v1.6.0 released | Same binary as iOS |
+| watchOS | ✅ v1.6.0 released | Embedded in iOS binary |
+| visionOS | 🔵 Pending App Store toggle | Path 1 compat mode verified on sim (2026-07-23); enable in ASC on next submission |
 
-**Last public release:** v1.5 build 15 — accepted by App Store before 2026-05-25.
+**Last public release:** v1.6.0 build 15 — released 2026.
 
 ---
 
@@ -84,14 +85,20 @@ Detailed release plan defining MVP and subsequent milestones. Contains Epics, Us
 
 ### **Release 1.7 (Next)**
 
-**Status:** 🔴 Planning
-**Candidates (to be decided when Apple review of v1.6.0 lands):**
-- **ENH-0019 — i18n / l10n Phase 1**: convert all user-visible strings to `String(localized:)`, ship English baseline + Arabic (8 languages planned total). Estimated 3–4 weeks (original ENH says 2–3 weeks; Fasting Mode + BUG-0069 added ~30–50 string keys not in the original audit).
-- **EPIC-0015 XCUITest implementation**: write the 49 test cases now documented in TC-0074–0122 (PR #154 added the documentation; tests themselves not yet written).
-- **ENH-0008 — Sunnah prayer times (Tahajjud, Duha)**: pure feature add, ~1–2 weeks.
+**Status:** 🟡 In Development (develop branch)
+**Shipped to develop (not yet PRed to main):**
+- **ENH-0008 — Sunnah prayer times (Tahajjud & Duha)** — PR #156, merged 2026-07-20
+- **EPIC-0018 — visionOS native UI (ENH-0021)** — commit 38e1389 on develop, 2026-07-23
+  - Path 1: iOS compat mode on Apple Vision Pro (`UIRequiresFullScreen = NO`) — verified on visionOS 26.5 sim
+  - Path 2 scaffold: NextPrayerOrnament, QiblaVolumeView, AdhanImmersiveView, SpatialAdhanPlayer, QiblaCalibrationState
+  - TC-0123–TC-0137 visionOS UI test suite: 11 pass, 4 skip (hardware-gated), 0 fail
+
+**Remaining candidates for v1.7:**
+- **ENH-0019 — i18n / l10n Phase 1**: convert all user-visible strings to `String(localized:)`, ship English baseline + Arabic. Estimated 3–4 weeks.
+- **EPIC-0015 XCUITest implementation**: write the 49 test cases documented in TC-0074–0122 (PR #154 added documentation; tests themselves not yet written).
 - **BUG-0071 fix**: deterministic stub for `LocationServiceTests.testInitialization()` so CI flake stops requiring manual reruns.
-- **ENH-0028 / ENH-0029**: add watchOS + iOS unit test targets to close the test-infrastructure gaps surfaced by the v1.6.0 audit.
-- **Stray test file cleanup**: delete `testsIqamahTests.swift` and `testsIqamahTests_FIXED.swift` at repo root (orphans from an old refactor).
+- **ENH-0028 / ENH-0029**: add watchOS + iOS unit test targets.
+- **US-0045 Live Activity**: 1-hour-before auto-start missing from `PrayerActivityManager.swift`.
 
 ---
 
