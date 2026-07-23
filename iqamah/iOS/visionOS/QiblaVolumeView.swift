@@ -137,9 +137,9 @@
                                         makkahLat: Double, makkahLon: Double) -> Double {
             let φ1 = lat * .pi / 180
             let φ2 = makkahLat * .pi / 180
-            let Δλ = (makkahLon - lon) * .pi / 180
-            let y = sin(Δλ) * cos(φ2)
-            let x = cos(φ1) * sin(φ2) - sin(φ1) * cos(φ2) * cos(Δλ)
+            let dLon = (makkahLon - lon) * .pi / 180
+            let y = sin(dLon) * cos(φ2)
+            let x = cos(φ1) * sin(φ2) - sin(φ1) * cos(φ2) * cos(dLon)
             let bearing = atan2(y, x) * 180 / .pi
             return (bearing + 360).truncatingRemainder(dividingBy: 360)
         }
