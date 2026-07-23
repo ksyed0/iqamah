@@ -199,12 +199,12 @@ struct IqamahWidgetView: View {
                 LargeWidgetView(entry: entry)
             #endif
         #if !os(visionOS)
-        case .accessoryRectangular:
-            lockScreenView
-        case .accessoryCircular:
-            CircularWidgetView(entry: entry)
-        case .accessoryInline:
-            InlineWidgetView(entry: entry)
+            case .accessoryRectangular:
+                lockScreenView
+            case .accessoryCircular:
+                CircularWidgetView(entry: entry)
+            case .accessoryInline:
+                InlineWidgetView(entry: entry)
         #endif
         default:
             smallView

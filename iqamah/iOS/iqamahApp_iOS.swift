@@ -99,25 +99,25 @@ struct IqamahiOSApp: App {
                         await PrayerActivityManager.shared.startOrUpdateActivity(settings: settings)
                     }
                 }
-                #if os(visionOS)
+            #if os(visionOS)
                 .ornament(attachmentAnchor: .scene(.bottom)) {
                     NextPrayerOrnament()
                         .environmentObject(settings)
                 }
-                #endif
+            #endif
         }
         #if os(visionOS)
-        WindowGroup(id: VisionSceneIDs.qiblaVolume) {
-            QiblaVolumeView()
-                .environmentObject(settings)
-        }
-        .windowStyle(.volumetric)
-        .defaultSize(width: 0.4, height: 0.5, depth: 0.4, in: .meters)
+            WindowGroup(id: VisionSceneIDs.qiblaVolume) {
+                QiblaVolumeView()
+                    .environmentObject(settings)
+            }
+            .windowStyle(.volumetric)
+            .defaultSize(width: 0.4, height: 0.5, depth: 0.4, in: .meters)
 
-        ImmersiveSpace(id: VisionSceneIDs.adhanImmersive) {
-            AdhanImmersiveView()
-        }
-        .immersionStyle(selection: .constant(.mixed), in: .mixed)
+            ImmersiveSpace(id: VisionSceneIDs.adhanImmersive) {
+                AdhanImmersiveView()
+            }
+            .immersionStyle(selection: .constant(.mixed), in: .mixed)
         #endif
     }
 

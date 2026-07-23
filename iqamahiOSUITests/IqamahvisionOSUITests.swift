@@ -72,7 +72,7 @@ final class IqamahvisionOSUITests: XCTestCase {
     /// argument. This is the reliable mechanism for testing visionOS tab content:
     /// the visionOS 26 `_UIFloatingTabBar` does not respond to XCUITest synthetic
     /// taps, so navigating programmatically is not feasible from the test runner.
-    private func relaunchOnTab(_ tab: Int, file: StaticString = #file, line: UInt = #line) {
+    private func relaunchOnTab(_ tab: Int, file _: StaticString = #file, line _: UInt = #line) {
         app.terminate()
         app.launchArguments = ["--uitesting", "--startTab=\(tab)"]
         app.launch()
@@ -155,10 +155,10 @@ final class IqamahvisionOSUITests: XCTestCase {
     func testOrnamentHijriDateVisible() {
         let predicate = NSPredicate(
             format: "label CONTAINS[c] 'Muharram' OR label CONTAINS[c] 'Safar' " +
-                    "OR label CONTAINS[c] 'Rabi' OR label CONTAINS[c] 'Jumada' " +
-                    "OR label CONTAINS[c] 'Rajab' OR label CONTAINS[c] \"Sha'ban\" " +
-                    "OR label CONTAINS[c] 'Ramadan' OR label CONTAINS[c] 'Shawwal' " +
-                    "OR label CONTAINS[c] 'Dhul'"
+                "OR label CONTAINS[c] 'Rabi' OR label CONTAINS[c] 'Jumada' " +
+                "OR label CONTAINS[c] 'Rajab' OR label CONTAINS[c] \"Sha'ban\" " +
+                "OR label CONTAINS[c] 'Ramadan' OR label CONTAINS[c] 'Shawwal' " +
+                "OR label CONTAINS[c] 'Dhul'"
         )
         XCTAssertTrue(
             app.staticTexts.matching(predicate).firstMatch.waitForExistence(timeout: 5),
@@ -181,13 +181,13 @@ final class IqamahvisionOSUITests: XCTestCase {
             try XCTSkipIf(
                 ProcessInfo.processInfo.environment["SIMULATOR_DEVICE_NAME"] != nil,
                 "iOS compat (iphonesimulator) build: #if os(visionOS) not compiled — " +
-                "test requires native visionOS hardware or xrsimulator build (TC-0129)"
+                    "test requires native visionOS hardware or xrsimulator build (TC-0129)"
             )
             XCTFail("'Open 3D Qibla' button not found on visionOS device (AC-0393)")
             return
         }
         XCTAssertTrue(open3DButton.exists,
-            "Qiblah tab 'Open 3D Qibla' button should be accessible (AC-0393)")
+                      "Qiblah tab 'Open 3D Qibla' button should be accessible (AC-0393)")
     }
 
     // MARK: - TC-0130: No flat 2D compass rendered on visionOS (AC-0393)
@@ -195,7 +195,7 @@ final class IqamahvisionOSUITests: XCTestCase {
     func testNoFlat2DCompassOnVisionOS() {
         relaunchOnTab(1)
         _ = app.staticTexts.matching(NSPredicate(format: "label == 'Qiblah Direction'"))
-                .firstMatch.waitForExistence(timeout: 8)
+            .firstMatch.waitForExistence(timeout: 8)
         XCTAssertFalse(
             app.otherElements["qiblahCompass"].exists,
             "Flat 2D compass must NOT appear on visionOS (AC-0393)"
@@ -207,7 +207,7 @@ final class IqamahvisionOSUITests: XCTestCase {
     func testQiblahBearingLabelVisible() {
         relaunchOnTab(1)
         _ = app.staticTexts.matching(NSPredicate(format: "label == 'Qiblah Direction'"))
-                .firstMatch.waitForExistence(timeout: 8)
+            .firstMatch.waitForExistence(timeout: 8)
         let predicate = NSPredicate(format: "label MATCHES '.*[0-9]+\\.[0-9]+°.*'")
         XCTAssertTrue(
             app.staticTexts.matching(predicate).firstMatch.waitForExistence(timeout: 5),
@@ -282,7 +282,7 @@ final class IqamahvisionOSUITests: XCTestCase {
             let inTabBar = app.tabBars.buttons[item].waitForExistence(timeout: 2)
             let inButtons = inTabBar ? true : app.buttons[item].waitForExistence(timeout: 4)
             XCTAssertTrue(inButtons,
-                "Tab bar item '\(item)' should be accessible on visionOS (AC-0404)")
+                          "Tab bar item '\(item)' should be accessible on visionOS (AC-0404)")
         }
     }
 

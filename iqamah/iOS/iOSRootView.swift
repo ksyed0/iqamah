@@ -8,8 +8,12 @@ struct IOSRootView: View {
         // --startTab=N selects the initial tab for UI tests (visionOS 26 floating tab
         // bar does not respond to XCUITest synthetic taps, so tests relaunch on the
         // target tab directly instead of navigating via tapTab()).
-        if CommandLine.arguments.contains("--startTab=1") { return 1 }
-        if CommandLine.arguments.contains("--startTab=2") { return 2 }
+        if CommandLine.arguments.contains("--startTab=1") {
+            return 1
+        }
+        if CommandLine.arguments.contains("--startTab=2") {
+            return 2
+        }
         return 0
     }()
     @State private var showHilalWatch = false
@@ -22,7 +26,7 @@ struct IOSRootView: View {
                 .onReceive(NotificationCenter.default.publisher(for: .openPrayerTimesTab)) { _ in
                     selectedTab = 0
                 }
-                #if !os(visionOS)
+            #if !os(visionOS)
                 .fullScreenCover(isPresented: $showHilalWatch) {
                     HilalWatchSheet()
                         .environmentObject(settings)
@@ -30,7 +34,7 @@ struct IOSRootView: View {
                 .onReceive(NotificationCenter.default.publisher(for: .openHilalWatch)) { _ in
                     showHilalWatch = true
                 }
-                #endif
+            #endif
                 .onAppear {
                     if settings.isLegacyV15User, !settings.didShowGPSReDetectPromptV16 {
                         showLegacyReDetectPrompt = true
