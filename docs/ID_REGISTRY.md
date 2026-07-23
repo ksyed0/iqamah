@@ -9,12 +9,12 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 | **Sequence** | **Next Available ID** | **Last Assigned** |
 |--------------|-----------------------|-------------------|
 | EPIC         | EPIC-0018             | EPIC-0017         |
-| US           | US-0076               | US-0075           |
+| US           | US-0081               | US-0080           |
 | TASK         | TASK-0001             | None              |
-| AC           | AC-0383               | AC-0382           |
-| TC           | TC-0123               | TC-0122           |
+| AC           | AC-0408               | AC-0407           |
+| TC           | TC-0138               | TC-0137           |
 | BUG          | BUG-0072              | BUG-0071          |
-| ENH          | ENH-0030               | ENH-0029           |
+| ENH          | ENH-0030              | ENH-0029          |
 
 ---
 
@@ -28,4 +28,4 @@ Single source of truth for the next available ID in each artefact sequence. Upda
 
 ---
 
-**Last Updated:** 2026-05-25 (BUG-0071 logged — LocationServiceTests CI flake. Plus session-close updates to RELEASE_PLAN.md and BUGS.md reflecting v1.6.0 (15) submission to App Store on 2026-05-25.)
+**Last Updated:** 2026-07-23 (EPIC-0018 commit 38e1389 on develop. TC-0123–TC-0137 visionOS UI test suite: 11 pass, 4 skip, 0 fail. ENH-0021 Path 1 verified on visionOS 26.5 sim.)

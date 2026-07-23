@@ -107,14 +107,16 @@ struct IqamahWatchWidgetView: View {
 
     var body: some View {
         switch family {
-        case .accessoryRectangular:
-            RectangularComplicationView(entry: entry)
-        case .accessoryCircular:
-            CircularComplicationView(entry: entry)
-        case .accessoryCorner:
-            CornerComplicationView(entry: entry)
-        case .accessoryInline:
-            InlineComplicationView(entry: entry)
+        #if !os(visionOS)
+            case .accessoryRectangular:
+                RectangularComplicationView(entry: entry)
+            case .accessoryCircular:
+                CircularComplicationView(entry: entry)
+            case .accessoryCorner:
+                CornerComplicationView(entry: entry)
+            case .accessoryInline:
+                InlineComplicationView(entry: entry)
+        #endif
         default:
             RectangularComplicationView(entry: entry)
         }
@@ -133,12 +135,16 @@ struct IqamahWatchComplicationWidget: Widget {
         }
         .configurationDisplayName("Iqamah")
         .description("Next prayer countdown on your watch face.")
-        .supportedFamilies([
-            .accessoryRectangular,
-            .accessoryCircular,
-            .accessoryCorner,
-            .accessoryInline,
-        ])
+        #if os(visionOS)
+            .supportedFamilies([.systemSmall])
+        #else
+            .supportedFamilies([
+                .accessoryRectangular,
+                .accessoryCircular,
+                .accessoryCorner,
+                .accessoryInline,
+            ])
+        #endif
     }
 }
 

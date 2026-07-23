@@ -99,7 +99,26 @@ struct IqamahiOSApp: App {
                         await PrayerActivityManager.shared.startOrUpdateActivity(settings: settings)
                     }
                 }
+            #if os(visionOS)
+                .ornament(attachmentAnchor: .scene(.bottom)) {
+                    NextPrayerOrnament()
+                        .environmentObject(settings)
+                }
+            #endif
         }
+        #if os(visionOS)
+            WindowGroup(id: VisionSceneIDs.qiblaVolume) {
+                QiblaVolumeView()
+                    .environmentObject(settings)
+            }
+            .windowStyle(.volumetric)
+            .defaultSize(width: 0.4, height: 0.5, depth: 0.4, in: .meters)
+
+            ImmersiveSpace(id: VisionSceneIDs.adhanImmersive) {
+                AdhanImmersiveView()
+            }
+            .immersionStyle(selection: .constant(.mixed), in: .mixed)
+        #endif
     }
 
     /// BUG-0069: launch-time auto-detect (opt-in). Skips silently if disabled or onboarding incomplete.

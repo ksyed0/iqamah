@@ -16,12 +16,16 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Iqamah uses your location to calculate accurate prayer times for your area.</string>
+	<key>NSWorldSensingUsageDescription</key>
+	<string>Iqamah uses world tracking to determine the Qibla direction toward Makkah in 3D space.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>NSSupportsLiveActivitiesFrequentUpdates</key>
 	<true/>
+	<key>UIRequiresFullScreen</key>
+	<false/>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UISupportedInterfaceOrientations</key>

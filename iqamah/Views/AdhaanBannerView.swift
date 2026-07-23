@@ -13,6 +13,10 @@ struct AdhaanBannerView: View {
     let onClose: () -> Void
 
     @ObservedObject private var player = AdhaaanPlayer.shared
+    #if os(visionOS)
+        @Environment(\.openImmersiveSpace) private var openImmersiveSpace
+        @AppStorage("visionOS.adhanFilename") private var storedAdhanFilename: String = ""
+    #endif
 
     var body: some View {
         VStack(spacing: 0) {
@@ -66,6 +70,18 @@ struct AdhaanBannerView: View {
                 }
 
                 Spacer(minLength: 0)
+
+                #if os(visionOS)
+                    Button {
+                        Task { await openImmersiveSpace(id: VisionSceneIDs.adhanImmersive) }
+                    } label: {
+                        Image(systemName: "dot.radiowaves.up.forward")
+                            .font(.system(size: 20))
+                            .foregroundStyle(Color.appGold)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Open Spatial Adhan")
+                #endif
 
                 // Stop / Close button
                 Button(action: player.isPlaying ? onStop : onClose) {
