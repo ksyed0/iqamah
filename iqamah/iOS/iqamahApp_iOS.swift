@@ -1,3 +1,4 @@
+import BackgroundTasks
 import CoreLocation
 import IqamahCore
 import SwiftUI
@@ -15,6 +16,21 @@ struct IqamahiOSApp: App {
         // Pre-seed Toronto / ISNA settings so XCUITests skip setup flow (AC-0326, US-0067).
         if ProcessInfo.processInfo.arguments.contains("--uitesting") {
             bootstrapUITestSettings()
+        }
+        // Register BGAppRefreshTask for 1h-before Live Activity auto-start (US-0045).
+        // Must register here — before the first scene body renders.
+        BGTaskScheduler.shared.register(
+            forTaskWithIdentifier: "com.fablesoft.iqamah.prayerLARefresh",
+            using: nil
+        ) { task in
+            task.expirationHandler = {
+                task.setTaskCompleted(success: false)
+            }
+            Task { @MainActor in
+                await PrayerActivityManager.shared.startOrUpdateActivity(settings: SettingsManager.shared)
+                PrayerActivityManager.shared.scheduleBGRefreshTask(settings: SettingsManager.shared)
+                task.setTaskCompleted(success: true)
+            }
         }
     }
 
@@ -162,6 +178,7 @@ struct IqamahiOSApp: App {
 
     private func reschedule() {
         Task { await NotificationScheduler.shared.rescheduleAll() }
+        PrayerActivityManager.shared.scheduleBGRefreshTask(settings: settings)
     }
 
     private func reloadWidget() {

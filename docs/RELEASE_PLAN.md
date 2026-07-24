@@ -98,7 +98,7 @@ Detailed release plan defining MVP and subsequent milestones. Contains Epics, Us
 - **EPIC-0015 XCUITest implementation**: write the 49 test cases documented in TC-0074–0122 (PR #154 added documentation; tests themselves not yet written).
 - **BUG-0071 fix**: deterministic stub for `LocationServiceTests.testInitialization()` so CI flake stops requiring manual reruns.
 - **ENH-0028 / ENH-0029**: add watchOS + iOS unit test targets.
-- **US-0045 Live Activity**: 1-hour-before auto-start missing from `PrayerActivityManager.swift`.
+- **US-0045 Live Activity**: 1-hour-before auto-start — design spec complete at `docs/superpowers/specs/2026-07-23-us-0045-live-activity-auto-start.md`; implementation in progress 2026-07-24.
 
 ---
 
@@ -1278,7 +1278,7 @@ rm adhaan_4_original_backup.mp3
 
 **Priority:** Medium
 **Estimate:** 5 Story Points
-**Status:** 🔴 Deferred — not yet started; planned for v2.1 after EPIC-0012 (Watch) stable
+**Status:** 🟡 In Progress — design spec at `docs/superpowers/specs/2026-07-23-us-0045-live-activity-auto-start.md`; implementation 2026-07-24
 **Dependencies:** US-0044
 
 **Scope:**
@@ -1290,7 +1290,7 @@ rm adhaan_4_original_backup.mp3
 - Live Activity entitlement (`NSSupportsLiveActivities = true` in Info.plist)
 
 **Acceptance Criteria:**
-- [ ] AC-0198: Activity appears in the Dynamic Island within one minute of the one-hour-before mark for each enabled prayer
+- [ ] AC-0198: Activity appears in the Dynamic Island within one minute of the one-hour-before mark for each enabled prayer **when the app has been used within the preceding hour** (foreground path, exact); best-effort via BGAppRefreshTask when fully suspended (guaranteed sub-minute timing deferred to ENH-0026)
 - [ ] AC-0199: Compact, expanded, and minimal Dynamic Island presentations all render correctly with live countdown
 - [ ] AC-0200: Lock Screen presentation shows prayer name and accurate countdown
 - [ ] AC-0201: Activity ends automatically at the prayer's scheduled time without leaving stale state
