@@ -611,7 +611,7 @@ final class LocationServiceTests: XCTestCase {
         // Should have an authorization status
         let status = await MainActor.run { locationService.authorizationStatus }
         let validStatuses: [CLAuthorizationStatus] = [
-            .notDetermined, .restricted, .denied, .authorizedAlways, .authorizedWhenInUse,
+            .notDetermined, .restricted, .denied, .authorizedAlways,
         ]
         XCTAssertTrue(validStatuses.contains(status), "Should have valid authorization status")
     }
