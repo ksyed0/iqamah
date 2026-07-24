@@ -325,13 +325,17 @@ Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
 
 #### US-0045 — iOS Live Activity / Dynamic Island
 
-**TC-0030 (AC-0198) — Live Activity starts at the 60-minute-before mark**
-Type: Functional · Preconditions: Physical device with Dynamic Island; next enabled prayer 50–60 minutes away
+**TC-0030 (AC-0198) — Live Activity starts at the 60-minute-before mark (foreground timer path)**
+Type: Functional · Preconditions: Physical device with Dynamic Island; Live Activity enabled; next enabled prayer N+1 is >65 min away
 Steps:
-  1. Wait until 60 minutes before prayer time
-  2. Observe Dynamic Island
-Expected: Live Activity appears within 1 minute of the 60-min mark
-Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+  1. Open the app and verify a Live Activity starts for prayer N (the imminent prayer)
+  2. Note the time of prayer N+1 (the following prayer shown in the LA)
+  3. Background the app (leave it running, not force-quit)
+  4. Wait until 60 minutes before prayer N+1
+  5. Observe the Dynamic Island without reopening the app
+Expected: Dynamic Island updates to show prayer N+1 within ~1 minute of the T-1h mark, driven by the foreground `preLaunchTimer` in `PrayerActivityManager.schedulePreLaunch()`
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None
+Notes: Implementation complete 2026-07-24. Cannot be automated — Live Activity is System UI, not reachable by XCUITest. Force-quitting the app before the timer fires tests the BGTask path instead (see TC-0138).
 
 **TC-0031 (AC-0199) — Compact, expanded, and minimal Dynamic Island layouts render**
 Type: Functional · Preconditions: Live Activity active
@@ -340,39 +344,58 @@ Steps:
   2. Long-press the island to expand
   3. Open another app to put activity in minimal state
 Expected: All three layouts show prayer name and live countdown without truncation
-Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None
+Notes: Implementation complete 2026-07-24 (AC-0199 was already implemented; no new code needed for this TC). Cannot be automated — System UI.
 
 **TC-0032 (AC-0200) — Lock Screen Live Activity card renders correctly**
 Type: Functional · Preconditions: Live Activity active; device locked
 Steps:
   1. Wake screen by tapping power button
 Expected: Lock Screen card shows prayer name + accurate live countdown
-Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None
+Notes: Implementation complete 2026-07-24. Cannot be automated — System UI.
 
 **TC-0033 (AC-0201) — Live Activity ends at prayer time without stale state**
 Type: Functional · Preconditions: Live Activity active and within minutes of prayer time
 Steps:
   1. Wait for prayer time to elapse
   2. Foreground the app
-Expected: Live Activity dimmed at scheduled time (staleDate); removed entirely on next foreground sweep
-Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+Expected: Live Activity dimmed at scheduled time (staleDate +1 min); removed entirely on next foreground sweep via rollover timer
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None
+Notes: Implementation complete 2026-07-24. `scheduleRollover` fires +1s after prayer time and calls `startOrUpdateActivity` which rebuilds the LA for the next prayer.
 
 **TC-0034 (AC-0202) — Disabled prayer does not start a Live Activity**
-Type: Negative · Preconditions: Asr disabled in Settings tab
+Type: Negative · Preconditions: Asr disabled in Settings > Prayer toggles
 Steps:
-  1. Wait until 60 minutes before Asr
-Expected: No Live Activity appears for Asr
-Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+  1. Disable Asr in Settings
+  2. Open the app within 60 minutes of Asr — or wait for the foreground pre-launch timer to fire
+  3. Observe Dynamic Island
+Expected: No Live Activity appears for Asr; LA remains on the prior enabled prayer (or absent if none)
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None
+Notes: Implementation complete 2026-07-24. Both `schedulePreLaunch` and `scheduleBGRefreshTask` guard on `isPrayerEnabled(prayer.name)`.
 
 **TC-0035 (AC-0203) — No duplicate Live Activities for the same prayer**
 Type: Edge Case
 Steps:
-  1. Foreground the app within 60 min of prayer
+  1. Foreground the app within 60 min of prayer — LA starts
   2. Background the app
-  3. Foreground again
-  4. Repeat several cycles
-Expected: At most one Live Activity active for the upcoming prayer at any time
-Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None · Notes:
+  3. Foreground again rapidly (5× in 30 seconds)
+  4. Check Dynamic Island
+Expected: Exactly one Live Activity visible; no duplicate Lock Screen banners
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None
+Notes: Implementation complete 2026-07-24. Dedup guard in `startOrUpdateActivity`: `Activity.activities.count > 1` ends all but the first.
+
+**TC-0138 (AC-0198) — Live Activity starts via BGAppRefreshTask (background path)**
+Type: Functional · Preconditions: Physical device; Xcode + LLDB attached; app backgrounded (not force-quit); Dynamic Island present
+Steps:
+  1. Open the app and verify Live Activity is running for prayer N
+  2. Background the app (do not force-quit)
+  3. In Xcode LLDB console, run:
+     `e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateLaunchForTaskWithIdentifier:@"com.fablesoft.iqamah.prayerLARefresh"]`
+  4. Observe Dynamic Island within 5 seconds
+Expected: App wakes via BGTask; `startOrUpdateActivity` runs; LA updates to reflect next prayer state
+Status: [ ] Not Run / [ ] Pass / [ ] Fail · Defect: None
+Notes: Implementation complete 2026-07-24. BGTask identifier: `com.fablesoft.iqamah.prayerLARefresh`. Registered in `IqamahiOSApp.init()`. Cannot be automated in XCUITest — requires LLDB. In production (no LLDB), iOS fires the task opportunistically around T-55min.
 
 ### EPIC-0016 — ENH-0001 GPS Accuracy Finish-Up
 

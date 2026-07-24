@@ -1,5 +1,6 @@
 #if os(iOS)
     import ActivityKit
+    import BackgroundTasks
     import Foundation
     import IqamahCore
 
@@ -12,6 +13,7 @@
 
         private var currentActivity: Activity<PrayerActivityAttributes>?
         private var rolloverTimer: Timer?
+        private var preLaunchTimer: Timer?
 
         // MARK: - Public API
 
@@ -61,20 +63,86 @@
                 }
             }
 
-            // Schedule a foreground-only rollover so a foregrounded (or recently
-            // backgrounded) app advances to the next prayer +1s after the current
-            // one passes. Full background reliability still requires push-token
-            // LA updates + BGAppRefreshTask (follow-up).
             scheduleRollover(at: state.nextPrayerTime)
+
+            // 1h-before auto-start: timer for foreground path + BGTask for background (US-0045).
+            let (_, followingPrayer) = findUpcomingPrayers(settings: settings)
+            if let following = followingPrayer {
+                schedulePreLaunch(for: following, settings: settings)
+            }
+            scheduleBGRefreshTask(settings: settings)
         }
 
         func endActivity() async {
             rolloverTimer?.invalidate()
             rolloverTimer = nil
+            preLaunchTimer?.invalidate()
+            preLaunchTimer = nil
             if let activity = currentActivity {
                 await activity.end(ActivityContent(state: activity.content.state, staleDate: nil), dismissalPolicy: .immediate)
             }
             currentActivity = nil
+        }
+
+        // Submits a BGAppRefreshTask to wake the app ~55 min before the following
+        // prayer and start the Live Activity (best-effort; AC-0198 background path).
+        func scheduleBGRefreshTask(settings: SettingsManager) {
+            let (_, following) = findUpcomingPrayers(settings: settings)
+            guard let target = following,
+                  settings.isPrayerEnabled(target.name) else { return }
+            let fireDate = target.time.addingTimeInterval(-3600 + 300) // T-55min
+            guard fireDate > Date() else { return }
+            let request = BGAppRefreshTaskRequest(identifier: "com.fablesoft.iqamah.prayerLARefresh")
+            request.earliestBeginDate = fireDate
+            try? BGTaskScheduler.shared.submit(request)
+        }
+
+        private func schedulePreLaunch(
+            for prayer: (name: String, time: Date),
+            settings: SettingsManager
+        ) {
+            preLaunchTimer?.invalidate()
+            guard settings.isPrayerEnabled(prayer.name) else { return }
+            let fireDate = prayer.time.addingTimeInterval(-3600)
+            guard fireDate > Date() else { return } // already inside the 1h window
+            let timer = Timer(fire: fireDate, interval: 0, repeats: false) { [weak self] _ in
+                Task { @MainActor in
+                    await self?.startOrUpdateActivity(settings: SettingsManager.shared)
+                }
+            }
+            preLaunchTimer = timer
+            RunLoop.main.add(timer, forMode: .common)
+        }
+
+        private func findUpcomingPrayers(settings: SettingsManager)
+            -> (next: (name: String, time: Date)?, following: (name: String, time: Date)?) {
+            guard let coord = settings.activeCoordinate,
+                  let timezone = TimeZone(identifier: settings.activeTimezoneIdentifier) else {
+                return (nil, nil)
+            }
+            let calc = PrayerCalculator(
+                coordinate: coord, timezone: timezone,
+                method: settings.calculationMethod, asrMethod: settings.asrMethod
+            )
+            let now = Date()
+            var next: (name: String, time: Date)?
+            var following: (name: String, time: Date)?
+            for dayOffset in 0 ... 1 {
+                guard let day = Calendar.current.date(byAdding: .day, value: dayOffset, to: now),
+                      let times = try? calc.calculate(for: day) else { continue }
+                let upcoming = times.prayers.filter { $0.time > now && $0.name != "Sunrise" }
+                for prayer in upcoming {
+                    if next == nil {
+                        next = (prayer.name, prayer.time)
+                    } else if following == nil {
+                        following = (prayer.name, prayer.time); break
+                    }
+                }
+                if following != nil {
+                    break
+                }
+            }
+            return (next, following)
         }
 
         private func scheduleRollover(at fireDate: Date) {
