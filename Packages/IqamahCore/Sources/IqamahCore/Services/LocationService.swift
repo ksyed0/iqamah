@@ -19,7 +19,7 @@ public class LocationService: NSObject, ObservableObject {
     private var locationContinuation: CheckedContinuation<CLLocationCoordinate2D, Error>?
     private var pendingLocationRequest = false
 
-    public override init() {
+    override public init() {
         super.init()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyKilometer
@@ -110,17 +110,24 @@ extension LocationService: CLLocationManagerDelegate {
                     pendingLocationRequest = false
                     locationManager.requestLocation()
                 }
-#if os(iOS)
-            case .authorized:
-                if pendingLocationRequest || locationContinuation != nil {
-                    pendingLocationRequest = false
-                    locationManager.requestLocation()
-                }
-#endif
+            #if os(iOS)
+                case .authorized:
+                    if pendingLocationRequest || locationContinuation != nil {
+                        pendingLocationRequest = false
+                        locationManager.requestLocation()
+                    }
+            #endif
             case .denied, .restricted:
+                // Only surface an error if the user actually initiated a request.
+                // Without this guard, merely initializing LocationService on a
+                // device with location denied would set locationError as a side
+                // effect of init() — causing BUG-0071 CI flake and spurious UI errors.
+                let hadPendingRequest = pendingLocationRequest || locationContinuation != nil
                 isLoading = false
                 pendingLocationRequest = false
-                locationError = "Location access denied. Please enable in System Settings."
+                if hadPendingRequest {
+                    locationError = "Location access denied. Please enable in System Settings."
+                }
                 locationContinuation?.resume(throwing: NSError(
                     domain: "LocationService",
                     code: 1,
