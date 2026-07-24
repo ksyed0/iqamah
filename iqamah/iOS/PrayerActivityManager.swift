@@ -90,7 +90,7 @@
             let (_, following) = findUpcomingPrayers(settings: settings)
             guard let target = following,
                   settings.isPrayerEnabled(target.name) else { return }
-            let fireDate = target.time.addingTimeInterval(-3600 + 300)  // T-55min
+            let fireDate = target.time.addingTimeInterval(-3600 + 300) // T-55min
             guard fireDate > Date() else { return }
             let request = BGAppRefreshTaskRequest(identifier: "com.fablesoft.iqamah.prayerLARefresh")
             request.earliestBeginDate = fireDate
@@ -104,7 +104,7 @@
             preLaunchTimer?.invalidate()
             guard settings.isPrayerEnabled(prayer.name) else { return }
             let fireDate = prayer.time.addingTimeInterval(-3600)
-            guard fireDate > Date() else { return }  // already inside the 1h window
+            guard fireDate > Date() else { return } // already inside the 1h window
             let timer = Timer(fire: fireDate, interval: 0, repeats: false) { [weak self] _ in
                 Task { @MainActor in
                     await self?.startOrUpdateActivity(settings: SettingsManager.shared)
@@ -115,8 +115,7 @@
         }
 
         private func findUpcomingPrayers(settings: SettingsManager)
-            -> (next: (name: String, time: Date)?, following: (name: String, time: Date)?)
-        {
+            -> (next: (name: String, time: Date)?, following: (name: String, time: Date)?) {
             guard let coord = settings.activeCoordinate,
                   let timezone = TimeZone(identifier: settings.activeTimezoneIdentifier) else {
                 return (nil, nil)
@@ -133,10 +132,15 @@
                       let times = try? calc.calculate(for: day) else { continue }
                 let upcoming = times.prayers.filter { $0.time > now && $0.name != "Sunrise" }
                 for prayer in upcoming {
-                    if next == nil { next = (prayer.name, prayer.time) }
-                    else if following == nil { following = (prayer.name, prayer.time); break }
+                    if next == nil {
+                        next = (prayer.name, prayer.time)
+                    } else if following == nil {
+                        following = (prayer.name, prayer.time); break
+                    }
                 }
-                if following != nil { break }
+                if following != nil {
+                    break
+                }
             }
             return (next, following)
         }
