@@ -3,6 +3,19 @@
     import IqamahCore
     import UserNotifications
 
+    // MARK: - Protocol for dependency injection (enables unit testing without live UNUserNotificationCenter)
+
+    protocol NotificationCenterProtocol {
+        func notificationSettings() async -> UNNotificationSettings
+        func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool
+        func add(_ request: UNNotificationRequest) async throws
+        func removeAllPendingNotificationRequests()
+        func removePendingNotificationRequests(withIdentifiers identifiers: [String])
+        func pendingNotificationRequests() async -> [UNNotificationRequest]
+    }
+
+    extension UNUserNotificationCenter: NotificationCenterProtocol {}
+
     /// Schedules local prayer-time notifications for the next 7 days.
     ///
     /// Called whenever settings change (city, method, enabledPrayers) and on
@@ -12,11 +25,12 @@
     final class NotificationScheduler: NSObject, ObservableObject, UNUserNotificationCenterDelegate {
         static let shared = NotificationScheduler()
 
-        private let center = UNUserNotificationCenter.current()
+        let center: any NotificationCenterProtocol
 
-        override private init() {
+        init(center: any NotificationCenterProtocol = UNUserNotificationCenter.current()) {
+            self.center = center
             super.init()
-            center.delegate = self
+            (center as? UNUserNotificationCenter)?.delegate = self
         }
 
         // MARK: - Authorisation

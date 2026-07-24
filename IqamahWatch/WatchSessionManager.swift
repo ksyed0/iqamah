@@ -15,6 +15,12 @@ final class WatchSessionManager: NSObject, ObservableObject, WCSessionDelegate {
         WCSession.default.activate()
     }
 
+    // Internal accessor used by unit tests to inject a settings instance without
+    // requiring a live WCSession (which isn't available on simulator).
+    func wireSettings(_ settings: SettingsManager) {
+        settingsRef = settings
+    }
+
     nonisolated func session(_: WCSession,
                              didReceiveUserInfo userInfo: [String: Any]) {
         Task { @MainActor in

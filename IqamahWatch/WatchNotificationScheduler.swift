@@ -1,11 +1,26 @@
 import IqamahCore
 import UserNotifications
 
+// MARK: - Protocol for dependency injection (enables unit testing without live UNUserNotificationCenter)
+
+protocol WatchNotificationCenterProtocol {
+    func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool
+    func add(_ request: UNNotificationRequest) async throws
+    func removeAllPendingNotificationRequests()
+    func removePendingNotificationRequests(withIdentifiers identifiers: [String])
+    func pendingNotificationRequests() async -> [UNNotificationRequest]
+}
+
+extension UNUserNotificationCenter: WatchNotificationCenterProtocol {}
+
 @MainActor
 final class WatchNotificationScheduler {
     static let shared = WatchNotificationScheduler()
-    private let center = UNUserNotificationCenter.current()
-    private init() {}
+    let center: any WatchNotificationCenterProtocol
+
+    init(center: any WatchNotificationCenterProtocol = UNUserNotificationCenter.current()) {
+        self.center = center
+    }
 
     func rescheduleAll(settings: SettingsManager) async {
         let granted = await (try? center.requestAuthorization(options: [.alert, .sound])) ?? false

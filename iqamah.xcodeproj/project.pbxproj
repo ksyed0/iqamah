@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		943D60863014006E00BD085C /* WatchSessionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 943D60853014006E00BD085C /* WatchSessionManagerTests.swift */; };
+		943D60873014006E00BD085C /* WatchNotificationSchedulerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 943D60843014006E00BD085C /* WatchNotificationSchedulerTests.swift */; };
 		944B0D992F635A0500EC6A01 /* TestsAdditionalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 944B0D982F635A0500EC6A01 /* TestsAdditionalTests.swift */; };
 		94594CE62FB2C01D00D1AD1C /* IqamahCore in Frameworks */ = {isa = PBXBuildFile; productRef = IC0000000000000000000002 /* IqamahCore */; };
 		947E50DF300EAC1F00CD805D /* QiblaVolumeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 947E50DD300EAC1F00CD805D /* QiblaVolumeView.swift */; };
@@ -136,6 +138,20 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		943D607F3013FA1500BD085C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA0000000000000000000050 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = iOS0000000000000000000040;
+			remoteInfo = "iqamah-iOS";
+		};
+		943D60883014140A00BD085C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA0000000000000000000050 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = WA000000000000000000001;
+			remoteInfo = IqamahWatch;
+		};
 		947E50EE300EADB500CD805D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = AA0000000000000000000050 /* Project object */;
@@ -253,6 +269,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		943D607B3013FA1500BD085C /* iqamahIOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iqamahIOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		943D60843014006E00BD085C /* WatchNotificationSchedulerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchNotificationSchedulerTests.swift; sourceTree = "<group>"; };
+		943D60853014006E00BD085C /* WatchSessionManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSessionManagerTests.swift; sourceTree = "<group>"; };
 		944B0D7D2F6340DD00EC6A01 /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
 		944B0D8C2F63423600EC6A01 /* .env.example */ = {isa = PBXFileReference; lastKnownFileType = text; path = .env.example; sourceTree = "<group>"; };
 		944B0D8D2F63424C00EC6A01 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
@@ -383,11 +402,19 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		943D607C3013FA1500BD085C /* iqamahIOSTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = iqamahIOSTests; sourceTree = "<group>"; };
 		944B0DB92F63689C00EC6A01 /* docs */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = docs; sourceTree = "<group>"; };
 		947E50E9300EADB500CD805D /* IqamahvisionOSUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = IqamahvisionOSUITests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		943D60783013FA1500BD085C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		947E50E5300EADB500CD805D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -518,6 +545,7 @@
 				wOSUITests00000000000009 /* IqamahWatchUITests */,
 				SNAP000000000000000006 /* Tests */,
 				947E50E9300EADB500CD805D /* IqamahvisionOSUITests */,
+				943D607C3013FA1500BD085C /* iqamahIOSTests */,
 				AA0000000000000000000032 /* Products */,
 				9457D7C42F2BDF2D00549E92 /* AppIconView.swift */,
 				9457D7C52F2BDF6400549E92 /* AppIconGenerator.swift */,
@@ -572,6 +600,7 @@
 				94594CE82FB2C01D00D1AD1C /* IqamahWatchWidget.appex */,
 				94594CE92FB2C01D00D1AD1C /* IqamahWatch.app */,
 				947E50E8300EADB500CD805D /* IqamahvisionOSUITests.xctest */,
+				943D607B3013FA1500BD085C /* iqamahIOSTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -725,6 +754,8 @@
 		WT000000000000000000070 /* IqamahWatchTests */ = {
 			isa = PBXGroup;
 			children = (
+				943D60843014006E00BD085C /* WatchNotificationSchedulerTests.swift */,
+				943D60853014006E00BD085C /* WatchSessionManagerTests.swift */,
 				WT000000000000000000010R /* TimelineTests.swift */,
 				WT000000000000000000020R /* QiblaTests.swift */,
 			);
@@ -781,6 +812,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		943D607A3013FA1500BD085C /* iqamahIOSTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 943D60813013FA1500BD085C /* Build configuration list for PBXNativeTarget "iqamahIOSTests" */;
+			buildPhases = (
+				943D60773013FA1500BD085C /* Sources */,
+				943D60783013FA1500BD085C /* Frameworks */,
+				943D60793013FA1500BD085C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				943D60803013FA1500BD085C /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				943D607C3013FA1500BD085C /* iqamahIOSTests */,
+			);
+			name = iqamahIOSTests;
+			packageProductDependencies = (
+			);
+			productName = iqamahIOSTests;
+			productReference = 943D607B3013FA1500BD085C /* iqamahIOSTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		947E50E7300EADB500CD805D /* IqamahvisionOSUITests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 947E50F0300EADB500CD805D /* Build configuration list for PBXNativeTarget "IqamahvisionOSUITests" */;
@@ -954,6 +1008,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				943D60893014140A00BD085C /* PBXTargetDependency */,
 				WT000000000000000000009 /* PBXTargetDependency */,
 			);
 			name = IqamahWatchTests;
@@ -1055,6 +1110,10 @@
 				LastSwiftUpdateCheck = 2660;
 				LastUpgradeCheck = 2660;
 				TargetAttributes = {
+					943D607A3013FA1500BD085C = {
+						CreatedOnToolsVersion = 26.6;
+						TestTargetID = iOS0000000000000000000040;
+					};
 					947E50E7300EADB500CD805D = {
 						CreatedOnToolsVersion = 26.6;
 						TestTargetID = iOS0000000000000000000040;
@@ -1101,11 +1160,19 @@
 				WG000000000000000000001 /* IqamahWidget */,
 				MW00000000000000000001 /* IqamahWidgetMac */,
 				947E50E7300EADB500CD805D /* IqamahvisionOSUITests */,
+				943D607A3013FA1500BD085C /* iqamahIOSTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		943D60793013FA1500BD085C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		947E50E6300EADB500CD805D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1205,6 +1272,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		943D60773013FA1500BD085C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		947E50E4300EADB500CD805D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1325,6 +1399,8 @@
 				WT000000000000000000010 /* TimelineTests.swift in Sources */,
 				WT000000000000000000041 /* PrayerEntry.swift in Sources */,
 				WT000000000000000000042 /* PrayerTimelineProvider.swift in Sources */,
+				943D60863014006E00BD085C /* WatchSessionManagerTests.swift in Sources */,
+				943D60873014006E00BD085C /* WatchNotificationSchedulerTests.swift in Sources */,
 				WT000000000000000000020A /* QiblaTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1400,6 +1476,16 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		943D60803013FA1500BD085C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = iOS0000000000000000000040 /* iqamah-iOS */;
+			targetProxy = 943D607F3013FA1500BD085C /* PBXContainerItemProxy */;
+		};
+		943D60893014140A00BD085C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = WA000000000000000000001 /* IqamahWatch */;
+			targetProxy = 943D60883014140A00BD085C /* PBXContainerItemProxy */;
+		};
 		947E50EF300EADB500CD805D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = iOS0000000000000000000040 /* iqamah-iOS */;
@@ -1458,6 +1544,53 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		943D60823013FA1500BD085C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 96Y29SP9JR;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = FableSoft.iqamahIOSTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/iqamah-iOS.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/iqamah-iOS";
+			};
+			name = Debug;
+		};
+		943D60833013FA1500BD085C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 96Y29SP9JR;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = FableSoft.iqamahIOSTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/iqamah-iOS.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/iqamah-iOS";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		947E50F1300EADB500CD805D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1967,6 +2100,7 @@
 				PRODUCT_NAME = IqamahWatchTests;
 				SDKROOT = watchos;
 				SWIFT_VERSION = 5.10;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/IqamahWatch.app/IqamahWatch";
 				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Debug;
@@ -1974,12 +2108,14 @@
 		WT000000000000000000004 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 96Y29SP9JR;
 				PRODUCT_BUNDLE_IDENTIFIER = com.fablesoft.iqamah.watch.tests;
 				PRODUCT_NAME = IqamahWatchTests;
 				SDKROOT = watchos;
 				SWIFT_VERSION = 5.10;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/IqamahWatch.app/IqamahWatch";
 				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Release;
@@ -2141,6 +2277,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		943D60813013FA1500BD085C /* Build configuration list for PBXNativeTarget "iqamahIOSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				943D60823013FA1500BD085C /* Debug */,
+				943D60833013FA1500BD085C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		947E50F0300EADB500CD805D /* Build configuration list for PBXNativeTarget "IqamahvisionOSUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

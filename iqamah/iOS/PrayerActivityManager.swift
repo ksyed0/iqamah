@@ -114,7 +114,7 @@
             RunLoop.main.add(timer, forMode: .common)
         }
 
-        private func findUpcomingPrayers(settings: SettingsManager)
+        func findUpcomingPrayers(settings: SettingsManager)
             -> (next: (name: String, time: Date)?, following: (name: String, time: Date)?) {
             guard let coord = settings.activeCoordinate,
                   let timezone = TimeZone(identifier: settings.activeTimezoneIdentifier) else {
