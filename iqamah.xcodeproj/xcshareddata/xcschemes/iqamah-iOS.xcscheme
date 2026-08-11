@@ -65,6 +65,17 @@
                ReferencedContainer = "container:iqamah.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "943D607A3013FA1500BD085C"
+               BuildableName = "iqamahIOSTests.xctest"
+               BlueprintName = "iqamahIOSTests"
+               ReferencedContainer = "container:iqamah.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
