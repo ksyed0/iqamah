@@ -2,12 +2,10 @@ import Foundation
 import IqamahCore
 import Testing
 import UserNotifications
-@testable import IqamahWatch
 
 // MARK: - Mock notification center
 
-@MainActor
-final class MockWatchNotificationCenter: WatchNotificationCenterProtocol {
+final class MockWatchNotificationCenter: WatchNotificationCenterProtocol, @unchecked Sendable {
     var addedRequests: [UNNotificationRequest] = []
     var removeAllCallCount = 0
     var removedIdentifiers: [String] = []

@@ -1,7 +1,6 @@
 import IqamahCore
 import Testing
 import WatchConnectivity
-@testable import IqamahWatch
 
 @Suite("WatchSessionManager — applyUserInfo")
 @MainActor
